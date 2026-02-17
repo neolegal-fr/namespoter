@@ -5,8 +5,39 @@
 @source "./src/**/*.{html,ts}";
 
 body {
+
     margin: 0;
+
     font-family: var(--font-family, sans-serif);
+
     -webkit-font-smoothing: antialiased;
+
     -moz-osx-font-smoothing: grayscale;
+
+}
+
+
+
+/* Correctif pour les overlays PrimeNG qui bloquent l'interface */
+
+.p-drawer-mask:not(.p-drawer-mask-visible), 
+
+.p-dialog-mask:not(.p-dialog-mask-visible) {
+
+    display: none !important;
+
+    z-index: -1 !important;
+
+    pointer-events: none !important;
+
+}
+
+
+
+.upper-toolbar-container {
+
+    position: relative;
+
+    z-index: 9999 !important; /* Priorité absolue sur les masques */
+
 }

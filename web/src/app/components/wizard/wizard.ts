@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomainService } from '../../services/domain';
@@ -51,13 +51,17 @@ export class WizardComponent implements OnInit {
   activeIndex = signal(0);
   maxActiveIndex = signal(0);
   loading = signal(false);
-  showCreditDialog = signal(false);
+  isLoggedIn = signal(false);
+  
+  // Utilisation de booleens simples pour une liaison bidirectionnelle stable
+  showCreditDialog = false;
+  showProjectsDrawer = false;
+  
   creditsToBuy = signal(100);
 
   // Projets
   projectId = signal<string | null>(null);
   projectName = signal('');
-  showProjectsDrawer = signal(false);
   projects = signal<any[]>([]);
 
   // Étape 1
@@ -82,14 +86,15 @@ export class WizardComponent implements OnInit {
     public userService: UserService,
     public projectService: ProjectService,
     public keycloak: KeycloakService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
+    this.isLoggedIn.set(await this.keycloak.isLoggedIn());
     this.updateLabels();
     this.translate.onLangChange.subscribe(() => this.updateLabels());
 
-    // Restaurer l'état après login
     const savedState = localStorage.getItem('wizard_state');
     if (savedState) {
       const state = JSON.parse(savedState);
@@ -102,7 +107,7 @@ export class WizardComponent implements OnInit {
       this.projectId.set(state.projectId || null);
       localStorage.removeItem('wizard_state');
       
-      if (await this.keycloak.isLoggedIn()) {
+      if (this.isLoggedIn()) {
         if (this.projectId()) {
           this.loadProject(this.projectId()!);
         } else {
@@ -130,6 +135,7 @@ export class WizardComponent implements OnInit {
         { label: res['WIZARD.STEP2.MATCH_ANY'], value: 'any' },
         { label: res['WIZARD.STEP2.MATCH_ALL'], value: 'all' }
       ]);
+      this.cdr.detectChanges();
     });
   }
 
@@ -137,52 +143,66 @@ export class WizardComponent implements OnInit {
   nextStep() {
     this.activeIndex.update(val => val + 1);
     this.maxActiveIndex.set(Math.max(this.maxActiveIndex(), this.activeIndex()));
+    this.cdr.detectChanges();
   }
 
   prevStep() {
     this.activeIndex.update(val => val - 1);
+    this.cdr.detectChanges();
   }
 
   onStepChange(index: number) {
     if (index <= this.maxActiveIndex()) {
       this.activeIndex.set(index);
+      this.cdr.detectChanges();
     }
   }
 
   // Gestion des projets
   openProjects() {
+    this.showProjectsDrawer = true;
     this.projectService.getProjects().subscribe(res => {
       this.projects.set(res);
-      this.showProjectsDrawer.set(true);
+      this.cdr.detectChanges();
     });
   }
 
   loadProject(id: string) {
-    this.loading.set(true);
-    this.projectService.getProject(id).subscribe({
-      next: (project) => {
-        this.projectId.set(project.id);
-        this.projectName.set(project.name);
-        this.description.set(project.description);
-        this.keywords.set(project.keywords);
-        this.selectedExtensions.set(project.extensions);
-        this.matchMode.set(project.matchMode);
-        
-        // Formater les suggestions pour le tableau
-        this.domains.set(project.suggestions.map((s: any) => ({
-          id: s.id,
-          name: s.domainName,
-          allExtensions: s.availability,
-          isFavorite: s.isFavorite
-        })));
+    // 1. On ferme d'abord le volet
+    this.showProjectsDrawer = false;
+    this.cdr.detectChanges();
 
-        this.activeIndex.set(2);
-        this.maxActiveIndex.set(2);
-        this.showProjectsDrawer.set(false);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false)
-    });
+    // 2. On laisse un court instant pour l'animation avant de charger
+    setTimeout(() => {
+      this.loading.set(true);
+      this.cdr.detectChanges();
+
+      this.projectService.getProject(id).subscribe({
+        next: (project) => {
+          this.projectId.set(project.id);
+          this.projectName.set(project.name);
+          this.description.set(project.description);
+          this.selectedExtensions.set(project.extensions);
+          this.matchMode.set(project.matchMode);
+          
+          this.domains.set(project.suggestions.map((s: any) => ({
+            id: s.id,
+            name: s.domainName,
+            allExtensions: s.availability,
+            isFavorite: s.isFavorite
+          })));
+
+          this.activeIndex.set(2);
+          this.maxActiveIndex.set(2);
+          this.loading.set(false);
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.loading.set(false);
+          this.cdr.detectChanges();
+        }
+      });
+    }, 100);
   }
 
   resetProject() {
@@ -198,6 +218,7 @@ export class WizardComponent implements OnInit {
     this.matchMode.set('any');
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
+    this.cdr.detectChanges();
   }
 
   toggleFavorite(result: any) {
@@ -208,19 +229,21 @@ export class WizardComponent implements OnInit {
         if (a.isFavorite === b.isFavorite) return 0;
         return a.isFavorite ? -1 : 1;
       }));
+      this.cdr.detectChanges();
     });
   }
 
-  // Gestion des saisies
   addKeyword() {
     if (this.newKeyword() && !this.keywords().includes(this.newKeyword())) {
       this.keywords.update(k => [...k, this.newKeyword()]);
       this.newKeyword.set('');
+      this.cdr.detectChanges();
     }
   }
 
   removeKeyword(keyword: string) {
     this.keywords.update(k => k.filter(item => item !== keyword));
+    this.cdr.detectChanges();
   }
 
   addExtension() {
@@ -231,31 +254,38 @@ export class WizardComponent implements OnInit {
         this.selectedExtensions.update(e => [...e, ext]);
       }
       this.newExtension.set('');
+      this.cdr.detectChanges();
     }
   }
 
   removeExtension(ext: string) {
     this.selectedExtensions.update(e => e.filter(item => item !== ext));
+    this.cdr.detectChanges();
   }
 
   isFullyAvailable(result: any): boolean {
     return this.selectedExtensions().every(ext => result.allExtensions[ext]);
   }
 
-  // Actions IA
   async refine() {
     this.loading.set(true);
+    this.cdr.detectChanges();
     this.domainService.refineDescription(this.description()).subscribe({
       next: (res: { refined: string }) => {
         this.refinedDescription.set(res.refined);
         this.loading.set(false);
+        this.cdr.detectChanges();
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.cdr.detectChanges();
+      }
     });
   }
 
   async goToKeywords() {
     this.loading.set(true);
+    this.cdr.detectChanges();
     const descToUse = this.refinedDescription() || this.description();
     this.domainService.generateKeywords(descToUse).subscribe({
       next: (res: { keywords: string[] }) => {
@@ -263,20 +293,24 @@ export class WizardComponent implements OnInit {
         this.loading.set(false);
         this.nextStep();
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.cdr.detectChanges();
+      }
     });
   }
 
   async buyCredits() {
     this.userService.addCredits(this.creditsToBuy()).subscribe({
       next: () => {
-        this.showCreditDialog.set(false);
+        this.showCreditDialog = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   async findDomains(append = false) {
-    if (!(await this.keycloak.isLoggedIn())) {
+    if (!this.isLoggedIn()) {
       const state = {
         description: this.description(),
         projectName: this.projectName(),
@@ -292,6 +326,7 @@ export class WizardComponent implements OnInit {
     }
 
     this.loading.set(true);
+    this.cdr.detectChanges();
     this.domainService.searchDomains(
       this.refinedDescription() || this.description(), 
       this.keywords(),
@@ -323,12 +358,14 @@ export class WizardComponent implements OnInit {
         }
         
         this.loading.set(false);
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.loading.set(false);
         if (err.status === 403) {
-          this.showCreditDialog.set(true);
+          this.showCreditDialog = true;
         }
+        this.cdr.detectChanges();
       }
     });
   }
