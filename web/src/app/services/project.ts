@@ -10,6 +10,7 @@ export class ProjectService {
   
   // État partagé
   showDrawer = signal(false);
+  showCreditDialog = signal(false);
   projects = signal<any[]>([]);
 
   constructor(private http: HttpClient) {}

@@ -56,11 +56,11 @@
     },
     "LOADING": "L'IA travaille pour vous...",
     "CREDIT_DIALOG": {
-      "TITLE": "Crédits insuffisants",
-      "MESSAGE": "Vous n'avez plus assez de crédits. Combien voulez-vous en acheter (test) ?",
+      "TITLE": "Recharger vos crédits",
+      "MESSAGE": "Combien de crédits voulez-vous ajouter à votre compte ?",
       "QUANTITY": "Quantité",
       "CANCEL": "Annuler",
-      "BUY": "Acheter"
+      "BUY": "Recharger"
     }
   }
 }

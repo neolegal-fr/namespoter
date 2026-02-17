@@ -56,11 +56,11 @@
     },
     "LOADING": "AI is working for you...",
     "CREDIT_DIALOG": {
-      "TITLE": "Insufficient credits",
-      "MESSAGE": "You don't have enough credits. How many do you want to buy (test)?",
+      "TITLE": "Refill your credits",
+      "MESSAGE": "How many credits do you want to add to your account?",
       "QUANTITY": "Quantity",
       "CANCEL": "Cancel",
-      "BUY": "Buy"
+      "BUY": "Refill"
     }
   }
 }

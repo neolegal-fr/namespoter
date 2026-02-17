@@ -11,8 +11,6 @@ import { Textarea } from 'primeng/textarea';
 import { InputText } from 'primeng/inputtext';
 import { Chip } from 'primeng/chip';
 import { ProgressSpinner } from 'primeng/progressspinner';
-import { Dialog } from 'primeng/dialog';
-import { InputNumber } from 'primeng/inputnumber';
 import { TableModule } from 'primeng/table';
 import { SelectButton } from 'primeng/selectbutton';
 import { Drawer } from 'primeng/drawer';
@@ -35,8 +33,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     InputText,
     Chip,
     ProgressSpinner,
-    Dialog,
-    InputNumber,
     TableModule,
     SelectButton,
     Drawer,
@@ -53,10 +49,6 @@ export class WizardComponent implements OnInit {
   maxActiveIndex = signal(0);
   loading = signal(false);
   isLoggedIn = signal(false);
-  
-  showCreditDialog = signal(false);
-  
-  creditsToBuy = signal(100);
 
   // Projets
   projectId = signal<string | null>(null);
@@ -340,81 +332,142 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  async buyCredits() {
-    this.userService.addCredits(this.creditsToBuy()).subscribe({
-      next: () => {
-        this.showCreditDialog.set(false);
-        this.cdr.detectChanges();
-      }
-    });
-  }
+    async findDomains(append = false) {
 
-  async findDomains(append = false) {
-    if (!this.isLoggedIn()) {
-      const state = {
-        description: this.description(),
-        projectName: this.projectName(),
-        refinedDescription: this.refinedDescription(),
-        keywords: this.keywords(),
-        selectedExtensions: this.selectedExtensions(),
-        matchMode: this.matchMode(),
-        projectId: this.projectId()
-      };
-      localStorage.setItem('wizard_state', JSON.stringify(state));
-      this.keycloak.login();
-      return;
+      if (!this.isLoggedIn()) {
+
+        const state = {
+
+          description: this.description(),
+
+          projectName: this.projectName(),
+
+          refinedDescription: this.refinedDescription(),
+
+          keywords: this.keywords(),
+
+          selectedExtensions: this.selectedExtensions(),
+
+          matchMode: this.matchMode(),
+
+          projectId: this.projectId()
+
+        };
+
+        localStorage.setItem('wizard_state', JSON.stringify(state));
+
+        this.keycloak.login();
+
+        return;
+
+      }
+
+  
+
+      this.loading.set(true);
+
+      this.cdr.detectChanges();
+
+      this.domainService.searchDomains(
+
+        this.refinedDescription() || this.description(), 
+
+        this.keywords(),
+
+        this.selectedExtensions(),
+
+        this.matchMode(),
+
+        this.projectId() || undefined,
+
+        this.projectName() || undefined
+
+      ).subscribe({
+
+        next: (res: any) => {
+
+          this.totalChecked.set(res.totalChecked || 0);
+
+          
+
+          if (!this.projectId() && res.projectId) {
+
+            this.router.navigate(['/projects', res.projectId], { replaceUrl: true });
+
+          }
+
+          
+
+          this.projectId.set(res.projectId);
+
+  
+
+          const newDomains = res.domains.map((d: any) => ({
+
+            id: d.id,
+
+            name: d.name,
+
+            allExtensions: d.allExtensions,
+
+            isFavorite: false
+
+          }));
+
+  
+
+          if (append) {
+
+            this.domains.update(d => [...d, ...newDomains]);
+
+          } else {
+
+            this.domains.set(newDomains);
+
+            this.nextStep();
+
+          }
+
+          
+
+          if (res.remainingCredits !== undefined) {
+
+            this.userService.updateCredits(res.remainingCredits);
+
+          }
+
+  
+
+          // Rafraîchir la liste globale
+
+          this.projectService.refreshProjects().subscribe();
+
+          
+
+          this.loading.set(false);
+
+          this.cdr.detectChanges();
+
+        },
+
+        error: (err: any) => {
+
+          this.loading.set(false);
+
+          if (err.status === 403) {
+
+            this.projectService.showCreditDialog.set(true);
+
+          }
+
+          this.cdr.detectChanges();
+
+        }
+
+      });
+
     }
 
-    this.loading.set(true);
-    this.cdr.detectChanges();
-    this.domainService.searchDomains(
-      this.refinedDescription() || this.description(), 
-      this.keywords(),
-      this.selectedExtensions(),
-      this.matchMode(),
-      this.projectId() || undefined,
-      this.projectName() || undefined
-    ).subscribe({
-      next: (res: any) => {
-        this.totalChecked.set(res.totalChecked || 0);
-        
-        if (!this.projectId() && res.projectId) {
-          this.router.navigate(['/projects', res.projectId], { replaceUrl: true });
-        }
-        
-        this.projectId.set(res.projectId);
-
-        const newDomains = res.domains.map((d: any) => ({
-          id: d.id,
-          name: d.name,
-          allExtensions: d.allExtensions,
-          isFavorite: false
-        }));
-
-        if (append) {
-          this.domains.update(d => [...d, ...newDomains]);
-        } else {
-          this.domains.set(newDomains);
-          this.nextStep();
-        }
-        
-        if (res.remainingCredits !== undefined) {
-          this.userService.updateCredits(res.remainingCredits);
-        }
-
-        // Rafraîchir la liste globale
-        this.projectService.refreshProjects().subscribe();
-        
-        this.loading.set(false);
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        this.loading.set(false);
-        if (err.status === 403) {
-          this.showCreditDialog.set(true);
-        }
-        this.cdr.detectChanges();
-      }
-    });
   }
-}
+
+  

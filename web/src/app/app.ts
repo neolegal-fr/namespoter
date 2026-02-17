@@ -14,6 +14,9 @@ import { MenuItem } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 
+import { Dialog } from 'primeng/dialog';
+import { InputNumber } from 'primeng/inputnumber';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -26,7 +29,9 @@ import { FormsModule } from '@angular/forms';
     MenubarModule, 
     AvatarModule,
     SelectModule,
-    FormsModule
+    FormsModule,
+    Dialog,
+    InputNumber
   ],
   template: `
     <main class="min-h-screen bg-gray-50 font-sans">
@@ -41,25 +46,23 @@ import { FormsModule } from '@angular/forms';
         <ng-template pTemplate="end">
           <div class="flex items-center gap-2 md:gap-4">
             
-            <!-- Langue Dropdown -->
+            <!-- Langue Dropdown Compact -->
             <p-select 
               [options]="languages" 
               [(ngModel)]="selectedLang" 
-              optionLabel="label" 
               optionValue="code"
               (onChange)="onLangChange($event)"
-              styleClass="w-32 border-none bg-surface-100"
+              styleClass="w-16 border-none bg-transparent"
               [selectOnFocus]="true">
               <ng-template pTemplate="selectedItem" let-selectedOption>
-                <div class="flex items-center gap-2">
-                  <span [class]="'fi fi-' + selectedOption.flag"></span>
-                  <span>{{ selectedOption.label }}</span>
+                <div class="flex items-center justify-center">
+                  <span [class]="'fi fi-' + selectedOption.flag + ' text-lg'"></span>
                 </div>
               </ng-template>
               <ng-template pTemplate="item" let-lang>
                 <div class="flex items-center gap-2">
                   <span [class]="'fi fi-' + lang.flag"></span>
-                  <span>{{ lang.label }}</span>
+                  <span class="text-xs font-bold">{{ lang.label }}</span>
                 </div>
               </ng-template>
             </p-select>
@@ -94,9 +97,24 @@ import { FormsModule } from '@angular/forms';
         </ng-template>
       </p-menubar>
       
-      <div class="container mx-auto">
-        <router-outlet></router-outlet>
+      <div class="flex flex-col items-center w-full px-4 py-4 md:py-8">
+        <div class="w-full max-w-4xl">
+          <router-outlet></router-outlet>
+        </div>
       </div>
+
+      <!-- Dialogue de demande de crédits (Global) -->
+      <p-dialog [header]="'WIZARD.CREDIT_DIALOG.TITLE' | translate" [visible]="projectService.showCreditDialog()" (visibleChange)="projectService.showCreditDialog.set($event)" [modal]="true" [style]="{ width: '25rem' }" [appendTo]="'body'">
+        <span class="p-text-secondary block mb-5">{{ 'WIZARD.CREDIT_DIALOG.MESSAGE' | translate }}</span>
+        <div class="flex items-center gap-3 mb-5">
+            <label for="credits" class="font-semibold w-24">{{ 'WIZARD.CREDIT_DIALOG.QUANTITY' | translate }}</label>
+            <p-inputNumber [(ngModel)]="creditsToBuy" inputId="credits" class="flex-auto" [min]="1"></p-inputNumber>
+        </div>
+        <div class="flex justify-end gap-2">
+            <p-button [label]="'WIZARD.CREDIT_DIALOG.CANCEL' | translate" severity="secondary" (onClick)="projectService.showCreditDialog.set(false)" />
+            <p-button [label]="'WIZARD.CREDIT_DIALOG.BUY' | translate" (onClick)="buyCredits()" />
+        </div>
+      </p-dialog>
 
       <footer class="mt-20 py-12 border-t bg-white text-center text-gray-400 text-sm">
         <div class="mb-2 font-bold text-gray-500">NameSpotter &copy; 2026</div>
@@ -113,6 +131,7 @@ export class AppComponent implements OnInit {
   currentLang = signal('fr');
   selectedLang = 'fr';
   userName = signal('');
+  creditsToBuy = signal(100);
   
   languages = [
     { label: 'FR', code: 'fr', flag: 'fr' },
@@ -138,7 +157,7 @@ export class AppComponent implements OnInit {
     if (this.isLoggedIn()) {
       const profile = await this.keycloak.loadUserProfile();
       this.userName.set(profile.firstName || profile.username || '');
-      this.loadCredits();
+      this.loadCredits(); // Forcer le chargement initial des crédits
       this.updateProfileMenu();
     }
 
@@ -153,7 +172,7 @@ export class AppComponent implements OnInit {
   }
 
   updateProfileMenu() {
-    this.translate.get(['APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT', 'APP.BILLING']).subscribe(res => {
+    this.translate.get(['APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT']).subscribe(res => {
       this.profileMenuItems = [
         {
           label: this.userName(),
@@ -161,17 +180,14 @@ export class AppComponent implements OnInit {
             {
               label: `${res['APP.CREDITS']}: ${this.credits()}`,
               icon: 'pi pi-wallet',
-              disabled: true
+              command: () => {
+                this.projectService.showCreditDialog.set(true);
+              }
             },
             {
               label: res['APP.MANAGE_ACCOUNT'],
               icon: 'pi pi-cog',
               command: () => this.keycloak.getKeycloakInstance().accountManagement()
-            },
-            {
-              label: res['APP.BILLING'],
-              icon: 'pi pi-credit-card',
-              command: () => console.log('Billing clicked')
             },
             { separator: true },
             {
@@ -197,6 +213,14 @@ export class AppComponent implements OnInit {
 
   loadCredits() {
     this.userService.getCredits().subscribe();
+  }
+
+  buyCredits() {
+    console.log('Requesting credits:', this.creditsToBuy());
+    this.userService.addCredits(this.creditsToBuy()).subscribe(() => {
+      this.projectService.showCreditDialog.set(false);
+      console.log('Credits updated successfully');
+    });
   }
 
   openProjects() {
