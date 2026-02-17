@@ -17,7 +17,7 @@ export class UsersService {
       user = this.usersRepository.create({
         keycloakId,
         email,
-        credits: 10, // Crédits offerts à l'inscription
+        credits: 100, // Crédits offerts à l'inscription
       });
       user = await this.usersRepository.save(user);
     }
