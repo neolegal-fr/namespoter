@@ -7,71 +7,100 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
+import { MenubarModule } from 'primeng/menubar';
+import { AvatarModule } from 'primeng/avatar';
 import { MenuItem } from 'primeng/api';
+
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, TranslateModule, MenuModule, ButtonModule],
+  imports: [
+    CommonModule, 
+    RouterOutlet, 
+    TranslateModule, 
+    MenuModule, 
+    ButtonModule, 
+    MenubarModule, 
+    AvatarModule,
+    SelectModule,
+    FormsModule
+  ],
   template: `
-    <main class="min-h-screen bg-gray-50">
-      <header class="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-          
-          <!-- Gauche: Logo et Langue -->
-          <div class="flex items-center gap-6">
-            <h1 class="text-2xl font-bold text-blue-600 cursor-pointer flex items-center gap-2" (click)="goToHome()">
-              <i class="pi pi-compass text-3xl"></i>
-              <span class="hidden sm:block">Namespoter</span>
-            </h1>
-            
-            <div class="flex bg-gray-100 p-1 rounded-md">
-              <button (click)="setLang('fr')" [class.bg-white]="currentLang() === 'fr'" [class.shadow-sm]="currentLang() === 'fr'" class="px-2 py-1 rounded text-[10px] font-bold transition-all">FR</button>
-              <button (click)="setLang('en')" [class.bg-white]="currentLang() === 'en'" [class.shadow-sm]="currentLang() === 'en'" class="px-2 py-1 rounded text-[10px] font-bold transition-all">EN</button>
-            </div>
+    <main class="min-h-screen bg-gray-50 font-sans">
+      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-4 md:px-8 h-16 sticky top-0 z-50">
+        <ng-template pTemplate="start">
+          <div class="flex items-center gap-2 cursor-pointer" (click)="goToHome()">
+            <i class="pi pi-compass text-2xl text-primary"></i>
+            <span class="text-xl font-bold tracking-tight text-surface-900">NameSpotter</span>
           </div>
+        </ng-template>
 
-          <!-- Centre / Droite: Menu Principal -->
-          <div class="flex items-center gap-2 sm:gap-4">
+        <ng-template pTemplate="end">
+          <div class="flex items-center gap-2 md:gap-4">
             
+            <!-- Langue Dropdown -->
+            <p-select 
+              [options]="languages" 
+              [(ngModel)]="selectedLang" 
+              optionLabel="label" 
+              optionValue="code"
+              (onChange)="onLangChange($event)"
+              styleClass="w-32 border-none bg-surface-100"
+              [selectOnFocus]="true">
+              <ng-template pTemplate="selectedItem" let-selectedOption>
+                <div class="flex items-center gap-2">
+                  <span [class]="'fi fi-' + selectedOption.flag"></span>
+                  <span>{{ selectedOption.label }}</span>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="item" let-lang>
+                <div class="flex items-center gap-2">
+                  <span [class]="'fi fi-' + lang.flag"></span>
+                  <span>{{ lang.label }}</span>
+                </div>
+              </ng-template>
+            </p-select>
+
             <ng-container *ngIf="isLoggedIn()">
-              <!-- Bouton Mes Projets -->
               <p-button 
                 [label]="'APP.MY_PROJECTS' | translate" 
                 icon="pi pi-folder" 
                 [text]="true"
                 severity="secondary"
-                (click)="openProjects()">
+                (onClick)="openProjects()">
               </p-button>
 
-              <!-- Séparateur vertical -->
-              <div class="h-8 w-[1px] bg-gray-200 mx-2 hidden sm:block"></div>
-
-              <!-- Profil et Crédits -->
-              <div class="flex items-center gap-3 pl-2">
-                <div class="hidden md:flex flex-col items-end">
-                  <span class="text-xs font-bold text-gray-900">{{ userName() }}</span>
-                  <span class="text-[10px] text-blue-600 font-semibold">{{ 'APP.CREDITS' | translate }}: {{ credits() }}</span>
-                </div>
-                
-                <button #userBtn (click)="userMenu.toggle($event)" class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors">
-                  <i class="pi pi-user text-xl"></i>
-                </button>
-                <p-menu #userMenu [model]="profileMenuItems" [popup]="true" appendTo="body"></p-menu>
-              </div>
+              <p-avatar 
+                icon="pi pi-user" 
+                shape="circle" 
+                class="cursor-pointer ml-2"
+                styleClass="bg-primary text-primary-contrast shadow-sm"
+                (click)="userMenu.toggle($event)">
+              </p-avatar>
+              <p-menu #userMenu [model]="profileMenuItems" [popup]="true" appendTo="body"></p-menu>
             </ng-container>
 
-            <button *ngIf="!isLoggedIn()" (click)="login()" class="px-6 py-2 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition-all shadow-md">
-               {{ 'APP.LOGIN' | translate }}
-            </button>
+            <p-button 
+              *ngIf="!isLoggedIn()" 
+              [label]="'APP.LOGIN' | translate" 
+              icon="pi pi-sign-in"
+              [rounded]="true"
+              (onClick)="login()">
+            </p-button>
           </div>
-        </div>
-      </header>
+        </ng-template>
+      </p-menubar>
       
-      <router-outlet></router-outlet>
+      <div class="container mx-auto">
+        <router-outlet></router-outlet>
+      </div>
 
-      <footer class="mt-20 py-8 border-t text-center text-gray-400 text-sm">
-        &copy; 2026 Namespoter - {{ 'APP.FOOTER' | translate }}
+      <footer class="mt-20 py-12 border-t bg-white text-center text-gray-400 text-sm">
+        <div class="mb-2 font-bold text-gray-500">NameSpotter &copy; 2026</div>
+        {{ 'APP.FOOTER' | translate }}
       </footer>
     </main>
   `,
@@ -82,8 +111,14 @@ export class AppComponent implements OnInit {
   credits = signal(0);
   isLoggedIn = signal(false);
   currentLang = signal('fr');
+  selectedLang = 'fr';
   userName = signal('');
   
+  languages = [
+    { label: 'FR', code: 'fr', flag: 'fr' },
+    { label: 'EN', code: 'en', flag: 'gb' }
+  ];
+
   profileMenuItems: MenuItem[] = [];
 
   constructor(
@@ -96,7 +131,9 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
-    this.currentLang.set(this.translate.currentLang || 'fr');
+    const lang = this.translate.currentLang || 'fr';
+    this.currentLang.set(lang);
+    this.selectedLang = lang;
     
     if (this.isLoggedIn()) {
       const profile = await this.keycloak.loadUserProfile();
@@ -109,22 +146,40 @@ export class AppComponent implements OnInit {
       this.updateProfileMenu();
     });
 
-    this.userService.credits$.subscribe(val => this.credits.set(val));
+    this.userService.credits$.subscribe(val => {
+      this.credits.set(val);
+      this.updateProfileMenu();
+    });
   }
 
   updateProfileMenu() {
-    this.translate.get(['APP.CREDITS', 'APP.LOGOUT']).subscribe(res => {
+    this.translate.get(['APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT', 'APP.BILLING']).subscribe(res => {
       this.profileMenuItems = [
         {
-          label: `${res['APP.CREDITS']}: ${this.credits()}`,
-          icon: 'pi pi-wallet',
-          disabled: true
-        },
-        { separator: true },
-        {
-          label: res['APP.LOGOUT'],
-          icon: 'pi pi-sign-out',
-          command: () => this.logout()
+          label: this.userName(),
+          items: [
+            {
+              label: `${res['APP.CREDITS']}: ${this.credits()}`,
+              icon: 'pi pi-wallet',
+              disabled: true
+            },
+            {
+              label: res['APP.MANAGE_ACCOUNT'],
+              icon: 'pi pi-cog',
+              command: () => this.keycloak.getKeycloakInstance().accountManagement()
+            },
+            {
+              label: res['APP.BILLING'],
+              icon: 'pi pi-credit-card',
+              command: () => console.log('Billing clicked')
+            },
+            { separator: true },
+            {
+              label: res['APP.LOGOUT'],
+              icon: 'pi pi-sign-out',
+              command: () => this.logout()
+            }
+          ]
         }
       ];
     });
@@ -133,6 +188,11 @@ export class AppComponent implements OnInit {
   setLang(lang: string) {
     this.translate.use(lang);
     this.currentLang.set(lang);
+    this.selectedLang = lang;
+  }
+
+  onLangChange(event: any) {
+    this.setLang(event.value);
   }
 
   loadCredits() {
