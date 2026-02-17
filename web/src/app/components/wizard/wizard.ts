@@ -12,9 +12,8 @@ import { Chip } from 'primeng/chip';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { Dialog } from 'primeng/dialog';
 import { InputNumber } from 'primeng/inputnumber';
-import { MultiSelect } from 'primeng/multiselect';
+import { TableModule } from 'primeng/table';
 import { SelectButton } from 'primeng/selectbutton';
-import { Tag } from 'primeng/tag';
 import { MenuItem } from 'primeng/api';
 import { UserService } from '../../services/user';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -34,9 +33,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     ProgressSpinner,
     Dialog,
     InputNumber,
-    MultiSelect,
+    TableModule,
     SelectButton,
-    Tag,
     TranslateModule
   ],
   templateUrl: './wizard.html',
@@ -59,16 +57,8 @@ export class WizardComponent implements OnInit {
   keywords = signal<string[]>([]);
   newKeyword = signal('');
   
-  availableExtensions = [
-    { label: '.com', value: '.com' },
-    { label: '.net', value: '.net' },
-    { label: '.org', value: '.org' },
-    { label: '.fr', value: '.fr' },
-    { label: '.io', value: '.io' },
-    { label: '.ai', value: '.ai' },
-    { label: '.app', value: '.app' }
-  ];
-  selectedExtensions = signal<string[]>(['.com']);
+  newExtension = signal('');
+  selectedExtensions = signal<string[]>(['.com', '.net']);
   matchMode = signal('any');
   matchOptions = signal<any[]>([]);
 
@@ -94,7 +84,7 @@ export class WizardComponent implements OnInit {
       this.description.set(state.description);
       this.refinedDescription.set(state.refinedDescription);
       this.keywords.set(state.keywords);
-      this.selectedExtensions.set(state.selectedExtensions || ['.com']);
+      this.selectedExtensions.set(state.selectedExtensions || ['.com', '.net']);
       this.matchMode.set(state.matchMode || 'any');
       localStorage.removeItem('wizard_state');
       
@@ -145,7 +135,7 @@ export class WizardComponent implements OnInit {
     this.refinedDescription.set('');
     this.keywords.set([]);
     this.domains.set([]);
-    this.selectedExtensions.set(['.com']);
+    this.selectedExtensions.set(['.com', '.net']);
     this.matchMode.set('any');
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
@@ -160,6 +150,25 @@ export class WizardComponent implements OnInit {
 
   removeKeyword(keyword: string) {
     this.keywords.update(k => k.filter(item => item !== keyword));
+  }
+
+  addExtension() {
+    let ext = this.newExtension().trim().toLowerCase();
+    if (ext) {
+      if (!ext.startsWith('.')) ext = '.' + ext;
+      if (!this.selectedExtensions().includes(ext)) {
+        this.selectedExtensions.update(e => [...e, ext]);
+      }
+      this.newExtension.set('');
+    }
+  }
+
+  removeExtension(ext: string) {
+    this.selectedExtensions.update(e => e.filter(item => item !== ext));
+  }
+
+  isFullyAvailable(result: any): boolean {
+    return this.selectedExtensions().every(ext => result.allExtensions[ext]);
   }
 
   async refine() {
