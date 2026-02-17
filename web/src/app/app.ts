@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { UserService } from './services/user';
 import { ProjectService } from './services/project';
@@ -35,7 +35,7 @@ import { InputNumber } from 'primeng/inputnumber';
   ],
   template: `
     <main class="min-h-screen bg-gray-50 font-sans">
-      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-4 md:px-8 h-16 sticky top-0 z-50">
+      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-4 md:px-8 h-16 sticky top-0 z-10">
         <ng-template pTemplate="start">
           <div class="flex items-center gap-2 cursor-pointer" (click)="goToHome()">
             <i class="pi pi-compass text-2xl text-primary"></i>
@@ -76,14 +76,14 @@ import { InputNumber } from 'primeng/inputnumber';
                 (onClick)="openProjects()">
               </p-button>
 
-              <p-avatar 
-                icon="pi pi-user" 
-                shape="circle" 
-                class="cursor-pointer ml-2"
-                styleClass="bg-primary text-primary-contrast shadow-sm"
-                (click)="userMenu.toggle($event)">
-              </p-avatar>
-              <p-menu #userMenu [model]="profileMenuItems" [popup]="true" appendTo="body"></p-menu>
+                <p-avatar 
+                  icon="pi pi-user" 
+                  shape="circle" 
+                  class="cursor-pointer ml-2"
+                  styleClass="bg-primary text-primary-contrast shadow-sm"
+                  (click)="userMenu.toggle($event)">
+                </p-avatar>
+                <p-menu #userMenu [model]="profileMenuItems" [popup]="true"></p-menu>
             </ng-container>
 
             <p-button 
@@ -104,7 +104,13 @@ import { InputNumber } from 'primeng/inputnumber';
       </div>
 
       <!-- Dialogue de demande de crédits (Global) -->
-      <p-dialog [header]="'WIZARD.CREDIT_DIALOG.TITLE' | translate" [visible]="projectService.showCreditDialog()" (visibleChange)="projectService.showCreditDialog.set($event)" [modal]="true" [style]="{ width: '25rem' }" [appendTo]="'body'">
+      <p-dialog [header]="'WIZARD.CREDIT_DIALOG.TITLE' | translate" 
+                [visible]="projectService.showCreditDialog()" 
+                (visibleChange)="projectService.showCreditDialog.set($event)" 
+                [modal]="true" 
+                [style]="{ width: '25rem' }" 
+                [draggable]="false" 
+                [resizable]="false">
         <span class="p-text-secondary block mb-5">{{ 'WIZARD.CREDIT_DIALOG.MESSAGE' | translate }}</span>
         <div class="flex items-center gap-3 mb-5">
             <label for="credits" class="font-semibold w-24">{{ 'WIZARD.CREDIT_DIALOG.QUANTITY' | translate }}</label>
@@ -145,7 +151,8 @@ export class AppComponent implements OnInit {
     public projectService: ProjectService,
     private keycloak: KeycloakService,
     private translate: TranslateService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
@@ -157,17 +164,17 @@ export class AppComponent implements OnInit {
     if (this.isLoggedIn()) {
       const profile = await this.keycloak.loadUserProfile();
       this.userName.set(profile.firstName || profile.username || '');
-      this.loadCredits(); // Forcer le chargement initial des crédits
-      this.updateProfileMenu();
+      this.loadCredits();
+      setTimeout(() => this.updateProfileMenu());
     }
 
     this.translate.onLangChange.subscribe(() => {
-      this.updateProfileMenu();
+      setTimeout(() => this.updateProfileMenu());
     });
 
     this.userService.credits$.subscribe(val => {
       this.credits.set(val);
-      this.updateProfileMenu();
+      setTimeout(() => this.updateProfileMenu());
     });
   }
 
@@ -180,9 +187,7 @@ export class AppComponent implements OnInit {
             {
               label: `${res['APP.CREDITS']}: ${this.credits()}`,
               icon: 'pi pi-wallet',
-              command: () => {
-                this.projectService.showCreditDialog.set(true);
-              }
+              command: () => this.triggerCreditDialog()
             },
             {
               label: res['APP.MANAGE_ACCOUNT'],
@@ -198,7 +203,14 @@ export class AppComponent implements OnInit {
           ]
         }
       ];
+      this.cdr.detectChanges();
     });
+  }
+
+  triggerCreditDialog() {
+    console.log('Triggering credit dialog...');
+    this.projectService.showCreditDialog.set(true);
+    this.cdr.detectChanges();
   }
 
   setLang(lang: string) {
