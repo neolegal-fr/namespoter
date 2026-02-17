@@ -141,19 +141,20 @@
           <p-table [value]="domains()" [responsiveLayout]="'scroll'">
             <ng-template pTemplate="header">
               <tr>
-                <th class="w-16 bg-gray-50 text-center"><i class="pi pi-heart"></i></th>
                 <th class="bg-gray-50">Nom de domaine</th>
                 <th *ngFor="let ext of selectedExtensions()" class="text-center bg-gray-50">{{ ext }}</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-result>
               <tr>
-                <td class="text-center">
-                  <button (click)="toggleFavorite(result)" class="text-xl transition-transform active:scale-125">
-                    <i class="pi" [class.pi-heart-fill]="result.isFavorite" [class.pi-heart]="!result.isFavorite" [style.color]="result.isFavorite ? '#ef4444' : '#9ca3af'"></i>
-                  </button>
+                <td class="font-bold text-lg font-mono">
+                  <div class="flex items-center">
+                    <button (click)="toggleFavorite(result)" class="text-xl transition-transform active:scale-125" style="margin-right: 1.5rem;">
+                      <i class="pi" [class.pi-heart-fill]="result.isFavorite" [class.pi-heart]="!result.isFavorite" [style.color]="result.isFavorite ? '#ef4444' : '#9ca3af'"></i>
+                    </button>
+                    <span [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
+                  </div>
                 </td>
-                <td class="font-bold text-lg font-mono" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</td>
                 <td *ngFor="let ext of selectedExtensions()" class="text-center">
                   <i *ngIf="result.allExtensions[ext]" class="pi pi-check text-2xl font-bold" [style.color]="isFullyAvailable(result) ? '#16a34a' : '#22c55e'" title="Disponible"></i>
                   <i *ngIf="!result.allExtensions[ext]" class="pi pi-times text-red-400 text-xl" title="Indisponible"></i>
