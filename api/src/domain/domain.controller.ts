@@ -28,14 +28,29 @@ export class DomainController {
 
   @Post('search')
   async search(@Body() dto: SearchDomainsDto, @AuthenticatedUser() user: any) {
-    const cost = 1; // 1 crédit par recherche
-    const success = await this.usersService.decrementCredits(user.sub, cost);
+    // 1. Vérifier le solde actuel
+    const currentCredits = await this.usersService.getCredits(user.sub);
     
-    if (!success) {
+    if (currentCredits <= 0) {
       throw new ForbiddenException('Crédits insuffisants');
     }
 
-    const domains = await this.domainService.findAvailableDomains(dto.description, dto.keywords);
-    return { domains };
+    // 2. Limiter la recherche à ce que l'utilisateur peut s'offrir (max 10 par requête)
+    const limit = Math.min(10, currentCredits);
+
+    // 3. Trouver les domaines
+    const domains = await this.domainService.findAvailableDomains(dto.description, dto.keywords, limit);
+    
+    // 4. Débiter le montant réel
+    const actualCost = domains.length;
+    if (actualCost > 0) {
+      await this.usersService.decrementCredits(user.sub, actualCost);
+    }
+
+    return { 
+      domains,
+      creditsDebited: actualCost,
+      remainingCredits: currentCredits - actualCost
+    };
   }
 }

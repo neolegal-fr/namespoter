@@ -48,16 +48,17 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
+    
+    // S'abonner aux changements de crédits
+    this.userService.credits$.subscribe(val => this.credits.set(val));
+
     if (this.isLoggedIn()) {
       this.loadCredits();
     }
   }
 
   loadCredits() {
-    this.userService.getCredits().subscribe({
-      next: (res) => this.credits.set(res.credits),
-      error: () => console.error('Erreur lors du chargement des crédits')
-    });
+    this.userService.getCredits().subscribe();
   }
 
   login() {

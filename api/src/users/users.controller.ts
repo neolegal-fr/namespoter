@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedUser } from 'nest-keycloak-connect';
 
@@ -13,8 +13,28 @@ export class UsersController {
     return { credits };
   }
 
-  @Get('me')
-  async getMe(@AuthenticatedUser() user: any) {
-    return await this.usersService.findOrCreate(user.sub, user.email);
+    @Get('me')
+
+    async getMe(@AuthenticatedUser() user: any) {
+
+      return await this.usersService.findOrCreate(user.sub, user.email);
+
+    }
+
+  
+
+    @Post('add-credits')
+
+    async addCredits(@AuthenticatedUser() user: any, @Body('amount') amount: number) {
+
+      await this.usersService.addCredits(user.sub, amount);
+
+      const credits = await this.usersService.getCredits(user.sub);
+
+      return { credits };
+
+    }
+
   }
-}
+
+  

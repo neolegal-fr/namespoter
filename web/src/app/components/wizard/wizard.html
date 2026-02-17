@@ -76,7 +76,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div *ngFor="let domain of domains()" class="p-4 border rounded-lg bg-white shadow-sm flex justify-between items-center hover:border-blue-500 transition-colors">
             <span class="text-lg font-mono font-medium">{{ domain }}</span>
-            <p-button icon="pi pi-external-link" severity="success" size="small" [text]="true" label="Acheter"></p-button>
           </div>
         </div>
 
@@ -84,12 +83,38 @@
           <p class="text-gray-500">Aucun domaine trouvé. Essayez de changer vos mots-clés.</p>
         </div>
 
-        <div class="flex justify-center mt-8">
-          <p-button label="Recommencer" icon="pi pi-refresh" severity="secondary" (onClick)="activeIndex.set(0)"></p-button>
+        <div class="flex flex-col md:flex-row justify-center gap-4 mt-8">
+          <p-button 
+            label="Plus de suggestions" 
+            icon="pi pi-plus-circle" 
+            severity="info" 
+            [loading]="loading()"
+            (onClick)="findDomains(true)">
+          </p-button>
+          
+          <p-button 
+            label="Nouveau projet" 
+            icon="pi pi-refresh" 
+            severity="secondary" 
+            (onClick)="resetProject()">
+          </p-button>
         </div>
       </div>
     </div>
   </p-card>
+
+  <!-- Dialogue d'achat de crédits factice -->
+  <p-dialog header="Crédits insuffisants" [(visible)]="showCreditDialog" [modal]="true" [style]="{ width: '25rem' }">
+    <span class="p-text-secondary block mb-5">Vous n'avez plus assez de crédits. Combien voulez-vous en acheter (test) ?</span>
+    <div class="flex items-center gap-3 mb-5">
+        <label for="credits" class="font-semibold w-24">Quantité</label>
+        <p-inputNumber [(ngModel)]="creditsToBuy" inputId="credits" class="flex-auto" [min]="1"></p-inputNumber>
+    </div>
+    <div class="flex justify-end gap-2">
+        <p-button label="Annuler" severity="secondary" (onClick)="showCreditDialog.set(false)" />
+        <p-button label="Acheter" (onClick)="buyCredits()" />
+    </div>
+  </p-dialog>
 
   <div *ngIf="loading()" class="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
      <div class="text-center">

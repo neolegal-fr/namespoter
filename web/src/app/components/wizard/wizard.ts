@@ -10,7 +10,10 @@ import { Textarea } from 'primeng/textarea';
 import { InputText } from 'primeng/inputtext';
 import { Chip } from 'primeng/chip';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { Dialog } from 'primeng/dialog';
+import { InputNumber } from 'primeng/inputnumber';
 import { MenuItem } from 'primeng/api';
+import { UserService } from '../../services/user';
 
 @Component({
   selector: 'app-wizard',
@@ -24,7 +27,9 @@ import { MenuItem } from 'primeng/api';
     Textarea,
     InputText,
     Chip,
-    ProgressSpinner
+    ProgressSpinner,
+    Dialog,
+    InputNumber
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
@@ -38,6 +43,8 @@ export class WizardComponent implements OnInit {
 
   activeIndex = signal(0);
   loading = signal(false);
+  showCreditDialog = signal(false);
+  creditsToBuy = signal(100);
 
   // Étape 1
   description = signal('');
@@ -52,6 +59,7 @@ export class WizardComponent implements OnInit {
 
   constructor(
     private domainService: DomainService,
+    private userService: UserService,
     private keycloak: KeycloakService
   ) {}
 
@@ -77,6 +85,14 @@ export class WizardComponent implements OnInit {
 
   prevStep() {
     this.activeIndex.update(val => val - 1);
+  }
+
+  resetProject() {
+    this.description.set('');
+    this.refinedDescription.set('');
+    this.keywords.set([]);
+    this.domains.set([]);
+    this.activeIndex.set(0);
   }
 
   addKeyword() {
@@ -114,27 +130,88 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  async findDomains() {
-    if (!(await this.keycloak.isLoggedIn())) {
-      // Sauvegarder l'état avant de rediriger vers le login
-      const state = {
-        description: this.description(),
-        refinedDescription: this.refinedDescription(),
-        keywords: this.keywords()
-      };
-      localStorage.setItem('wizard_state', JSON.stringify(state));
-      this.keycloak.login();
-      return;
-    }
-
-    this.loading.set(true);
-    this.domainService.searchDomains(this.refinedDescription() || this.description(), this.keywords()).subscribe({
-      next: (res) => {
-        this.domains.set(res.domains);
-        this.loading.set(false);
-        this.nextStep();
-      },
-      error: () => this.loading.set(false)
+  async buyCredits() {
+    this.userService.addCredits(this.creditsToBuy()).subscribe({
+      next: () => {
+        this.showCreditDialog.set(false);
+      }
     });
   }
-}
+
+    async findDomains(append = false) {
+
+      if (!(await this.keycloak.isLoggedIn())) {
+
+        const state = {
+
+          description: this.description(),
+
+          refinedDescription: this.refinedDescription(),
+
+          keywords: this.keywords()
+
+        };
+
+        localStorage.setItem('wizard_state', JSON.stringify(state));
+
+        this.keycloak.login();
+
+        return;
+
+      }
+
+  
+
+      this.loading.set(true);
+
+      this.domainService.searchDomains(this.refinedDescription() || this.description(), this.keywords()).subscribe({
+
+        next: (res: any) => {
+
+          if (append) {
+
+            this.domains.update(d => [...new Set([...d, ...res.domains])]);
+
+          } else {
+
+            this.domains.set(res.domains);
+
+            this.nextStep();
+
+          }
+
+          
+
+          // Mettre à jour les crédits via le service
+
+          if (res.remainingCredits !== undefined) {
+
+            this.userService.updateCredits(res.remainingCredits);
+
+          }
+
+          
+
+          this.loading.set(false);
+
+        },
+
+        error: (err) => {
+
+          this.loading.set(false);
+
+          if (err.status === 403) {
+
+            this.showCreditDialog.set(true);
+
+          }
+
+        }
+
+      });
+
+    }
+
+  }
+
+  
