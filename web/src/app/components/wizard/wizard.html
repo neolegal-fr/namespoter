@@ -140,8 +140,8 @@
               <ng-template pTemplate="body" let-result>
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="font-bold text-sm md:text-lg font-mono py-2 md:py-3 px-2 md:px-4">
-                    <div class="flex items-center" style="gap: 0.75rem">
-                      <button (click)="toggleFavorite(result)" class="text-lg md:text-xl transition-transform active:scale-125 shrink-0">
+                    <div class="flex items-center">
+                      <button (click)="toggleFavorite(result)" class="text-lg md:text-xl transition-transform active:scale-125 shrink-0" style="margin-right: 0.75rem">
                         <i class="pi" [class.pi-heart-fill]="result.isFavorite" [class.pi-heart]="!result.isFavorite" [style.color]="result.isFavorite ? '#ef4444' : '#9ca3af'"></i>
                       </button>
                       <span class="truncate" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
