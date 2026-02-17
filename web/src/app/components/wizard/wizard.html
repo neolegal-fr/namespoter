@@ -1,24 +1,24 @@
 <div class="max-w-4xl mx-auto mt-10 p-4">
   <p-card>
     <ng-template pTemplate="title">
-      <div class="flex items-center gap-3">
+      <div class="flex justify-center items-center gap-3 mb-6">
         <!-- Affichage du nom avec clic pour éditer -->
         <h2 *ngIf="!isEditingName()" 
             (click)="isEditingName.set(true)" 
-            class="text-2xl font-bold cursor-pointer hover:text-blue-600 transition-colors flex items-center gap-2 group">
+            class="text-3xl font-black cursor-pointer hover:text-primary transition-colors flex items-center gap-3 group text-center">
           {{ projectName() || ('WIZARD.STEPS.' + (activeIndex() === 0 ? 'DESCRIPTION' : activeIndex() === 1 ? 'KEYWORDS' : 'DOMAINS') | translate) }}
-          <i class="pi pi-pencil text-sm opacity-0 group-hover:opacity-100 text-gray-400"></i>
+          <i class="pi pi-pencil text-base opacity-0 group-hover:opacity-100 text-surface-400"></i>
         </h2>
 
         <!-- Mode édition du nom -->
-        <div *ngIf="isEditingName()" class="flex items-center gap-2 w-full max-w-md">
+        <div *ngIf="isEditingName()" class="flex items-center gap-2 w-full max-w-lg justify-center">
           <input pInputText 
                  [(ngModel)]="projectName" 
                  (keydown.enter)="finishEditingName()" 
                  (blur)="finishEditingName()"
-                 class="w-full text-xl font-bold"
+                 class="w-full text-2xl font-bold text-center"
                  autoFocus>
-          <p-button icon="pi pi-check" severity="success" [text]="true" (onClick)="finishEditingName()"></p-button>
+          <p-button icon="pi pi-check" [rounded]="true" severity="success" [text]="true" (onClick)="finishEditingName()"></p-button>
         </div>
       </div>
     </ng-template>
