@@ -141,11 +141,11 @@
               <ng-template pTemplate="body" let-result>
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="font-bold text-sm md:text-lg font-mono py-2 md:py-3 px-2 md:px-4">
-                    <div class="flex items-center">
-                      <button (click)="toggleFavorite(result)" class="text-lg md:text-xl transition-transform active:scale-125 shrink-0" style="margin-right: 0.75rem">
+                    <div style="display: flex; align-items: center; gap: 0.75rem">
+                      <button type="button" (click)="toggleFavorite(result); $event.stopPropagation()" style="background: none; border: none; cursor: pointer; font-size: 1.25rem; flex-shrink: 0; padding: 0">
                         <i class="pi" [class.pi-heart-fill]="result.isFavorite" [class.pi-heart]="!result.isFavorite" [style.color]="result.isFavorite ? '#ef4444' : '#9ca3af'"></i>
                       </button>
-                      <span class="truncate" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
+                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
                     </div>
                   </td>
                   <td *ngFor="let ext of selectedExtensions()" class="text-center px-1">
@@ -183,18 +183,18 @@
 
   <!-- Volet des projets sécurisé -->
   <p-drawer [visible]="projectService.showDrawer()" (visibleChange)="projectService.showDrawer.set($event)" [header]="'PROJECTS.TITLE' | translate" position="left" [style]="{ width: '25rem' }" [dismissible]="true" [modal]="false">
-    <p class="text-gray-600 mb-6 text-sm">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
-    
-    <div class="flex flex-col gap-2">
-      <div *ngFor="let project of projectService.projects()" 
-           class="p-3 border rounded-md hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-colors bg-white shadow-sm flex justify-between items-center" 
+    <p style="color: #9ca3af; margin-bottom: 1.5rem; font-size: 0.875rem">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
+
+    <div style="display: flex; flex-direction: column; gap: 0.5rem">
+      <div *ngFor="let project of projectService.projects()"
+           class="project-item"
            (click)="loadProject(project.id)"
            [pTooltip]="project.description" tooltipPosition="bottom" [appendTo]="'body'">
-        <div class="font-bold text-gray-700 truncate mr-2">{{ project.name }}</div>
-        <i class="pi pi-chevron-right text-xs text-gray-400"></i>
+        <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1">{{ project.name }}</div>
+        <i class="pi pi-chevron-right" style="font-size: 0.75rem; color: #9ca3af; flex-shrink: 0"></i>
       </div>
-      
-      <div *ngIf="projectService.projects().length === 0" class="text-center py-10 text-gray-400">
+
+      <div *ngIf="projectService.projects().length === 0" style="text-align: center; padding: 2.5rem 0; color: #9ca3af">
         {{ 'PROJECTS.EMPTY' | translate }}
       </div>
     </div>
