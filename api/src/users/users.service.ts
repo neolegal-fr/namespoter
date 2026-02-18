@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -12,16 +12,16 @@ export class UsersService {
 
   async findOrCreate(keycloakId: string, email?: string): Promise<User> {
     let user = await this.usersRepository.findOne({ where: { keycloakId } });
-    
+
     if (!user) {
       user = this.usersRepository.create({
         keycloakId,
         email,
-        credits: 100, // Crédits offerts à l'inscription
+        credits: 100,
       });
       user = await this.usersRepository.save(user);
     }
-    
+
     return user;
   }
 
@@ -30,15 +30,16 @@ export class UsersService {
     return user.credits;
   }
 
-  async decrementCredits(keycloakId: string, amount: number): Promise<boolean> {
-    const user = await this.findOrCreate(keycloakId);
-    
-    if (user.credits < amount) {
+  async decrementCredits(keycloakId: string, amount: number, manager?: EntityManager): Promise<boolean> {
+    const repo = manager ? manager.getRepository(User) : this.usersRepository;
+    const user = await repo.findOne({ where: { keycloakId } });
+
+    if (!user || user.credits < amount) {
       return false;
     }
-    
+
     user.credits -= amount;
-    await this.usersRepository.save(user);
+    await repo.save(user);
     return true;
   }
 

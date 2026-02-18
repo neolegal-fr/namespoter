@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional, MinLength, MaxLength, ArrayMinSize, ArrayMaxSize, Matches } from 'class-validator';
 
 export enum MatchMode {
   ANY = 'any',
@@ -8,14 +8,22 @@ export enum MatchMode {
 export class SearchDomainsDto {
   @IsString()
   @IsNotEmpty()
+  @MinLength(10, { message: 'La description doit faire au moins 10 caractères' })
+  @MaxLength(1000, { message: 'La description ne peut pas dépasser 1000 caractères' })
   description: string;
 
   @IsArray()
+  @ArrayMinSize(1, { message: 'Au moins un mot-clé est requis' })
+  @ArrayMaxSize(50, { message: 'Maximum 50 mots-clés autorisés' })
   @IsString({ each: true })
+  @MaxLength(100, { each: true, message: 'Chaque mot-clé ne peut pas dépasser 100 caractères' })
   keywords: string[];
 
   @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(10)
   @IsString({ each: true })
+  @Matches(/^\.[a-z]{2,10}$/, { each: true, message: 'Format d\'extension invalide (ex: .com, .fr, .io)' })
   @IsOptional()
   extensions?: string[];
 
@@ -28,6 +36,7 @@ export class SearchDomainsDto {
   projectId?: string;
 
   @IsString()
+  @MaxLength(100)
   @IsOptional()
   projectName?: string;
 }

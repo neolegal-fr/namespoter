@@ -11,6 +11,6 @@ export class User {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ default: 10 })
+  @Column({ default: 100 })
   credits: number;
 }

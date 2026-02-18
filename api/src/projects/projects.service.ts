@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { DomainSuggestion } from './entities/domain-suggestion.entity';
 import { User } from '../users/entities/user.entity';
@@ -42,21 +42,24 @@ export class ProjectsService {
   }
 
   async createOrUpdate(
-    user: User, 
-    data: { id?: string, name?: string, description: string, keywords: string[], extensions: string[], matchMode: string }
+    user: User,
+    data: { id?: string; name?: string; description: string; keywords: string[]; extensions: string[]; matchMode: string },
+    manager?: EntityManager,
   ): Promise<Project> {
+    const repo = manager ? manager.getRepository(Project) : this.projectsRepository;
     let project: Project;
 
     if (data.id) {
-      project = await this.findOne(data.id, user);
+      const found = await repo.findOne({ where: { id: data.id, user: { id: user.id } } });
+      if (!found) throw new NotFoundException('Projet non trouvé');
+      project = found;
     } else {
-      project = this.projectsRepository.create({
+      project = repo.create({
         user,
         name: data.name || (data.description.substring(0, 30) + '...'),
       });
     }
 
-    // Mettre à jour le nom si fourni
     if (data.name) {
       project.name = data.name;
     }
@@ -66,59 +69,40 @@ export class ProjectsService {
     project.extensions = data.extensions;
     project.matchMode = data.matchMode;
 
-    return this.projectsRepository.save(project);
+    return repo.save(project);
   }
 
-  async addSuggestions(project: Project, domains: any[]): Promise<void> {
-    const suggestions = domains.map(d => {
-      return this.suggestionsRepository.create({
+  async addSuggestions(project: Project, domains: any[], manager?: EntityManager): Promise<void> {
+    const repo = manager ? manager.getRepository(DomainSuggestion) : this.suggestionsRepository;
+
+    const suggestions = domains.map(d =>
+      repo.create({
         project,
         domainName: d.name,
         availability: d.allExtensions,
-      });
+      }),
+    );
+
+    await repo.save(suggestions);
+  }
+
+  async toggleFavorite(suggestionId: string, user: User): Promise<boolean> {
+    const suggestion = await this.suggestionsRepository.findOne({
+      where: { id: suggestionId, project: { user: { id: user.id } } },
     });
 
-    await this.suggestionsRepository.save(suggestions);
-  }
-
-    async toggleFavorite(suggestionId: string, user: User): Promise<boolean> {
-
-      const suggestion = await this.suggestionsRepository.findOne({
-
-        where: { id: suggestionId, project: { user: { id: user.id } } },
-
-      });
-
-  
-
-      if (!suggestion) {
-
-        throw new NotFoundException('Suggestion non trouvée');
-
-      }
-
-  
-
-      suggestion.isFavorite = !suggestion.isFavorite;
-
-      await this.suggestionsRepository.save(suggestion);
-
-      return suggestion.isFavorite;
-
+    if (!suggestion) {
+      throw new NotFoundException('Suggestion non trouvée');
     }
 
-  
-
-    async update(id: string, user: User, data: Partial<Project>): Promise<Project> {
-
-      const project = await this.findOne(id, user);
-
-      Object.assign(project, data);
-
-      return this.projectsRepository.save(project);
-
-    }
-
+    suggestion.isFavorite = !suggestion.isFavorite;
+    await this.suggestionsRepository.save(suggestion);
+    return suggestion.isFavorite;
   }
 
-  
+  async update(id: string, user: User, data: Partial<Project>): Promise<Project> {
+    const project = await this.findOne(id, user);
+    Object.assign(project, data);
+    return this.projectsRepository.save(project);
+  }
+}

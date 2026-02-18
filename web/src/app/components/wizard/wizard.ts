@@ -185,6 +185,7 @@ export class WizardComponent implements OnInit {
         this.projectId.set(project.id);
         this.projectName.set(project.name);
         this.description.set(project.description);
+        this.keywords.set(project.keywords || []);
         this.selectedExtensions.set(project.extensions);
         this.matchMode.set(project.matchMode);
         
@@ -231,13 +232,30 @@ export class WizardComponent implements OnInit {
 
   toggleFavorite(result: any) {
     if (!result.id) return;
-    this.projectService.toggleFavorite(result.id).subscribe(res => {
-      result.isFavorite = res.isFavorite;
-      this.domains.update(d => [...d].sort((a, b) => {
-        if (a.isFavorite === b.isFavorite) return 0;
-        return a.isFavorite ? -1 : 1;
-      }));
-      this.cdr.detectChanges();
+
+    // Mise à jour optimiste immédiate — l'UI répond sans attendre le serveur
+    const previousValue = result.isFavorite;
+    result.isFavorite = !result.isFavorite;
+    this.domains.update(d => [...d].sort((a, b) => {
+      if (a.isFavorite === b.isFavorite) return 0;
+      return a.isFavorite ? -1 : 1;
+    }));
+    this.cdr.detectChanges();
+
+    // Synchronisation en arrière-plan
+    this.projectService.toggleFavorite(result.id).subscribe({
+      next: (res) => {
+        result.isFavorite = res.isFavorite;
+      },
+      error: () => {
+        // Annulation de la mise à jour optimiste en cas d'erreur
+        result.isFavorite = previousValue;
+        this.domains.update(d => [...d].sort((a, b) => {
+          if (a.isFavorite === b.isFavorite) return 0;
+          return a.isFavorite ? -1 : 1;
+        }));
+        this.cdr.detectChanges();
+      }
     });
   }
 

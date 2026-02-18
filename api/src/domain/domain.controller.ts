@@ -1,17 +1,23 @@
-import { Controller, Post, Body, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { DomainService } from './domain.service';
 import { RefineDescriptionDto } from './dto/refine-description.dto';
 import { SearchDomainsDto } from './dto/search-domains.dto';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
 import { UsersService } from '../users/users.service';
 import { ProjectsService } from '../projects/projects.service';
+import { Project } from '../projects/entities/project.entity';
 
 @Controller('domain')
 export class DomainController {
+  private readonly logger = new Logger(DomainController.name);
+
   constructor(
     private readonly domainService: DomainService,
     private readonly usersService: UsersService,
-    private readonly projectsService: ProjectsService
+    private readonly projectsService: ProjectsService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   @Public()
@@ -38,73 +44,57 @@ export class DomainController {
   @Post('search')
   async search(@Body() dto: SearchDomainsDto, @AuthenticatedUser() keycloakUser: any) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
-    const currentCredits = user.credits;
-    
-    if (currentCredits <= 0) {
+
+    if (user.credits <= 0) {
       throw new ForbiddenException('Crédits insuffisants');
     }
 
-    const limit = Math.min(10, currentCredits);
+    const limit = Math.min(10, user.credits);
 
-    const result = await this.domainService.findAvailableDomains(
-      dto.description, 
-      dto.keywords, 
+    // Opérations externes (IA + Whois) hors transaction pour ne pas bloquer la DB
+    const { results, totalChecked } = await this.domainService.findAvailableDomains(
+      dto.description,
+      dto.keywords,
       limit,
       dto.extensions,
-      dto.matchMode
+      dto.matchMode,
     );
-    const { results, totalChecked } = result;
-    
-        const actualCost = results.length;
-    
-        
-    
-        // Sauvegarder ou mettre à jour le projet systématiquement
-    
-        const project = await this.projectsService.createOrUpdate(user, {
-    
-          id: dto.projectId,
-    
-          name: dto.projectName,
-    
-          description: dto.description,
-    
-          keywords: dto.keywords,
-    
-          extensions: dto.extensions || ['.com'],
-    
-          matchMode: dto.matchMode || 'any'
-    
-        });
-    
-    
-    
+
+    const actualCost = results.length;
+
+    // Toutes les écritures DB dans une transaction atomique
+    let project: Project;
+    try {
+      await this.dataSource.transaction(async (manager) => {
+        project = await this.projectsService.createOrUpdate(
+          user,
+          {
+            id: dto.projectId,
+            name: dto.projectName,
+            description: dto.description,
+            keywords: dto.keywords,
+            extensions: dto.extensions || ['.com'],
+            matchMode: dto.matchMode || 'any',
+          },
+          manager,
+        );
+
         if (actualCost > 0) {
-    
-          await this.usersService.decrementCredits(user.keycloakId, actualCost);
-    
-          await this.projectsService.addSuggestions(project, results);
-    
+          await this.usersService.decrementCredits(user.keycloakId, actualCost, manager);
+          await this.projectsService.addSuggestions(project, results, manager);
         }
-    
-    
-    
-        return { 
-    
-          domains: results,
-    
-          totalChecked,
-    
-          projectId: project.id,
-    
-          creditsDebited: actualCost,
-    
-          remainingCredits: user.credits - actualCost
-    
-        };
-    
-      }
-    
+      });
+    } catch (error) {
+      this.logger.error('Échec de la transaction de sauvegarde du projet:', error);
+      throw new InternalServerErrorException('Impossible de sauvegarder les résultats');
     }
-    
-    
+
+    return {
+      domains: results,
+      totalChecked,
+      projectId: project!.id,
+      creditsDebited: actualCost,
+      remainingCredits: user.credits - actualCost,
+    };
+  }
+}
