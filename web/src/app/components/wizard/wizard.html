@@ -149,8 +149,9 @@
                     </div>
                   </td>
                   <td *ngFor="let ext of selectedExtensions()" class="text-center px-1">
-                    <i *ngIf="result.allExtensions[ext]" class="pi pi-check text-lg font-bold" [style.color]="isFullyAvailable(result) ? '#16a34a' : '#22c55e'" title="Disponible"></i>
-                    <i *ngIf="!result.allExtensions[ext]" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
+                    <i *ngIf="result.allExtensions[ext] === true" class="pi pi-check text-lg font-bold" [style.color]="isFullyAvailable(result) ? '#16a34a' : '#22c55e'" title="Disponible"></i>
+                    <i *ngIf="result.allExtensions[ext] === null" class="pi pi-spin pi-spinner text-base" style="color: #9ca3af" title="Vérification..."></i>
+                    <i *ngIf="result.allExtensions[ext] === false" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
                   </td>
                 </tr>
               </ng-template>

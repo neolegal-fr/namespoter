@@ -42,8 +42,9 @@ export class DomainController {
     return { keywords };
   }
 
+  @Public()
   @Post('recheck')
-  async recheck(@Body() dto: RecheckDomainsDto, @AuthenticatedUser() _user: any) {
+  async recheck(@Body() dto: RecheckDomainsDto) {
     const domains = await this.domainService.recheckAvailability(dto.names, dto.extensions);
     return { domains };
   }

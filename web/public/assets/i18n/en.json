@@ -62,6 +62,7 @@
     },
     "LOADING": "AI is working for you...",
     "RECHECKING": "Checking availability...",
+    "RECHECK_ERROR": "Could not check availability. Please try again.",
     "CREDIT_DIALOG": {
       "TITLE": "Refill your credits",
       "MESSAGE": "How many credits do you want to add to your account?",

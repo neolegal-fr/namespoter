@@ -82,8 +82,11 @@ export class WizardComponent implements OnInit {
     const exts = this.selectedExtensions();
     if (exts.length === 0) return this.domains();
     return this.domains().filter(d => {
-      const available = exts.filter(ext => d.allExtensions?.[ext] === true);
-      return mode === 'all' ? available.length === exts.length : available.length > 0;
+      // Ignorer les extensions en cours de vérification (null) dans le filtre
+      const knownExts = exts.filter(ext => d.allExtensions?.[ext] !== null && d.allExtensions?.[ext] !== undefined);
+      if (knownExts.length === 0) return true; // toutes en cours → on garde la ligne
+      const available = knownExts.filter(ext => d.allExtensions[ext] === true);
+      return mode === 'all' ? available.length === knownExts.length : available.length > 0;
     });
   });
 
@@ -356,6 +359,18 @@ export class WizardComponent implements OnInit {
     const names = this.domains().map(d => d.name);
     const extensions = this.selectedExtensions();
     this.recheckLoading.set(true);
+
+    // Initialise les nouvelles extensions à null (indéterminé) pour distinguer
+    // "en cours de vérification" de "indisponible confirmé"
+    this.domains.update(list =>
+      list.map(d => {
+        const updated: Record<string, boolean | null> = { ...d.allExtensions };
+        for (const ext of extensions) {
+          if (!(ext in updated)) updated[ext] = null;
+        }
+        return { ...d, allExtensions: updated };
+      })
+    );
     this.cdr.detectChanges();
 
     this.domainService.recheckDomains(names, extensions).subscribe({
@@ -371,6 +386,9 @@ export class WizardComponent implements OnInit {
       },
       error: () => {
         this.recheckLoading.set(false);
+        this.translate.get('WIZARD.RECHECK_ERROR').subscribe(msg => {
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: msg, life: 4000 });
+        });
         this.cdr.detectChanges();
       }
     });
