@@ -244,19 +244,12 @@
               (onClick)="resetProject()">
             </p-button>
             <p-button
-              *ngIf="domains().length > 0"
-              [label]="'WIZARD.STEP3.MORE_BTN' | translate"
-              icon="pi pi-plus-circle"
-              severity="info"
-              [loading]="loading()"
-              (onClick)="findDomains(true)">
-            </p-button>
-            <p-button
-              [label]="'WIZARD.STEP2.SEARCH_BTN' | translate"
-              icon="pi pi-search"
+              [label]="(domains().length > 0 ? 'WIZARD.STEP3.MORE_BTN' : 'WIZARD.STEP2.SEARCH_BTN') | translate"
+              [icon]="domains().length > 0 ? 'pi pi-plus-circle' : 'pi pi-search'"
+              [severity]="domains().length > 0 ? 'info' : 'primary'"
               [disabled]="selectedExtensions().length === 0"
               [loading]="loading()"
-              (onClick)="findDomains()">
+              (onClick)="findDomains(domains().length > 0)">
             </p-button>
           </div>
         </div>
