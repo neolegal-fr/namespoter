@@ -137,18 +137,31 @@ export class DomainService {
 
   async isDomainAvailable(domain: string): Promise<boolean> {
     try {
-      const { stdout } = await execAsync(`whois ${domain}`, { timeout: 5000 });
+      const { stdout } = await execAsync(`whois ${domain}`, { timeout: 10000 });
       const output = stdout.toLowerCase();
 
-      const patterns = [
+      // Check "available" patterns first — some TLDs (.io, .co, etc.) include
+      // registrar info for the TLD itself before the "no match" message.
+      const availablePatterns = [
+        'no match for',
+        'no match',
+        'not found',
+        'no entries found',
+        'no data found',
+        'status: available',
+        'domain not found',
+        'is available',
+      ];
+      if (availablePatterns.some(p => output.includes(p))) return true;
+
+      const takenPatterns = [
         'domain name:',
         'registrar:',
         'creation date:',
         'registry domain id:',
-        'reserved'
+        'reserved',
       ];
-
-      return !patterns.some(pattern => output.includes(pattern));
+      return !takenPatterns.some(pattern => output.includes(pattern));
     } catch (error: any) {
       const errorMsg = error.stdout?.toLowerCase() || error.message?.toLowerCase() || '';
       return errorMsg.includes('no match') || errorMsg.includes('not found') || errorMsg.includes('available');
