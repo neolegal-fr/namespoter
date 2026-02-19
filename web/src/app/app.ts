@@ -33,7 +33,7 @@ import { InputNumber } from 'primeng/inputnumber';
   ],
   template: `
     <main class="min-h-screen">
-      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-3 md:px-5 sticky top-0 z-10" style="height: 4rem">
+      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-3 md:px-5 sticky top-0" style="height: 4rem; z-index: 100">
         <ng-template pTemplate="start">
           <div class="flex align-items-center gap-2 cursor-pointer" (click)="goToHome()">
             <i class="pi pi-compass text-2xl text-primary"></i>

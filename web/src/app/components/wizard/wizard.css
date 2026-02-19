@@ -2,6 +2,12 @@
     padding: 1rem;
 }
 
+/* Stepper doit rester sous la navbar sticky */
+.p-steps {
+    position: relative;
+    z-index: 1;
+}
+
 .truncate {
     white-space: nowrap;
     overflow: hidden;
