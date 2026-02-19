@@ -49,10 +49,18 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 export class WizardComponent implements OnInit {
   items: MenuItem[] = [];
 
+  landingBenefits = [
+    { icon: 'pi pi-sparkles',   titleKey: 'LANDING.B1_TITLE', descKey: 'LANDING.B1_DESC' },
+    { icon: 'pi pi-check-circle', titleKey: 'LANDING.B2_TITLE', descKey: 'LANDING.B2_DESC' },
+    { icon: 'pi pi-heart',      titleKey: 'LANDING.B3_TITLE', descKey: 'LANDING.B3_DESC' },
+    { icon: 'pi pi-globe',      titleKey: 'LANDING.B4_TITLE', descKey: 'LANDING.B4_DESC' },
+  ];
+
   activeIndex = signal(0);
   maxActiveIndex = signal(0);
   loading = signal(false);
   isLoggedIn = signal(false);
+  showLanding = signal(false);
 
   // Projets
   projectId = signal<string | null>(null);
@@ -110,6 +118,10 @@ export class WizardComponent implements OnInit {
 
   async ngOnInit() {
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
+    // Afficher la landing uniquement aux visiteurs non connectés sur la page d'accueil
+    if (!this.isLoggedIn() && !this.route.snapshot.params['id']) {
+      this.showLanding.set(true);
+    }
     this.updateLabels();
     this.translate.onLangChange.subscribe(() => this.updateLabels());
 
@@ -168,6 +180,10 @@ export class WizardComponent implements OnInit {
       ]);
       this.cdr.detectChanges();
     });
+  }
+
+  startFromLanding() {
+    this.showLanding.set(false);
   }
 
   // Navigation
@@ -285,6 +301,7 @@ export class WizardComponent implements OnInit {
     this.matchMode.set('any');
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
+    if (!this.isLoggedIn()) this.showLanding.set(true);
     this.router.navigate(['/']);
     this.cdr.detectChanges();
   }

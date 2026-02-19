@@ -1,4 +1,18 @@
 {
+  "LANDING": {
+    "TAGLINE": "Un nom de domaine pertinent et disponible, vite.",
+    "SUBTITLE": "Décrivez votre projet en quelques mots — l'IA fait le reste.",
+    "B1_TITLE": "Suggestions IA",
+    "B1_DESC": "GPT génère des noms adaptés à votre activité et votre cible",
+    "B2_TITLE": "Disponibilité réelle",
+    "B2_DESC": "Vérification Whois en temps réel sur les extensions de votre choix",
+    "B3_TITLE": "Favoris & historique",
+    "B3_DESC": "Sauvegardez vos recherches et reprenez-les quand vous voulez",
+    "B4_TITLE": "Multi-extensions",
+    "B4_DESC": ".com, .fr, .io, .net… vérifiez toutes vos extensions en une fois",
+    "CTA": "Trouver mon nom de domaine gratuitement",
+    "FREE_NOTE": "Aucune carte bancaire requise · 100 crédits offerts à l'inscription"
+  },
   "APP": {
     "TITLE": "Namespoter",
     "PROJECTS": "Projets",

@@ -1,5 +1,41 @@
 <div class="w-full">
-  <p-card styleClass="p-3 md:p-5">
+
+  <!-- ─── Landing page (visiteurs non connectés) ─────────── -->
+  <div *ngIf="showLanding()" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2rem; padding: 2rem 0">
+
+    <!-- Tagline -->
+    <div>
+      <h1 class="font-bold text-900" style="font-size: 2.5rem; margin: 0 0 0.5rem 0; letter-spacing: -0.04em; line-height: 1.1">
+        {{ 'LANDING.TAGLINE' | translate }}
+      </h1>
+      <p class="text-500" style="font-size: 1.05rem; margin: 0">{{ 'LANDING.SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Bénéfices -->
+    <div style="display: flex; flex-direction: column; gap: 0.875rem; max-width: 28rem; width: 100%; text-align: left">
+      <div *ngFor="let b of landingBenefits" style="display: flex; align-items: flex-start; gap: 0.75rem">
+        <i [class]="b.icon" style="color: var(--p-primary-color); font-size: 1.1rem; margin-top: 0.15rem; flex-shrink: 0"></i>
+        <div>
+          <span class="font-semibold text-900">{{ b.titleKey | translate }}</span>
+          <span class="text-500"> — {{ b.descKey | translate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <p-button
+      [label]="'LANDING.CTA' | translate"
+      icon="pi pi-arrow-right"
+      iconPos="right"
+      size="large"
+      (onClick)="startFromLanding()">
+    </p-button>
+
+    <p class="text-400" style="font-size: 0.8rem; margin: 0">{{ 'LANDING.FREE_NOTE' | translate }}</p>
+  </div>
+
+  <!-- ─── Wizard ───────────────────────────────────────────── -->
+  <p-card *ngIf="!showLanding()" styleClass="p-3 md:p-5">
     <div class="w-full mb-5" style="text-align: center" *ngIf="activeIndex() > 0">
       <!-- Affichage du nom avec clic pour éditer -->
       <div *ngIf="!isEditingName()"
