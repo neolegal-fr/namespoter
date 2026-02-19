@@ -1,5 +1,4 @@
-import { Controller, Get, Param, Patch, Delete, Post, Logger, Body } from '@nestjs/common';
-import { AddSuggestionDto } from './dto/add-suggestion.dto';
+import { Controller, Get, Param, Patch, Delete, Logger, Body } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { AuthenticatedUser } from 'nest-keycloak-connect';
 import { UsersService } from '../users/users.service';
@@ -35,16 +34,6 @@ export class ProjectsController {
   async remove(@Param('id') id: string, @AuthenticatedUser() keycloakUser: any) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
     return this.projectsService.remove(id, user);
-  }
-
-  @Post(':id/suggestions')
-  async addSuggestion(
-    @Param('id') id: string,
-    @AuthenticatedUser() keycloakUser: any,
-    @Body() dto: AddSuggestionDto,
-  ) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
-    return this.projectsService.addManualSuggestion(id, user, dto.domainName, dto.availability);
   }
 
   @Patch('suggestions/:id/favorite')

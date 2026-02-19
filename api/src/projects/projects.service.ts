@@ -100,17 +100,6 @@ export class ProjectsService {
     return suggestion.isFavorite;
   }
 
-  async addManualSuggestion(
-    projectId: string,
-    user: User,
-    domainName: string,
-    availability: Record<string, boolean>,
-  ): Promise<DomainSuggestion> {
-    const project = await this.findOne(projectId, user);
-    const suggestion = this.suggestionsRepository.create({ project, domainName, availability });
-    return this.suggestionsRepository.save(suggestion);
-  }
-
   async update(id: string, user: User, data: Partial<Project>): Promise<Project> {
     const project = await this.findOne(id, user);
     Object.assign(project, data);

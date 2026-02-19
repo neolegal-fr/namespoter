@@ -41,10 +41,6 @@ export class ProjectService {
     return this.http.patch<{ isFavorite: boolean }>(`${this.apiUrl}/suggestions/${suggestionId}/favorite`, {});
   }
 
-  addManualSuggestion(projectId: string, domainName: string, availability: Record<string, boolean>): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${projectId}/suggestions`, { domainName, availability });
-  }
-
   deleteProject(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
