@@ -153,6 +153,11 @@ export class WizardComponent implements OnInit {
       if (this.isLoggedIn()) {
         if (this.projectId()) {
           this.loadProject(this.projectId()!);
+        } else if (state.pendingSearch) {
+          // L'utilisateur avait cliqué "Rechercher" avant d'être invité à se connecter
+          this.activeIndex.set(1);
+          this.maxActiveIndex.set(1);
+          this.findDomains();
         } else {
           this.activeIndex.set(1);
           this.maxActiveIndex.set(1);
@@ -545,7 +550,9 @@ export class WizardComponent implements OnInit {
 
           matchMode: this.matchMode(),
 
-          projectId: this.projectId()
+          projectId: this.projectId(),
+
+          pendingSearch: true
 
         };
 
