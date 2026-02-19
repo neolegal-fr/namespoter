@@ -60,17 +60,22 @@ export class DomainService {
     }
   }
 
-  async generateKeywords(description: string): Promise<string[]> {
+  async generateKeywords(description: string, locale?: string): Promise<string[]> {
+    const localeInstruction = locale
+      ? `Generate keywords primarily in the language with code "${locale}", culturally adapted for that market. Include both native-language terms and commonly used English loanwords in this market.`
+      : 'Generate keywords in English, suitable for an international audience.';
+
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
-            content: `Tu es un expert en SEO et sémantique. 
-            Identifie AU MOINS 20 mots-clés et termes associés pertinents pour la description suivante. 
-            Varie les angles : synonymes, termes techniques, bénéfices utilisateurs, et concepts abstraits liés au domaine.
-            Retourne UNIQUEMENT une liste de mots séparés par des virgules, sans numérotation.`,
+            content: `You are an SEO and semantics expert.
+            Identify AT LEAST 20 relevant keywords and associated terms for the following description.
+            Vary the angles: synonyms, technical terms, user benefits, and abstract concepts related to the domain.
+            ${localeInstruction}
+            Return ONLY a comma-separated list of words, no numbering.`,
           },
           { role: 'user', content: description },
         ],
@@ -87,28 +92,34 @@ export class DomainService {
     }
   }
 
-  async generateDomainIdeas(description: string, keywords: string[]): Promise<string[]> {
+  async generateDomainIdeas(description: string, keywords: string[], locale?: string): Promise<string[]> {
     const vocabStr = keywords.join(', ');
+    const localeInstruction = locale
+      ? `Names should resonate with a "${locale}"-language audience. Prefer names that are easy to pronounce in that language, and may incorporate roots, sounds, or cultural references familiar to its speakers. Local or regional words are encouraged alongside invented ones.`
+      : 'Names should be internationally friendly — easy to pronounce for a global audience, preferring Anglo-Saxon or Latin roots.';
+
     const prompt = `
-      Tu es un expert en branding et naming de classe mondiale. 
-      Ta mission est de générer 30 noms de marque percutants pour le projet suivant :
-      Description : "${description}"
-      Mots-clés sémantiques : ${vocabStr}
+      You are a world-class branding and naming expert.
+      Your mission is to generate 30 powerful brand names for the following project:
+      Description: "${description}"
+      Semantic keywords: ${vocabStr}
 
-      Critères de qualité (IMPÉRATIF) :
-      1. Court (2-3 syllabes max).
-      2. Facile à prononcer et à épeler (doit passer le "test de la radio").
-      3. Éviter les chiffres et les tirets.
-      4. Sonorité moderne et mémorisable.
+      Quality criteria (MANDATORY):
+      1. Short (2-3 syllables max).
+      2. Easy to pronounce and spell (must pass the "radio test").
+      3. Avoid numbers and hyphens.
+      4. Modern and memorable sound.
 
-      Utilise un mélange de ces techniques de naming :
-      - Portmanteaux (fusion de 2 mots pertinents).
-      - Mots composés courts et élégants.
-      - Noms évocateurs (métaphores liées au bénéfice client).
-      - Noms inventés avec une racine latine ou anglo-saxonne forte.
+      ${localeInstruction}
 
-      Ta réponse doit être UNIQUEMENT un objet JSON avec une clé "names" contenant une liste de chaînes de caractères (uniquement le nom, sans l'extension).
-      Exemple: {"names": ["Altro", "Velora", "Flowly"]}
+      Use a mix of these naming techniques:
+      - Portmanteaus (merging 2 relevant words).
+      - Short, elegant compound words.
+      - Evocative names (metaphors linked to the client benefit).
+      - Invented names with a strong Latin or language-appropriate root.
+
+      Your response must be ONLY a JSON object with a "names" key containing a list of strings (name only, no extension).
+      Example: {"names": ["Altro", "Velora", "Flowly"]}
     `;
 
     try {
@@ -186,11 +197,12 @@ export class DomainService {
   }
 
   async findAvailableDomains(
-    description: string, 
-    keywords: string[], 
+    description: string,
+    keywords: string[],
     targetCount = 10,
     extensions = ['.com'],
-    matchMode = MatchMode.ANY
+    matchMode = MatchMode.ANY,
+    locale?: string
   ): Promise<{ results: any[], totalChecked: number }> {
     const finalResults: any[] = [];
     const checkedNames = new Set<string>();
@@ -198,7 +210,7 @@ export class DomainService {
     const maxAttempts = 5;
 
     while (finalResults.length < targetCount && attempts < maxAttempts) {
-      const names = await this.generateDomainIdeas(description, keywords);
+      const names = await this.generateDomainIdeas(description, keywords, locale);
       
       const newNames = names.filter(name => !checkedNames.has(name));
       newNames.forEach(name => checkedNames.add(name));

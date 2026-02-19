@@ -64,7 +64,12 @@
       "MATCH_ANY": "At least one available",
       "MATCH_ALL": "All extensions available",
       "BACK_BTN": "Back",
-      "SEARCH_BTN": "Search for domains"
+      "SEARCH_BTN": "Search for domains",
+      "TARGET_TITLE": "Target audience",
+      "TARGET_INTL": "International",
+      "TARGET_LOCAL": "Local / Regional",
+      "LANGUAGE": "Language:",
+      "LANGUAGE_PLACEHOLDER": "Choose a language"
     },
     "STEP3": {
       "TITLE": "Available {{extensions}} domains",

@@ -18,9 +18,9 @@ export class DomainService {
     return this.http.post<{ suggestedName: string }>(`${this.apiUrl}/suggest-name`, { description });
   }
 
-    generateKeywords(description: string): Observable<{ keywords: string[] }> {
+    generateKeywords(description: string, locale?: string | null): Observable<{ keywords: string[] }> {
 
-      return this.http.post<{ keywords: string[] }>(`${this.apiUrl}/keywords`, { description });
+      return this.http.post<{ keywords: string[] }>(`${this.apiUrl}/keywords`, { description, ...(locale ? { locale } : {}) });
 
     }
 
@@ -30,11 +30,11 @@ export class DomainService {
     return this.http.post<any>(`${this.apiUrl}/recheck`, { names, extensions });
   }
 
-      searchDomains(description: string, keywords: string[], extensions: string[], matchMode: string, projectId?: string, projectName?: string): Observable<any> {
+      searchDomains(description: string, keywords: string[], extensions: string[], matchMode: string, projectId?: string, projectName?: string, locale?: string | null): Observable<any> {
 
-  
 
-          return this.http.post<any>(`${this.apiUrl}/search`, { description, keywords, extensions, matchMode, projectId, projectName });
+
+          return this.http.post<any>(`${this.apiUrl}/search`, { description, keywords, extensions, matchMode, projectId, projectName, ...(locale ? { locale } : {}) });
 
   
 

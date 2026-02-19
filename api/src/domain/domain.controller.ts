@@ -38,7 +38,7 @@ export class DomainController {
   @Public()
   @Post('keywords')
   async generateKeywords(@Body() dto: RefineDescriptionDto) {
-    const keywords = await this.domainService.generateKeywords(dto.description);
+    const keywords = await this.domainService.generateKeywords(dto.description, dto.locale);
     return { keywords };
   }
 
@@ -66,6 +66,7 @@ export class DomainController {
       limit,
       dto.extensions,
       dto.matchMode,
+      dto.locale,
     );
 
     const actualCost = results.length;

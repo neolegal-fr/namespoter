@@ -39,4 +39,8 @@ export class SearchDomainsDto {
   @MaxLength(100)
   @IsOptional()
   projectName?: string;
+
+  @IsString()
+  @IsOptional()
+  locale?: string;
 }

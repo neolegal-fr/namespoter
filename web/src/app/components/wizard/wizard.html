@@ -143,6 +143,29 @@
           </div>
         </div>
 
+        <!-- Cible internationale ou locale -->
+        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+          <h4 class="section-label">{{ 'WIZARD.STEP2.TARGET_TITLE' | translate }}</h4>
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
+            <p-selectButton
+              [options]="[{ label: ('WIZARD.STEP2.TARGET_INTL' | translate), value: false }, { label: ('WIZARD.STEP2.TARGET_LOCAL' | translate), value: true }]"
+              [(ngModel)]="isLocal"
+              styleClass="select-btn-full">
+            </p-selectButton>
+          </div>
+          <div *ngIf="isLocal()" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap">
+            <span class="text-500" style="font-size: 0.85rem">{{ 'WIZARD.STEP2.LANGUAGE' | translate }}</span>
+            <p-select
+              [options]="LOCALE_OPTIONS"
+              [(ngModel)]="localeOverride"
+              optionLabel="label"
+              optionValue="value"
+              [placeholder]="detectedLocale() ? (LOCALE_LABELS[detectedLocale()!] + ' (détecté)') : ('WIZARD.STEP2.LANGUAGE_PLACEHOLDER' | translate)"
+              style="min-width: 10rem">
+            </p-select>
+          </div>
+        </div>
+
         <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <p-button

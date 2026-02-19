@@ -13,6 +13,7 @@ import { Chip } from 'primeng/chip';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { SelectButton } from 'primeng/selectbutton';
+import { Select } from 'primeng/select';
 import { Drawer } from 'primeng/drawer';
 import { Tooltip } from 'primeng/tooltip';
 import { ConfirmDialog } from 'primeng/confirmdialog';
@@ -37,6 +38,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     ProgressSpinner,
     TableModule,
     SelectButton,
+    Select,
     Drawer,
     Tooltip,
     ConfirmDialog,
@@ -48,6 +50,46 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 })
 export class WizardComponent implements OnInit {
   items: MenuItem[] = [];
+
+  // ─── US-001 : International / Local ───────────────────────
+  isLocal = signal(false);
+  localeOverride = signal<string>('');
+
+  private readonly EXT_TO_LOCALE: Record<string, string> = {
+    '.fr': 'fr', '.be': 'fr', '.ch': 'fr',
+    '.de': 'de', '.at': 'de',
+    '.es': 'es', '.mx': 'es', '.ar': 'es', '.co': 'es',
+    '.it': 'it',
+    '.nl': 'nl',
+    '.pt': 'pt', '.br': 'pt',
+    '.pl': 'pl',
+    '.jp': 'ja',
+    '.cn': 'zh',
+    '.ru': 'ru',
+    '.uk': 'en', '.gb': 'en', '.au': 'en', '.us': 'en', '.ca': 'en',
+  };
+
+  readonly LOCALE_LABELS: Record<string, string> = {
+    fr: 'Français', de: 'Deutsch', es: 'Español', it: 'Italiano',
+    nl: 'Nederlands', pt: 'Português', pl: 'Polski',
+    ja: '日本語', zh: '中文', ru: 'Русский', en: 'English',
+  };
+
+  readonly LOCALE_OPTIONS = Object.entries(this.LOCALE_LABELS).map(([value, label]) => ({ value, label }));
+
+  detectedLocale = computed(() => {
+    for (const ext of this.selectedExtensions()) {
+      const code = this.EXT_TO_LOCALE[ext];
+      if (code) return code;
+    }
+    return null;
+  });
+
+  effectiveLocale = computed(() => {
+    if (!this.isLocal()) return null;
+    return this.localeOverride() || this.detectedLocale() || null;
+  });
+  // ────────────────────────────────────────────────────────────
 
   landingBenefits = [
     { icon: 'pi pi-sparkles',   titleKey: 'LANDING.B1_TITLE', descKey: 'LANDING.B1_DESC' },
@@ -304,6 +346,8 @@ export class WizardComponent implements OnInit {
     this.newExtension.set('');
     this.selectedExtensions.set(['.com', '.net']);
     this.matchMode.set('all');
+    this.isLocal.set(false);
+    this.localeOverride.set('');
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
     if (!this.isLoggedIn()) this.showLanding.set(true);
@@ -518,7 +562,7 @@ export class WizardComponent implements OnInit {
       });
     }
 
-    this.domainService.generateKeywords(descToUse).subscribe({
+    this.domainService.generateKeywords(descToUse, this.effectiveLocale()).subscribe({
       next: (res: { keywords: string[] }) => {
         this.keywords.set(res.keywords);
         this.loading.set(false);
@@ -583,7 +627,9 @@ export class WizardComponent implements OnInit {
 
         this.projectId() || undefined,
 
-        this.projectName() || undefined
+        this.projectName() || undefined,
+
+        this.effectiveLocale()
 
       ).subscribe({
 

@@ -64,7 +64,12 @@
       "MATCH_ANY": "Au moins une extension disponible",
       "MATCH_ALL": "Toutes les extensions disponibles",
       "BACK_BTN": "Retour",
-      "SEARCH_BTN": "Rechercher des domaines"
+      "SEARCH_BTN": "Rechercher des domaines",
+      "TARGET_TITLE": "Cible",
+      "TARGET_INTL": "International",
+      "TARGET_LOCAL": "Local / Régional",
+      "LANGUAGE": "Langue :",
+      "LANGUAGE_PLACEHOLDER": "Choisir une langue"
     },
     "STEP3": {
       "TITLE": "Domaines {{extensions}} disponibles",
