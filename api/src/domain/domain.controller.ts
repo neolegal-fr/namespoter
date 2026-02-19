@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { DomainService } from './domain.service';
 import { RefineDescriptionDto } from './dto/refine-description.dto';
 import { SearchDomainsDto } from './dto/search-domains.dto';
+import { RecheckDomainsDto } from './dto/recheck-domains.dto';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
 import { UsersService } from '../users/users.service';
 import { ProjectsService } from '../projects/projects.service';
@@ -39,6 +40,12 @@ export class DomainController {
   async generateKeywords(@Body() dto: RefineDescriptionDto) {
     const keywords = await this.domainService.generateKeywords(dto.description);
     return { keywords };
+  }
+
+  @Post('recheck')
+  async recheck(@Body() dto: RecheckDomainsDto, @AuthenticatedUser() _user: any) {
+    const domains = await this.domainService.recheckAvailability(dto.names, dto.extensions);
+    return { domains };
   }
 
   @Post('search')

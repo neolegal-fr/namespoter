@@ -61,6 +61,7 @@
       "NEW_PROJECT_BTN": "Nouveau projet"
     },
     "LOADING": "L'IA travaille pour vous...",
+    "RECHECKING": "Vérification des disponibilités en cours...",
     "CREDIT_DIALOG": {
       "TITLE": "Recharger vos crédits",
       "MESSAGE": "Combien de crédits voulez-vous ajouter à votre compte ?",

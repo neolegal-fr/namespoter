@@ -71,52 +71,30 @@
         </div>
       </div>
 
-      <!-- Étape 2 : Configuration (Mots-clés + Extensions) -->
+      <!-- Étape 2 : Mots-clés -->
       <div *ngIf="activeIndex() === 1" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem">
         <div>
           <h2 class="font-bold text-900" style="font-size: 1.5rem; margin: 0 0 0.375rem 0">{{ 'WIZARD.STEP2.TITLE' | translate }}</h2>
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP2.SUBTITLE' | translate }}</p>
         </div>
 
-        <div class="grid" style="width: 100%; max-width: 42rem; text-align: left">
-          <!-- Colonne Mots-clés -->
-          <div class="col-12 md:col-6 flex flex-column gap-3">
-            <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
-            <div class="flex gap-2">
-              <input pInputText type="text" [(ngModel)]="newKeyword" class="flex-1" [placeholder]="'WIZARD.STEP2.ADD_PLACEHOLDER' | translate" (keydown.enter)="addKeyword()">
-              <p-button icon="pi pi-plus" (onClick)="addKeyword()"></p-button>
-            </div>
-            <div class="chips-container">
-              <p-chip *ngFor="let keyword of keywords()" [label]="keyword" [removable]="true" (onRemove)="removeKeyword(keyword)"></p-chip>
-            </div>
+        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
+          <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
+          <div class="flex gap-2">
+            <input pInputText type="text" [(ngModel)]="newKeyword" class="flex-1" [placeholder]="'WIZARD.STEP2.ADD_PLACEHOLDER' | translate" (keydown.enter)="addKeyword()">
+            <p-button icon="pi pi-plus" (onClick)="addKeyword()"></p-button>
           </div>
-
-          <!-- Colonne Extensions -->
-          <div class="col-12 md:col-6 flex flex-column gap-3">
-            <h4 class="section-label">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
-            <div class="flex gap-2">
-              <input pInputText type="text" [(ngModel)]="newExtension" class="flex-1" placeholder=".com, .fr, .io..." (keydown.enter)="addExtension()">
-              <p-button icon="pi pi-plus" (onClick)="addExtension()"></p-button>
-            </div>
-            <div class="chips-container">
-              <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
-            </div>
-
-            <h4 class="section-label mt-2">{{ 'WIZARD.STEP2.MATCH_MODE' | translate }}</h4>
-            <p-selectButton
-              [options]="matchOptions()"
-              [(ngModel)]="matchMode"
-              styleClass="select-btn-full">
-            </p-selectButton>
+          <div class="chips-container">
+            <p-chip *ngFor="let keyword of keywords()" [label]="keyword" [removable]="true" (onRemove)="removeKeyword(keyword)"></p-chip>
           </div>
         </div>
 
-        <div class="flex mt-5" style="width: 100%; max-width: 42rem; justify-content: space-between">
+        <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <p-button
             [label]="'WIZARD.STEP2.SEARCH_BTN' | translate"
             icon="pi pi-search"
-            [disabled]="selectedExtensions().length === 0"
+            [disabled]="keywords().length === 0"
             [loading]="loading()"
             (onClick)="findDomains()">
           </p-button>
@@ -128,12 +106,32 @@
         <h2 class="font-bold" style="font-size: 1.5rem; margin: 0 0 0.375rem 0; color: #16a34a">{{ 'WIZARD.STEP3.TITLE' | translate:{ extensions: selectedExtensions().join(', ') } }}</h2>
         <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP3.SUBTITLE' | translate }}</p>
 
+        <!-- Bandeau configuration extensions -->
+        <div class="extensions-bar" style="width: 100%">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
+            <h4 class="section-label" style="margin: 0; white-space: nowrap">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1">
+              <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
+            </div>
+            <div style="display: flex; gap: 0.375rem; align-items: center">
+              <input pInputText [(ngModel)]="newExtension" placeholder=".io" style="width: 4.5rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
+              <p-button icon="pi pi-plus" size="small" (onClick)="addExtension()" [loading]="recheckLoading()"></p-button>
+            </div>
+          </div>
+          <div *ngIf="selectedExtensions().length > 1" style="margin-top: 0.625rem">
+            <p-selectButton [options]="matchOptions()" [(ngModel)]="matchMode" styleClass="select-btn-full"></p-selectButton>
+          </div>
+          <div *ngIf="recheckLoading()" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--p-surface-500)">
+            <i class="pi pi-spin pi-spinner" style="margin-right: 0.375rem"></i>{{ 'WIZARD.RECHECKING' | translate }}
+          </div>
+        </div>
+
         <div *ngIf="domains().length > 0 && domains().length < 10" class="p-2 border-left-4 border-solid border-round text-sm font-italic" style="background: #fffbeb; border-color: #f59e0b; color: #92400e">
           {{ 'WIZARD.STEP3.NOTE' | translate:{ total: totalChecked(), count: domains().length } }}
         </div>
 
         <div class="mt-4 border-1 border-solid border-round-lg shadow-1 overflow-x-auto" style="width: 100%; max-width: 36rem; margin: 0 auto; background: white">
-            <p-table [value]="domains()" styleClass="p-datatable-sm">
+            <p-table [value]="filteredDomains()" styleClass="p-datatable-sm">
               <ng-template pTemplate="header">
                 <tr>
                   <th style="background: var(--p-surface-50); min-width: 100px">Nom de domaine</th>

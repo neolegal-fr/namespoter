@@ -155,6 +155,23 @@ export class DomainService {
     }
   }
 
+  async recheckAvailability(
+    names: string[],
+    extensions: string[],
+  ): Promise<{ name: string; allExtensions: Record<string, boolean> }[]> {
+    return Promise.all(
+      names.map(async (name) => {
+        const extStatus: Record<string, boolean> = {};
+        await Promise.all(
+          extensions.map(async (ext) => {
+            extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`);
+          }),
+        );
+        return { name, allExtensions: extStatus };
+      }),
+    );
+  }
+
   async findAvailableDomains(
     description: string, 
     keywords: string[], 

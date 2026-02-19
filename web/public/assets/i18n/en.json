@@ -61,6 +61,7 @@
       "NEW_PROJECT_BTN": "New project"
     },
     "LOADING": "AI is working for you...",
+    "RECHECKING": "Checking availability...",
     "CREDIT_DIALOG": {
       "TITLE": "Refill your credits",
       "MESSAGE": "How many credits do you want to add to your account?",

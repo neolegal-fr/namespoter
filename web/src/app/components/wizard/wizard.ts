@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, ChangeDetectorRef, ApplicationRef } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomainService } from '../../services/domain';
@@ -75,6 +75,17 @@ export class WizardComponent implements OnInit {
   // Étape 3
   domains = signal<any[]>([]);
   totalChecked = signal(0);
+  recheckLoading = signal(false);
+
+  filteredDomains = computed(() => {
+    const mode = this.matchMode();
+    const exts = this.selectedExtensions();
+    if (exts.length === 0) return this.domains();
+    return this.domains().filter(d => {
+      const available = exts.filter(ext => d.allExtensions?.[ext] === true);
+      return mode === 'all' ? available.length === exts.length : available.length > 0;
+    });
+  });
 
   constructor(
     public domainService: DomainService,
@@ -318,7 +329,11 @@ export class WizardComponent implements OnInit {
     if (ext) {
       if (!ext.startsWith('.')) ext = '.' + ext;
       if (!this.selectedExtensions().includes(ext)) {
+        if (this.selectedExtensions().length === 1) {
+          this.matchMode.set('all');
+        }
         this.selectedExtensions.update(e => [...e, ext]);
+        this.recheckIfNeeded();
       }
       this.newExtension.set('');
       this.cdr.detectChanges();
@@ -327,7 +342,38 @@ export class WizardComponent implements OnInit {
 
   removeExtension(ext: string) {
     this.selectedExtensions.update(e => e.filter(item => item !== ext));
+    this.recheckIfNeeded();
     this.cdr.detectChanges();
+  }
+
+  recheckIfNeeded() {
+    if (this.domains().length > 0 && this.selectedExtensions().length > 0) {
+      this.recheckDomains();
+    }
+  }
+
+  recheckDomains() {
+    const names = this.domains().map(d => d.name);
+    const extensions = this.selectedExtensions();
+    this.recheckLoading.set(true);
+    this.cdr.detectChanges();
+
+    this.domainService.recheckDomains(names, extensions).subscribe({
+      next: (res) => {
+        this.domains.update(list =>
+          list.map(d => {
+            const updated = res.domains.find(r => r.name === d.name);
+            return updated ? { ...d, allExtensions: updated.allExtensions } : d;
+          })
+        );
+        this.recheckLoading.set(false);
+        this.appRef.tick();
+      },
+      error: () => {
+        this.recheckLoading.set(false);
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   isFullyAvailable(result: any): boolean {

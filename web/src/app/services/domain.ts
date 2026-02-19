@@ -26,7 +26,11 @@ export class DomainService {
 
   
 
-        searchDomains(description: string, keywords: string[], extensions: string[], matchMode: string, projectId?: string, projectName?: string): Observable<any> {
+    recheckDomains(names: string[], extensions: string[]): Observable<{ domains: { name: string; allExtensions: Record<string, boolean> }[] }> {
+    return this.http.post<any>(`${this.apiUrl}/recheck`, { names, extensions });
+  }
+
+      searchDomains(description: string, keywords: string[], extensions: string[], matchMode: string, projectId?: string, projectName?: string): Observable<any> {
 
   
 
