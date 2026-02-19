@@ -81,7 +81,9 @@
       "MORE_BTN": "More suggestions",
       "NEW_PROJECT_BTN": "New project",
       "COPY_TABLE": "Copy table",
-      "COPIED": "Copied!"
+      "COPIED": "Copied!",
+      "ADD_MANUAL_PLACEHOLDER": "Add your own idea (e.g. floralship)...",
+      "ADD_MANUAL_BTN": "Add"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

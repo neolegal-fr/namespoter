@@ -118,6 +118,7 @@ export class WizardComponent implements OnInit {
   newKeyword = signal('');
   
   newExtension = signal('');
+  newManualName = signal('');
   selectedExtensions = signal<string[]>(['.com', '.net']);
   matchMode = signal('all');
   matchOptions = signal<any[]>([]);
@@ -575,6 +576,68 @@ export class WizardComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  addManualRow() {
+    // Normaliser : minuscules, retirer extension accidentelle, ne garder que [a-z0-9-]
+    const name = this.newManualName().trim().toLowerCase()
+      .replace(/\.[a-z]{2,10}$/, '')
+      .replace(/[^a-z0-9-]/g, '');
+
+    if (name.length < 2) return;
+    if (this.domains().some(d => d.name === name)) {
+      this.newManualName.set('');
+      return;
+    }
+
+    // Ajouter la ligne avec des cellules "en cours" (null)
+    const pendingRow = {
+      id: null as string | null,
+      name,
+      allExtensions: Object.fromEntries(this.selectedExtensions().map(ext => [ext, null])) as Record<string, boolean | null>,
+      isFavorite: false,
+      isManual: true,
+    };
+    this.domains.update(d => [...d, pendingRow]);
+    this.newManualName.set('');
+    this.cdr.detectChanges();
+
+    // Vérifier la disponibilité
+    this.domainService.recheckDomains([name], this.selectedExtensions()).subscribe({
+      next: (res) => {
+        const checked = res.domains.find((r: any) => r.name === name);
+        if (!checked) return;
+
+        this.domains.update(list =>
+          list.map(d => d.name === name && (d as any).isManual
+            ? { ...d, allExtensions: checked.allExtensions }
+            : d
+          )
+        );
+        this.appRef.tick();
+
+        // Persister si un projet est actif
+        if (this.projectId() && this.isLoggedIn()) {
+          this.projectService.addManualSuggestion(this.projectId()!, name, checked.allExtensions).subscribe({
+            next: (saved) => {
+              this.domains.update(list =>
+                list.map(d => d.name === name && (d as any).isManual ? { ...d, id: saved.id } : d)
+              );
+            }
+          });
+        }
+      },
+      error: () => {
+        // Marquer toutes les cellules comme indisponibles en cas d'erreur
+        this.domains.update(list =>
+          list.map(d => d.name === name && (d as any).isManual
+            ? { ...d, allExtensions: Object.fromEntries(this.selectedExtensions().map(ext => [ext, false])) }
+            : d
+          )
+        );
         this.cdr.detectChanges();
       }
     });

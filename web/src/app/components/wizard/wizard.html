@@ -215,6 +215,7 @@
                         <i class="pi" [class.pi-heart-fill]="result.isFavorite" [class.pi-heart]="!result.isFavorite" [style.color]="result.isFavorite ? '#ef4444' : '#9ca3af'"></i>
                       </button>
                       <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
+                      <i *ngIf="result.isManual" class="pi pi-pencil" style="font-size: 0.65rem; color: #9ca3af; flex-shrink: 0" title="Ajouté manuellement"></i>
                     </div>
                   </td>
                   <td *ngFor="let ext of selectedExtensions()" class="text-center px-1">
@@ -230,6 +231,12 @@
 
         <div *ngIf="domains().length === 0 && totalChecked() > 0 && !loading()" class="text-center" style="padding: 2.5rem 0">
           <p class="text-500">{{ 'WIZARD.STEP3.NO_RESULTS' | translate }}</p>
+        </div>
+
+        <!-- Ajout manuel -->
+        <div style="width: 100%; max-width: 36rem; display: flex; gap: 0.5rem; align-items: center">
+          <input pInputText [(ngModel)]="newManualName" [placeholder]="'WIZARD.STEP3.ADD_MANUAL_PLACEHOLDER' | translate" style="flex: 1; height: 2rem; font-size: 0.85rem" (keydown.enter)="addManualRow()">
+          <p-button [label]="'WIZARD.STEP3.ADD_MANUAL_BTN' | translate" icon="pi pi-pencil" size="small" severity="secondary" (onClick)="addManualRow()"></p-button>
         </div>
 
         <!-- Boutons de navigation -->
