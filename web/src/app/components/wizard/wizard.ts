@@ -127,6 +127,7 @@ export class WizardComponent implements OnInit {
   totalChecked = signal(0);
   recheckLoading = signal(false);
   copiedDomain = signal<string | null>(null);
+  streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
   private searchTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
@@ -580,146 +581,99 @@ export class WizardComponent implements OnInit {
     });
   }
 
-    async findDomains(append = false) {
+  async findDomains(append = false) {
+    if (!this.isLoggedIn()) {
+      const state = {
+        description: this.description(),
+        projectName: this.projectName(),
+        refinedDescription: this.refinedDescription(),
+        keywords: this.keywords(),
+        selectedExtensions: this.selectedExtensions(),
+        matchMode: this.matchMode(),
+        projectId: this.projectId(),
+        pendingSearch: true,
+      };
+      localStorage.setItem('wizard_state', JSON.stringify(state));
+      this.keycloak.login();
+      return;
+    }
 
-      if (!this.isLoggedIn()) {
+    if (!append) this.domains.set([]);
+    this.loading.set(true);
+    this.streamProgress.set({ phase: 'generating', checked: 0, found: 0 });
+    this.startSearchTimeout();
+    this.cdr.detectChanges();
 
-        const state = {
+    const token = await this.keycloak.getToken();
 
-          description: this.description(),
+    this.domainService.searchDomainsStream({
+      description: this.refinedDescription() || this.description(),
+      keywords: this.keywords(),
+      extensions: this.selectedExtensions(),
+      matchMode: this.matchMode(),
+      projectId: this.projectId() || undefined,
+      projectName: this.projectName() || undefined,
+      locale: this.effectiveLocale(),
+    }, token).subscribe({
+      next: (event: any) => {
+        this.clearSearchTimeout();
+        this.startSearchTimeout();
 
-          projectName: this.projectName(),
+        if (event.type === 'generating') {
+          this.streamProgress.update(p => p ? { ...p, phase: 'generating' } : null);
 
-          refinedDescription: this.refinedDescription(),
+        } else if (event.type === 'candidate') {
+          this.streamProgress.update(p => p
+            ? { ...p, phase: 'checking', name: event.name, checked: event.checkedSoFar }
+            : null);
 
-          keywords: this.keywords(),
+        } else if (event.type === 'result') {
+          const domain = { id: null as string | null, name: event.domain.name, allExtensions: event.domain.allExtensions, isFavorite: false };
+          this.domains.update(d => [...d, domain]);
+          this.streamProgress.update(p => p ? { ...p, found: this.domains().length } : null);
 
-          selectedExtensions: this.selectedExtensions(),
-
-          matchMode: this.matchMode(),
-
-          projectId: this.projectId(),
-
-          pendingSearch: true
-
-        };
-
-        localStorage.setItem('wizard_state', JSON.stringify(state));
-
-        this.keycloak.login();
-
-        return;
-
-      }
-
-  
-
-      this.loading.set(true);
-      this.startSearchTimeout();
-
-      this.cdr.detectChanges();
-
-      this.domainService.searchDomains(
-
-        this.refinedDescription() || this.description(), 
-
-        this.keywords(),
-
-        this.selectedExtensions(),
-
-        this.matchMode(),
-
-        this.projectId() || undefined,
-
-        this.projectName() || undefined,
-
-        this.effectiveLocale()
-
-      ).subscribe({
-
-        next: (res: any) => {
-
-          this.totalChecked.set(res.totalChecked || 0);
-
-          
-
-          if (!this.projectId() && res.projectId) {
-
-            this.router.navigate(['/projects', res.projectId], { replaceUrl: true });
-
+        } else if (event.type === 'done') {
+          this.totalChecked.set(event.totalChecked || 0);
+          // Mettre à jour les IDs des suggestions sauvegardées
+          if (event.savedDomains?.length) {
+            this.domains.update(list => list.map(d => {
+              const saved = event.savedDomains.find((s: any) => s.name === d.name);
+              return saved ? { ...d, id: saved.id } : d;
+            }));
           }
-
-          
-
-          this.projectId.set(res.projectId);
-
-  
-
-          const newDomains = res.domains.map((d: any) => ({
-
-            id: d.id,
-
-            name: d.name,
-
-            allExtensions: d.allExtensions,
-
-            isFavorite: false
-
-          }));
-
-  
-
-          if (append) {
-
-            this.domains.update(d => [...d, ...newDomains]);
-
-          } else {
-
-            this.domains.set(newDomains);
-
+          if (event.projectId) {
+            this.projectId.set(event.projectId);
+            if (this.router.url !== `/projects/${event.projectId}`) {
+              this.router.navigate(['/projects', event.projectId], { replaceUrl: true });
+            }
           }
-
-          
-
-          if (res.remainingCredits !== undefined) {
-
-            this.userService.updateCredits(res.remainingCredits);
-
+          if (event.remainingCredits !== undefined) {
+            this.userService.updateCredits(event.remainingCredits);
           }
-
-  
-
-          // Rafraîchir la liste globale
-
           this.projectService.refreshProjects().subscribe();
 
-          
-
-          this.clearSearchTimeout();
+        } else if (event.type === 'error') {
+          this.streamProgress.set(null);
           this.loading.set(false);
-
-          this.cdr.detectChanges();
-
-        },
-
-        error: (err: any) => {
-
-          this.clearSearchTimeout();
-          this.loading.set(false);
-
-          if (err.status === 403) {
-
-            this.projectService.showCreditDialog.set(true);
-
-          }
-
-          this.cdr.detectChanges();
-
         }
 
-      });
-
-    }
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        this.streamProgress.set(null);
+        this.loading.set(false);
+        this.clearSearchTimeout();
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.streamProgress.set(null);
+        this.loading.set(false);
+        this.clearSearchTimeout();
+        if (err.status === 403) this.projectService.showCreditDialog.set(true);
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   }
 

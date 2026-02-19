@@ -72,7 +72,7 @@ export class ProjectsService {
     return repo.save(project);
   }
 
-  async addSuggestions(project: Project, domains: any[], manager?: EntityManager): Promise<void> {
+  async addSuggestions(project: Project, domains: any[], manager?: EntityManager): Promise<DomainSuggestion[]> {
     const repo = manager ? manager.getRepository(DomainSuggestion) : this.suggestionsRepository;
 
     const suggestions = domains.map(d =>
@@ -83,7 +83,7 @@ export class ProjectsService {
       }),
     );
 
-    await repo.save(suggestions);
+    return repo.save(suggestions);
   }
 
   async toggleFavorite(suggestionId: string, user: User): Promise<boolean> {

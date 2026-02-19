@@ -202,7 +202,8 @@ export class DomainService {
     targetCount = 10,
     extensions = ['.com'],
     matchMode = MatchMode.ANY,
-    locale?: string
+    locale?: string,
+    onEvent?: (event: Record<string, any>) => void,
   ): Promise<{ results: any[], totalChecked: number }> {
     const finalResults: any[] = [];
     const checkedNames = new Set<string>();
@@ -210,8 +211,9 @@ export class DomainService {
     const maxAttempts = 5;
 
     while (finalResults.length < targetCount && attempts < maxAttempts) {
+      onEvent?.({ type: 'generating' });
       const names = await this.generateDomainIdeas(description, keywords, locale);
-      
+
       const newNames = names.filter(name => !checkedNames.has(name));
       newNames.forEach(name => checkedNames.add(name));
 
@@ -223,14 +225,16 @@ export class DomainService {
       for (const name of newNames) {
         if (finalResults.length >= targetCount) break;
 
+        onEvent?.({ type: 'candidate', name, checkedSoFar: checkedNames.size });
+
         const extStatus: Record<string, boolean> = {};
-        
+
         await Promise.all(extensions.map(async (ext) => {
           extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`);
         }));
 
         const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext]);
-        
+
         let isMatch = false;
         if (matchMode === MatchMode.ALL) {
           isMatch = availableExts.length === extensions.length;
@@ -239,11 +243,9 @@ export class DomainService {
         }
 
         if (isMatch) {
-          finalResults.push({
-            name,
-            availableExtensions: availableExts,
-            allExtensions: extStatus
-          });
+          const domain = { name, availableExtensions: availableExts, allExtensions: extStatus };
+          finalResults.push(domain);
+          onEvent?.({ type: 'result', domain });
         }
       }
       attempts++;

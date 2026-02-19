@@ -1,6 +1,7 @@
-import { Controller, Post, Body, ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Res, ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import type { Response } from 'express';
 import { DomainService } from './domain.service';
 import { RefineDescriptionDto } from './dto/refine-description.dto';
 import { SearchDomainsDto } from './dto/search-domains.dto';
@@ -47,6 +48,88 @@ export class DomainController {
   async recheck(@Body() dto: RecheckDomainsDto) {
     const domains = await this.domainService.recheckAvailability(dto.names, dto.extensions);
     return { domains };
+  }
+
+  @Post('search/stream')
+  async searchStream(
+    @Body() dto: SearchDomainsDto,
+    @AuthenticatedUser() keycloakUser: any,
+    @Res() res: Response,
+  ) {
+    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+
+    if (user.credits <= 0) {
+      res.status(403).json({ message: 'Crédits insuffisants' });
+      return;
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    const emit = (data: Record<string, any>) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+
+    const limit = Math.min(10, user.credits);
+    const results: any[] = [];
+
+    try {
+      const { totalChecked } = await this.domainService.findAvailableDomains(
+        dto.description,
+        dto.keywords,
+        limit,
+        dto.extensions,
+        dto.matchMode,
+        dto.locale,
+        (event) => {
+          emit(event);
+          if (event.type === 'result') results.push(event.domain);
+        },
+      );
+
+      const actualCost = results.length;
+      let project: Project;
+      let savedDomains: { name: string; id: string }[] = [];
+
+      try {
+        await this.dataSource.transaction(async (manager) => {
+          project = await this.projectsService.createOrUpdate(
+            user,
+            {
+              id: dto.projectId,
+              name: dto.projectName,
+              description: dto.description,
+              keywords: dto.keywords,
+              extensions: dto.extensions || ['.com'],
+              matchMode: dto.matchMode || 'any',
+            },
+            manager,
+          );
+
+          if (actualCost > 0) {
+            await this.usersService.decrementCredits(user.keycloakId, actualCost, manager);
+            const saved = await this.projectsService.addSuggestions(project, results, manager);
+            savedDomains = saved.map(s => ({ name: s.domainName, id: s.id }));
+          }
+        });
+
+        emit({
+          type: 'done',
+          totalChecked,
+          projectId: project!.id,
+          savedDomains,
+          remainingCredits: user.credits - actualCost,
+        });
+      } catch (error) {
+        this.logger.error('Échec de la transaction streaming:', error);
+        emit({ type: 'error', message: 'Impossible de sauvegarder les résultats' });
+      }
+    } catch (error) {
+      this.logger.error('Erreur pendant le streaming:', error);
+      emit({ type: 'error', message: 'Erreur lors de la recherche' });
+    }
+
+    res.end();
   }
 
   @Post('search')

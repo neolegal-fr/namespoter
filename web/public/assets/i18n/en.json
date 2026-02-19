@@ -89,6 +89,11 @@
       "CANCEL": "Cancel and retry"
     },
     "LOADING": "AI is working for you...",
+    "STREAM": {
+      "GENERATING": "AI is generating new name ideas...",
+      "CHECKING": "Checking {{name}}",
+      "PROGRESS": "{{checked}} candidates evaluated — {{found}} available so far"
+    },
     "RECHECKING": "Checking availability...",
     "RECHECK_ERROR": "Could not check availability. Please try again.",
     "CREDIT_DIALOG": {

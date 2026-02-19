@@ -89,6 +89,11 @@
       "CANCEL": "Annuler et réessayer"
     },
     "LOADING": "L'IA travaille pour vous...",
+    "STREAM": {
+      "GENERATING": "L'IA génère de nouvelles idées de noms...",
+      "CHECKING": "Vérification de {{name}}",
+      "PROGRESS": "{{checked}} candidats évalués — {{found}} disponibles pour l'instant"
+    },
     "RECHECKING": "Vérification des disponibilités en cours...",
     "RECHECK_ERROR": "Impossible de vérifier la disponibilité. Réessayez.",
     "CREDIT_DIALOG": {
