@@ -107,13 +107,14 @@
         </div>
       </div>
 
-      <!-- Étape 2 : Mots-clés -->
+      <!-- Étape 2 : Mots-clés + configuration -->
       <div *ngIf="activeIndex() === 1" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem">
         <div>
           <h2 class="font-bold text-900" style="font-size: 1.5rem; margin: 0 0 0.375rem 0">{{ 'WIZARD.STEP2.TITLE' | translate }}</h2>
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP2.SUBTITLE' | translate }}</p>
         </div>
 
+        <!-- Mots-clés -->
         <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
           <div class="flex gap-2">
@@ -122,6 +123,23 @@
           </div>
           <div class="chips-container">
             <p-chip *ngFor="let keyword of keywords()" [label]="keyword" [removable]="true" (onRemove)="removeKeyword(keyword)"></p-chip>
+          </div>
+        </div>
+
+        <!-- Extensions + critère de disponibilité -->
+        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
+          <h4 class="section-label">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap">
+            <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1">
+              <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
+            </div>
+            <div style="display: flex; gap: 0.375rem; align-items: center; flex-shrink: 0">
+              <input pInputText [(ngModel)]="newExtension" placeholder=".io .fr net" style="width: 9rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
+              <p-button icon="pi pi-plus" size="small" (onClick)="addExtension()"></p-button>
+            </div>
+          </div>
+          <div *ngIf="selectedExtensions().length > 1">
+            <p-selectButton [options]="matchOptions()" [(ngModel)]="matchMode" styleClass="select-btn-full"></p-selectButton>
           </div>
         </div>
 
@@ -142,7 +160,7 @@
         <h2 class="font-bold" style="font-size: 1.5rem; margin: 0 0 0.375rem 0; color: #16a34a">{{ 'WIZARD.STEP3.TITLE' | translate:{ extensions: selectedExtensions().join(', ') } }}</h2>
         <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP3.SUBTITLE' | translate }}</p>
 
-        <!-- Bandeau configuration extensions -->
+        <!-- Bandeau ajustement extensions post-recherche -->
         <div class="extensions-bar" style="width: 100%">
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
             <h4 class="section-label" style="margin: 0; white-space: nowrap">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
@@ -150,7 +168,7 @@
               <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
             </div>
             <div style="display: flex; gap: 0.375rem; align-items: center">
-              <input pInputText [(ngModel)]="newExtension" placeholder=".io .fr net" style="width: 9rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
+              <input pInputText [(ngModel)]="newExtension" placeholder=".io" style="width: 5rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
               <p-button icon="pi pi-plus" size="small" (onClick)="addExtension()" [loading]="recheckLoading()"></p-button>
             </div>
           </div>
