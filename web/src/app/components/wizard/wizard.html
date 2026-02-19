@@ -191,7 +191,11 @@
            (click)="loadProject(project.id)"
            [pTooltip]="project.description" tooltipPosition="bottom" [appendTo]="'body'">
         <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1">{{ project.name }}</div>
-        <i class="pi pi-chevron-right" style="font-size: 0.75rem; color: #9ca3af; flex-shrink: 0"></i>
+        
+        <div class="flex items-center gap-2">
+          <p-button icon="pi pi-trash" [text]="true" severity="danger" (onClick)="deleteProject($event, project.id)" size="small"></p-button>
+          <i class="pi pi-chevron-right" style="font-size: 0.75rem; color: #9ca3af; flex-shrink: 0"></i>
+        </div>
       </div>
 
       <div *ngIf="projectService.projects().length === 0" style="text-align: center; padding: 2.5rem 0; color: #9ca3af">
@@ -199,6 +203,9 @@
       </div>
     </div>
   </p-drawer>
+
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
 
   <div *ngIf="loading()" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 50; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px)">
      <div style="text-align: center">

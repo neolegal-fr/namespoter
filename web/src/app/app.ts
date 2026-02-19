@@ -50,17 +50,18 @@ import { InputNumber } from 'primeng/inputnumber';
             </button>
 
             <ng-container *ngIf="isLoggedIn()">
-              <p-button 
-                [label]="'APP.MY_PROJECTS' | translate" 
-                icon="pi pi-folder" 
+              <p-button
+                [label]="'APP.PROJECTS' | translate"
+                icon="pi pi-folder"
                 [text]="true"
                 severity="secondary"
-                (onClick)="openProjects()">
+                (onClick)="projectMenu.toggle($event)">
               </p-button>
+              <p-menu #projectMenu [model]="projectMenuItems" [popup]="true"></p-menu>
 
-                <p-avatar 
-                  icon="pi pi-user" 
-                  shape="circle" 
+                <p-avatar
+                  icon="pi pi-user"
+                  shape="circle"
                   class="cursor-pointer ml-2"
                   styleClass="bg-primary text-primary-contrast shadow-sm"
                   (click)="userMenu.toggle($event)">
@@ -127,6 +128,7 @@ export class AppComponent implements OnInit {
   ];
 
   profileMenuItems: MenuItem[] = [];
+  projectMenuItems: MenuItem[] = [];
 
   constructor(
     private userService: UserService,
@@ -147,16 +149,26 @@ export class AppComponent implements OnInit {
       const profile = await this.keycloak.loadUserProfile();
       this.userName.set(profile.firstName || profile.username || '');
       this.loadCredits();
-      setTimeout(() => this.updateProfileMenu());
+      setTimeout(() => { this.updateProfileMenu(); this.updateProjectMenu(); });
     }
 
     this.translate.onLangChange.subscribe(() => {
-      setTimeout(() => this.updateProfileMenu());
+      setTimeout(() => { this.updateProfileMenu(); this.updateProjectMenu(); });
     });
 
     this.userService.credits$.subscribe(val => {
       this.credits.set(val);
       setTimeout(() => this.updateProfileMenu());
+    });
+  }
+
+  updateProjectMenu() {
+    this.translate.get(['APP.PROJECT_NEW', 'APP.PROJECT_OPEN']).subscribe(res => {
+      this.projectMenuItems = [
+        { label: res['APP.PROJECT_NEW'], icon: 'pi pi-plus', command: () => this.newProject() },
+        { label: res['APP.PROJECT_OPEN'], icon: 'pi pi-folder-open', command: () => this.openProjects() }
+      ];
+      this.cdr.detectChanges();
     });
   }
 
@@ -220,6 +232,10 @@ export class AppComponent implements OnInit {
   openProjects() {
     this.projectService.refreshProjects().subscribe();
     this.projectService.showDrawer.set(true);
+  }
+
+  newProject() {
+    this.projectService.resetWizard();
   }
 
   login() {

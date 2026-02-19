@@ -15,7 +15,9 @@ import { TableModule } from 'primeng/table';
 import { SelectButton } from 'primeng/selectbutton';
 import { Drawer } from 'primeng/drawer';
 import { Tooltip } from 'primeng/tooltip';
-import { MenuItem } from 'primeng/api';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { Toast } from 'primeng/toast';
+import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { UserService } from '../../services/user';
 import { ProjectService } from '../../services/project';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -37,6 +39,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     SelectButton,
     Drawer,
     Tooltip,
+    ConfirmDialog,
+    Toast,
     TranslateModule
   ],
   templateUrl: './wizard.html',
@@ -80,13 +84,20 @@ export class WizardComponent implements OnInit {
     private translate: TranslateService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
   ) {}
 
   async ngOnInit() {
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
     this.updateLabels();
     this.translate.onLangChange.subscribe(() => this.updateLabels());
+
+    // Écouter les demandes de reset (depuis le menu global)
+    this.projectService.resetWizard$.subscribe(() => {
+      this.resetProject();
+    });
 
     // S'abonner aux changements de paramètres d'URL
     this.route.params.subscribe(params => {
@@ -210,6 +221,34 @@ export class WizardComponent implements OnInit {
         this.loading.set(false);
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  deleteProject(event: Event, id: string) {
+    event.stopPropagation();
+    this.translate.get(['PROJECTS.CONFIRM_DELETE', 'PROJECTS.DELETE', 'PROJECTS.SUCCESS', 'PROJECTS.DELETE_SUCCESS']).subscribe(res => {
+      this.confirmationService.confirm({
+        target: event.target as EventTarget,
+        message: res['PROJECTS.CONFIRM_DELETE'],
+        header: res['PROJECTS.DELETE'],
+        icon: 'pi pi-exclamation-triangle',
+        acceptIcon: "none",
+        rejectIcon: "none",
+        rejectButtonStyleClass: "p-button-text",
+        accept: () => {
+          this.projectService.deleteProject(id).subscribe(() => {
+            this.projectService.refreshProjects().subscribe();
+            if (this.projectId() === id) {
+              this.resetProject();
+            }
+            this.messageService.add({ 
+              severity: 'success', 
+              summary: res['PROJECTS.SUCCESS'], 
+              detail: res['PROJECTS.DELETE_SUCCESS'] 
+            });
+          });
+        }
+      });
     });
   }
 

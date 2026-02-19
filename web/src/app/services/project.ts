@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,15 @@ export class ProjectService {
   showCreditDialog = signal(false);
   projects = signal<any[]>([]);
 
+  // Événements
+  private resetWizardSource = new Subject<void>();
+  resetWizard$ = this.resetWizardSource.asObservable();
+
   constructor(private http: HttpClient) {}
+
+  resetWizard() {
+    this.resetWizardSource.next();
+  }
 
   refreshProjects(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
@@ -31,5 +39,9 @@ export class ProjectService {
 
   toggleFavorite(suggestionId: string): Observable<{ isFavorite: boolean }> {
     return this.http.patch<{ isFavorite: boolean }>(`${this.apiUrl}/suggestions/${suggestionId}/favorite`, {});
+  }
+
+  deleteProject(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

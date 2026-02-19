@@ -105,4 +105,9 @@ export class ProjectsService {
     Object.assign(project, data);
     return this.projectsRepository.save(project);
   }
+
+  async remove(id: string, user: User): Promise<void> {
+    const project = await this.findOne(id, user);
+    await this.projectsRepository.remove(project);
+  }
 }

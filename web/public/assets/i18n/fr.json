@@ -1,7 +1,9 @@
 {
   "APP": {
     "TITLE": "Namespoter",
-    "MY_PROJECTS": "Mes projets",
+    "PROJECTS": "Projets",
+    "PROJECT_NEW": "Nouveau",
+    "PROJECT_OPEN": "Ouvrir",
     "CREDITS": "Crédits",
     "LOGOUT": "Déconnexion",
     "LOGIN": "Connexion / S'inscrire",
@@ -16,7 +18,11 @@
     "SUBTITLE": "Reprenez vos recherches là où vous vous étiez arrêté.",
     "EMPTY": "Aucun projet pour le moment.",
     "OPEN": "Ouvrir",
-    "DATE": "Dernière mise à jour"
+    "DATE": "Dernière mise à jour",
+    "DELETE": "Supprimer",
+    "CONFIRM_DELETE": "Voulez-vous vraiment supprimer ce projet ?",
+    "DELETE_SUCCESS": "Projet supprimé avec succès",
+    "SUCCESS": "Succès"
   },
   "WIZARD": {
     "STEPS": {

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Logger, Body } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Delete, Logger, Body } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { AuthenticatedUser } from 'nest-keycloak-connect';
 import { UsersService } from '../users/users.service';
@@ -28,6 +28,12 @@ export class ProjectsController {
   async update(@Param('id') id: string, @AuthenticatedUser() keycloakUser: any, @Body() data: any) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
     return this.projectsService.update(id, user, data);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string, @AuthenticatedUser() keycloakUser: any) {
+    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    return this.projectsService.remove(id, user);
   }
 
   @Patch('suggestions/:id/favorite')
