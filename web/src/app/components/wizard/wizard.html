@@ -5,7 +5,7 @@
 
     <!-- Tagline -->
     <div>
-      <h1 class="font-bold text-900" style="font-size: 2.5rem; margin: 0 0 0.5rem 0; letter-spacing: -0.04em; line-height: 1.1">
+      <h1 class="font-bold text-900" style="font-size: clamp(1.75rem, 6vw, 2.5rem); margin: 0 0 0.5rem 0; letter-spacing: -0.04em; line-height: 1.1">
         {{ 'LANDING.TAGLINE' | translate }}
       </h1>
       <p class="text-500" style="font-size: 1.05rem; margin: 0">{{ 'LANDING.SUBTITLE' | translate }}</p>
@@ -41,8 +41,8 @@
       <div *ngIf="!isEditingName()"
            (click)="isEditingName.set(true)"
            class="edit-name-trigger cursor-pointer"
-           style="display: inline-flex; align-items: center; gap: 0.75rem">
-        <h1 class="font-bold text-primary" style="margin: 0; font-size: 2.5rem; text-transform: uppercase; font-weight: 900; letter-spacing: -0.05em">
+           style="display: inline-flex; align-items: center; gap: 0.75rem; max-width: calc(100vw - 2rem); overflow: hidden">
+        <h1 class="font-bold text-primary" style="margin: 0; font-size: clamp(1.5rem, 7vw, 2.5rem); text-transform: uppercase; font-weight: 900; letter-spacing: -0.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
           {{ projectName() || ('WIZARD.STEPS.' + (activeIndex() === 0 ? 'DESCRIPTION' : activeIndex() === 1 ? 'KEYWORDS' : 'DOMAINS') | translate) }}
         </h1>
         <i class="pi pi-pencil text-lg text-400" style="flex-shrink: 0; opacity: 0; transition: opacity 0.2s ease"></i>
@@ -80,7 +80,7 @@
           [placeholder]="'WIZARD.STEP1.PLACEHOLDER' | translate">
         </textarea>
 
-        <div class="flex align-items-center" style="justify-content: center; gap: 0.75rem">
+        <div class="flex align-items-center" style="justify-content: center; gap: 0.75rem; flex-wrap: wrap">
           <p-button
             [label]="'WIZARD.STEP1.REFINE_BTN' | translate"
             icon="pi pi-sparkles"
@@ -149,7 +149,7 @@
           </div>
         </div>
 
-        <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between">
+        <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <p-button
             [label]="'WIZARD.STEP2.NEXT_BTN' | translate"
@@ -247,7 +247,7 @@
         </div>
 
         <!-- Boutons de navigation -->
-        <div class="flex" style="width: 100%; max-width: 36rem; justify-content: space-between">
+        <div class="flex" style="width: 100%; max-width: 36rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <div style="display: flex; gap: 0.5rem">
             <p-button
@@ -272,7 +272,7 @@
   </p-card>
 
   <!-- Volet des projets sécurisé -->
-  <p-drawer [visible]="projectService.showDrawer()" (visibleChange)="projectService.showDrawer.set($event)" [header]="'PROJECTS.TITLE' | translate" position="left" [style]="{ width: '25rem' }" [dismissible]="true" [modal]="false">
+  <p-drawer [visible]="projectService.showDrawer()" (visibleChange)="projectService.showDrawer.set($event)" [header]="'PROJECTS.TITLE' | translate" position="left" [style]="{ width: 'min(25rem, 90vw)' }" [dismissible]="true" [modal]="false">
     <p style="color: #9ca3af; margin-bottom: 1.5rem; font-size: 0.875rem">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
 
     <div style="display: flex; flex-direction: column; gap: 0.5rem">

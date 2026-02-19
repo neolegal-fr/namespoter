@@ -91,7 +91,7 @@ import { InputNumber } from 'primeng/inputnumber';
                 [visible]="projectService.showCreditDialog()" 
                 (visibleChange)="projectService.showCreditDialog.set($event)" 
                 [modal]="true" 
-                [style]="{ width: '25rem' }" 
+                [style]="{ width: 'min(25rem, 90vw)' }"
                 [draggable]="false" 
                 [resizable]="false">
         <span class="p-text-secondary block mb-3">{{ 'WIZARD.CREDIT_DIALOG.MESSAGE' | translate }}</span>
