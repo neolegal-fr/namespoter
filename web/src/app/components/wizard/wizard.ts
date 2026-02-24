@@ -583,49 +583,84 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  addManualDomain() {
-    // Normalise : minuscules, supprime le point initial et toute extension éventuelle
-    const raw = this.newDomainName().trim().toLowerCase().replace(/^\./, '');
-    const name = raw.replace(/\.[a-z]{2,10}$/, '');
-    if (!name) return;
+  private meetsMatchMode(allExtensions: Record<string, boolean | null>): boolean {
+    const exts = this.selectedExtensions();
+    const known = exts.filter(ext => allExtensions[ext] !== null && allExtensions[ext] !== undefined);
+    if (known.length === 0) return true;
+    const available = known.filter(ext => allExtensions[ext] === true);
+    return this.matchMode() === 'all' ? available.length === known.length : available.length > 0;
+  }
 
-    // Doublon silencieux
-    if (this.domains().some(d => d.name === name)) {
+  addManualDomain() {
+    // Sépare par espace, virgule ou point-virgule ; normalise chaque token
+    const newNames = [
+      ...new Set(
+        this.newDomainName().trim().toLowerCase()
+          .split(/[\s,;]+/)
+          .filter(t => t.length > 0)
+          .map(t => t.replace(/^\./, '').replace(/\.[a-z]{2,10}$/, ''))
+          .filter(n => n.length > 0)
+          .filter(n => !this.domains().some(d => d.name === n)) // exclure doublons
+      )
+    ];
+
+    if (newNames.length === 0) {
       this.newDomainName.set('');
       return;
     }
 
-    // Ajouter une ligne temporaire avec spinners
-    const tempRow = {
+    // Lignes temporaires avec spinners
+    const tempRows = newNames.map(name => ({
       id: null as string | null,
       name,
       allExtensions: Object.fromEntries(this.selectedExtensions().map(ext => [ext, null])),
       isFavorite: false,
       isManual: true,
-    };
-    this.domains.update(d => [...d, tempRow]);
+    }));
+    this.domains.update(d => [...d, ...tempRows]);
     this.newDomainName.set('');
     this.addingDomain.set(true);
     this.cdr.detectChanges();
 
-    this.domainService.recheckDomains([name], this.selectedExtensions()).subscribe({
+    this.domainService.recheckDomains(newNames, this.selectedExtensions()).subscribe({
       next: (res) => {
-        const checked = res.domains.find((r: any) => r.name === name);
-        const availability = checked ? checked.allExtensions : tempRow.allExtensions;
-
-        // Mettre à jour la ligne dans le signal
+        // Mettre à jour les lignes avec la vraie disponibilité
         this.domains.update(list =>
-          list.map(d => d.name === name && d.isManual ? { ...d, allExtensions: availability } : d)
+          list.map(d => {
+            if (!d.isManual || !newNames.includes(d.name)) return d;
+            const checked = res.domains.find((r: any) => r.name === d.name);
+            return checked ? { ...d, allExtensions: checked.allExtensions } : d;
+          })
         );
 
-        // Sauvegarder dans le projet si on en a un
+        // Avertir pour les noms qui ne remplissent pas les critères du filtre actif
+        const hidden = res.domains.filter((r: any) =>
+          newNames.includes(r.name) && !this.meetsMatchMode(r.allExtensions)
+        );
+        if (hidden.length > 0) {
+          const names = hidden.map((r: any) => r.name).join(', ');
+          this.translate.get(['WIZARD.STEP3.MANUAL_NOT_AVAILABLE', 'WIZARD.STEP3.MANUAL_NOT_AVAILABLE_SUMMARY'],
+            { names }).subscribe(t => {
+            this.messageService.add({
+              severity: 'warn',
+              summary: t['WIZARD.STEP3.MANUAL_NOT_AVAILABLE_SUMMARY'],
+              detail: t['WIZARD.STEP3.MANUAL_NOT_AVAILABLE'].replace('{{names}}', names),
+              life: 6000,
+            });
+          });
+        }
+
+        // Sauvegarder dans le projet
         if (this.projectId()) {
-          this.projectService.addSuggestion(this.projectId()!, name, availability as Record<string, boolean>).subscribe({
-            next: (saved) => {
-              this.domains.update(list =>
-                list.map(d => d.name === name && d.isManual ? { ...d, id: saved.id } : d)
-              );
-            },
+          res.domains.forEach((r: any) => {
+            if (!newNames.includes(r.name)) return;
+            this.projectService.addSuggestion(this.projectId()!, r.name, r.allExtensions as Record<string, boolean>).subscribe({
+              next: (saved) => {
+                this.domains.update(list =>
+                  list.map(d => d.name === r.name && d.isManual ? { ...d, id: saved.id } : d)
+                );
+              },
+            });
           });
         }
 
@@ -634,7 +669,7 @@ export class WizardComponent implements OnInit {
       },
       error: () => {
         this.addingDomain.set(false);
-        this.domains.update(list => list.filter(d => !(d.name === name && d.isManual)));
+        this.domains.update(list => list.filter(d => !newNames.includes(d.name) || !d.isManual));
         this.cdr.detectChanges();
       },
     });

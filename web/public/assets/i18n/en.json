@@ -106,9 +106,11 @@
       "NEW_PROJECT_BTN": "New project",
       "COPY_TABLE": "Copy table",
       "COPIED": "Copied!",
-      "ADD_MANUAL_PLACEHOLDER": "e.g. florizon",
+      "ADD_MANUAL_PLACEHOLDER": "e.g. florizon, bloomly, verdana",
       "ADD_MANUAL_BTN": "Check",
-      "MANUAL_TOOLTIP": "Manually added"
+      "MANUAL_TOOLTIP": "Manually added",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Active filter",
+      "MANUAL_NOT_AVAILABLE": "{{names}} does not meet the current availability criteria and is hidden by the active filter."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

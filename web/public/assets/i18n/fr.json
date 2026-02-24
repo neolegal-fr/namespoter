@@ -106,9 +106,11 @@
       "NEW_PROJECT_BTN": "Nouveau projet",
       "COPY_TABLE": "Copier le tableau",
       "COPIED": "Copié !",
-      "ADD_MANUAL_PLACEHOLDER": "ex : florizon",
+      "ADD_MANUAL_PLACEHOLDER": "ex : florizon, bloomly, verdana",
       "ADD_MANUAL_BTN": "Vérifier",
-      "MANUAL_TOOLTIP": "Ajouté manuellement"
+      "MANUAL_TOOLTIP": "Ajouté manuellement",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtre actif",
+      "MANUAL_NOT_AVAILABLE": "{{names}} ne remplit pas les critères de disponibilité et est masqué par le filtre actif."
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
