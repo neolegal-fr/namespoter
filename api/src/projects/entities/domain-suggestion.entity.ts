@@ -15,6 +15,9 @@ export class DomainSuggestion {
   @Column({ default: false })
   isFavorite: boolean;
 
+  @Column({ nullable: true, type: 'text' })
+  analysis: string | null;
+
   @ManyToOne(() => Project, (project) => project.suggestions)
   project: Project;
 }

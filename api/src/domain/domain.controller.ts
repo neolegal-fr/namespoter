@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Res, ForbiddenException, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import type { Response } from 'express';
@@ -41,6 +41,23 @@ export class DomainController {
   async generateKeywords(@Body() dto: RefineDescriptionDto) {
     const keywords = await this.domainService.generateKeywords(dto.description, dto.locale);
     return { keywords };
+  }
+
+  @Post('analyze')
+  async analyze(
+    @Body('suggestionId') suggestionId: string,
+    @AuthenticatedUser() keycloakUser: any,
+  ) {
+    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const suggestion = await this.projectsService.getSuggestionForUser(suggestionId, user);
+    if (!suggestion) throw new NotFoundException('Suggestion non trouvée');
+
+    // Idempotent — retourner l'analyse en cache si elle existe déjà
+    if (suggestion.analysis) return { analysis: suggestion.analysis };
+
+    const analysis = await this.domainService.analyzeNameWithAI(suggestion.domainName);
+    await this.projectsService.saveAnalysis(suggestionId, analysis);
+    return { analysis };
   }
 
   @Public()

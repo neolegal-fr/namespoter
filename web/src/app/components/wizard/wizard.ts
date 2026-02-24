@@ -129,6 +129,7 @@ export class WizardComponent implements OnInit {
   copiedDomain = signal<string | null>(null);
   newDomainName = signal('');
   addingDomain = signal(false);
+  expandedAnalysisId = signal<string | null>(null);
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
@@ -293,7 +294,9 @@ export class WizardComponent implements OnInit {
           id: s.id,
           name: s.domainName,
           allExtensions: s.availability,
-          isFavorite: s.isFavorite
+          isFavorite: s.isFavorite,
+          analysis: s.analysis ?? null,
+          analysisPending: false,
         })));
 
         this.activeIndex.set(2);
@@ -378,6 +381,18 @@ export class WizardComponent implements OnInit {
     this.projectService.toggleFavorite(result.id).subscribe({
       next: (res) => {
         result.isFavorite = res.isFavorite;
+        // US-005 — déclencher l'analyse IA si le favori vient d'être activé et pas encore analysé
+        if (res.isFavorite && !result.analysis && !result.analysisPending) {
+          result.analysisPending = true;
+          this.domainService.analyzeName(result.id).subscribe({
+            next: (r) => {
+              result.analysis = r.analysis;
+              result.analysisPending = false;
+              this.cdr.detectChanges();
+            },
+            error: () => { result.analysisPending = false; },
+          });
+        }
       },
       error: () => {
         // Annulation de la mise à jour optimiste en cas d'erreur
@@ -389,6 +404,10 @@ export class WizardComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  toggleAnalysis(id: string) {
+    this.expandedAnalysisId.set(this.expandedAnalysisId() === id ? null : id);
   }
 
   addKeyword() {

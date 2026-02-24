@@ -22,6 +22,10 @@ export class DomainService {
     return this.http.post<{ keywords: string[] }>(`${this.apiUrl}/keywords`, { description, ...(locale ? { locale } : {}) });
   }
 
+  analyzeName(suggestionId: string): Observable<{ analysis: string }> {
+    return this.http.post<{ analysis: string }>(`${this.apiUrl}/analyze`, { suggestionId });
+  }
+
   recheckDomains(names: string[], extensions: string[]): Observable<{ domains: { name: string; allExtensions: Record<string, boolean> }[] }> {
     return this.http.post<any>(`${this.apiUrl}/recheck`, { names, extensions });
   }

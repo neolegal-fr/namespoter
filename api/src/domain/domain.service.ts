@@ -155,6 +155,35 @@ export class DomainService {
     }
   }
 
+  async analyzeNameWithAI(name: string): Promise<string> {
+    const prompt = `Analyze the brand/domain name "${name}" concisely across these 6 criteria. Use this exact format (one line each, max 15 words per line):
+
+**Memorability**: [★ rating 1-5] — [comment]
+**Pronunciation**: [★ rating 1-5] — [comment]
+**International appeal**: [★ rating 1-5] — [comment]
+**SEO / searchability**: [★ rating 1-5] — [comment]
+**Distinctiveness**: [★ rating 1-5] — [comment]
+**Length**: ${name.length} chars — [comment]
+
+✅ **Strengths**: [max 15 words]
+⚠️ **Watch out**: [max 15 words]
+
+Be direct and honest. Total: max 100 words.`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 300,
+        temperature: 0.5,
+      });
+      return response.choices[0].message.content?.trim() ?? '';
+    } catch (error) {
+      this.logger.error(`Erreur analyse IA pour "${name}":`, error);
+      throw error;
+    }
+  }
+
   async isDomainAvailable(domain: string): Promise<boolean> {
     try {
       const { stdout } = await execAsync(`whois ${domain}`, { timeout: 10000 });

@@ -86,6 +86,16 @@ export class ProjectsService {
     return repo.save(suggestions);
   }
 
+  async getSuggestionForUser(id: string, user: User): Promise<DomainSuggestion | null> {
+    return this.suggestionsRepository.findOne({
+      where: { id, project: { user: { id: user.id } } },
+    });
+  }
+
+  async saveAnalysis(id: string, analysis: string): Promise<void> {
+    await this.suggestionsRepository.update(id, { analysis });
+  }
+
   async updateSuggestionsAvailability(updates: { id: string; availability: Record<string, boolean> }[]): Promise<void> {
     await Promise.all(
       updates.map(({ id, availability }) => this.suggestionsRepository.update(id, { availability }))

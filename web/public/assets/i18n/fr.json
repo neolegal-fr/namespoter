@@ -106,6 +106,8 @@
       "NEW_PROJECT_BTN": "Nouveau projet",
       "COPY_TABLE": "Copier le tableau",
       "COPIED": "Copié !",
+      "ANALYSIS_PENDING": "Analyse IA en cours…",
+      "ANALYSIS_TOGGLE": "Voir l'analyse du nom",
       "ADD_MANUAL_PLACEHOLDER": "ex : florizon, bloomly, verdana",
       "ADD_MANUAL_BTN": "Vérifier",
       "MANUAL_TOOLTIP": "Ajouté manuellement",
