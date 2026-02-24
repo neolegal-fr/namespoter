@@ -381,6 +381,164 @@
 
 ---
 
+## US-015 · Exclude Already-Evaluated Candidates from LLM Re-generation
+
+**As a** user requesting additional domain suggestions ("More suggestions"),
+**I want** the AI to avoid re-proposing names it has already generated,
+**So that** every new batch brings genuinely fresh ideas.
+
+### Acceptance Criteria
+- [ ] When calling the LLM for a new batch of candidates, the list of already-evaluated domain names (base names, without extension) is included in the prompt context
+- [ ] The prompt explicitly instructs the LLM to avoid any name already in the list
+- [ ] The backend passes this exclusion list regardless of whether the request is an initial search or a "More suggestions" top-up
+- [ ] The exclusion list is capped to a reasonable size (e.g. 200 names) to avoid token bloat — oldest entries are trimmed first if the list exceeds the cap
+- [ ] No duplicate base names appear across successive batches for the same project
+
+### Technical Notes
+- The existing `DomainSuggestion` records for the current project are the source of truth for the exclusion list
+- Pass as a compact comma-separated list in the prompt: `Already tested (do not reproduce): floralship, bloomly, verdana, …`
+- Consider prompt-token budget: 200 names × ~8 chars avg ≈ 1 600 chars — acceptable for GPT-3.5
+
+---
+
+## US-016 · Memorable Brand & Domain Name Criteria in LLM Prompt
+
+**As a** user looking for a strong domain name,
+**I want** the AI to apply proven memorability criteria when generating suggestions,
+**So that** the names I receive are not just available but genuinely brandable.
+
+### Acceptance Criteria
+- [ ] The generation prompt explicitly instructs the LLM to favour names that meet the following criteria:
+  - **Short**: ideally ≤ 10 characters (base name without extension)
+  - **Easy to pronounce**: phonetically natural in the target language, no ambiguous letter clusters
+  - **Easy to spell**: no unexpected silent letters, no confusing double letters unless intentional
+  - **Distinctive**: not generic (avoid `easybooking`, `quickservice`-style constructs)
+  - **No hyphens or numbers** in the base name
+  - **Evocative**: ideally suggests the product's benefit, emotion, or sector without being literal
+  - **Legally safer**: avoid trademarked terms or proper nouns
+- [ ] The prompt weight on memorability can be tuned without code change (configurable system prompt or env-var override)
+- [ ] The existing locale/target-language injection (US-001) is preserved and combined with these new criteria
+
+### Technical Notes
+- Update `DomainService.buildPrompt()` (or equivalent) to include a "Brand name quality criteria" section
+- Keep the criteria as a bullet list in a dedicated prompt section — easier to iterate on than inline prose
+- A/B test before and after with the same description to validate improvement
+
+---
+
+## US-017 · Extended European Language Support
+
+**As a** user targeting a non-English, non-French European market,
+**I want** to select my target language from a broader list of European languages,
+**So that** the AI generates culturally and linguistically appropriate domain name suggestions.
+
+### Acceptance Criteria
+- [ ] The language selector (Step 2, local/regional mode) includes at minimum: German (de), Spanish (es), Italian (it), Portuguese (pt), Dutch (nl), Polish (pl), Swedish (sv), Danish (da), Finnish (fi), Romanian (ro), Czech (cs)
+- [ ] The selected language is passed to the LLM prompt and to the keyword generation step
+- [ ] The UI language selector itself (FR/EN flag toggle) remains separate from the target-language selector
+- [ ] Adding a new language requires only a new entry in a config array — no code change
+- [ ] Languages are listed alphabetically (by their native name) in the dropdown
+
+### Technical Notes
+- Existing locale inference table (`.fr`→fr, `.de`→de, etc.) in US-001 should be extended to cover all new languages
+- LLM prompt: replace the current hardcoded language instruction with a dynamic `Generate names in {{language}}` insertion
+- Consider grouping: "Most common" at top (en, fr, de, es), then alphabetical full list
+
+---
+
+## US-018 · Favourite Comparison Tool
+
+**As a** user who has shortlisted several favourite domain names,
+**I want** to compare them side by side in a structured view,
+**So that** I can make a final decision without toggling back and forth through the full results table.
+
+### Acceptance Criteria
+- [ ] A "Compare favourites" button or tab appears when the user has ≥ 2 favourites
+- [ ] The comparison view displays each favourite in a column (or card) with:
+  - Domain name + availability per extension (✓/✗ matrix)
+  - Length (character count of base name)
+  - AI memorability score or pros/cons summary if available (US-005)
+  - A "Copy" action per domain
+  - An "Open registrar" link per available extension
+- [ ] The user can remove a domain from the comparison without un-favouriting it
+- [ ] The comparison is limited to 5 domains maximum to keep the layout usable
+- [ ] The view is accessible from Step 3 (results page) and from the project drawer
+
+### Technical Notes
+- No new backend endpoint required — data is already in the local project state
+- Implement as a Dialog or a dedicated panel below the results table
+- If US-005 (pros/cons) is not yet implemented, the analysis column is hidden
+
+---
+
+## US-019 · Configurable Batch Size for "More Suggestions"
+
+**As a** user requesting additional domain suggestions,
+**I want** to specify how many new suggestions I want before clicking "More suggestions",
+**So that** I can choose between a quick top-up (5) or a larger batch (20) based on my needs and credit budget.
+
+### Acceptance Criteria
+- [ ] The "More suggestions" button is accompanied by a small numeric selector (stepper or segmented control): **5 · 10 · 20** (default: 10)
+- [ ] The selected quantity is passed to the backend as the `count` parameter of the domain search request
+- [ ] The credit cost is displayed next to the selector: e.g. "= 10 credits"
+- [ ] The selected quantity persists within the session (sticky across successive "More" clicks)
+- [ ] The selector does not appear if the user has fewer credits than the minimum option (5)
+
+### Technical Notes
+- Backend already accepts a `count` / `limit` parameter — verify and expose it if not already wired
+- Display format suggestion: `[ More suggestions ] [ 5 | 10 | 20 ]` or a single split-button
+
+---
+
+## US-020 · Feedback Form with 1 000-Credit Reward
+
+**As a** user of Namespoter,
+**I want** to share feedback about what could be improved and receive free credits in return,
+**So that** I'm incentivised to contribute to the product's improvement.
+
+### Acceptance Criteria
+- [ ] A "Give feedback" entry point is visible in the app (e.g. menu bar item, footer link, or floating button)
+- [ ] Clicking it opens a dialog with:
+  - A headline: *"Tell us what could be improved — get 1 000 free credits"*
+  - A free-text area (required, min 20 chars, max 1 000 chars)
+  - An optional email field (pre-filled if the user is logged in)
+  - A submit button
+- [ ] On submission:
+  - The feedback is stored in the DB (`Feedback` entity: `id`, `keycloakId`, `email`, `message`, `createdAt`)
+  - **1 000 extra credits are added to the user's account** (same as buying a pack, but free)
+  - A success toast confirms: *"Thank you! 1 000 credits have been added to your account."*
+  - The user cannot submit feedback more than **once per 30 days** (rate-limit per account)
+- [ ] If the user is not logged in, clicking "Give feedback" prompts login first
+- [ ] The feedback is viewable by admins via a simple `GET /feedback` endpoint (authenticated, admin role)
+
+### Technical Notes
+- New `Feedback` entity + `FeedbackModule` (controller + service)
+- Credit grant uses the existing `usersService.addExtraCredits(keycloakId, 1000)`
+- Rate-limit: query the latest `Feedback` record for the user; reject if `createdAt > now - 30 days`
+- No email notification to admin in scope (can be added later)
+
+---
+
+## US-021 · Explain Credit Cost in UI ("1 credit = 1 name suggestion")
+
+**As a** new or occasional user,
+**I want** to understand clearly what a credit represents and how many I'm spending,
+**So that** I can make informed decisions about my searches and purchases.
+
+### Acceptance Criteria
+- [ ] The credit balance display in the nav bar includes a tooltip or info icon explaining: *"1 credit = 1 domain name suggestion"*
+- [ ] On Step 2 (before searching), the search button label or a sub-label indicates the estimated credit cost: e.g. *"Search — ~10 credits"*
+- [ ] The billing dialog includes a line: *"Each domain name suggestion costs 1 credit. Extensions checked do not cost extra."*
+- [ ] The landing page free-credits note is updated to reference the explanation: *"100 free credits on sign-up = up to 100 domain name suggestions"*
+- [ ] i18n: both FR and EN translations are provided for all new strings
+
+### Technical Notes
+- No backend change required
+- Tooltip on credit balance: PrimeNG `pTooltip` directive
+- Estimated cost on search button: derive from `selectedKeywords.length × (estimated names per keyword)` — or simply show a fixed `~10 credits per search`
+
+---
+
 ## Priority / Effort Matrix (initial estimate)
 
 | Story | Value | Effort | Priority |
@@ -398,3 +556,10 @@
 | US-012 · MCP server | High | Medium | 🟡 Later |
 | US-013 · Teams / Claude skill / Marketplace | High | High | 🔵 Future |
 | US-014 · Stripe packs + subscription | High | High | 🟠 Next |
+| US-015 · Exclude already-evaluated candidates | High | Low | 🟠 Next |
+| US-016 · Memorable brand criteria in prompt | High | Low | 🟠 Next |
+| US-017 · Extended European language support | Medium | Low | 🟠 Next |
+| US-018 · Favourite comparison tool | Medium | Medium | 🟡 Later |
+| US-019 · Configurable batch size ("More") | Medium | Low | 🟠 Next |
+| US-020 · Feedback form + 1 000 credit reward | High | Medium | 🟠 Next |
+| US-021 · Explain credit cost in UI | High | Low | 🔴 Now |
