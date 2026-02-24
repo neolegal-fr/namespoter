@@ -419,6 +419,7 @@ export class WizardComponent implements OnInit {
         this.matchMode.set('all');
       }
       this.selectedExtensions.update(e => [...e, ...toAdd]);
+      this.persistExtensions();
       this.recheckIfNeeded();
     }
     this.newExtension.set('');
@@ -427,8 +428,15 @@ export class WizardComponent implements OnInit {
 
   removeExtension(ext: string) {
     this.selectedExtensions.update(e => e.filter(item => item !== ext));
+    this.persistExtensions();
     this.recheckIfNeeded();
     this.cdr.detectChanges();
+  }
+
+  private persistExtensions() {
+    if (this.projectId()) {
+      this.projectService.updateProject(this.projectId()!, { extensions: this.selectedExtensions() }).subscribe();
+    }
   }
 
   recheckIfNeeded() {
