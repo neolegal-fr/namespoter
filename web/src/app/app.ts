@@ -2,6 +2,7 @@ import { Component, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { UserService } from './services/user';
 import { ProjectService } from './services/project';
+import { PaymentService } from './services/payment';
 import { KeycloakService } from 'keycloak-angular';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -14,7 +15,7 @@ import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 
 import { Dialog } from 'primeng/dialog';
-import { InputNumber } from 'primeng/inputnumber';
+import { PaymentService } from './services/payment';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,6 @@ import { InputNumber } from 'primeng/inputnumber';
     AvatarModule,
     FormsModule,
     Dialog,
-    InputNumber
   ],
   template: `
     <main class="min-h-screen">
@@ -86,22 +86,71 @@ import { InputNumber } from 'primeng/inputnumber';
         </div>
       </div>
 
-      <!-- Dialogue de demande de crédits (Global) -->
-      <p-dialog [header]="'WIZARD.CREDIT_DIALOG.TITLE' | translate" 
-                [visible]="projectService.showCreditDialog()" 
-                (visibleChange)="projectService.showCreditDialog.set($event)" 
-                [modal]="true" 
-                [style]="{ width: 'min(25rem, 90vw)' }"
-                [draggable]="false" 
+      <!-- Dialogue de facturation (abonnement + packs) -->
+      <p-dialog [header]="'BILLING.TITLE' | translate"
+                [visible]="projectService.showCreditDialog()"
+                (visibleChange)="projectService.showCreditDialog.set($event)"
+                [modal]="true"
+                [style]="{ width: 'min(28rem, 90vw)' }"
+                [draggable]="false"
                 [resizable]="false">
-        <span class="p-text-secondary block mb-3">{{ 'WIZARD.CREDIT_DIALOG.MESSAGE' | translate }}</span>
-        <div class="flex align-items-center gap-2 mb-3">
-            <label for="credits" class="font-semibold" style="min-width: 6rem">{{ 'WIZARD.CREDIT_DIALOG.QUANTITY' | translate }}</label>
-            <p-inputNumber [(ngModel)]="creditsToBuy" inputId="credits" class="flex-auto" [min]="1"></p-inputNumber>
+
+        <!-- Section abonnement -->
+        <div style="margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--p-surface-200)">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem">
+            <i class="pi pi-star-fill" style="color: var(--p-primary-color)"></i>
+            <span class="font-bold text-900">{{ 'BILLING.SUBSCRIPTION_TITLE' | translate }}</span>
+          </div>
+          <div style="background: var(--p-surface-50); border-radius: 0.5rem; padding: 0.875rem 1rem; margin-bottom: 0.75rem">
+            <div class="font-semibold text-900">{{ 'BILLING.ESSENTIAL_NAME' | translate }}</div>
+            <div class="text-500" style="font-size: 0.85rem; margin-top: 0.2rem">{{ 'BILLING.ESSENTIAL_DESC' | translate }}</div>
+            <div style="margin-top: 0.5rem; font-size: 1.1rem; font-weight: 700; color: var(--p-primary-color)">5 € / mois</div>
+          </div>
+          <div style="display: flex; gap: 0.5rem">
+            <p-button *ngIf="!hasActiveSubscription()"
+              [label]="'BILLING.SUBSCRIBE_BTN' | translate"
+              icon="pi pi-arrow-right"
+              [loading]="billingLoading()"
+              (onClick)="subscribeEssential()"
+              style="flex: 1">
+            </p-button>
+            <p-button *ngIf="hasActiveSubscription()"
+              [label]="'BILLING.MANAGE_BTN' | translate"
+              icon="pi pi-cog"
+              severity="secondary"
+              [loading]="billingLoading()"
+              (onClick)="openPortal()"
+              style="flex: 1">
+            </p-button>
+          </div>
+          <div *ngIf="hasActiveSubscription()" style="margin-top: 0.5rem; font-size: 0.8rem; color: #16a34a; display: flex; align-items: center; gap: 0.375rem">
+            <i class="pi pi-check-circle"></i>
+            <span>{{ 'BILLING.ACTIVE_SUBSCRIPTION' | translate }} — {{ subscriptionCredits() }} {{ 'BILLING.CREDITS_REMAINING' | translate }}</span>
+          </div>
         </div>
-        <div class="flex justify-content-end gap-2">
-            <p-button [label]="'WIZARD.CREDIT_DIALOG.CANCEL' | translate" severity="secondary" (onClick)="projectService.showCreditDialog.set(false)" />
-            <p-button [label]="'WIZARD.CREDIT_DIALOG.BUY' | translate" (onClick)="buyCredits()" />
+
+        <!-- Section pack extra -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem">
+            <i class="pi pi-wallet" style="color: var(--p-primary-color)"></i>
+            <span class="font-bold text-900">{{ 'BILLING.PACK_TITLE' | translate }}</span>
+          </div>
+          <div style="background: var(--p-surface-50); border-radius: 0.5rem; padding: 0.875rem 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between">
+            <div>
+              <div class="font-semibold text-900">{{ 'BILLING.PACK_NAME' | translate }}</div>
+              <div class="text-500" style="font-size: 0.85rem; margin-top: 0.2rem">{{ 'BILLING.PACK_DESC' | translate }}</div>
+              <div style="margin-top: 0.5rem; font-size: 1.1rem; font-weight: 700; color: var(--p-primary-color)">10 €</div>
+            </div>
+            <p-button
+              [label]="'BILLING.BUY_BTN' | translate"
+              icon="pi pi-shopping-cart"
+              [loading]="billingLoading()"
+              (onClick)="buyPack()">
+            </p-button>
+          </div>
+          <div *ngIf="extraCredits() > 0" style="font-size: 0.8rem; color: var(--p-surface-500)">
+            {{ 'BILLING.EXTRA_BALANCE' | translate }} : {{ extraCredits() }} {{ 'BILLING.CREDITS' | translate }}
+          </div>
         </div>
       </p-dialog>
 
@@ -116,11 +165,14 @@ import { InputNumber } from 'primeng/inputnumber';
 export class AppComponent implements OnInit {
   title = 'namespoter-web';
   credits = signal(0);
+  subscriptionCredits = signal(0);
+  extraCredits = signal(0);
+  hasActiveSubscription = signal(false);
+  billingLoading = signal(false);
   isLoggedIn = signal(false);
   currentLang = signal('fr');
   selectedLang = 'fr';
   userName = signal('');
-  creditsToBuy = signal(100);
   
   languages = [
     { label: 'FR', code: 'fr', flag: 'fr' },
@@ -136,7 +188,8 @@ export class AppComponent implements OnInit {
     private keycloak: KeycloakService,
     private translate: TranslateService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private paymentService: PaymentService,
   ) {}
 
   async ngOnInit() {
@@ -168,6 +221,12 @@ export class AppComponent implements OnInit {
     this.userService.credits$.subscribe(val => {
       this.credits.set(val);
       setTimeout(() => this.updateProfileMenu());
+    });
+
+    this.userService.billing$.subscribe(info => {
+      this.subscriptionCredits.set(info.subscriptionCredits);
+      this.extraCredits.set(info.extraCredits);
+      this.hasActiveSubscription.set(info.hasActiveSubscription);
     });
   }
 
@@ -211,9 +270,33 @@ export class AppComponent implements OnInit {
   }
 
   triggerCreditDialog() {
-    console.log('Triggering credit dialog...');
+    this.userService.getCredits().subscribe();
     this.projectService.showCreditDialog.set(true);
     this.cdr.detectChanges();
+  }
+
+  subscribeEssential() {
+    this.billingLoading.set(true);
+    this.paymentService.createSubscriptionCheckout().subscribe({
+      next: ({ url }) => { window.location.href = url; },
+      error: () => this.billingLoading.set(false),
+    });
+  }
+
+  buyPack() {
+    this.billingLoading.set(true);
+    this.paymentService.createPackCheckout().subscribe({
+      next: ({ url }) => { window.location.href = url; },
+      error: () => this.billingLoading.set(false),
+    });
+  }
+
+  openPortal() {
+    this.billingLoading.set(true);
+    this.paymentService.openPortal().subscribe({
+      next: ({ url }) => { window.location.href = url; },
+      error: () => this.billingLoading.set(false),
+    });
   }
 
   setLang(lang: string) {
@@ -228,14 +311,6 @@ export class AppComponent implements OnInit {
 
   loadCredits() {
     this.userService.getCredits().subscribe();
-  }
-
-  buyCredits() {
-    console.log('Requesting credits:', this.creditsToBuy());
-    this.userService.addCredits(this.creditsToBuy()).subscribe(() => {
-      this.projectService.showCreditDialog.set(false);
-      console.log('Credits updated successfully');
-    });
   }
 
   openProjects() {

@@ -58,7 +58,7 @@ export class DomainController {
   ) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
 
-    if (user.credits <= 0) {
+    if (user.totalCredits <= 0) {
       res.status(403).json({ message: 'Crédits insuffisants' });
       return;
     }
@@ -70,7 +70,7 @@ export class DomainController {
 
     const emit = (data: Record<string, any>) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
-    const limit = Math.min(10, user.credits);
+    const limit = Math.min(10, user.totalCredits);
     const results: any[] = [];
 
     try {
@@ -90,6 +90,7 @@ export class DomainController {
       const actualCost = results.length;
       let project: Project;
       let savedDomains: { name: string; id: string }[] = [];
+      let remainingCredits = user.totalCredits - actualCost;
 
       try {
         await this.dataSource.transaction(async (manager) => {
@@ -107,7 +108,8 @@ export class DomainController {
           );
 
           if (actualCost > 0) {
-            await this.usersService.decrementCredits(user.keycloakId, actualCost, manager);
+            const newTotal = await this.usersService.decrementCredits(user.keycloakId, actualCost, manager);
+            remainingCredits = newTotal;
             const saved = await this.projectsService.addSuggestions(project, results, manager);
             savedDomains = saved.map(s => ({ name: s.domainName, id: s.id }));
           }
@@ -118,7 +120,7 @@ export class DomainController {
           totalChecked,
           projectId: project!.id,
           savedDomains,
-          remainingCredits: user.credits - actualCost,
+          remainingCredits,
         });
       } catch (error) {
         this.logger.error('Échec de la transaction streaming:', error);
@@ -136,11 +138,11 @@ export class DomainController {
   async search(@Body() dto: SearchDomainsDto, @AuthenticatedUser() keycloakUser: any) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
 
-    if (user.credits <= 0) {
+    if (user.totalCredits <= 0) {
       throw new ForbiddenException('Crédits insuffisants');
     }
 
-    const limit = Math.min(10, user.credits);
+    const limit = Math.min(10, user.totalCredits);
 
     // Opérations externes (IA + Whois) hors transaction pour ne pas bloquer la DB
     const { results, totalChecked } = await this.domainService.findAvailableDomains(
@@ -156,6 +158,7 @@ export class DomainController {
 
     // Toutes les écritures DB dans une transaction atomique
     let project: Project;
+    let newTotal = user.totalCredits - actualCost;
     try {
       await this.dataSource.transaction(async (manager) => {
         project = await this.projectsService.createOrUpdate(
@@ -172,7 +175,7 @@ export class DomainController {
         );
 
         if (actualCost > 0) {
-          await this.usersService.decrementCredits(user.keycloakId, actualCost, manager);
+          newTotal = await this.usersService.decrementCredits(user.keycloakId, actualCost, manager);
           await this.projectsService.addSuggestions(project, results, manager);
         }
       });
@@ -186,7 +189,7 @@ export class DomainController {
       totalChecked,
       projectId: project!.id,
       creditsDebited: actualCost,
-      remainingCredits: user.credits - actualCost,
+      remainingCredits: newTotal,
     };
   }
 }

@@ -38,6 +38,29 @@
     "DELETE_SUCCESS": "Projet supprimé avec succès",
     "SUCCESS": "Succès"
   },
+  "BILLING": {
+    "TITLE": "Crédits & Abonnement",
+    "SUBSCRIPTION_TITLE": "Abonnement mensuel",
+    "ESSENTIAL_NAME": "Formule Essential",
+    "ESSENTIAL_DESC": "2 000 crédits renouvelés chaque mois",
+    "SUBSCRIBE_BTN": "S'abonner",
+    "MANAGE_BTN": "Gérer mon abonnement",
+    "ACTIVE_SUBSCRIPTION": "Abonnement actif",
+    "CREDITS_REMAINING": "crédits restants ce mois",
+    "PACK_TITLE": "Crédits supplémentaires",
+    "PACK_NAME": "Pack 1 000 crédits",
+    "PACK_DESC": "Crédits permanents, consommés après votre abonnement",
+    "BUY_BTN": "Acheter",
+    "EXTRA_BALANCE": "Crédits extra disponibles",
+    "CREDITS": "crédits"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Paiement confirmé !",
+    "SUCCESS_MESSAGE": "Vos crédits ont été ajoutés à votre compte. Vous pouvez reprendre vos recherches.",
+    "CANCEL_TITLE": "Paiement annulé",
+    "CANCEL_MESSAGE": "Votre paiement n'a pas été effectué. Aucun montant n'a été débité.",
+    "BACK_HOME": "Retour à l'accueil"
+  },
   "WIZARD": {
     "STEPS": {
       "DESCRIPTION": "Description",

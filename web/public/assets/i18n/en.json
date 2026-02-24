@@ -38,6 +38,29 @@
     "DELETE_SUCCESS": "Project deleted successfully",
     "SUCCESS": "Success"
   },
+  "BILLING": {
+    "TITLE": "Credits & Subscription",
+    "SUBSCRIPTION_TITLE": "Monthly subscription",
+    "ESSENTIAL_NAME": "Essential Plan",
+    "ESSENTIAL_DESC": "2,000 credits renewed every month",
+    "SUBSCRIBE_BTN": "Subscribe",
+    "MANAGE_BTN": "Manage subscription",
+    "ACTIVE_SUBSCRIPTION": "Active subscription",
+    "CREDITS_REMAINING": "credits remaining this month",
+    "PACK_TITLE": "Extra credits",
+    "PACK_NAME": "1,000 credit pack",
+    "PACK_DESC": "Permanent credits, used after your subscription credits",
+    "BUY_BTN": "Buy",
+    "EXTRA_BALANCE": "Extra credits available",
+    "CREDITS": "credits"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Payment confirmed!",
+    "SUCCESS_MESSAGE": "Your credits have been added to your account. You can resume your searches.",
+    "CANCEL_TITLE": "Payment cancelled",
+    "CANCEL_MESSAGE": "Your payment was not processed. No amount has been charged.",
+    "BACK_HOME": "Back to home"
+  },
   "WIZARD": {
     "STEPS": {
       "DESCRIPTION": "Description",

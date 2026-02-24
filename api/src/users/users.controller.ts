@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedUser } from 'nest-keycloak-connect';
 
@@ -6,35 +6,27 @@ import { AuthenticatedUser } from 'nest-keycloak-connect';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('me')
+  async getMe(@AuthenticatedUser() keycloakUser: any) {
+    const user = await this.usersService.findOrCreate(keycloakUser.sub, keycloakUser.email);
+    return {
+      keycloakId: user.keycloakId,
+      email: user.email,
+      subscriptionCredits: user.credits,
+      extraCredits: user.extraCredits,
+      totalCredits: user.totalCredits,
+      hasActiveSubscription: !!user.stripeSubscriptionId,
+    };
+  }
+
   @Get('credits')
-  async getCredits(@AuthenticatedUser() user: any) {
-    // user.sub est l'ID Keycloak
-    const credits = await this.usersService.getCredits(user.sub);
-    return { credits };
+  async getCredits(@AuthenticatedUser() keycloakUser: any) {
+    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    return {
+      credits: user.totalCredits,
+      subscriptionCredits: user.credits,
+      extraCredits: user.extraCredits,
+      hasActiveSubscription: !!user.stripeSubscriptionId,
+    };
   }
-
-    @Get('me')
-
-    async getMe(@AuthenticatedUser() user: any) {
-
-      return await this.usersService.findOrCreate(user.sub, user.email);
-
-    }
-
-  
-
-    @Post('add-credits')
-
-    async addCredits(@AuthenticatedUser() user: any, @Body('amount') amount: number) {
-
-      await this.usersService.addCredits(user.sub, amount);
-
-      const credits = await this.usersService.getCredits(user.sub);
-
-      return { credits };
-
-    }
-
-  }
-
-  
+}
