@@ -463,6 +463,15 @@ export class WizardComponent implements OnInit {
             return updated ? { ...d, allExtensions: updated.allExtensions } : d;
           })
         );
+
+        // Persister les nouvelles disponibilités pour toutes les suggestions sauvegardées
+        const toSave = this.domains()
+          .filter(d => d.id)
+          .map(d => ({ id: d.id as string, availability: d.allExtensions as Record<string, boolean> }));
+        if (toSave.length > 0) {
+          this.projectService.updateSuggestionsAvailability(toSave).subscribe();
+        }
+
         this.recheckLoading.set(false);
         this.appRef.tick();
       },

@@ -46,6 +46,14 @@ export class ProjectsController {
     return this.projectsService.addManualSuggestion(id, user, body.domainName, body.availability);
   }
 
+  @Patch('suggestions/availability')
+  async updateAvailability(
+    @Body() body: { updates: { id: string; availability: Record<string, boolean> }[] },
+  ) {
+    await this.projectsService.updateSuggestionsAvailability(body.updates);
+    return { ok: true };
+  }
+
   @Patch('suggestions/:id/favorite')
   async toggleFavorite(@Param('id') id: string, @AuthenticatedUser() keycloakUser: any) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);

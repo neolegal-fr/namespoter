@@ -86,6 +86,12 @@ export class ProjectsService {
     return repo.save(suggestions);
   }
 
+  async updateSuggestionsAvailability(updates: { id: string; availability: Record<string, boolean> }[]): Promise<void> {
+    await Promise.all(
+      updates.map(({ id, availability }) => this.suggestionsRepository.update(id, { availability }))
+    );
+  }
+
   async addManualSuggestion(
     projectId: string,
     user: User,
