@@ -127,6 +127,8 @@ export class WizardComponent implements OnInit {
   totalChecked = signal(0);
   recheckLoading = signal(false);
   copiedDomain = signal<string | null>(null);
+  newDomainName = signal('');
+  addingDomain = signal(false);
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
@@ -578,6 +580,63 @@ export class WizardComponent implements OnInit {
         this.loading.set(false);
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  addManualDomain() {
+    // Normalise : minuscules, supprime le point initial et toute extension éventuelle
+    const raw = this.newDomainName().trim().toLowerCase().replace(/^\./, '');
+    const name = raw.replace(/\.[a-z]{2,10}$/, '');
+    if (!name) return;
+
+    // Doublon silencieux
+    if (this.domains().some(d => d.name === name)) {
+      this.newDomainName.set('');
+      return;
+    }
+
+    // Ajouter une ligne temporaire avec spinners
+    const tempRow = {
+      id: null as string | null,
+      name,
+      allExtensions: Object.fromEntries(this.selectedExtensions().map(ext => [ext, null])),
+      isFavorite: false,
+      isManual: true,
+    };
+    this.domains.update(d => [...d, tempRow]);
+    this.newDomainName.set('');
+    this.addingDomain.set(true);
+    this.cdr.detectChanges();
+
+    this.domainService.recheckDomains([name], this.selectedExtensions()).subscribe({
+      next: (res) => {
+        const checked = res.domains.find((r: any) => r.name === name);
+        const availability = checked ? checked.allExtensions : tempRow.allExtensions;
+
+        // Mettre à jour la ligne dans le signal
+        this.domains.update(list =>
+          list.map(d => d.name === name && d.isManual ? { ...d, allExtensions: availability } : d)
+        );
+
+        // Sauvegarder dans le projet si on en a un
+        if (this.projectId()) {
+          this.projectService.addSuggestion(this.projectId()!, name, availability as Record<string, boolean>).subscribe({
+            next: (saved) => {
+              this.domains.update(list =>
+                list.map(d => d.name === name && d.isManual ? { ...d, id: saved.id } : d)
+              );
+            },
+          });
+        }
+
+        this.addingDomain.set(false);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.addingDomain.set(false);
+        this.domains.update(list => list.filter(d => !(d.name === name && d.isManual)));
+        this.cdr.detectChanges();
+      },
     });
   }
 

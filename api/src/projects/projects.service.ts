@@ -86,6 +86,27 @@ export class ProjectsService {
     return repo.save(suggestions);
   }
 
+  async addManualSuggestion(
+    projectId: string,
+    user: User,
+    domainName: string,
+    availability: Record<string, boolean>,
+  ): Promise<DomainSuggestion> {
+    const project = await this.projectsRepository.findOne({
+      where: { id: projectId, user: { id: user.id } },
+    });
+    if (!project) throw new NotFoundException('Projet non trouvé');
+
+    // Ignorer si le nom existe déjà dans ce projet
+    const existing = await this.suggestionsRepository.findOne({
+      where: { project: { id: projectId }, domainName },
+    });
+    if (existing) return existing;
+
+    const suggestion = this.suggestionsRepository.create({ project, domainName, availability });
+    return this.suggestionsRepository.save(suggestion);
+  }
+
   async toggleFavorite(suggestionId: string, user: User): Promise<boolean> {
     const suggestion = await this.suggestionsRepository.findOne({
       where: { id: suggestionId, project: { user: { id: user.id } } },

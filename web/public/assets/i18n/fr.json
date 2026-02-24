@@ -105,7 +105,10 @@
       "MORE_BTN": "Plus de suggestions",
       "NEW_PROJECT_BTN": "Nouveau projet",
       "COPY_TABLE": "Copier le tableau",
-      "COPIED": "Copié !"
+      "COPIED": "Copié !",
+      "ADD_MANUAL_PLACEHOLDER": "ex : florizon",
+      "ADD_MANUAL_BTN": "Vérifier",
+      "MANUAL_TOOLTIP": "Ajouté manuellement"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

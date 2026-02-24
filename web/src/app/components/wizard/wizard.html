@@ -229,6 +229,7 @@
                         <i class="pi" [class.pi-heart-fill]="result.isFavorite" [class.pi-heart]="!result.isFavorite" [style.color]="result.isFavorite ? '#ef4444' : '#9ca3af'"></i>
                       </button>
                       <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
+                      <i *ngIf="result.isManual" class="pi pi-pencil" style="font-size: 0.7rem; color: #9ca3af; flex-shrink: 0" [pTooltip]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate" tooltipPosition="top"></i>
                     </div>
                   </td>
                   <td *ngFor="let ext of selectedExtensions()" class="text-center px-1">
@@ -241,6 +242,24 @@
             </p-table>
           </div>
         </ng-container>
+
+        <!-- Saisie manuelle d'un nom -->
+        <div *ngIf="domains().length > 0 && projectId()" style="width: 100%; max-width: 36rem; display: flex; gap: 0.5rem; align-items: center">
+          <input pInputText
+                 [(ngModel)]="newDomainName"
+                 (keydown.enter)="addManualDomain()"
+                 [placeholder]="'WIZARD.STEP3.ADD_MANUAL_PLACEHOLDER' | translate"
+                 style="flex: 1; font-size: 0.875rem">
+          <p-button
+            [label]="'WIZARD.STEP3.ADD_MANUAL_BTN' | translate"
+            icon="pi pi-plus"
+            severity="secondary"
+            size="small"
+            [loading]="addingDomain()"
+            [disabled]="!newDomainName().trim()"
+            (onClick)="addManualDomain()">
+          </p-button>
+        </div>
 
         <div *ngIf="domains().length === 0 && totalChecked() > 0 && !loading()" class="text-center" style="padding: 2.5rem 0">
           <p class="text-500">{{ 'WIZARD.STEP3.NO_RESULTS' | translate }}</p>

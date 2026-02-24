@@ -105,7 +105,10 @@
       "MORE_BTN": "More suggestions",
       "NEW_PROJECT_BTN": "New project",
       "COPY_TABLE": "Copy table",
-      "COPIED": "Copied!"
+      "COPIED": "Copied!",
+      "ADD_MANUAL_PLACEHOLDER": "e.g. florizon",
+      "ADD_MANUAL_BTN": "Check",
+      "MANUAL_TOOLTIP": "Manually added"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
