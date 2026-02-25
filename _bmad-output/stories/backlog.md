@@ -703,6 +703,121 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 
 ---
 
+## US-025 · Auto-Favourite Manually Added Domains
+
+**As a** user who adds a domain name manually to the results table,
+**I want** it to be automatically marked as a favourite,
+**So that** the AI analysis is triggered immediately and the row stays visible at the top of the list.
+
+### Acceptance Criteria
+- [ ] When `addManualDomain()` successfully adds a row, `isFavorite` is set to `true` on the temp row immediately (optimistic)
+- [ ] Once the suggestion is saved to the DB (after WHOIS check), `toggleFavorite` is called server-side to persist the favourite state
+- [ ] The AI analysis (US-005) is triggered automatically for the new row (same as toggling favourite)
+- [ ] The row is sorted to the top of the table alongside other favourites
+
+### Technical Notes
+- In `addManualDomain()`, after receiving the saved suggestion ID, call `projectService.toggleFavorite(id)` then `domainService.analyzeName(id)`
+- Set `isManual: true, isFavorite: true` on the temp row before the WHOIS check so the heart is immediately red
+
+---
+
+## US-026 · Refined Analysis Display — Star Gauge + Detail Card (US-005 follow-up)
+
+**As a** user viewing a favourited domain's analysis,
+**I want** to see a compact summary line with a star score and key points, expandable to a full metric detail card,
+**So that** I get immediate signal quality at a glance without the full text always taking up space.
+
+### Acceptance Criteria
+
+#### Compact summary line (always visible when analysis is ready)
+- [ ] Displayed on a single discreet line directly below the domain name (inside the same table cell)
+- [ ] Contains: a **5-star gauge** (average of all 6 metric scores) + the first **strength** + the first **weakness**, truncated with ellipsis if too long
+- [ ] Example: `★★★★☆  ✅ Punchy and short  ⚠️ May clash with "Florazon"`
+- [ ] Font size ≈ 0.72rem, muted colour (`#6b7280`), no background
+
+#### Detail card (expandable)
+- [ ] A `…` or `+` button at the end of the summary line opens a detail card (replaces the current chevron behaviour from US-005)
+- [ ] The detail card shows each of the 6 metrics as a labelled star-bar row:
+  ```
+  Memorability       ★★★★☆
+  Pronunciation      ★★★★★
+  International      ★★★☆☆
+  SEO                ★★☆☆☆
+  Distinctiveness    ★★★★☆
+  Length             ★★★☆☆  (7 chars)
+  ```
+- [ ] Below the metrics: full **Strengths** and **Watch out** text
+- [ ] The card closes when clicking `…` again or clicking elsewhere
+
+#### Backend — structured analysis format
+- [ ] The AI prompt is updated to return **structured JSON** instead of free text:
+  ```json
+  {
+    "scores": { "memorability": 4, "pronunciation": 5, "international": 3, "seo": 2, "distinctiveness": 4, "length": 3 },
+    "strengths": "Punchy and short, easy to spell",
+    "watchout": "May be confused with similar names in the sector"
+  }
+  ```
+- [ ] The `analysis` DB column stores this JSON string
+- [ ] The average score is computed on the frontend: `mean(Object.values(scores))`
+- [ ] Existing plain-text analyses (from US-005 initial implementation) are treated as legacy and re-analysed on next favourite toggle if the JSON parse fails
+
+### Technical Notes
+- Update `DomainService.analyzeNameWithAI()` to use `response_format: { type: 'json_object' }` and a prompt that returns the above structure
+- Frontend: parse `result.analysis` as JSON; fall back to displaying raw text if parse fails (backwards compat)
+- Star gauge: render with `★` / `☆` characters or a simple loop — no extra library needed
+- The detail card can be a `<div>` positioned absolutely or just inline-expanded below the summary line (inline preferred, simpler)
+
+---
+
+## US-027 · Move Streaming Progress Panel Between Table and Action Buttons
+
+**As a** user watching domain results appear progressively,
+**I want** the streaming progress indicator to appear between the last table row and the "More suggestions" button,
+**So that** it feels connected to the table being built rather than floating above it.
+
+### Acceptance Criteria
+- [ ] The streaming progress panel (`streamProgress()`) is moved from its current position (above the table) to **between the table and the navigation buttons**
+- [ ] When `streamProgress()` is active and `domains().length > 0`, the panel appears directly below the table card, above the manual entry input and the action buttons
+- [ ] When `streamProgress()` is null (search complete or not started), the panel is hidden (no layout shift)
+- [ ] The panel width matches the table (`max-width: 36rem; width: 100%`)
+- [ ] Layout order in Step 3 becomes:
+  1. Title + subtitle
+  2. Note (if fewer results than expected)
+  3. Copy table button
+  4. Results table
+  5. **Streaming progress panel** ← moved here
+  6. Manual domain entry input
+  7. Navigation buttons (Back / New project / More suggestions)
+
+### Technical Notes
+- Cut the `<div *ngIf="streamProgress()">` block from its current location in `wizard.html` and paste it after the `</div>` closing the table wrapper
+- No logic changes required
+
+---
+
+## US-028 · Fix Dropdown Menus Rendering Too Low on Scroll
+
+**As a** user who has scrolled down the page,
+**I want** dropdown menus (Select, language picker, match-mode selector) to open at the correct position relative to their trigger,
+**So that** I don't have to scroll back up to interact with them.
+
+### Acceptance Criteria
+- [ ] All PrimeNG `<p-select>` / `<p-selectButton>` / overlay panels open at the correct screen position regardless of scroll offset
+- [ ] Tested at: no scroll, 200px scroll, 600px scroll on both desktop and mobile
+- [ ] No regression on other overlay components (Drawer, Dialog, Toast, Tooltip)
+
+### Root Cause (likely)
+PrimeNG overlays default to `appendTo="body"` which positions the panel relative to `document.body`. If the body has `overflow: hidden` or if there's a CSS `transform` on an ancestor, the overlay calculates its position from the wrong origin. Alternatively, the overlay uses `position: absolute` relative to the viewport scroll offset and miscalculates.
+
+### Technical Notes
+- Check `appendTo` attribute on all `<p-select>` usages — ensure it is either `"body"` (default, usually correct) or not set
+- Check `styles.css` and `index.html` for any `overflow: hidden` or `transform` on `body` / `html` / wrapper elements that could break fixed/absolute positioning
+- PrimeNG 21 known issue: if the parent has `position: relative` and `overflow: hidden`, overlay panels clip. Solution: ensure no ancestor of the trigger has `overflow: hidden`
+- If the issue is scroll-related: PrimeNG overlays should recalculate on scroll — check if `appendTo="body"` is missing on affected components
+
+---
+
 ## Priority / Effort Matrix (initial estimate)
 
 | Story | Value | Effort | Priority |
@@ -730,3 +845,7 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 | US-022 · "Buy on registrar" button (OVH, Namecheap, Gandi) | High | Low | 🟠 Next |
 | US-023 · Landing page — brand name angle & SEO | High | Low | 🟠 Next |
 | US-024 · Keycloak theme — align with app design | Medium | Medium | 🟡 Later |
+| US-025 · Auto-favourite manually added domains | High | Low | 🔴 Now |
+| US-026 · Refined analysis display — star gauge + detail card | High | Medium | 🟠 Next |
+| US-027 · Move streaming progress panel position | Medium | Low | 🔴 Now |
+| US-028 · Fix dropdown menus rendering too low on scroll | High | Low | 🔴 Now |
