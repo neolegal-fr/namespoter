@@ -56,7 +56,7 @@ import { Dialog } from 'primeng/dialog';
                 severity="secondary"
                 (onClick)="projectMenu.toggle($event)">
               </p-button>
-              <p-menu #projectMenu [model]="projectMenuItems" [popup]="true"></p-menu>
+              <p-menu #projectMenu [model]="projectMenuItems" [popup]="true" appendTo="body"></p-menu>
 
                 <p-avatar
                   icon="pi pi-user"
@@ -65,7 +65,7 @@ import { Dialog } from 'primeng/dialog';
                   styleClass="bg-primary text-primary-contrast shadow-1"
                   (click)="userMenu.toggle($event)">
                 </p-avatar>
-                <p-menu #userMenu [model]="profileMenuItems" [popup]="true"></p-menu>
+                <p-menu #userMenu [model]="profileMenuItems" [popup]="true" appendTo="body"></p-menu>
             </ng-container>
 
             <p-button
