@@ -135,6 +135,7 @@ export class WizardComponent implements OnInit {
   showPickDialog = signal(false);
   pickBestLoading = signal(false);
   pickBestResult = signal<{ recommended: string; reason: string } | null>(null);
+  private pickBestKey = signal<string | null>(null);
   favourites = computed(() => this.domains().filter(d => d.isFavorite));
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
@@ -413,6 +414,14 @@ export class WizardComponent implements OnInit {
   }
 
   helpMePick() {
+    const currentKey = this.favourites().map(d => d.name).sort().join('|');
+
+    // Résultat déjà en cache pour cette liste de favoris → afficher directement
+    if (this.pickBestKey() === currentKey && this.pickBestResult()) {
+      this.showPickDialog.set(true);
+      return;
+    }
+
     this.pickBestResult.set(null);
     this.pickBestLoading.set(true);
     this.showPickDialog.set(true);
@@ -426,6 +435,7 @@ export class WizardComponent implements OnInit {
     this.domainService.pickBest(suggestions).subscribe({
       next: (result) => {
         this.pickBestResult.set(result);
+        this.pickBestKey.set(currentKey);
         this.pickBestLoading.set(false);
         this.cdr.detectChanges();
       },
