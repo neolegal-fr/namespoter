@@ -60,6 +60,14 @@ export class DomainController {
     return { analysis };
   }
 
+  @Post('pick-best')
+  async pickBest(
+    @Body() body: { suggestions: { name: string; analysis: string | null; extensions: Record<string, boolean | null> }[] },
+    @AuthenticatedUser() _keycloakUser: any,
+  ) {
+    return this.domainService.pickBestDomain(body.suggestions);
+  }
+
   @Public()
   @Post('recheck')
   async recheck(@Body() dto: RecheckDomainsDto) {

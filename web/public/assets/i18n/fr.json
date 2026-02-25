@@ -113,13 +113,11 @@
       "MANUAL_TOOLTIP": "Ajouté manuellement",
       "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtre actif",
       "MANUAL_NOT_AVAILABLE": "{{names}} ne remplit pas les critères de disponibilité et est masqué par le filtre actif.",
-      "COMPARE_BTN": "Comparer {{count}} favoris",
-      "COMPARE_TITLE": "Comparer les favoris",
-      "COMPARE_REMOVE": "Retirer de la comparaison",
-      "COMPARE_LENGTH": "Longueur :",
-      "COMPARE_CHARS": "caractères",
-      "COMPARE_NO_ANALYSIS": "Analyse non disponible",
-      "COMPARE_EMPTY": "Tous les domaines ont été retirés."
+      "PICK_BEST_BTN": "Aide-moi à choisir",
+      "PICK_TITLE": "Recommandation IA",
+      "PICK_LOADING": "Analyse de vos favoris en cours…",
+      "PICK_COPY": "Copier le nom",
+      "PICK_OTHER": "Autres noms en lice :"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

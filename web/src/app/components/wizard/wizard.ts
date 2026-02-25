@@ -132,12 +132,10 @@ export class WizardComponent implements OnInit {
   newDomainName = signal('');
   addingDomain = signal(false);
   expandedAnalysisId = signal<string | null>(null);
-  showCompareDialog = signal(false);
-  compareExcludedIds = signal<string[]>([]);
+  showPickDialog = signal(false);
+  pickBestLoading = signal(false);
+  pickBestResult = signal<{ recommended: string; reason: string } | null>(null);
   favourites = computed(() => this.domains().filter(d => d.isFavorite));
-  compareList = computed(() =>
-    this.favourites().filter(d => !this.compareExcludedIds().includes(d.id)).slice(0, 5)
-  );
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
@@ -414,13 +412,29 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  openCompare() {
-    this.compareExcludedIds.set([]);
-    this.showCompareDialog.set(true);
-  }
+  helpMePick() {
+    this.pickBestResult.set(null);
+    this.pickBestLoading.set(true);
+    this.showPickDialog.set(true);
 
-  removeFromCompare(id: string) {
-    this.compareExcludedIds.update(ids => [...ids, id]);
+    const suggestions = this.favourites().map(d => ({
+      name: d.name,
+      analysis: d.analysis ?? null,
+      extensions: d.allExtensions,
+    }));
+
+    this.domainService.pickBest(suggestions).subscribe({
+      next: (result) => {
+        this.pickBestResult.set(result);
+        this.pickBestLoading.set(false);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.pickBestLoading.set(false);
+        this.showPickDialog.set(false);
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   copyDomainName(name: string) {
@@ -428,6 +442,10 @@ export class WizardComponent implements OnInit {
       this.copiedDomain.set(name);
       setTimeout(() => this.copiedDomain.set(null), 1500);
     });
+  }
+
+  getFavouriteByName(name: string): any {
+    return this.favourites().find(d => d.name === name) ?? null;
   }
 
   parseAnalysisScore(analysis: string | null): number {

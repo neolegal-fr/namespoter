@@ -184,6 +184,44 @@ Be direct and honest. Total: max 100 words.`;
     }
   }
 
+  async pickBestDomain(
+    candidates: { name: string; analysis: string | null; extensions: Record<string, boolean | null> }[],
+  ): Promise<{ recommended: string; reason: string }> {
+    const list = candidates.map((c, i) => {
+      const available = Object.entries(c.extensions)
+        .filter(([, v]) => v === true)
+        .map(([k]) => k)
+        .join(', ') || 'none';
+      const analysis = c.analysis ? c.analysis.slice(0, 400) : 'No analysis yet.';
+      return `${i + 1}. "${c.name}" — available on: ${available}\n   ${analysis}`;
+    }).join('\n\n');
+
+    const prompt = `You are a branding expert helping a user choose the best domain name from their shortlist.
+
+Candidates:
+${list}
+
+Pick the single best name. Consider: memorability, pronounceability, brand strength, and extension availability.
+Respond ONLY in JSON: {"recommended": "thename", "reason": "2-3 sentences explaining why this name stands out over the others."}
+Write the reason in the same language as the analyses, or in English if no analysis is available.`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+      });
+      const content = response.choices[0].message.content;
+      if (!content) throw new Error('Empty response');
+      return JSON.parse(content);
+    } catch (error) {
+      this.logger.error('Erreur pick-best:', error);
+      throw error;
+    }
+  }
+
   async isDomainAvailable(domain: string): Promise<boolean> {
     try {
       const { stdout } = await execAsync(`whois ${domain}`, { timeout: 10000 });
