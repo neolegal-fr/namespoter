@@ -18,6 +18,7 @@ import { Drawer } from 'primeng/drawer';
 import { Tooltip } from 'primeng/tooltip';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Dialog } from 'primeng/dialog';
+import { SplitButton } from 'primeng/splitbutton';
 import { Toast } from 'primeng/toast';
 import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { UserService } from '../../services/user';
@@ -44,6 +45,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     Tooltip,
     ConfirmDialog,
     Dialog,
+    SplitButton,
     Toast,
     TranslateModule
   ],
@@ -135,8 +137,23 @@ export class WizardComponent implements OnInit {
   showPickDialog = signal(false);
   pickBestLoading = signal(false);
   pickBestResult = signal<{ recommended: string; reason: string } | null>(null);
+  pickBestCandidates = signal<string[]>([]);
   private pickBestKey = signal<string | null>(null);
   favourites = computed(() => this.domains().filter(d => d.isFavorite));
+
+  pickMenuItems = computed<MenuItem[]>(() => [
+    {
+      label: this.translate.instant('WIZARD.STEP3.PICK_ALL'),
+      icon: 'pi pi-list',
+      command: () => this.helpMePick('all'),
+    },
+    {
+      label: this.translate.instant('WIZARD.STEP3.PICK_FAVOURITES'),
+      icon: 'pi pi-heart-fill',
+      disabled: this.favourites().length < 2,
+      command: () => this.helpMePick('favourites'),
+    },
+  ]);
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
@@ -413,10 +430,13 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  helpMePick() {
-    const currentKey = this.favourites().map(d => d.name).sort().join('|');
+  helpMePick(mode: 'all' | 'favourites' = 'all') {
+    const candidates = mode === 'favourites' ? this.favourites() : this.filteredDomains();
+    if (candidates.length < 2) return;
 
-    // Résultat déjà en cache pour cette liste de favoris → afficher directement
+    const currentKey = mode + ':' + candidates.map(d => d.name).sort().join('|');
+
+    // Résultat déjà en cache → afficher directement
     if (this.pickBestKey() === currentKey && this.pickBestResult()) {
       this.showPickDialog.set(true);
       return;
@@ -425,8 +445,9 @@ export class WizardComponent implements OnInit {
     this.pickBestResult.set(null);
     this.pickBestLoading.set(true);
     this.showPickDialog.set(true);
+    this.pickBestCandidates.set(candidates.map(d => d.name));
 
-    const suggestions = this.favourites().map(d => ({
+    const suggestions = candidates.map(d => ({
       name: d.name,
       analysis: d.analysis ?? null,
       extensions: d.allExtensions,
@@ -454,8 +475,8 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  getFavouriteByName(name: string): any {
-    return this.favourites().find(d => d.name === name) ?? null;
+  getDomainByName(name: string): any {
+    return this.domains().find(d => d.name === name) ?? null;
   }
 
   parseAnalysisScore(analysis: string | null): number {

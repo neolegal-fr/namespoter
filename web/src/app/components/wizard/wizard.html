@@ -207,13 +207,15 @@
           </div>
 
           <div style="width: 100%; max-width: 36rem; display: flex; justify-content: space-between; align-items: center">
-            <p-button *ngIf="favourites().length >= 2"
+            <p-splitButton *ngIf="filteredDomains().length >= 2"
               [label]="'WIZARD.STEP3.PICK_BEST_BTN' | translate"
               icon="pi pi-lightbulb"
+              [model]="pickMenuItems()"
               severity="secondary"
               size="small"
-              (onClick)="helpMePick()">
-            </p-button>
+              (onClick)="helpMePick('all')"
+              appendTo="body">
+            </p-splitButton>
             <button type="button" (click)="copyTable()" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--p-surface-400); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0; transition: color 0.15s; margin-left: auto" class="copy-table-btn">
               <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'" [style.color]="copiedDomain() === 'table' ? '#16a34a' : null"></i>
               <span>{{ (copiedDomain() === 'table' ? 'WIZARD.STEP3.COPIED' : 'WIZARD.STEP3.COPY_TABLE') | translate }}</span>
@@ -357,7 +359,7 @@
         <div style="font-size: 2.5rem; margin-bottom: 0.375rem">🏆</div>
         <div style="font-family: monospace; font-size: 1.75rem; font-weight: 900; color: #16a34a; letter-spacing: -0.03em">{{ result.recommended }}</div>
         <!-- Extensions disponibles pour le nom recommandé -->
-        <ng-container *ngIf="getFavouriteByName(result.recommended) as rec">
+        <ng-container *ngIf="getDomainByName(result.recommended) as rec">
           <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 0.375rem; flex-wrap: wrap">
             <span *ngFor="let ext of selectedExtensions()" style="font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 9999px"
                   [style.background]="rec.allExtensions[ext] === true ? '#dcfce7' : '#fee2e2'"
@@ -384,15 +386,16 @@
         (onClick)="copyDomainName(result.recommended)">
       </p-button>
 
-      <!-- Autres favoris -->
-      <div *ngIf="favourites().length > 1" style="width: 100%; border-top: 1px solid var(--p-surface-200); padding-top: 1rem">
+      <!-- Autres candidats -->
+      <div *ngIf="pickBestCandidates().length > 1" style="width: 100%; border-top: 1px solid var(--p-surface-200); padding-top: 1rem">
         <p style="font-size: 0.75rem; color: #9ca3af; margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em">{{ 'WIZARD.STEP3.PICK_OTHER' | translate }}</p>
         <div style="display: flex; flex-wrap: wrap; gap: 0.375rem">
-          <span *ngFor="let d of favourites()" style="font-family: monospace; font-size: 0.82rem; padding: 0.2rem 0.625rem; border-radius: 9999px; background: var(--p-surface-100); color: #6b7280"
-                [style.opacity]="d.name === result.recommended ? '0' : '1'"
-                [style.display]="d.name === result.recommended ? 'none' : 'inline'">
-            {{ d.name }}
-          </span>
+          <ng-container *ngFor="let name of pickBestCandidates()">
+            <span *ngIf="name !== result.recommended"
+                  style="font-family: monospace; font-size: 0.82rem; padding: 0.2rem 0.625rem; border-radius: 9999px; background: var(--p-surface-100); color: #6b7280">
+              {{ name }}
+            </span>
+          </ng-container>
         </div>
       </div>
 

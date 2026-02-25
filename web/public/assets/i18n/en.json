@@ -115,9 +115,11 @@
       "MANUAL_NOT_AVAILABLE": "{{names}} does not meet the current availability criteria and is hidden by the active filter.",
       "PICK_BEST_BTN": "Help me pick the best",
       "PICK_TITLE": "AI Recommendation",
-      "PICK_LOADING": "Analysing your favourites…",
+      "PICK_LOADING": "Analysing candidates…",
       "PICK_COPY": "Copy name",
-      "PICK_OTHER": "Other shortlisted names:"
+      "PICK_OTHER": "Other candidates:",
+      "PICK_ALL": "Among all results",
+      "PICK_FAVOURITES": "Among favourites only"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
