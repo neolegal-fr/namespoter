@@ -62,10 +62,10 @@ export class DomainController {
 
   @Post('pick-best')
   async pickBest(
-    @Body() body: { suggestions: { name: string; analysis: string | null; extensions: Record<string, boolean | null> }[] },
+    @Body() body: { suggestions: { name: string; analysis: string | null; extensions: Record<string, boolean | null> }[]; lang?: string },
     @AuthenticatedUser() _keycloakUser: any,
   ) {
-    return this.domainService.pickBestDomain(body.suggestions);
+    return this.domainService.pickBestDomain(body.suggestions, body.lang);
   }
 
   @Public()

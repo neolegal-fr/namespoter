@@ -432,7 +432,7 @@ export class WizardComponent implements OnInit {
       extensions: d.allExtensions,
     }));
 
-    this.domainService.pickBest(suggestions).subscribe({
+    this.domainService.pickBest(suggestions, this.translate.currentLang).subscribe({
       next: (result) => {
         this.pickBestResult.set(result);
         this.pickBestKey.set(currentKey);

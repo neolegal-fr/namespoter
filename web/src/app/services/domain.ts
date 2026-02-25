@@ -26,8 +26,8 @@ export class DomainService {
     return this.http.post<{ analysis: string }>(`${this.apiUrl}/analyze`, { suggestionId });
   }
 
-  pickBest(suggestions: { name: string; analysis: string | null; extensions: Record<string, any> }[]): Observable<{ recommended: string; reason: string }> {
-    return this.http.post<{ recommended: string; reason: string }>(`${this.apiUrl}/pick-best`, { suggestions });
+  pickBest(suggestions: { name: string; analysis: string | null; extensions: Record<string, any> }[], lang: string): Observable<{ recommended: string; reason: string }> {
+    return this.http.post<{ recommended: string; reason: string }>(`${this.apiUrl}/pick-best`, { suggestions, lang });
   }
 
   recheckDomains(names: string[], extensions: string[]): Observable<{ domains: { name: string; allExtensions: Record<string, boolean> }[] }> {

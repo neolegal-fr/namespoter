@@ -186,6 +186,7 @@ Be direct and honest. Total: max 100 words.`;
 
   async pickBestDomain(
     candidates: { name: string; analysis: string | null; extensions: Record<string, boolean | null> }[],
+    lang?: string,
   ): Promise<{ recommended: string; reason: string }> {
     const list = candidates.map((c, i) => {
       const available = Object.entries(c.extensions)
@@ -196,6 +197,12 @@ Be direct and honest. Total: max 100 words.`;
       return `${i + 1}. "${c.name}" — available on: ${available}\n   ${analysis}`;
     }).join('\n\n');
 
+    const LANG_NAMES: Record<string, string> = {
+      fr: 'French', en: 'English', de: 'German', es: 'Spanish',
+      it: 'Italian', nl: 'Dutch', pt: 'Portuguese', pl: 'Polish',
+    };
+    const langInstruction = `Write the reason in ${LANG_NAMES[lang ?? ''] ?? 'English'}.`;
+
     const prompt = `You are a branding expert helping a user choose the best domain name from their shortlist.
 
 Candidates:
@@ -203,7 +210,7 @@ ${list}
 
 Pick the single best name. Consider: memorability, pronounceability, brand strength, and extension availability.
 Respond ONLY in JSON: {"recommended": "thename", "reason": "2-3 sentences explaining why this name stands out over the others."}
-Write the reason in the same language as the analyses, or in English if no analysis is available.`;
+${langInstruction}`;
 
     try {
       const response = await this.openai.chat.completions.create({
