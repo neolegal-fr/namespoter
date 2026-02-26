@@ -39,7 +39,7 @@ services:
         condition: service_healthy
 
   api:
-    image: git.neolegal.fr/NeoLegal/namespoter-api:latest
+    image: git.neolegal.fr/neolegal/namespoter-api:latest
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/namespoter
@@ -60,7 +60,7 @@ services:
         condition: service_healthy
 
   web:
-    image: git.neolegal.fr/NeoLegal/namespoter-web:latest
+    image: git.neolegal.fr/neolegal/namespoter-web:latest
     restart: unless-stopped
     environment:
       API_URL: ${API_URL}
