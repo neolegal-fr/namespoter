@@ -850,6 +850,12 @@ export class WizardComponent implements OnInit {
     this.startSearchTimeout();
     this.cdr.detectChanges();
 
+    try {
+      await this.keycloak.updateToken(30);
+    } catch {
+      await this.keycloak.login();
+      return;
+    }
     const token = await this.keycloak.getToken();
 
     this.domainService.searchDomainsStream({

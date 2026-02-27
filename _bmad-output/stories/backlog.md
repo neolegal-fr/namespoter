@@ -7,6 +7,8 @@
 
 ## US-001 · International vs. Local Domain Name Search
 
+**Status**: ✅ Implemented
+
 **As a** user searching for a domain name,
 **I want to** indicate whether I'm targeting an international audience or a local/regional one,
 **So that** the AI generates names and checks extensions that are relevant to my market.
@@ -26,6 +28,8 @@
 
 ## US-002 · Copy Domain Name from Results Table
 
+**Status**: ✅ Implemented
+
 **As a** user reviewing available domain names,
 **I want to** copy a domain name (with its extension) to my clipboard with a single click,
 **So that** I can quickly use it in a registrar, document, or message without manual selection.
@@ -40,6 +44,8 @@
 ---
 
 ## US-003 · Fix Header Overlap on Scroll (Step 3)
+
+**Status**: ✅ Implemented
 
 **As a** user scrolling through domain results on Step 3,
 **I want the** extensions/availability banner to not overlap the domain table rows,
@@ -59,6 +65,8 @@
 
 ## US-004 · Retrieve User Locale from Keycloak at Login
 
+**Status**: ✅ Implemented
+
 **As a** user who logs in via Keycloak SSO,
 **I want** the application to read my preferred locale from my Keycloak profile,
 **So that** the interface language is automatically set to my preference without manual selection.
@@ -77,6 +85,8 @@
 ---
 
 ## US-005 · Domain Name Pros & Cons Analysis (On-Demand, Cached)
+
+**Status**: ✅ Implemented
 
 **As a** user interested in a specific domain name,
 **I want** an AI-generated analysis of that name's strengths and weaknesses,
@@ -102,6 +112,8 @@
 ---
 
 ## US-006 · Landing Page Redesign — SSO / Marketing Focus
+
+**Status**: ✅ Implemented
 
 **As a** visitor discovering Namespoter for the first time,
 **I want** to immediately understand what the service does and feel invited to try it,
@@ -131,6 +143,8 @@
 
 ## US-007 · Multi-Extension Input (Pre-filled, Flexible Separators)
 
+**Status**: ✅ Implemented
+
 **As a** user configuring domain extensions to check,
 **I want** the extension field to be pre-filled with `.com` and to accept multiple extensions in a flexible format,
 **So that** I can quickly set up my search without worrying about exact syntax.
@@ -150,6 +164,8 @@
 ---
 
 ## US-008 · Streaming Domain Results (Progressive Display)
+
+**Status**: ✅ Implemented
 
 **As a** user waiting for domain search results,
 **I want** results to appear progressively as they are found,
@@ -172,6 +188,8 @@
 
 ## US-009 · Search Timeout Warning (30s)
 
+**Status**: ✅ Implemented
+
 **As a** user waiting for domain search results,
 **I want** to be notified if the search is taking longer than 30 seconds,
 **So that** I can decide whether to wait, retry, or adjust my query.
@@ -188,6 +206,8 @@
 ---
 
 ## US-010 · Streaming Domain Results (Progressive Display)
+
+**Status**: ✅ Implemented (duplicate of US-008)
 
 **As a** user waiting for domain search results,
 **I want** results to appear one by one as each domain is validated,
@@ -212,6 +232,8 @@
 
 ## US-011 · Manual Row Entry (User-defined Domain Ideas)
 
+**Status**: ✅ Implemented
+
 **As a** user reviewing AI-generated domain suggestions,
 **I want to** add my own domain name ideas to the results table,
 **So that** I can check their availability alongside the AI suggestions in the same interface.
@@ -232,6 +254,8 @@
 ---
 
 ## US-012 · MCP Server — Invoke Namespoter from an AI Chat
+
+**Status**: ❌ To do
 
 **As a** developer or power user working in an AI chat environment (Claude, Cursor, etc.),
 **I want** a Model Context Protocol (MCP) server that exposes Namespoter's core functions as tools,
@@ -256,6 +280,8 @@
 ---
 
 ## US-013 · Distribution — Teams App, Claude Skill, Marketplace Integrations
+
+**Status**: ❌ To do
 
 **As a** user of productivity tools (Microsoft Teams, Slack, Claude.ai, etc.),
 **I want** to access Namespoter's domain search directly within my existing workflow tool,
@@ -284,6 +310,8 @@
 ---
 
 ## US-014 · Online Credit Purchase via Stripe (Packs + Subscription)
+
+**Status**: ✅ Implemented
 
 **As a** registered user who needs credits,
 **I want** to subscribe to a monthly plan or purchase extra credit packs,
@@ -383,6 +411,8 @@
 
 ## US-015 · Exclude Already-Evaluated Candidates from LLM Re-generation
 
+**Status**: ✅ Implemented
+
 **As a** user requesting additional domain suggestions ("More suggestions"),
 **I want** the AI to avoid re-proposing names it has already generated,
 **So that** every new batch brings genuinely fresh ideas.
@@ -402,6 +432,8 @@
 ---
 
 ## US-016 · Memorable Brand & Domain Name Criteria in LLM Prompt
+
+**Status**: ✅ Implemented
 
 **As a** user looking for a strong domain name,
 **I want** the AI to apply proven memorability criteria when generating suggestions,
@@ -428,6 +460,8 @@
 
 ## US-017 · Extended European Language Support
 
+**Status**: ⚠️ Partial (FR/EN implemented; DE, ES, IT, etc. not yet)
+
 **As a** user targeting a non-English, non-French European market,
 **I want** to select my target language from a broader list of European languages,
 **So that** the AI generates culturally and linguistically appropriate domain name suggestions.
@@ -447,6 +481,8 @@
 ---
 
 ## US-018 · Favourite Comparison Tool
+
+**Status**: ❌ To do
 
 **As a** user who has shortlisted several favourite domain names,
 **I want** to compare them side by side in a structured view,
@@ -473,6 +509,8 @@
 
 ## US-019 · Configurable Batch Size for "More Suggestions"
 
+**Status**: ⚠️ Partial (fixed at 10, not configurable via UI)
+
 **As a** user requesting additional domain suggestions,
 **I want** to specify how many new suggestions I want before clicking "More suggestions",
 **So that** I can choose between a quick top-up (5) or a larger batch (20) based on my needs and credit budget.
@@ -491,6 +529,8 @@
 ---
 
 ## US-020 · Feedback Form with 1 000-Credit Reward
+
+**Status**: ❌ To do
 
 **As a** user of Namespoter,
 **I want** to share feedback about what could be improved and receive free credits in return,
@@ -521,6 +561,8 @@
 
 ## US-021 · Explain Credit Cost in UI ("1 credit = 1 name suggestion")
 
+**Status**: ⚠️ Partial (coût implicite visible dans le dialog billing, pas de warning pré-recherche)
+
 **As a** new or occasional user,
 **I want** to understand clearly what a credit represents and how many I'm spending,
 **So that** I can make informed decisions about my searches and purchases.
@@ -540,6 +582,8 @@
 ---
 
 ## US-022 · "Buy on registrar" button for available domains
+
+**Status**: ❌ To do
 
 **As a** user who has found an available domain name,
 **I want** a direct link to buy it on a registrar from within the results table,
@@ -597,6 +641,8 @@
 
 ## US-023 · Landing Page — Brand Name Angle & SEO Optimisation
 
+**Status**: ⚠️ Partial (contenu brand en place, meta tags / Open Graph / schema.org manquants)
+
 **As a** entrepreneur searching for a brand name online,
 **I want** to find Namespoter when I search for "find a brand name" or "brand name generator",
 **So that** I discover the tool through organic search rather than only word-of-mouth.
@@ -649,6 +695,8 @@ SEO opportunity: queries like *"trouver un nom de marque"*, *"générateur nom d
 ---
 
 ## US-024 · Keycloak Theme — Align Login/Register Pages with App Design
+
+**Status**: ❌ To do
 
 **As a** user registering or logging in to Namespoter,
 **I want** the Keycloak login and registration pages to look like the rest of the application,
@@ -705,6 +753,8 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 
 ## US-025 · Auto-Favourite Manually Added Domains
 
+**Status**: ✅ Implemented
+
 **As a** user who adds a domain name manually to the results table,
 **I want** it to be automatically marked as a favourite,
 **So that** the AI analysis is triggered immediately and the row stays visible at the top of the list.
@@ -722,6 +772,8 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 ---
 
 ## US-026 · Refined Analysis Display — Star Gauge + Detail Card (US-005 follow-up)
+
+**Status**: ✅ Implemented
 
 **As a** user viewing a favourited domain's analysis,
 **I want** to see a compact summary line with a star score and key points, expandable to a full metric detail card,
@@ -772,6 +824,8 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 
 ## US-027 · Move Streaming Progress Panel Between Table and Action Buttons
 
+**Status**: ✅ Implemented
+
 **As a** user watching domain results appear progressively,
 **I want** the streaming progress indicator to appear between the last table row and the "More suggestions" button,
 **So that** it feels connected to the table being built rather than floating above it.
@@ -798,6 +852,8 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 
 ## US-028 · Fix Dropdown Menus Rendering Too Low on Scroll
 
+**Status**: ⚠️ Partial (appendTo="body" appliqué, à valider en test réel)
+
 **As a** user who has scrolled down the page,
 **I want** dropdown menus (Select, language picker, match-mode selector) to open at the correct position relative to their trigger,
 **So that** I don't have to scroll back up to interact with them.
@@ -818,34 +874,239 @@ PrimeNG overlays default to `appendTo="body"` which positions the panel relative
 
 ---
 
+## US-029 · Subscription Management & Self-Service Cancellation
+
+**Status**: ❌ To do
+
+**As a** subscribed user,
+**I want** to view my current subscription details and cancel it on my own,
+**So that** I am not locked in and always have clear visibility over my billing commitment.
+
+### Context
+US-014 implements the Stripe checkout and Customer Portal redirect. This story focuses on the **post-subscription self-service experience**: a dedicated account section the user can reach at any time, showing subscription status and providing a one-click path to manage or cancel.
+
+### Acceptance Criteria
+
+#### Frontend — Account / Subscription Section
+- [ ] A "Subscription" tab or card is accessible from the user menu (top-right avatar / menu) at all times
+- [ ] The section displays:
+  - Current plan name (e.g. "Essential — 2 000 credits/month") or "No active subscription"
+  - Subscription status badge: **Active** / **Cancelled (active until …)** / **Expired**
+  - Subscription credits remaining this period + reset date (e.g. "1 340 / 2 000 — resets on 15 Mar")
+  - Extra (permanent) credits balance
+  - Next billing date and amount (if active)
+- [ ] A **"Manage subscription"** button opens the Stripe Customer Portal in a new tab (`GET /payments/portal`)
+- [ ] A **"Cancel subscription"** shortcut button is shown (active plan only):
+  - Triggers a confirmation dialog: "Your subscription will remain active until [date]. After that, your monthly credits will not renew. Confirm?"
+  - On confirm, redirects to the Stripe Customer Portal pre-opened on the cancellation flow
+- [ ] After cancellation (user returns from portal), the status badge updates to "Cancelled (active until …)" on next page load / polling
+- [ ] No active subscription: section shows "No active plan" and a CTA "Subscribe" (links to US-014 checkout flow)
+
+#### Backend
+- [ ] `GET /users/me/subscription` — returns:
+  ```json
+  {
+    "plan": "essential" | null,
+    "status": "active" | "cancelled" | "expired" | "none",
+    "subscriptionCredits": 1340,
+    "subscriptionCreditsTotal": 2000,
+    "extraCredits": 500,
+    "currentPeriodEnd": "2026-03-15T00:00:00Z" | null,
+    "nextBillingAmount": 500 | null
+  }
+  ```
+- [ ] Data sourced from local DB fields + optional Stripe API call for `nextBillingAmount` (or cached on webhook)
+- [ ] The existing `GET /payments/portal` endpoint (US-014) is reused as-is for the management redirect
+
+#### Webhook — Cancellation State
+- [ ] `customer.subscription.updated` with `cancel_at_period_end: true` → set a new `subscriptionCancelledAt: Date` field on `User` (date of next period end); status becomes "cancelled" in the API response
+
+### Technical Notes
+- The Subscription section can be implemented as a new `<p-dialog>` or a new route `/account` with a tab layout
+- Prefer a dialog (consistent with existing "credits" dialog pattern) unless the account page already exists
+- `subscriptionCancelledAt` field added to `User` entity; `status` in the API response is derived:
+  - `active`: `stripeSubscriptionId` set, `subscriptionCancelledAt` null
+  - `cancelled`: `stripeSubscriptionId` set, `subscriptionCancelledAt` in the future
+  - `expired`: `stripeSubscriptionId` null, `subscriptionCancelledAt` in the past (or cleared)
+  - `none`: no `stripeSubscriptionId` ever
+- Stripe Customer Portal handles payment method updates, invoice history, and cancellation — no need to rebuild those flows
+
+---
+
+## US-030 · Import Description from a Web Page URL
+
+**Status**: ❌ To do
+
+**As a** user who already has a product or landing page,
+**I want** to paste a URL instead of writing my product description manually,
+**So that** Namespoter can extract the relevant context automatically and I can skip the writing step.
+
+### Acceptance Criteria
+
+#### Frontend — Step 1 (Description)
+- [ ] Below the description textarea, a collapsible "Or import from a URL" section appears
+- [ ] It contains:
+  - A URL input field with placeholder `https://myproduct.com`
+  - An **"Extract"** button (disabled while empty or loading)
+- [ ] On click, a spinner replaces the button and the textarea is disabled
+- [ ] On success, the extracted description fills the textarea; the user can edit it before continuing
+- [ ] On error (unreachable URL, extraction failed, etc.), a toast message is shown: "Could not extract content from this URL. Please enter the description manually."
+- [ ] The URL input and the textarea are mutually exclusive as *primary input* but not locked: the user can still type or edit the textarea after extraction
+
+#### Backend — New Endpoint
+- [ ] `POST /domain/extract-description` (authenticated)
+  - Body: `{ "url": string }`
+  - Validates that `url` is a well-formed `http` or `https` URL
+  - Fetches the page HTML (timeout: 8 s, max body: 512 KB)
+  - Strips HTML tags, removes nav/footer/script/style noise (basic cheerio extraction targeting `<main>`, `<article>`, `<h1>`, `<p>` tags)
+  - Sends the cleaned text (truncated to 3 000 chars) to OpenAI with the prompt:
+    > "You are a product analyst. Based on the following web page content, write a concise product description (2–4 sentences) suitable for generating brand name ideas. Focus on what the product does, who it is for, and its key differentiator."
+  - Returns: `{ "description": string }`
+  - Costs **0 credits** (extraction is a free helper action, not a domain suggestion)
+  - Rate-limited: max 5 calls/user/hour to avoid abuse
+
+#### Security & Edge Cases
+- [ ] SSRF protection: reject URLs resolving to private IP ranges (10.x, 192.168.x, 127.x, etc.) before fetching
+- [ ] `User-Agent` header set to `Namespoter-Bot/1.0` on outgoing fetch
+- [ ] If the page returns a non-200 status, return a 422 with `{ "error": "page_unreachable" }`
+- [ ] If extracted text < 50 chars after stripping, return a 422 with `{ "error": "content_too_short" }`
+- [ ] PDF / non-HTML content-types are rejected immediately (future story could handle PDFs)
+
+### Technical Notes
+- Use `axios` (already a NestJS dependency) for the HTTP fetch with a custom timeout config
+- Use `cheerio` for HTML parsing (add as dependency: `npm install cheerio`)
+- SSRF check: use `dns.lookup` + IP range validation before the actual fetch, or use a library like `ssrf-req-filter`
+- New `DomainController` route: `POST /domain/extract-description`
+- Rate limiting: use `@nestjs/throttler` with a custom TTL/limit override for this specific endpoint
+- Frontend: new method `extractDescriptionFromUrl(url: string): Observable<{ description: string }>` in `DomainService`
+
+---
+
+## US-031 · LLM Model Selection — Standard vs. Premium
+
+**Status**: ❌ To do
+
+**As a** user who wants higher-quality name suggestions,
+**I want** to choose between a standard model (fast, economical) and a premium model (more creative, more accurate),
+**So that** I can decide the right trade-off between credit cost and output quality for my project.
+
+### Context
+The backend currently uses `gpt-3.5-turbo` for all AI calls (keyword generation, domain idea generation, description reformulation, name analysis). A premium tier using `gpt-4o` would produce more creative and contextually relevant suggestions, at a higher per-call cost that is passed on to the user as extra credits consumed.
+
+### Pricing Model
+
+| Tier | Model | Cost per domain suggestion | Cost per analysis |
+|------|-------|---------------------------|-------------------|
+| Standard | `gpt-3.5-turbo` | 1 credit | 1 credit |
+| Premium | `gpt-4o` | 3 credits | 2 credits |
+
+### Acceptance Criteria
+
+#### Frontend — Model Selector (Step 1)
+- [ ] A segmented control or radio group is displayed in Step 1 below the description textarea:
+  - **Standard** — GPT-3.5 · 1 credit / suggestion
+  - **Premium** — GPT-4o · 3 credits / suggestion ✨
+- [ ] The selected tier is persisted in the wizard state signal and sent with every API request
+- [ ] When switching to Premium, a brief inline tooltip or note reads: "More creative results — uses 3× more credits"
+- [ ] The current credit balance is visible nearby so the user can evaluate affordability
+- [ ] The model choice is saved with the project (restored on project reload)
+
+#### Backend — Model Routing
+- [ ] All `DomainService` methods (`reformulateDescription`, `generateKeywords`, `generateDomainIdeas`, `recheckDomainWithAI`, `analyzeNameWithAI`, `extractDescription`) accept an optional `model: 'standard' | 'premium'` parameter (default: `'standard'`)
+- [ ] A private helper `resolveModel(tier)` maps tier → OpenAI model ID:
+  - `'standard'` → `'gpt-3.5-turbo'`
+  - `'premium'` → `'gpt-4o'`
+- [ ] The `SearchDomainsDto` gains a `tier?: 'standard' | 'premium'` field (default `'standard'`)
+- [ ] Credit deduction in `DomainController` applies the correct multiplier:
+  - Standard: 1 credit per available domain found (current behaviour)
+  - Premium: 3 credits per available domain found
+- [ ] Analysis (`POST /domain/analyze`) also deducts 1 (standard) or 2 (premium) credits based on the tier stored on the project or passed in the request
+
+#### Backend — Safeguards
+- [ ] If the user's total credit balance < multiplier × requested batch size, the API returns a 402 with `{ "error": "insufficient_credits", "required": N, "available": M }` before any OpenAI call is made
+- [ ] The premium model is only available to authenticated users (public/anonymous users are locked to Standard)
+
+### Technical Notes
+- The 6 `openai.chat.completions.create({ model: 'gpt-3.5-turbo', ... })` calls in `domain.service.ts` are the only change points — replace the hardcoded string with `this.resolveModel(tier)`
+- `gpt-4o` supports `response_format: { type: 'json_object' }` (same as gpt-3.5-turbo) — no prompt changes needed
+- Store `tier` on the `Project` entity as an optional string field (migration required); default `'standard'` for existing projects
+- The `DomainSuggestion` entity can optionally store the model used for traceability/debugging
+
+---
+
+## US-032 · Long-Form "Phrase" Domain Names for Local Market Targeting
+
+**Status**: ❌ To do
+
+**As a** user who has selected a local/regional market target,
+**I want** the app to also suggest phrase-based domain names (longer, conversational names in my target language),
+**So that** I can explore a style of domain that is natural-sounding, memorable in the local language, and often still available.
+
+### Context
+When targeting a local market (US-001), short invented names may feel foreign or SEO-weak. Phrase-based domains (e.g. `monboulangerparis.fr`, `jetrouvemonpsy.fr`, `deinhandwerker.de`) are a proven alternative: they rank on long-tail keywords, are easy to remember and type, and tend to have much higher availability than short names. This generation mode complements — but does not replace — the standard short-name search.
+
+### Acceptance Criteria
+
+#### Frontend — Step 2 (Keywords / Options)
+- [ ] When `isLocal` is active (US-001), a toggle appears in Step 2: **"Also suggest phrase-style domains"** (off by default)
+- [ ] When enabled, the search request includes `phraseDomains: true`
+- [ ] In the results table (Step 3), phrase-style domains are visually distinguished with a badge or icon (e.g. 📝 or "phrase") so the user can tell them apart from short names
+- [ ] The toggle state is persisted in the wizard state and saved with the project
+
+#### Backend — Phrase Domain Generation
+- [ ] When `phraseDomains: true`, `DomainService.generateDomainIdeas()` runs a **second, separate prompt** targeting phrase-style names:
+  - Prompt instruction (adapted to the active locale):
+    > "Generate 10 domain name ideas that are natural phrases or short sentences in {locale} language. They should be 3–6 words long, use no hyphens, and describe what the product or service does in everyday language. Examples for French: `jetrouvemonpsy`, `monboulangerparis`, `lecoachdevotreequipe`. Return only a JSON array of lowercase strings without spaces or dots."
+  - The phrase prompt runs in parallel with (or after) the standard short-name prompt
+  - The resulting names are merged into the candidate list before Whois verification
+- [ ] Phrase domains are flagged with `style: 'phrase'` in the `DomainSuggestion` entity (new optional field, default `'standard'`)
+- [ ] Credit deduction is identical to standard suggestions (1 credit per domain found available, or the premium multiplier if US-031 is active)
+- [ ] `phraseDomains` is only accepted when `locale` is set (guard: returns 400 if `phraseDomains: true` and no locale)
+
+#### Whois Verification
+- [ ] Phrase-style domains go through the same Whois verification pipeline as standard domains — no special handling required
+
+### Technical Notes
+- The second prompt can be added as a private `generatePhraseDomainIdeas(description, keywords, locale, model)` method in `DomainService`, following the same structure as `generateDomainIdeas()`
+- Both prompts can be fired concurrently with `Promise.all` to keep latency low
+- If the total candidate pool (standard + phrase) exceeds the target batch size, prioritise standard names first; include phrase names up to the remaining quota
+- The `style` column on `DomainSuggestion` is a simple `varchar` with default `'standard'`; migration required
+- Frontend badge: a small `p-tag` with severity `secondary` and value "phrase" appended next to the domain name in the table
+
+---
+
 ## Priority / Effort Matrix (initial estimate)
 
-| Story | Value | Effort | Priority |
-|-------|-------|--------|----------|
-| US-007 · Multi-extension input | High | Low | 🔴 Now |
-| US-003 · Scroll overlap fix | High | Low | 🔴 Now |
-| US-002 · Copy to clipboard | High | Low | 🔴 Now |
-| US-004 · Locale from Keycloak | Medium | Low | 🟠 Next |
-| US-006 · Landing page redesign | High | Medium | 🟠 Next |
-| US-001 · International/local toggle | Medium | Medium | 🟠 Next |
-| US-009 · Timeout warning | Medium | Low | 🟠 Next |
-| US-005 · Pros & cons analysis | High | High | 🟡 Later |
-| US-010 · Streaming results (SSE) | High | High | 🟡 Later |
-| US-011 · Manual row entry | Medium | Low | 🟠 Next |
-| US-012 · MCP server | High | Medium | 🟡 Later |
-| US-013 · Teams / Claude skill / Marketplace | High | High | 🔵 Future |
-| US-014 · Stripe packs + subscription | High | High | 🟠 Next |
-| US-015 · Exclude already-evaluated candidates | High | Low | 🟠 Next |
-| US-016 · Memorable brand criteria in prompt | High | Low | 🟠 Next |
-| US-017 · Extended European language support | Medium | Low | 🟠 Next |
-| US-018 · Favourite comparison tool | Medium | Medium | 🟡 Later |
-| US-019 · Configurable batch size ("More") | Medium | Low | 🟠 Next |
-| US-020 · Feedback form + 1 000 credit reward | High | Medium | 🟠 Next |
-| US-021 · Explain credit cost in UI | High | Low | 🔴 Now |
-| US-022 · "Buy on registrar" button (OVH, Namecheap, Gandi) | High | Low | 🟠 Next |
-| US-023 · Landing page — brand name angle & SEO | High | Low | 🟠 Next |
-| US-024 · Keycloak theme — align with app design | Medium | Medium | 🟡 Later |
-| US-025 · Auto-favourite manually added domains | High | Low | 🔴 Now |
-| US-026 · Refined analysis display — star gauge + detail card | High | Medium | 🟠 Next |
-| US-027 · Move streaming progress panel position | Medium | Low | 🔴 Now |
-| US-028 · Fix dropdown menus rendering too low on scroll | High | Low | 🔴 Now |
+| Story | Value | Effort | Priority | Status |
+|-------|-------|--------|----------|--------|
+| US-007 · Multi-extension input | High | Low | 🔴 Now | ✅ Done |
+| US-003 · Scroll overlap fix | High | Low | 🔴 Now | ✅ Done |
+| US-002 · Copy to clipboard | High | Low | 🔴 Now | ✅ Done |
+| US-021 · Explain credit cost in UI | High | Low | 🔴 Now | ⚠️ Partial |
+| US-025 · Auto-favourite manually added domains | High | Low | 🔴 Now | ✅ Done |
+| US-027 · Move streaming progress panel position | Medium | Low | 🔴 Now | ✅ Done |
+| US-028 · Fix dropdown menus rendering too low on scroll | High | Low | 🔴 Now | ⚠️ Partial |
+| US-004 · Locale from Keycloak | Medium | Low | 🟠 Next | ✅ Done |
+| US-006 · Landing page redesign | High | Medium | 🟠 Next | ✅ Done |
+| US-001 · International/local toggle | Medium | Medium | 🟠 Next | ✅ Done |
+| US-009 · Timeout warning | Medium | Low | 🟠 Next | ✅ Done |
+| US-011 · Manual row entry | Medium | Low | 🟠 Next | ✅ Done |
+| US-014 · Stripe packs + subscription | High | High | 🟠 Next | ✅ Done |
+| US-015 · Exclude already-evaluated candidates | High | Low | 🟠 Next | ✅ Done |
+| US-016 · Memorable brand criteria in prompt | High | Low | 🟠 Next | ✅ Done |
+| US-017 · Extended European language support | Medium | Low | 🟠 Next | ⚠️ Partial |
+| US-019 · Configurable batch size ("More") | Medium | Low | 🟠 Next | ⚠️ Partial |
+| US-020 · Feedback form + 1 000 credit reward | High | Medium | 🟠 Next | ❌ To do |
+| US-022 · "Buy on registrar" button (OVH, Namecheap, Gandi) | High | Low | 🟠 Next | ❌ To do |
+| US-023 · Landing page — brand name angle & SEO | High | Low | 🟠 Next | ⚠️ Partial |
+| US-026 · Refined analysis display — star gauge + detail card | High | Medium | 🟠 Next | ✅ Done |
+| US-029 · Subscription management & self-service cancellation | High | Medium | 🟠 Next | ❌ To do |
+| US-030 · Import description from a web page URL | High | Medium | 🟠 Next | ❌ To do |
+| US-031 · LLM model selection — Standard vs. Premium | High | Medium | 🟠 Next | ❌ To do |
+| US-032 · Long-form "phrase" domain names for local targeting | Medium | Low | 🟠 Next | ❌ To do |
+| US-005 · Pros & cons analysis | High | High | 🟡 Later | ✅ Done |
+| US-010 · Streaming results (SSE) | High | High | 🟡 Later | ✅ Done |
+| US-012 · MCP server | High | Medium | 🟡 Later | ❌ To do |
+| US-018 · Favourite comparison tool | Medium | Medium | 🟡 Later | ❌ To do |
+| US-024 · Keycloak theme — align with app design | Medium | Medium | 🟡 Later | ❌ To do |
+| US-013 · Teams / Claude skill / Marketplace | High | High | 🔵 Future | ❌ To do |
