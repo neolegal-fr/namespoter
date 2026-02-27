@@ -1,5 +1,6 @@
 {
   "realm": "namespoter",
+  "displayName": "NameSpotter",
   "enabled": true,
   "loginTheme": "namespoter",
   "accountTheme": "keycloak",
