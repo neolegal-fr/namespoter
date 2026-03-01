@@ -11,11 +11,11 @@ export class User {
   @Column({ nullable: true })
   email: string;
 
-  /** Crédits issus de l'abonnement mensuel (remis à zéro à chaque renouvellement) */
+  /** Crédits gratuits mensuels (remis à 100 chaque mois via lazy reset) */
   @Column({ default: 100 })
   credits: number;
 
-  /** Crédits achetés en extra (permanents, jamais remis à zéro) */
+  /** Crédits achetés en pack (permanents, jamais remis à zéro) */
   @Column({ default: 0 })
   extraCredits: number;
 
@@ -23,17 +23,9 @@ export class User {
   @Column({ nullable: true })
   stripeCustomerId: string;
 
-  /** ID abonnement Stripe actif */
-  @Column({ nullable: true })
-  stripeSubscriptionId: string;
-
-  /** Date de fin de la période d'abonnement en cours (mise à jour par webhook invoice.paid) */
+  /** Dernière date de reset des crédits gratuits (lazy reset mensuel) */
   @Column({ nullable: true, type: 'datetime' })
-  subscriptionCurrentPeriodEnd: Date | null;
-
-  /** Date à laquelle l'abonnement sera annulé (cancel_at_period_end) ; null si actif normalement */
-  @Column({ nullable: true, type: 'datetime' })
-  subscriptionCancelledAt: Date | null;
+  lastFreeReset: Date | null;
 
   get totalCredits(): number {
     return this.credits + this.extraCredits;

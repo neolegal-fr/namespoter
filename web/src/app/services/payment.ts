@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config';
 
+export type PackType = 'decouverte' | 'pro' | 'max';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,19 +13,11 @@ export class PaymentService {
 
   constructor(private http: HttpClient, private config: ConfigService) {}
 
-  createSubscriptionCheckout(): Observable<{ url: string }> {
-    return this.http.post<{ url: string }>(`${this.apiUrl}/checkout/subscription`, {});
+  createPackCheckout(packType: PackType): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.apiUrl}/checkout/pack`, { packType });
   }
 
-  createPackCheckout(): Observable<{ url: string }> {
-    return this.http.post<{ url: string }>(`${this.apiUrl}/checkout/pack`, {});
-  }
-
-  openPortal(): Observable<{ url: string }> {
-    return this.http.get<{ url: string }>(`${this.apiUrl}/portal`);
-  }
-
-  fulfillSession(sessionId: string): Observable<{ creditsAdded: number; totalCredits: number; subscriptionCredits: number; extraCredits: number; hasActiveSubscription: boolean }> {
+  fulfillSession(sessionId: string): Observable<{ creditsAdded: number; totalCredits: number; freeCredits: number; packCredits: number }> {
     return this.http.post<any>(`${this.apiUrl}/fulfill-session`, { sessionId });
   }
 }

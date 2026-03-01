@@ -12,10 +12,9 @@ export class UsersController {
     return {
       keycloakId: user.keycloakId,
       email: user.email,
-      subscriptionCredits: user.credits,
-      extraCredits: user.extraCredits,
+      freeCredits: user.credits,
+      packCredits: user.extraCredits,
       totalCredits: user.totalCredits,
-      hasActiveSubscription: !!user.stripeSubscriptionId,
     };
   }
 
@@ -29,9 +28,8 @@ export class UsersController {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
     return {
       credits: user.totalCredits,
-      subscriptionCredits: user.credits,
-      extraCredits: user.extraCredits,
-      hasActiveSubscription: !!user.stripeSubscriptionId,
+      freeCredits: user.credits,
+      packCredits: user.extraCredits,
     };
   }
 }

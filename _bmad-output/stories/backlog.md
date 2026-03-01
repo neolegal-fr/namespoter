@@ -1302,4 +1302,84 @@ The current table view works well on desktop but is overwhelming on mobile and c
 | US-035 · Keycloak email theme — branded emails | Medium | Low | 🟡 Later | ✅ Done |
 | US-036 · Keycloak account console theme | Low | Medium | 🟡 Later | ✅ Done |
 | US-037 · Keycloak registration & password-reset polish | Medium | Low | 🟡 Later | ✅ Done |
+| US-038 · No-subscription pricing — Free plan + credit packs | High | Medium | 🔴 Now | ❌ To do |
+| US-038 · No-subscription pricing — Free plan + credit packs | High | Medium | 🔴 Now | ❌ To do |
 | US-013 · Teams / Claude skill / Marketplace | High | High | 🔵 Future | ❌ To do |
+
+---
+
+## US-038 · No-Subscription Pricing — Free Plan + Credit Packs
+
+**Status**: ❌ To do
+
+**As a** potential user hesitant to commit to yet another monthly subscription,
+**I want to** access Namorama for free and buy credits only when I need them,
+**So that** I can try the product without friction and scale my usage at my own pace.
+
+### Context & Positioning
+
+The current subscription model (5 €/month) creates an adoption barrier. The new pricing strategy removes this friction entirely: no subscription, no recurring charge. The tagline **"Vous n'aimez pas les abonnements ? Nous non plus."** anchors the value proposition.
+
+Every registered user gets **100 free credits per month**, enough to run meaningful searches. Users who need more simply buy a one-time credit pack.
+
+### Pricing Grid
+
+| Plan | Price | Credits | Price per credit | Target user |
+|------|-------|---------|-----------------|-------------|
+| **Free** | 0 € | 100 / month | — | Discovery, occasional use |
+| **Pack Découverte** | 9 € | 500 | 0,018 € | Freelancers, small projects |
+| **Pack Pro** | 19 € | 2 000 | 0,0095 € | Founders, agencies |
+| **Pack Max** | 29 € | 5 000 | 0,0058 € | Power users, studios |
+
+Credits are permanent (no expiry on purchased packs). The monthly free allocation resets on the 1st of each month.
+
+### Acceptance Criteria
+
+#### Backend
+- [ ] Remove subscription plan logic (`essential` plan, Stripe subscription checkout)
+- [ ] Keep Stripe one-time payment flow for credit packs
+- [ ] Add 3 pack tiers in Stripe (Découverte 9 €, Pro 19 €, Max 29 €) with corresponding `STRIPE_PACK_*_PRICE_ID` env vars
+- [ ] Free monthly allocation: on the 1st of each month, top up `subscriptionCredits` to 100 for all users (cron job or lazy reset on first request of the month)
+- [ ] API: `GET /users/credits` returns `{ freeCredits, packCredits, total }` — free credits are consumed first
+- [ ] Credit deduction order: free credits first, then pack credits
+
+#### Frontend — Pricing / Billing dialog
+- [ ] Replace current billing dialog content with the new no-subscription layout
+- [ ] Header: **"Vous n'aimez pas les abonnements ? Nous non plus."** (bold, primary color)
+- [ ] Sub-header: "100 crédits gratuits chaque mois, et des packs sans engagement si vous en avez besoin."
+- [ ] Display current free credit balance with monthly reset date (e.g. "74 / 100 crédits gratuits — renouvellement le 1er avril")
+- [ ] Pack cards (3 cards side by side or stacked on mobile):
+  - Découverte — 9 € — 500 crédits
+  - Pro — 19 € — 2 000 crédits *(badge "Populaire")*
+  - Max — 29 € — 5 000 crédits
+- [ ] Each card shows price per credit in muted text
+- [ ] "Acheter" button on each card triggers Stripe one-time checkout
+- [ ] Pack credit balance displayed separately: "X crédits pack disponibles"
+- [ ] Remove all subscription-related UI (subscribe button, cancel flow, renewal date for subscription)
+
+#### Frontend — Landing page / homepage
+- [ ] Add a pricing section on the landing page with the same 3-pack grid
+- [ ] Tagline visible above the pricing section: "Vous n'aimez pas les abonnements ? Nous non plus."
+- [ ] Free plan highlighted prominently: "Commencez gratuitement — 100 crédits offerts chaque mois, sans carte bancaire"
+- [ ] i18n keys for FR and EN
+
+#### i18n (FR / EN)
+- [ ] `BILLING.TAGLINE` — "Vous n'aimez pas les abonnements ? Nous non plus." / "Not a fan of subscriptions? Neither are we."
+- [ ] `BILLING.FREE_DESC` — "100 crédits offerts chaque mois, sans engagement" / "100 free credits every month, no strings attached"
+- [ ] `BILLING.PACK_DECOUVERTE_NAME` — "Pack Découverte" / "Starter Pack"
+- [ ] `BILLING.PACK_PRO_NAME` — "Pack Pro" / "Pro Pack"
+- [ ] `BILLING.PACK_MAX_NAME` — "Pack Max" / "Max Pack"
+- [ ] `BILLING.FREE_RESET` — "Renouvellement le {{date}}" / "Resets on {{date}}"
+- [ ] `BILLING.PACK_BALANCE` — "{{n}} crédits pack" / "{{n}} pack credits"
+
+### Technical Notes
+
+- Remove `STRIPE_ESSENTIAL_PRICE_ID` and `STRIPE_SUBSCRIPTION_*` env vars (or keep for backward compat during transition)
+- Add `STRIPE_PACK_DECOUVERTE_PRICE_ID`, `STRIPE_PACK_PRO_PRICE_ID`, `STRIPE_PACK_MAX_PRICE_ID`
+- Monthly reset: simplest approach is a `lastFreeReset: Date` column on `user` entity — on credit check, if `lastFreeReset` < start of current month, reset `subscriptionCredits = 100` and update `lastFreeReset`
+- Existing users with active subscriptions: migrate their `subscriptionCredits` balance to `packCredits`, cancel Stripe subscription via API, communicate change by email
+
+### Out of Scope
+- Annual plans, team/org plans
+- Credit gifting or promo codes (separate story)
+- Usage analytics dashboard

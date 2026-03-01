@@ -7,11 +7,19 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import { StripeEvent } from './entities/stripe-event.entity';
 
-/** Crédits offerts par l'abonnement mensuel */
-const SUBSCRIPTION_QUOTA = 2000;
+export type PackType = 'decouverte' | 'pro' | 'max';
 
-/** Crédits offerts par le pack ponctuel */
-const PACK_CREDITS = 1000;
+const PACK_CREDITS: Record<PackType, number> = {
+  decouverte: 500,
+  pro: 2000,
+  max: 5000,
+};
+
+const PACK_PRICE_ENV: Record<PackType, string> = {
+  decouverte: 'STRIPE_PACK_DECOUVERTE_PRICE_ID',
+  pro: 'STRIPE_PACK_PRO_PRICE_ID',
+  max: 'STRIPE_PACK_MAX_PRICE_ID',
+};
 
 @Injectable()
 export class PaymentsService {
@@ -46,60 +54,22 @@ export class PaymentsService {
     return customer.id;
   }
 
-  /** Crée une session Stripe Checkout pour l'abonnement mensuel */
-  async createSubscriptionCheckout(user: User): Promise<string> {
+  /** Crée une session Stripe Checkout pour un pack de crédits (decouverte | pro | max) */
+  async createPackCheckout(user: User, packType: PackType): Promise<string> {
     const customerId = await this.ensureStripeCustomer(user);
-
-    const session = await this.stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer: customerId,
-      line_items: [
-        {
-          price: this.configService.get<string>('STRIPE_ESSENTIAL_PRICE_ID'),
-          quantity: 1,
-        },
-      ],
-      success_url: `${this.frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${this.frontendUrl}/payment/cancel`,
-      metadata: { keycloakId: user.keycloakId, type: 'subscription' },
-      invoice_creation: undefined, // géré automatiquement par Stripe en mode subscription
-    });
-
-    return session.url!;
-  }
-
-  /** Crée une session Stripe Checkout pour un pack de crédits ponctuel */
-  async createPackCheckout(user: User): Promise<string> {
-    const customerId = await this.ensureStripeCustomer(user);
+    const priceId = this.configService.get<string>(PACK_PRICE_ENV[packType]);
 
     const session = await this.stripe.checkout.sessions.create({
       mode: 'payment',
       customer: customerId,
-      line_items: [
-        {
-          price: this.configService.get<string>('STRIPE_PACK_PRICE_ID'),
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${this.frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${this.frontendUrl}/payment/cancel`,
-      metadata: { keycloakId: user.keycloakId, type: 'pack' },
+      metadata: { keycloakId: user.keycloakId, type: 'pack', packType },
       invoice_creation: { enabled: true },
     });
 
     return session.url!;
-  }
-
-  /** Crée une session Stripe Customer Portal */
-  async createPortalSession(user: User): Promise<string> {
-    const customerId = await this.ensureStripeCustomer(user);
-
-    const session = await this.stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${this.frontendUrl}/`,
-    });
-
-    return session.url;
   }
 
   /** Vérifie si une session a déjà été traitée (idempotence) */
@@ -130,7 +100,6 @@ export class PaymentsService {
       return { creditsAdded: 0 };
     }
 
-    // Vérifier que la session appartient bien à cet utilisateur
     if (session.metadata?.keycloakId !== keycloakId) {
       this.logger.warn(`Session ${sessionId} n'appartient pas à ${keycloakId}`);
       return { creditsAdded: 0 };
@@ -139,21 +108,11 @@ export class PaymentsService {
     await this.markProcessed(sessionId, session.metadata?.type ?? 'unknown');
 
     if (session.mode === 'payment' && session.metadata?.type === 'pack') {
-      await this.usersService.addExtraCredits(keycloakId, PACK_CREDITS);
-      this.logger.log(`fulfillSession: ${PACK_CREDITS} crédits extra ajoutés pour ${keycloakId}`);
-      return { creditsAdded: PACK_CREDITS };
-    }
-
-    if (session.mode === 'subscription' && session.subscription) {
-      await this.usersService.setStripeSubscriptionId(keycloakId, session.subscription as string);
-      await this.usersService.resetSubscriptionCredits(keycloakId, SUBSCRIPTION_QUOTA);
-      // Stocker la date de fin de période depuis Stripe
-      try {
-        const sub = await this.stripe.subscriptions.retrieve(session.subscription as string) as any;
-        await this.usersService.setSubscriptionPeriodEnd(keycloakId, new Date(sub.current_period_end * 1000));
-      } catch { /* non bloquant */ }
-      this.logger.log(`fulfillSession: abonnement activé pour ${keycloakId}`);
-      return { creditsAdded: SUBSCRIPTION_QUOTA };
+      const packType = (session.metadata?.packType ?? 'decouverte') as PackType;
+      const credits = PACK_CREDITS[packType] ?? PACK_CREDITS.decouverte;
+      await this.usersService.addExtraCredits(keycloakId, credits);
+      this.logger.log(`fulfillSession: ${credits} crédits pack (${packType}) ajoutés pour ${keycloakId}`);
+      return { creditsAdded: credits };
     }
 
     return { creditsAdded: 0 };
@@ -173,81 +132,25 @@ export class PaymentsService {
 
     this.logger.log(`Webhook reçu: ${event.type}`);
 
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const keycloakId = session.metadata?.keycloakId;
-        if (!keycloakId) break;
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const keycloakId = session.metadata?.keycloakId;
+      if (!keycloakId) return;
 
-        if (await this.isAlreadyProcessed(session.id)) {
-          this.logger.log(`Webhook: session déjà traitée via fulfillSession: ${session.id}`);
-          break;
-        }
-        await this.markProcessed(session.id, session.metadata?.type ?? 'unknown');
-
-        if (session.mode === 'payment' && session.metadata?.type === 'pack') {
-          await this.usersService.addExtraCredits(keycloakId, PACK_CREDITS);
-          this.logger.log(`Webhook: Pack ${PACK_CREDITS} crédits ajouté pour ${keycloakId}`);
-        }
-        if (session.mode === 'subscription' && session.subscription) {
-          await this.usersService.setStripeSubscriptionId(keycloakId, session.subscription as string);
-          await this.usersService.resetSubscriptionCredits(keycloakId, SUBSCRIPTION_QUOTA);
-          this.logger.log(`Webhook: Abonnement activé pour ${keycloakId}`);
-        }
-        break;
+      if (await this.isAlreadyProcessed(session.id)) {
+        this.logger.log(`Webhook: session déjà traitée via fulfillSession: ${session.id}`);
+        return;
       }
+      await this.markProcessed(session.id, session.metadata?.type ?? 'unknown');
 
-      case 'invoice.paid': {
-        // Renouvellement mensuel → remettre les crédits d'abonnement à leur quota
-        const invoice = event.data.object as Stripe.Invoice;
-        if (invoice.billing_reason === 'subscription_cycle' && invoice.customer) {
-          const user = await this.usersService.findByStripeCustomerId(invoice.customer as string);
-          if (user) {
-            await this.usersService.resetSubscriptionCredits(user.keycloakId, SUBSCRIPTION_QUOTA);
-            // Mettre à jour la date de fin de période
-            if ((invoice as any).period_end) {
-              await this.usersService.setSubscriptionPeriodEndByCustomerId(
-                invoice.customer as string,
-                new Date((invoice as any).period_end * 1000),
-              );
-            }
-            this.logger.log(`Renouvellement abonnement : ${SUBSCRIPTION_QUOTA} crédits pour ${user.keycloakId}`);
-          }
-        }
-        break;
+      if (session.mode === 'payment' && session.metadata?.type === 'pack') {
+        const packType = (session.metadata?.packType ?? 'decouverte') as PackType;
+        const credits = PACK_CREDITS[packType] ?? PACK_CREDITS.decouverte;
+        await this.usersService.addExtraCredits(keycloakId, credits);
+        this.logger.log(`Webhook: ${credits} crédits pack (${packType}) ajoutés pour ${keycloakId}`);
       }
-
-      case 'customer.subscription.updated': {
-        // Annulation programmée (cancel_at_period_end) ou réactivation
-        const subscription = event.data.object as Stripe.Subscription;
-        if (subscription.customer) {
-          if (subscription.cancel_at_period_end && subscription.cancel_at) {
-            await this.usersService.setSubscriptionCancelledAt(
-              subscription.customer as string,
-              new Date(subscription.cancel_at * 1000),
-            );
-            this.logger.log(`Annulation programmée pour customer ${subscription.customer}`);
-          } else if (!subscription.cancel_at_period_end) {
-            // Réactivation → effacer la date d'annulation
-            await this.usersService.setSubscriptionCancelledAt(subscription.customer as string, null);
-            this.logger.log(`Annulation annulée pour customer ${subscription.customer}`);
-          }
-        }
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        // Abonnement résilié → remettre les crédits d'abonnement à 0
-        const subscription = event.data.object as Stripe.Subscription;
-        if (subscription.customer) {
-          await this.usersService.cancelSubscription(subscription.customer as string);
-          this.logger.log(`Abonnement résilié pour customer ${subscription.customer}`);
-        }
-        break;
-      }
-
-      default:
-        this.logger.debug(`Événement non géré: ${event.type}`);
+    } else {
+      this.logger.debug(`Événement non géré: ${event.type}`);
     }
   }
 }

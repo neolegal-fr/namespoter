@@ -12,7 +12,7 @@ import {
 import type { Request } from 'express';
 import type { RawBodyRequest as RawBodyReq } from '@nestjs/common';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
-import { PaymentsService } from './payments.service';
+import { PaymentsService, PackType } from './payments.service';
 import { UsersService } from '../users/users.service';
 
 @Controller('payments')
@@ -24,27 +24,18 @@ export class PaymentsController {
     private readonly usersService: UsersService,
   ) {}
 
-  /** Crée une session Checkout pour l'abonnement mensuel */
-  @Post('checkout/subscription')
-  async checkoutSubscription(@AuthenticatedUser() keycloakUser: any) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub, keycloakUser.email);
-    const url = await this.paymentsService.createSubscriptionCheckout(user);
-    return { url };
-  }
-
-  /** Crée une session Checkout pour un pack de crédits ponctuel */
+  /** Crée une session Checkout pour un pack de crédits (decouverte | pro | max) */
   @Post('checkout/pack')
-  async checkoutPack(@AuthenticatedUser() keycloakUser: any) {
+  async checkoutPack(
+    @Body('packType') packType: PackType,
+    @AuthenticatedUser() keycloakUser: any,
+  ) {
+    const validTypes: PackType[] = ['decouverte', 'pro', 'max'];
+    if (!validTypes.includes(packType)) {
+      throw new BadRequestException(`packType invalide : ${packType}`);
+    }
     const user = await this.usersService.findOrCreate(keycloakUser.sub, keycloakUser.email);
-    const url = await this.paymentsService.createPackCheckout(user);
-    return { url };
-  }
-
-  /** Crée une session Stripe Customer Portal */
-  @Get('portal')
-  async portal(@AuthenticatedUser() keycloakUser: any) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub, keycloakUser.email);
-    const url = await this.paymentsService.createPortalSession(user);
+    const url = await this.paymentsService.createPackCheckout(user, packType);
     return { url };
   }
 
@@ -62,9 +53,8 @@ export class PaymentsController {
     return {
       creditsAdded: result.creditsAdded,
       totalCredits: user.totalCredits,
-      subscriptionCredits: user.credits,
-      extraCredits: user.extraCredits,
-      hasActiveSubscription: !!user.stripeSubscriptionId,
+      freeCredits: user.credits,
+      packCredits: user.extraCredits,
     };
   }
 
