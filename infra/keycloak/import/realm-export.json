@@ -1,0 +1,60 @@
+{
+  "realm": "namespoter",
+  "displayName": "Namorama",
+  "enabled": true,
+  "loginTheme": "namespoter",
+  "accountTheme": "namespoter",
+  "adminTheme": "keycloak",
+  "emailTheme": "namespoter",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "clients": [
+    {
+      "clientId": "namespoter-web",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "rootUrl": "https://namorama.com",
+      "baseUrl": "https://namorama.com",
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "https://namorama.com/*",
+        "https://www.namorama.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "https://namorama.com",
+        "https://www.namorama.com"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:4200##https://namorama.com"
+      }
+    },
+    {
+      "clientId": "namespoter-api",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret-tres-confidentiel-123",
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "redirectUris": [],
+      "webOrigins": []
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Standard User"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "user"
+  ]
+}

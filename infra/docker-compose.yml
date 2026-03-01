@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mariadb:
     image: mariadb:10.6
@@ -29,7 +27,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json
+      - ./keycloak/import:/opt/keycloak/data/import
       - ./keycloak/themes/namespoter:/opt/keycloak/themes/namespoter
     depends_on:
       - mariadb
