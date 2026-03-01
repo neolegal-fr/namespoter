@@ -20,6 +20,7 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Dialog } from 'primeng/dialog';
 import { SplitButton } from 'primeng/splitbutton';
 import { Toast } from 'primeng/toast';
+import { Menu } from 'primeng/menu';
 import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { UserService } from '../../services/user';
 import { ProjectService } from '../../services/project';
@@ -47,6 +48,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     Dialog,
     SplitButton,
     Toast,
+    Menu,
     TranslateModule
   ],
   templateUrl: './wizard.html',
@@ -155,6 +157,27 @@ export class WizardComponent implements OnInit {
     },
   ]);
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
+
+  // ─── US-022 : Buy on registrar ────────────────────
+  registrarMenuItems = signal<MenuItem[]>([]);
+
+  private readonly REGISTRARS = [
+    {
+      label: 'OVH',
+      icon: 'pi pi-shopping-cart',
+      buildUrl: (domain: string) => `https://www.ovhcloud.com/fr/domains/domain-name-search/?q=${domain}`,
+    },
+    {
+      label: 'Namecheap',
+      icon: 'pi pi-shopping-cart',
+      buildUrl: (domain: string) => `https://www.namecheap.com/domains/registration/results/?domain=${domain}`,
+    },
+    {
+      label: 'Gandi',
+      icon: 'pi pi-shopping-cart',
+      buildUrl: (domain: string, name: string) => `https://www.gandi.net/fr/domain/suggest?q=${name}`,
+    },
+  ];
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
   private searchTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
@@ -477,6 +500,18 @@ export class WizardComponent implements OnInit {
 
   getDomainByName(name: string): any {
     return this.domains().find(d => d.name === name) ?? null;
+  }
+
+  openBuyMenu(name: string, ext: string, event: Event, menu: Menu) {
+    const domain = `${name}${ext}`;
+    this.registrarMenuItems.set(
+      this.REGISTRARS.map(r => ({
+        label: r.label,
+        icon: r.icon,
+        command: () => window.open(r.buildUrl(domain, name), '_blank', 'noopener'),
+      }))
+    );
+    menu.toggle(event);
   }
 
   parseAnalysisScore(analysis: string | null): number {

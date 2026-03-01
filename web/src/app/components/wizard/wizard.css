@@ -24,6 +24,19 @@
     background: var(--p-surface-50, #f9fafb);
 }
 
+/* ─── US-022 : bouton panier registrar ──────────── */
+.buy-btn {
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.domain-row:hover .buy-btn {
+    opacity: 1;
+}
+/* Toujours visible sur écrans tactiles */
+@media (hover: none) {
+    .buy-btn { opacity: 1; }
+}
+
 /* Hover sur le bouton copier tableau */
 .copy-table-btn:hover {
     color: var(--p-primary-color) !important;

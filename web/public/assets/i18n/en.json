@@ -106,6 +106,7 @@
       "MORE_BTN": "10 more suggestions",
       "CREDITS_LEFT": "{{n}} credits left",
       "BUY_CREDITS_BTN": "Buy credits",
+      "BUY_TOOLTIP": "Buy this domain",
       "NEW_PROJECT_BTN": "New project",
       "COPY_TABLE": "Copy table",
       "COPIED": "Copied!",
