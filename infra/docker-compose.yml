@@ -1,7 +1,7 @@
 services:
   mariadb:
     image: mariadb:10.6
-    container_name: namespoter-db
+    container_name: namorama-db
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_USER: admin
@@ -14,7 +14,7 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.5.4
-    container_name: namespoter-auth
+    container_name: namorama-auth
     environment:
       KC_DB: mariadb
       KC_DB_URL: jdbc:mariadb://mariadb:3306/keycloak
@@ -28,7 +28,7 @@ services:
       - "8080:8080"
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import
-      - ./keycloak/themes/namespoter:/opt/keycloak/themes/namespoter
+      - ./keycloak/themes/namorama:/opt/keycloak/themes/namorama
     depends_on:
       - mariadb
 

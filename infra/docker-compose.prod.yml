@@ -2,13 +2,13 @@ version: '3.8'
 
 services:
   api:
-    image: git.neolegal.fr/neolegal/namespoter-api:latest
+    image: git.neolegal.fr/neolegal/namorama-api:latest
     restart: unless-stopped
     environment:
-      DATABASE_URL: mysql://${MARIADB_USER}:${MARIADB_PASSWORD}@192.168.1.95:3306/namespoter
+      DATABASE_URL: mysql://${MARIADB_USER}:${MARIADB_PASSWORD}@192.168.1.95:3306/namorama
       KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_URL}
-      KEYCLOAK_REALM: namespoter
-      KEYCLOAK_CLIENT_ID: namespoter-api
+      KEYCLOAK_REALM: namorama
+      KEYCLOAK_CLIENT_ID: namorama-api
       KEYCLOAK_SECRET: ${KEYCLOAK_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       FRONTEND_URL: ${FRONTEND_URL}
@@ -20,7 +20,7 @@ services:
       - "127.0.0.1:3000:3000"
 
   web:
-    image: git.neolegal.fr/neolegal/namespoter-web:latest
+    image: git.neolegal.fr/neolegal/namorama-web:latest
     restart: unless-stopped
     environment:
       API_URL: ${API_URL}

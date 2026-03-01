@@ -1,11 +1,11 @@
 {
-  "realm": "namespoter",
+  "realm": "namorama",
   "displayName": "Namorama",
   "enabled": true,
-  "loginTheme": "namespoter",
-  "accountTheme": "namespoter",
+  "loginTheme": "namorama",
+  "accountTheme": "namorama",
   "adminTheme": "keycloak",
-  "emailTheme": "namespoter",
+  "emailTheme": "namorama",
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
   "rememberMe": true,
@@ -14,7 +14,7 @@
   "editUsernameAllowed": false,
   "clients": [
     {
-      "clientId": "namespoter-web",
+      "clientId": "namorama-web",
       "enabled": true,
       "publicClient": true,
       "directAccessGrantsEnabled": true,
@@ -35,7 +35,7 @@
       }
     },
     {
-      "clientId": "namespoter-api",
+      "clientId": "namorama-api",
       "enabled": true,
       "publicClient": false,
       "secret": "secret-tres-confidentiel-123",

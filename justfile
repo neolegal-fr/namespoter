@@ -1,4 +1,4 @@
-# Justfile pour Namespoter
+# Justfile pour Namorama
 
 # Démarrer l'infrastructure et les serveurs de développement
 start:

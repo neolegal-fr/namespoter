@@ -6,7 +6,7 @@ SaaS pour trouver des noms de marque et domaines disponibles à partir d'une des
 
 - **Frontend** : Angular 21, PrimeNG 21 (Aura theme), Tailwind CSS 4
 - **Backend** : NestJS, TypeORM, PostgreSQL
-- **Auth** : Keycloak SSO (realm `namespoter`, auto-importé depuis `infra/keycloak/realm-export.json`)
+- **Auth** : Keycloak SSO (realm `namorama`, auto-importé depuis `infra/keycloak/realm-export.json`)
 - **IA** : OpenAI GPT-3.5 Turbo
 - **Infra** : Docker Compose (`infra/docker-compose.yml`), orchestration via `justfile`
 

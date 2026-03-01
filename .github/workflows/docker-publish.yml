@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: git.neolegal.fr
-  IMAGE_PREFIX: git.neolegal.fr/neolegal/namespoter
+  IMAGE_PREFIX: git.neolegal.fr/neolegal/namorama
 
 jobs:
   build-api:

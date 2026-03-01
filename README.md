@@ -32,7 +32,7 @@ Namespoter vous aide à trouver le nom de domaine idéal pour votre prochain pro
 - `just clean` : Nettoie les node_modules et les volumes Docker.
 
 ## 🔑 Keycloak
-Le Realm `namespoter` est pré-configuré. 
+Le Realm `namorama` est pré-configuré.
 - Console Admin : `http://localhost:8080` (admin/admin)
 - L'auto-inscription est activée.
 

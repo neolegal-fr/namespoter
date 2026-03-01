@@ -234,7 +234,7 @@ import { Dialog } from 'primeng/dialog';
   styles: []
 })
 export class AppComponent implements OnInit {
-  title = 'namespoter-web';
+  title = 'namorama-web';
   credits = signal(0);
   subscriptionCredits = signal(0);
   extraCredits = signal(0);

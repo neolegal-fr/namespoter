@@ -34,8 +34,8 @@ function initializeApp(keycloak: KeycloakService, translate: TranslateService, c
     await keycloak.init({
       config: {
         url: config.keycloakUrl,
-        realm: 'namespoter',
-        clientId: 'namespoter-web'
+        realm: 'namorama',
+        clientId: 'namorama-web'
       },
       initOptions: {
         onLoad: 'check-sso',

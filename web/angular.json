@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "namespoter-web": {
+    "namorama-web": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -56,10 +56,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "namespoter-web:build:production"
+              "buildTarget": "namorama-web:build:production"
             },
             "development": {
-              "buildTarget": "namespoter-web:build:development"
+              "buildTarget": "namorama-web:build:development"
             }
           },
           "defaultConfiguration": "development"
