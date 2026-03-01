@@ -13,7 +13,7 @@ services:
       - ./mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
+    image: quay.io/keycloak/keycloak:26.5.4
     container_name: namespoter-auth
     environment:
       KC_DB: mariadb
@@ -21,8 +21,8 @@ services:
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: admin_password
       KC_HOSTNAME: localhost
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     command: start-dev --import-realm
     ports:
       - "8080:8080"
