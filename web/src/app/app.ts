@@ -231,7 +231,7 @@ export class AppComponent implements OnInit {
     public projectService: ProjectService,
     private keycloak: KeycloakService,
     private translate: TranslateService,
-    private router: Router,
+    public router: Router,
     private cdr: ChangeDetectorRef,
     private paymentService: PaymentService,
     private cookieConsent: CookieConsentService,
