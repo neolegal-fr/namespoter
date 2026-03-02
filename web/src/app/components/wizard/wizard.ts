@@ -502,13 +502,12 @@ export class WizardComponent implements OnInit {
     return this.domains().find(d => d.name === name) ?? null;
   }
 
-  openBuyMenu(name: string, ext: string, event: Event, menu: Menu) {
-    const domain = `${name}${ext}`;
+  openBuyMenuByName(name: string, event: Event, menu: Menu) {
     this.registrarMenuItems.set(
       this.REGISTRARS.map(r => ({
         label: r.label,
         icon: r.icon,
-        command: () => window.open(r.buildUrl(domain, name), '_blank', 'noopener'),
+        command: () => window.open(r.buildUrl(name, name), '_blank', 'noopener'),
       }))
     );
     menu.toggle(event);

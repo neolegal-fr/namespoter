@@ -123,7 +123,8 @@
       "PICK_COPY": "Copy name",
       "PICK_OTHER": "Other candidates:",
       "PICK_ALL": "Among all results",
-      "PICK_FAVOURITES": "Among favourites only"
+      "PICK_FAVOURITES": "Among favourites only",
+      "PICK_URGENCY": "⏰ This domain is available now — but it may not be tomorrow. If you love it, register it right away at your favourite registrar."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

@@ -123,7 +123,8 @@
       "PICK_COPY": "Copier le nom",
       "PICK_OTHER": "Autres candidats :",
       "PICK_ALL": "Parmi tous les résultats",
-      "PICK_FAVOURITES": "Parmi les favoris uniquement"
+      "PICK_FAVOURITES": "Parmi les favoris uniquement",
+      "PICK_URGENCY": "⏰ Ce nom de domaine est disponible maintenant — mais ce ne sera peut-être pas le cas demain. Si vous avez un coup de cœur, enregistrez-le tout de suite chez votre registrar préféré."
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
