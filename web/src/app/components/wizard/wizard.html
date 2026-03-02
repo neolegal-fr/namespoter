@@ -251,7 +251,7 @@
                   <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem">
                     <div class="reg-split" (click)="$event.stopPropagation()">
                       <a [href]="REGISTRARS[0].url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__main">
-                        <i class="pi pi-shopping-cart"></i> OVH
+                        <i class="pi pi-shopping-cart"></i><span class="reg-label"> OVH</span>
                       </a>
                       <button type="button" class="reg-split__toggle" (click)="toggleReg(result.name, $event)">
                         <i class="pi pi-chevron-down"></i>
