@@ -3,6 +3,7 @@ import { RouterOutlet, Router } from '@angular/router';
 import { UserService, CreditInfo } from './services/user';
 import { ProjectService } from './services/project';
 import { PaymentService, PackType } from './services/payment';
+import { CookieConsentService } from './services/cookie-consent';
 import { KeycloakService } from 'keycloak-angular';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -231,9 +232,11 @@ export class AppComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private paymentService: PaymentService,
+    private cookieConsent: CookieConsentService,
   ) {}
 
   async ngOnInit() {
+    this.cookieConsent.init();
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
     const lang = this.translate.currentLang || 'fr';
     this.currentLang.set(lang);
