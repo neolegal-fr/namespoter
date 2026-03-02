@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, ChangeDetectorRef, ApplicationRef } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectorRef, ApplicationRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomainService } from '../../services/domain';
@@ -159,6 +159,7 @@ export class WizardComponent implements OnInit {
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
   // ─── US-022 : Buy on registrar ────────────────────
+  @ViewChild('buyMenu') buyMenuRef!: Menu;
   registrarMenuItems = signal<MenuItem[]>([]);
 
   private readonly REGISTRARS = [
@@ -502,7 +503,7 @@ export class WizardComponent implements OnInit {
     return this.domains().find(d => d.name === name) ?? null;
   }
 
-  openBuyMenuByName(name: string, event: Event, menu: Menu) {
+  openBuyMenuByName(name: string, event: Event) {
     this.registrarMenuItems.set(
       this.REGISTRARS.map(r => ({
         label: r.label,
@@ -510,7 +511,7 @@ export class WizardComponent implements OnInit {
         command: () => window.open(r.buildUrl(name, name), '_blank', 'noopener'),
       }))
     );
-    menu.toggle(event);
+    this.buyMenuRef.toggle(event);
   }
 
   parseAnalysisScore(analysis: string | null): number {

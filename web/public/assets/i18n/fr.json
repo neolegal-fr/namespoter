@@ -124,7 +124,9 @@
       "PICK_OTHER": "Autres candidats :",
       "PICK_ALL": "Parmi tous les résultats",
       "PICK_FAVOURITES": "Parmi les favoris uniquement",
-      "PICK_URGENCY": "⏰ Ce nom de domaine est disponible maintenant — mais ce ne sera peut-être pas le cas demain. Si vous avez un coup de cœur, enregistrez-le tout de suite chez votre registrar préféré."
+      "PICK_URGENCY_TITLE": "Les bons noms s'envolent.",
+      "PICK_URGENCY_SUB": "Celui-ci est libre en ce moment — peut-être plus demain. Ne laissez pas quelqu'un d'autre l'enregistrer avant vous.",
+      "PICK_BUY_BTN": "Acheter ce domaine"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

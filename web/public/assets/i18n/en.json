@@ -124,7 +124,9 @@
       "PICK_OTHER": "Other candidates:",
       "PICK_ALL": "Among all results",
       "PICK_FAVOURITES": "Among favourites only",
-      "PICK_URGENCY": "⏰ This domain is available now — but it may not be tomorrow. If you love it, register it right away at your favourite registrar."
+      "PICK_URGENCY_TITLE": "Good names go fast.",
+      "PICK_URGENCY_SUB": "This one is available right now — maybe not tomorrow. Don't let someone else register it before you.",
+      "PICK_BUY_BTN": "Buy this domain"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
