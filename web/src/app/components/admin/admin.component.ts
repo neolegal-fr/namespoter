@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 import { AdminService, AdminUser, AdminStats } from '../../services/admin.service';
 
@@ -18,7 +19,7 @@ import { AdminService, AdminUser, AdminStats } from '../../services/admin.servic
   imports: [
     CommonModule, FormsModule, TranslateModule,
     CardModule, TableModule, ButtonModule, InputTextModule,
-    InputNumberModule, TagModule, ToastModule,
+    InputNumberModule, TagModule, ToastModule, TooltipModule,
   ],
   providers: [MessageService],
   template: `

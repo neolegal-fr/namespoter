@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { ConfigService } from './config';
 
 export interface AdminUser {
   id: number;
@@ -31,9 +31,9 @@ export interface AdminStats {
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private base = `${environment.apiUrl}/admin`;
+  private get base() { return `${this.config.apiUrl}/admin`; }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private config: ConfigService) {}
 
   getUsers(page: number, limit: number, search: string): Observable<{ data: AdminUser[]; total: number }> {
     const params = new HttpParams()
