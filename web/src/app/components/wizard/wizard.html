@@ -249,16 +249,19 @@
                   </td>
                   <!-- US-022 : colonne achat registrar -->
                   <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem">
-                    <p-splitButton
-                      label="OVH"
-                      icon="pi pi-shopping-cart"
-                      size="small"
-                      severity="secondary"
-                      [model]="getRegistrarItems(result.name)"
-                      (onClick)="buyAtOvh(result.name)"
-                      appendTo="body"
-                      styleClass="registrar-btn">
-                    </p-splitButton>
+                    <div class="reg-split" (click)="$event.stopPropagation()">
+                      <a [href]="REGISTRARS[0].url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__main">
+                        <i class="pi pi-shopping-cart"></i> OVH
+                      </a>
+                      <button type="button" class="reg-split__toggle" (click)="toggleReg(result.name, $event)">
+                        <i class="pi pi-chevron-down"></i>
+                      </button>
+                      <div *ngIf="openReg() === result.name" class="reg-split__menu">
+                        <a *ngFor="let r of REGISTRARS.slice(1)" [href]="r.url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__item">
+                          {{ r.label }}
+                        </a>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </ng-template>
@@ -442,14 +445,11 @@
           <div style="font-size: 0.8rem; color: #b45309; margin-bottom: 0.75rem; line-height: 1.45">
             {{ 'WIZARD.STEP3.PICK_URGENCY_SUB' | translate }}
           </div>
-          <p-splitButton
-            label="OVH"
-            icon="pi pi-shopping-cart"
-            size="small"
-            [model]="getRegistrarItems(result.recommended)"
-            (onClick)="buyAtOvh(result.recommended)"
-            appendTo="body">
-          </p-splitButton>
+          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap">
+            <a *ngFor="let r of REGISTRARS" [href]="r.url(result.recommended, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-link-btn">
+              <i class="pi pi-shopping-cart" style="font-size: 0.72rem"></i> {{ r.label }}
+            </a>
+          </div>
         </div>
       </div>
 

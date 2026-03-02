@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, ChangeDetectorRef, ApplicationRef } from '@angular/core';
+import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomainService } from '../../services/domain';
@@ -158,21 +158,46 @@ export class WizardComponent implements OnInit {
 
   // ─── US-022 : Buy on registrar ────────────────────
   readonly REGISTRARS = [
-    { label: 'OVH',       url: (n: string) => `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${n}` },
-    { label: 'Namecheap', url: (n: string) => `https://www.namecheap.com/domains/registration/results.aspx?domain=${n}` },
-    { label: 'Gandi',     url: (n: string) => `https://www.gandi.net/en/domain/suggest?q=${n}` },
+    {
+      label: 'OVH',
+      url: (n: string, exts: string[]) => {
+        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
+        return `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${d}`;
+      },
+    },
+    {
+      label: 'Namecheap',
+      url: (n: string, exts: string[]) => {
+        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
+        return `https://www.namecheap.com/domains/registration/results.aspx?domain=${d}`;
+      },
+    },
+    {
+      label: 'GoDaddy',
+      url: (n: string, exts: string[]) => {
+        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
+        return `https://www.godaddy.com/domainsearch/find?domainToCheck=${d}`;
+      },
+    },
+    {
+      label: 'Gandi',
+      url: (n: string, exts: string[]) => {
+        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
+        return `https://shop.gandi.net/fr/domain/suggest?search=${d}`;
+      },
+    },
   ];
 
-  buyAtOvh(name: string) {
-    window.open(this.REGISTRARS[0].url(name), '_blank', 'noopener,noreferrer');
+  openReg = signal<string | null>(null);
+
+  toggleReg(name: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.openReg.set(this.openReg() === name ? null : name);
   }
 
-  getRegistrarItems(name: string): MenuItem[] {
-    return this.REGISTRARS.slice(1).map(r => ({
-      label: r.label,
-      url: r.url(name),
-      target: '_blank',
-    }));
+  @HostListener('document:click')
+  closeReg() {
+    this.openReg.set(null);
   }
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;

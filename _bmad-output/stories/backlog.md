@@ -1541,3 +1541,41 @@ No admin interface currently exists. Credit adjustments, user lookups, and activ
 - Impersonating users
 - Sending emails from the admin panel
 - Role assignment from the admin panel (done in Keycloak console)
+
+---
+
+## US-042 · Trademark Availability Check
+
+**Status**: ❌ To do
+
+**As a** user searching for a brand name,
+**I want** to know whether a name is already registered as a trademark,
+**So that** I can avoid legal conflicts and choose a name that is truly ownable.
+
+### Context
+
+Finding an available domain name is only half the battle — a name that is free as a domain but registered as a trademark in the same category exposes the user to legal risk. Integrating a trademark check (INPI for France, EUIPO for Europe, USPTO for the US) gives Namorama a significant competitive advantage over pure domain-search tools.
+
+### Acceptance Criteria
+
+- [ ] For each domain result, an indicator shows whether the name has a known trademark conflict
+- [ ] The check targets at least one database (INPI FR as default, EUIPO as stretch goal)
+- [ ] The check is scoped by Nice classification if possible, or shows all results otherwise
+- [ ] A "conflict" badge (e.g. 🔴) and a "clear" badge (e.g. 🟢) are displayed per name
+- [ ] Clicking the badge opens the relevant official search page pre-filled with the name
+- [ ] The check is done asynchronously (does not block domain results display)
+- [ ] Results are cached per name to avoid redundant API calls
+
+### Technical Notes
+
+- **INPI** exposes a public search UI at `https://data.inpi.fr` and an open API (`https://api.inpi.fr/`) — check if unauthenticated access is available
+- **EUIPO** offers `https://euipo.europa.eu/eSearch/` with a REST API — may require registration
+- **USPTO** offers the TSDR API (`https://tsdrapi.uspto.gov/`) for US market
+- Fallback: if no API is available, provide a direct link to the official search page pre-filled with the name (no badge, just a shortcut)
+- The check should run after domain availability is confirmed, to avoid wasting quota on unavailable names
+
+### Out of Scope
+
+- Legal advice or interpretation of trademark classes
+- Monitoring / trademark watch alerts
+- Blocking users from using conflicting names (informational only)

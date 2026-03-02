@@ -24,11 +24,88 @@
     background: var(--p-surface-50, #f9fafb);
 }
 
-/* ─── US-022 : split button registrar dans le tableau ── */
-.registrar-btn.p-splitbutton .p-splitbutton-defaultbutton,
-.registrar-btn.p-splitbutton .p-splitbutton-menubutton {
-    padding-top: 0.2rem;
-    padding-bottom: 0.2rem;
+/* ─── US-022 : custom split button registrar ── */
+.reg-split {
+    position: relative;
+    display: inline-flex;
+    border: 1px solid var(--p-surface-300);
+    border-radius: 0.25rem;
+    overflow: visible;
+}
+.reg-split__main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--p-surface-600);
+    background: white;
+    text-decoration: none;
+    border-right: 1px solid var(--p-surface-300);
+    white-space: nowrap;
+}
+.reg-split__main:hover {
+    background: var(--p-surface-100);
+    color: var(--p-surface-800);
+}
+.reg-split__toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.35rem;
+    background: white;
+    border: none;
+    cursor: pointer;
+    color: var(--p-surface-500);
+    font-size: 0.6rem;
+}
+.reg-split__toggle:hover {
+    background: var(--p-surface-100);
+    color: var(--p-surface-700);
+}
+.reg-split__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+    background: white;
+    border: 1px solid var(--p-surface-300);
+    border-radius: 0.25rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 9999;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.reg-split__item {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.78rem;
+    color: var(--p-surface-700);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.reg-split__item:hover {
+    background: var(--p-surface-100);
+}
+
+/* ─── liens registrar dans le dialog pick ── */
+.reg-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #fde68a;
+    border-radius: 0.25rem;
+    background: #fffbeb;
+    color: #92400e;
+    text-decoration: none;
+}
+.reg-link-btn:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
 }
 
 /* Hover sur le bouton copier tableau */
