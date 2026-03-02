@@ -501,7 +501,8 @@ export class WizardComponent implements OnInit {
   getRegistrarItems(name: string): MenuItem[] {
     return this.REGISTRARS.slice(1).map(r => ({
       label: r.label,
-      command: () => this.openExternalUrl(r.buildUrl(name)),
+      url: r.buildUrl(name),
+      target: '_blank',
     }));
   }
 
