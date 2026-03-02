@@ -1383,3 +1383,161 @@ Credits are permanent (no expiry on purchased packs). The monthly free allocatio
 - Annual plans, team/org plans
 - Credit gifting or promo codes (separate story)
 - Usage analytics dashboard
+
+---
+
+## US-039 · Responsive Table on Mobile
+
+**Status**: ❌ To do
+
+**As a** user browsing domain results on a smartphone,
+**I want** the results table to be readable and usable on a small screen,
+**So that** I can review available domains and buy them without having to scroll horizontally or squint.
+
+### Context
+
+The addition of the registrar "Buy" column (US-022) made the table wider. On screens < 480px the table overflows, columns are cramped, and the split button is barely usable. The table currently has: heart | domain name | .com | .fr | .io | … | OVH▾.
+
+### Acceptance Criteria
+
+#### Layout adaptation
+- [ ] On screens ≥ 768px (tablet/desktop): keep the current table layout unchanged
+- [ ] On screens < 768px: switch to a **card-per-domain** layout or a **condensed table**:
+  - Domain name is displayed prominently (large, monospace, green if fully available)
+  - Availability per extension is shown as compact chips/badges (✓ .com  ✗ .fr  ✓ .io)
+  - Heart (favourite) icon and Buy button are clearly accessible without zooming
+- [ ] The "Buy" split button remains usable on touch (large enough tap target, ≥ 44px)
+- [ ] The "Help me pick" and "10 more suggestions" buttons remain accessible and wrap cleanly
+
+#### UX
+- [ ] No horizontal scroll on the main content area on mobile
+- [ ] Domain name is not truncated to the point of being unreadable
+- [ ] Favourite toggle still works on tap
+
+### Technical Notes
+- Use CSS `@media (max-width: 767px)` breakpoint
+- Consider replacing `<p-table>` with a `<div *ngFor>` card list on mobile using Angular's `BreakpointObserver` or a pure-CSS approach
+- PrimeNG table does not have built-in responsive card mode in all versions — CSS-only solution may be simpler
+
+### Out of Scope
+- Redesign of steps 1 and 2 (already acceptable on mobile)
+- Native app / PWA
+
+---
+
+## US-040 · RGPD / Cookie Consent Banner
+
+**Status**: ❌ To do
+
+**As a** visitor or user of Namorama,
+**I want** to be informed about data collection and give or refuse my consent before any tracking occurs,
+**So that** the site complies with GDPR (EU Regulation 2016/679) and the French CNIL guidelines.
+
+### Context
+
+The site currently has no consent mechanism. Even without advertising trackers, Keycloak sets session cookies, and future analytics (US-034 — Google Analytics) will require explicit consent. CNIL requires a banner with Accept / Refuse options, and the ability to withdraw consent at any time.
+
+### Acceptance Criteria
+
+#### Consent banner
+- [ ] On first visit (and if consent not yet given), a banner appears at the bottom of the screen
+- [ ] Banner contains:
+  - Short explanation: "We use cookies for authentication and, with your consent, for audience analytics."
+  - **Accept** button (primary)
+  - **Refuse** button (secondary)
+  - Link to the full privacy policy page (can be a simple `/privacy` route initially)
+- [ ] Banner is responsive (full-width on mobile, constrained width on desktop)
+- [ ] Banner does not block the page content (positioned fixed at bottom, non-modal)
+
+#### Consent persistence
+- [ ] Consent choice (accept/refuse) is stored in `localStorage` under key `namorama_consent`
+- [ ] If consent was already given, the banner does not show again on subsequent visits
+- [ ] A "Manage cookies" link in the footer allows the user to change their choice at any time (resets stored consent and shows banner again)
+
+#### Analytics gating (for US-034)
+- [ ] Analytics scripts (Google Analytics or equivalent) are only loaded **after** the user has accepted
+- [ ] If the user refuses, no analytics script is loaded (not just blocked — never injected)
+
+#### Privacy policy page
+- [ ] A minimal `/privacy` route exists with:
+  - Data controller identity (NeoLegal)
+  - List of cookies set (Keycloak session, optional analytics)
+  - User rights (access, deletion, portability) and contact email
+  - Available in FR and EN
+
+### Technical Notes
+- Store consent in `localStorage`, not a cookie (avoids the meta-irony of using a cookie for cookie consent)
+- Angular service `ConsentService` with `hasConsented(): boolean`, `accept()`, `refuse()`, `reset()`
+- Banner component shown conditionally in `AppComponent` based on `ConsentService.hasConsented() === null` (null = not yet chosen)
+- No third-party CMP (Consent Management Platform) needed at this stage
+
+### Out of Scope
+- Granular consent per category (analytics vs. functional) — single accept/refuse is sufficient for CNIL at this traffic level
+- IAB TCF framework
+- Cookie audit / automatic cookie scanner
+
+---
+
+## US-041 · Admin Section — User Management & Activity Dashboard
+
+**Status**: ❌ To do
+
+**As an** administrator of Namorama,
+**I want** a protected back-office section accessible only to users with the `admin` role in the Keycloak realm,
+**So that** I can manage user credits manually and monitor the platform's activity at a glance.
+
+### Context
+
+No admin interface currently exists. Credit adjustments, user lookups, and activity monitoring require direct database access. This story adds a minimal but functional admin section within the web app, secured by Keycloak role.
+
+### Acceptance Criteria
+
+#### Access control
+- [ ] A new route `/admin` is added to the Angular app
+- [ ] Access is restricted to users who have the `admin` role in the Keycloak realm (`namorama`)
+- [ ] If a non-admin user navigates to `/admin`, they are redirected to `/` with no error message shown
+- [ ] The admin link is only visible in the user menu for admin users
+
+#### User list
+- [ ] Displays a paginated, searchable table of all registered users
+- [ ] Columns: email, total credits (free + pack), last login date, account creation date, number of projects
+- [ ] Search by email (partial match)
+- [ ] For each user: a button to open a credit adjustment panel
+  - Input field: new credit amount (or delta +/-)
+  - Confirm button saves the change via `PATCH /admin/users/:id/credits`
+  - Change is reflected immediately in the table
+
+#### Activity dashboard
+- [ ] Top-level KPI cards:
+  - Total registered accounts
+  - Active accounts in the last 7 / 30 days (configurable via a selector)
+  - New accounts in the last 7 / 30 days
+  - Total domain suggestions generated (all time)
+  - Total projects created (all time)
+- [ ] Per-project averages:
+  - Average number of suggestions per project
+  - Average number of favourites per project
+  - Average number of extensions selected per project
+- [ ] Credit consumption:
+  - Total credits consumed (all time)
+  - Average credits consumed per active user (last 30 days)
+
+#### Backend
+- [ ] New NestJS module `admin` with guard checking Keycloak role `admin`
+- [ ] `GET /admin/users` — paginated user list with stats
+- [ ] `PATCH /admin/users/:id/credits` — manual credit adjustment (logged with admin's sub + reason)
+- [ ] `GET /admin/stats` — aggregated KPIs
+- [ ] All admin endpoints require `admin` role; return 403 otherwise
+
+### Technical Notes
+- Keycloak role check: use `@Roles('admin')` decorator + `RoleGuard` from `nest-keycloak-connect`
+- Frontend role check: `keycloak.isUserInRole('admin')` in Angular guard
+- Credit adjustment audit: add a `CreditAdjustment` entity (userId, delta, reason, adminSub, createdAt) for traceability
+- Dashboard stats can be computed with simple TypeORM aggregate queries (COUNT, AVG, SUM)
+- Paginate user list with `?page=&limit=` query params
+
+### Out of Scope
+- Deleting user accounts (sensitive — requires GDPR process)
+- Impersonating users
+- Sending emails from the admin panel
+- Role assignment from the admin panel (done in Keycloak console)
