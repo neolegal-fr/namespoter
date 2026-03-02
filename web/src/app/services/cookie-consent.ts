@@ -9,6 +9,14 @@ export class CookieConsentService {
   constructor(private translate: TranslateService) {}
 
   init(): void {
+    const lang = this.resolvedLang();
+
+    // Synchroniser la langue si elle change après l'init
+    this.translate.onLangChange.subscribe(e => {
+      const l = e.lang.startsWith('en') ? 'en' : 'fr';
+      CookieConsent.setLanguage(l);
+    });
+
     CookieConsent.run({
       categories: {
         necessary: {
@@ -32,8 +40,7 @@ export class CookieConsentService {
       },
 
       language: {
-        default: this.translate.currentLang === 'en' ? 'en' : 'fr',
-        autoDetect: 'document',
+        default: lang,
         translations: {
           fr: {
             consentModal: {
@@ -112,6 +119,11 @@ export class CookieConsentService {
         },
       },
     });
+  }
+
+  private resolvedLang(): 'fr' | 'en' {
+    const l = this.translate.currentLang || this.translate.getBrowserLang() || 'fr';
+    return l.startsWith('en') ? 'en' : 'fr';
   }
 
   private updateGaConsent(granted: boolean) {
