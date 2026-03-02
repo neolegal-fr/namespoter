@@ -353,12 +353,23 @@ export class AppComponent implements OnInit {
   }
 
   openProjects() {
-    this.projectService.refreshProjects().subscribe();
-    this.projectService.showDrawer.set(true);
+    const show = () => {
+      this.projectService.refreshProjects().subscribe();
+      this.projectService.showDrawer.set(true);
+    };
+    if (this.router.url.startsWith('/admin')) {
+      this.router.navigate(['/']).then(() => setTimeout(show, 100));
+    } else {
+      show();
+    }
   }
 
   newProject() {
-    this.projectService.resetWizard();
+    if (this.router.url.startsWith('/admin')) {
+      this.router.navigate(['/']).then(() => setTimeout(() => this.projectService.resetWizard(), 100));
+    } else {
+      this.projectService.resetWizard();
+    }
   }
 
   login() {

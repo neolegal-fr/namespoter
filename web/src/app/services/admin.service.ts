@@ -21,6 +21,8 @@ export interface AdminStats {
   totalUsers: number;
   periodActiveUsers: number;
   periodNewUsers: number;
+  periodNewProjects: number;
+  periodSuggestions: number;
   totalProjects: number;
   totalSuggestions: number;
   avgSuggestionsPerProject: number;

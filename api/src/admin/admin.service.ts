@@ -24,6 +24,8 @@ export interface AdminStats {
   totalUsers: number;
   periodActiveUsers: number;
   periodNewUsers: number;
+  periodNewProjects: number;
+  periodSuggestions: number;
   totalProjects: number;
   totalSuggestions: number;
   avgSuggestionsPerProject: number;
@@ -103,7 +105,7 @@ export class AdminService {
     const periodEnd = to ?? new Date();
     const periodStart = from ?? new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const [totalUsers, periodActiveUsers, periodNewUsers] = await Promise.all([
+    const [totalUsers, periodActiveUsers, periodNewUsers, periodNewProjects] = await Promise.all([
       this.userRepo.count(),
       this.userRepo.createQueryBuilder('u')
         .where('u.lastLogin >= :from AND u.lastLogin <= :to', { from: periodStart, to: periodEnd })
@@ -111,7 +113,18 @@ export class AdminService {
       this.userRepo.createQueryBuilder('u')
         .where('u.createdAt >= :from AND u.createdAt <= :to', { from: periodStart, to: periodEnd })
         .getCount(),
+      this.projectRepo.createQueryBuilder('p')
+        .where('p.createdAt >= :from AND p.createdAt <= :to', { from: periodStart, to: periodEnd })
+        .getCount(),
     ]);
+
+    const periodSuggestionsResult = await this.dataSource.query(
+      `SELECT COUNT(*) as cnt FROM domain_suggestion ds
+       INNER JOIN project p ON p.id = ds.projectId
+       WHERE p.createdAt >= ? AND p.createdAt <= ?`,
+      [periodStart, periodEnd],
+    );
+    const periodSuggestions = Number(periodSuggestionsResult[0]?.cnt ?? 0);
 
     const [totalProjects, totalSuggestions] = await Promise.all([
       this.projectRepo.count(),
@@ -133,6 +146,8 @@ export class AdminService {
       totalUsers,
       periodActiveUsers,
       periodNewUsers,
+      periodNewProjects,
+      periodSuggestions,
       totalProjects,
       totalSuggestions,
       avgSuggestionsPerProject: Math.round((avgSuggestionsResult[0]?.avg ?? 0) * 10) / 10,

@@ -59,13 +59,36 @@ interface PeriodOption { label: string; days: number | null; }
 
       <!-- KPI cards -->
       <ng-container *ngIf="stats() as s">
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 0.75rem">
-          <div *ngFor="let kpi of kpiCards(s)" class="border-1 border-round-lg border-surface" style="padding: 0.875rem 1rem; background: white">
-            <div style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--p-surface-500); margin-bottom: 0.25rem">{{ kpi.label }}</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--p-surface-900)">{{ kpi.value }}</div>
-            <div *ngIf="kpi.sub" style="font-size: 0.72rem; color: var(--p-surface-400); margin-top: 0.15rem">{{ kpi.sub }}</div>
+
+        <!-- Indicateurs de période -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--p-surface-400)">Sur la période sélectionnée</span>
+            <i *ngIf="loadingStats()" class="pi pi-spin pi-spinner" style="font-size: 0.8rem; color: var(--p-surface-400)"></i>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 0.75rem">
+            <div *ngFor="let kpi of kpiPeriod(s)" class="border-1 border-round-lg" style="padding: 0.875rem 1rem; background: white; border-color: var(--p-primary-200, #bfdbfe)">
+              <div style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--p-surface-500); margin-bottom: 0.25rem">{{ kpi.label }}</div>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--p-primary-color)">{{ kpi.value }}</div>
+              <div *ngIf="kpi.sub" style="font-size: 0.72rem; color: var(--p-surface-400); margin-top: 0.15rem">{{ kpi.sub }}</div>
+            </div>
           </div>
         </div>
+
+        <!-- Indicateurs globaux -->
+        <div>
+          <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--p-surface-400); margin-bottom: 0.5rem">
+            Total cumulé
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: 0.75rem">
+            <div *ngFor="let kpi of kpiAbsolute(s)" class="border-1 border-round-lg border-surface" style="padding: 0.875rem 1rem; background: white">
+              <div style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--p-surface-500); margin-bottom: 0.25rem">{{ kpi.label }}</div>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--p-surface-900)">{{ kpi.value }}</div>
+              <div *ngIf="kpi.sub" style="font-size: 0.72rem; color: var(--p-surface-400); margin-top: 0.15rem">{{ kpi.sub }}</div>
+            </div>
+          </div>
+        </div>
+
       </ng-container>
 
       <!-- Barre de recherche -->
@@ -158,6 +181,7 @@ export class AdminComponent implements OnInit {
   users = signal<AdminUser[]>([]);
   stats = signal<AdminStats | null>(null);
   loadingUsers = signal(false);
+  loadingStats = signal(false);
   total = signal(0);
   page = signal(1);
   pageSize = 20;
@@ -199,8 +223,12 @@ export class AdminComponent implements OnInit {
   }
 
   loadStats() {
+    this.loadingStats.set(true);
     const { from, to } = this.getPeriodDates();
-    this.adminService.getStats(from, to).subscribe(s => this.stats.set(s));
+    this.adminService.getStats(from, to).subscribe({
+      next: s => { this.stats.set(s); this.loadingStats.set(false); },
+      error: () => this.loadingStats.set(false),
+    });
   }
 
   onPeriodChange() {
@@ -211,13 +239,18 @@ export class AdminComponent implements OnInit {
     return Math.max(1, Math.ceil(this.total() / this.pageSize));
   }
 
-  kpiCards(s: AdminStats) {
-    const periodLabel = this.selectedPeriod.days !== null
-      ? this.selectedPeriod.label
-      : 'période';
+  kpiPeriod(s: AdminStats): { label: string; value: number; sub?: string }[] {
+    return [
+      { label: 'Utilisateurs actifs', value: s.periodActiveUsers },
+      { label: 'Nouveaux inscrits', value: s.periodNewUsers },
+      { label: 'Nouveaux projets', value: s.periodNewProjects },
+      { label: 'Suggestions générées', value: s.periodSuggestions },
+    ];
+  }
+
+  kpiAbsolute(s: AdminStats): { label: string; value: number; sub?: string }[] {
     return [
       { label: 'Utilisateurs', value: s.totalUsers },
-      { label: `Actifs (${periodLabel})`, value: s.periodActiveUsers, sub: `${s.periodNewUsers} nouveaux` },
       { label: 'Projets', value: s.totalProjects },
       { label: 'Suggestions', value: s.totalSuggestions },
       { label: 'Moy. sugg./projet', value: s.avgSuggestionsPerProject },
