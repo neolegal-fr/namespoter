@@ -583,7 +583,7 @@
 
 ## US-022 · "Buy on registrar" button for available domains
 
-**Status**: ❌ To do
+**Status**: ✅ Implemented
 
 **As a** user who has found an available domain name,
 **I want** a direct link to buy it on a registrar from within the results table,
@@ -1150,7 +1150,7 @@ The current table view works well on desktop but is overwhelming on mobile and c
 
 ## US-034 · Google Analytics Integration
 
-**Status**: ❌ To do
+**Status**: ✅ Implemented
 
 **As a** product owner,
 **I want** Google Analytics 4 to track user behaviour on Namorama,
@@ -1310,7 +1310,7 @@ The current table view works well on desktop but is overwhelming on mobile and c
 
 ## US-038 · No-Subscription Pricing — Free Plan + Credit Packs
 
-**Status**: ❌ To do
+**Status**: ✅ Implemented
 
 **As a** potential user hesitant to commit to yet another monthly subscription,
 **I want to** access Namorama for free and buy credits only when I need them,
