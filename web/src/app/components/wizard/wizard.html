@@ -355,7 +355,8 @@
             <!-- Label crédits sous les boutons -->
             <ng-container *ngIf="domains().length > 0">
               <ng-container *ngIf="(userService.credits$ | async) as totalCredits">
-                <span style="font-size: 0.75rem; color: var(--p-surface-400)">
+                <span (click)="projectService.showCreditDialog.set(true)"
+                      style="font-size: 0.75rem; color: var(--p-surface-400); cursor: pointer; text-decoration: underline; text-decoration-style: dotted">
                   {{ 'WIZARD.STEP3.CREDITS_LEFT' | translate : { n: totalCredits } }}
                 </span>
               </ng-container>

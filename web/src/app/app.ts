@@ -110,13 +110,13 @@ import { Dialog } from 'primeng/dialog';
         <!-- Crédits gratuits mensuels -->
         <div style="margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--p-surface-200)">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem">
-            <span class="font-semibold text-900" style="font-size: 0.9rem">{{ 'BILLING.FREE_TITLE' | translate }}</span>
+            <span class="font-semibold text-900" style="font-size: 0.9rem">{{ creditInfo().freeCredits + creditInfo().packCredits }} {{ 'BILLING.FREE_TITLE' | translate }}</span>
             <span style="font-size: 0.8rem; color: var(--p-surface-500)">
               {{ 'BILLING.FREE_RESET' | translate : { date: (creditInfo().freeResetDate | date:'d MMM') } }}
             </span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem">
-            <span style="font-size: 0.85rem; color: var(--p-surface-600)">{{ creditInfo().freeCredits }} / 100 {{ 'BILLING.CREDITS' | translate }}</span>
+            <span style="font-size: 0.85rem; color: var(--p-surface-600)">{{ creditInfo().freeCredits }} / 100 {{ 'BILLING.FREE_MONTHLY' | translate }}</span>
           </div>
           <div style="height: 6px; border-radius: 3px; background: var(--p-surface-200); overflow: hidden">
             <div style="height: 100%; background: var(--p-primary-color); border-radius: 3px; transition: width 0.3s"
