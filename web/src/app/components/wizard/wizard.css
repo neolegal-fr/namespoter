@@ -4,10 +4,10 @@
 
 /* ─── US-039 : Mobile ───────────────────────────────── */
 @media (max-width: 767px) {
-    /* Réduire le padding horizontal du card pour gagner de la place */
+    /* Supprimer le padding horizontal du card sur mobile */
     .p-card > .p-card-body {
-        padding-left: 0.375rem !important;
-        padding-right: 0.375rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
     }
     /* Cellules tableau plus compactes */
     .p-datatable.p-datatable-sm .p-datatable-thead > tr > th,
