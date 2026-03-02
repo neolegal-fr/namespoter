@@ -309,7 +309,7 @@
         <!-- Boutons de navigation -->
         <div class="flex" style="width: 100%; max-width: 36rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
-          <div style="display: flex; gap: 0.5rem; align-items: flex-start">
+          <div style="display: flex; gap: 0.5rem; align-items: stretch">
             <p-splitButton *ngIf="filteredDomains().length >= 2"
               [label]="'WIZARD.STEP3.PICK_BEST_BTN' | translate"
               icon="pi pi-lightbulb"
