@@ -31,7 +31,7 @@
   "ADMIN": {
     "TITLE": "Administration",
     "SEARCH_PLACEHOLDER": "Rechercher par email…",
-    "COL_USER": "Utilisateur",
+    "COL_NAME": "Nom",
     "COL_EMAIL": "Email",
     "COL_CREDITS": "Crédits",
     "COL_PROJECTS": "Projets",

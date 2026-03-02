@@ -30,7 +30,12 @@ export class UsersController {
 
   @Get('credits')
   async getCredits(@AuthenticatedUser() keycloakUser: any) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const user = await this.usersService.findOrCreate(
+      keycloakUser.sub,
+      keycloakUser.email,
+      keycloakUser.given_name,
+      keycloakUser.family_name,
+    );
     return {
       credits: user.totalCredits,
       freeCredits: user.credits,

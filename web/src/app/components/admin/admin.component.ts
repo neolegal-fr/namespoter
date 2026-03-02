@@ -80,7 +80,8 @@ interface PeriodOption { label: string; days: number | null; }
                  styleClass="p-datatable-sm">
           <ng-template pTemplate="header">
             <tr>
-              <th style="background: var(--p-surface-50)">{{ 'ADMIN.COL_USER' | translate }}</th>
+              <th style="background: var(--p-surface-50)">{{ 'ADMIN.COL_NAME' | translate }}</th>
+              <th style="background: var(--p-surface-50)">{{ 'ADMIN.COL_EMAIL' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_CREDITS' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_PROJECTS' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_CREATED' | translate }}</th>
@@ -90,13 +91,11 @@ interface PeriodOption { label: string; days: number | null; }
           </ng-template>
           <ng-template pTemplate="body" let-user>
             <tr>
-              <td>
-                <div *ngIf="user.firstName || user.lastName" class="font-semibold text-sm text-900">
-                  {{ user.firstName }} {{ user.lastName }}
-                </div>
-                <div class="text-xs text-500" style="font-family: monospace">
-                  {{ user.email || user.keycloakId }}
-                </div>
+              <td class="text-sm font-semibold text-900">
+                {{ (user.firstName || user.lastName) ? (user.firstName + ' ' + user.lastName) : '—' }}
+              </td>
+              <td class="text-xs text-500" style="font-family: monospace">
+                {{ user.email || user.keycloakId }}
               </td>
               <td class="text-center">
                 <span class="font-bold" [style.color]="user.totalCredits > 0 ? '#16a34a' : '#ef4444'">{{ user.totalCredits }}</span>
