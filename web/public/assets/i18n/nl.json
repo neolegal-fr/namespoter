@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Een relevante en beschikbare domeinnaam, direct.",
+    "SUBTITLE": "Beschrijf uw project in een paar woorden — de AI doet de rest.",
+    "B1_TITLE": "AI-suggesties",
+    "B1_DESC": "GPT genereert namen afgestemd op uw activiteit en doelgroep",
+    "B2_TITLE": "Echte beschikbaarheid",
+    "B2_DESC": "Whois-controle in realtime voor uw gewenste extensies",
+    "B3_TITLE": "Favorieten & geschiedenis",
+    "B3_DESC": "Sla uw zoekopdrachten op en hervat ze wanneer u wilt",
+    "B4_TITLE": "Multi-extensies",
+    "B4_DESC": ".com, .nl, .io, .net… controleer alle extensies in één keer",
+    "CTA": "Mijn domeinnaam gratis vinden",
+    "FREE_NOTE": "Geen abonnement · Geen creditcard · 100 gratis credits bij registratie"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projecten",
+    "PROJECT_NEW": "Nieuw",
+    "PROJECT_OPEN": "Openen",
+    "CREDITS": "Credits",
+    "LOGOUT": "Uitloggen",
+    "LOGIN": "Inloggen / Registreren",
+    "MANAGE_ACCOUNT": "Mijn account beheren",
+    "BILLING": "Facturering",
+    "FOOTER": "Ontwikkeld door",
+    "SECURE_ACCESS": "Beveiligde toegang",
+    "LOGIN_REQUIRED": "Log in om te beginnen met het zoeken naar domeinnamen.",
+    "ADMIN": "Beheer"
+  },
+  "PROJECTS": {
+    "TITLE": "Mijn Projecten",
+    "SUBTITLE": "Hervat uw zoekopdrachten waar u gebleven was.",
+    "EMPTY": "Nog geen projecten.",
+    "OPEN": "Openen",
+    "DATE": "Laatste update",
+    "DELETE": "Verwijderen",
+    "CONFIRM_DELETE": "Wilt u dit project echt verwijderen?",
+    "DELETE_SUCCESS": "Project succesvol verwijderd",
+    "SUCCESS": "Succes"
+  },
+  "BILLING": {
+    "TITLE": "Credits",
+    "TAGLINE": "Houdt u niet van abonnementen? Wij ook niet.",
+    "TAGLINE_SUB": "100 gratis credits elke maand en pakketten zonder verplichting als u ze nodig hebt.",
+    "FREE_TITLE": "beschikbare credits",
+    "FREE_RESET": "Vernieuwing op {{date}}",
+    "PACK_TITLE": "Credits kopen",
+    "PACK_CREDITS": "{{n}} credits",
+    "PACK_PER_CREDIT": "{{price}} / credit",
+    "BUY_BTN": "Kopen",
+    "PACK_BALANCE": "en {{n}} gekochte credits",
+    "CREDITS": "credits",
+    "FREE_MONTHLY": "maandelijkse gratis credits",
+    "PACK_POPULAR": "Populair",
+    "PACK_DECOUVERTE_NAME": "Ontdekking",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Betaling bevestigd!",
+    "SUCCESS_MESSAGE": "Uw credits zijn aan uw account toegevoegd. U kunt uw zoekopdrachten hervatten.",
+    "CREDITS_ADDED": "+{{count}} credits toegevoegd — totaal: {{total}} credits",
+    "CANCEL_TITLE": "Betaling geannuleerd",
+    "CANCEL_MESSAGE": "Uw betaling is niet verwerkt. Er is geen bedrag afgeschreven.",
+    "BACK_HOME": "Terug naar home"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Beschrijving",
+      "KEYWORDS": "Trefwoorden",
+      "EXTENSIONS": "Extensies",
+      "DOMAINS": "Domeinen"
+    },
+    "STEP1": {
+      "TITLE": "Uw Project",
+      "PROJECT_NAME_TITLE": "Projectnaam (optioneel)",
+      "SUBTITLE": "Beschrijf uw oplossing, uw doelgroep en uw waarden.",
+      "PLACEHOLDER": "Bijv.: Een platform voor lokale en milieuvriendelijke bloemenbezorging...",
+      "REFINE_BTN": "Herformuleren met AI",
+      "CONTINUE_BTN": "Doorgaan naar trefwoorden",
+      "SUGGESTION_TITLE": "Voorgestelde herformulering:",
+      "USE_VERSION": "Deze versie gebruiken"
+    },
+    "STEP2": {
+      "TITLE": "Configuratie",
+      "SUBTITLE": "Pas uw trefwoorden aan en definieer uw doelgroep.",
+      "KEYWORDS_TITLE": "Trefwoorden",
+      "EXTENSIONS_TITLE": "Domeinextensies",
+      "ADD_PLACEHOLDER": "Trefwoord toevoegen...",
+      "MATCH_MODE": "Beschikbaarheidscriterium",
+      "MATCH_ANY": "Minstens één extensie beschikbaar",
+      "MATCH_ALL": "Alle extensies beschikbaar",
+      "BACK_BTN": "Terug",
+      "NEXT_BTN": "Doorgaan naar extensies",
+      "SEARCH_BTN": "Domeinen zoeken",
+      "TARGET_TITLE": "Doelgroep",
+      "TARGET_INTL": "Internationaal",
+      "TARGET_LOCAL": "Lokaal / Regionaal",
+      "LANGUAGE": "Taal:",
+      "LANGUAGE_PLACEHOLDER": "Kies een taal",
+      "NAMING_STYLES_TITLE": "Naamstijlen (optioneel)",
+      "DESCRIPTIVE_TOGGLE": "Beschrijvende namen — bijv.: bakkerij-amsterdam.nl",
+      "CULTURAL_TOGGLE": "Culturele referenties — bijv.: uilenspiegel.nl"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "beschrijvend",
+      "CULTURAL": "cultureel"
+    },
+    "STEP3": {
+      "TITLE": "Beschikbare {{extensions}} domeinen",
+      "SUBTITLE": "Hier zijn onze suggesties voor uw project.",
+      "NOTE": "Opmerking: We hebben {{total}} naamideeën geanalyseerd, maar slechts {{count}} waren echt beschikbaar.",
+      "NO_RESULTS": "Geen domein gevonden. Probeer andere trefwoorden.",
+      "MORE_BTN": "10 meer suggesties",
+      "CREDITS_LEFT": "{{n}} credits over",
+      "BUY_CREDITS_BTN": "Credits kopen",
+      "BUY_COL_HEADER": "Kopen bij een registrar",
+      "NEW_PROJECT_BTN": "Nieuw project",
+      "COPY_TABLE": "Tabel kopiëren",
+      "COPIED": "Gekopieerd!",
+      "ANALYSIS_PENDING": "AI-analyse bezig…",
+      "ANALYSIS_TOGGLE": "Naamanalyse bekijken",
+      "ADD_MANUAL_PLACEHOLDER": "bijv.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Controleren",
+      "MANUAL_TOOLTIP": "Handmatig toegevoegd",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filter actief",
+      "MANUAL_NOT_AVAILABLE": "{{names}} voldoet niet aan de beschikbaarheidscriteria en wordt verborgen door het actieve filter.",
+      "PICK_BEST_BTN": "Help me kiezen",
+      "PICK_TITLE": "AI-aanbeveling",
+      "PICK_LOADING": "Kandidaten worden geanalyseerd…",
+      "PICK_COPY": "Naam kopiëren",
+      "PICK_OTHER": "Andere kandidaten:",
+      "PICK_ALL": "Uit alle resultaten",
+      "PICK_FAVOURITES": "Alleen uit favorieten",
+      "PICK_URGENCY_TITLE": "Goede namen gaan snel.",
+      "PICK_URGENCY_SUB": "Deze is nu vrij — misschien morgen niet meer. Laat iemand anders hem niet voor u registreren.",
+      "PICK_BUY_BTN": "Dit domein kopen"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "De zoekopdracht duurt langer dan verwacht. Wilt u blijven wachten?",
+      "KEEP_WAITING": "Blijven wachten",
+      "CANCEL": "Annuleren en opnieuw proberen"
+    },
+    "LOADING": "De AI werkt voor u...",
+    "STREAM": {
+      "GENERATING": "De AI genereert nieuwe naamideeën...",
+      "CHECKING": "Controleren van {{name}}",
+      "PROGRESS": "{{checked}} kandidaten beoordeeld — {{found}} momenteel beschikbaar"
+    },
+    "RECHECKING": "Beschikbaarheid controleren...",
+    "RECHECK_ERROR": "Kan beschikbaarheid niet controleren. Probeer opnieuw.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Credits opladen",
+      "MESSAGE": "Hoeveel credits wilt u aan uw account toevoegen?",
+      "QUANTITY": "Hoeveelheid",
+      "CANCEL": "Annuleren",
+      "BUY": "Opladen"
+    }
+  }
+}

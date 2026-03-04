@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Et relevant og ledig domenenavn — med en gang.",
+    "SUBTITLE": "Beskriv prosjektet ditt med noen ord — AI gjør resten.",
+    "B1_TITLE": "AI-forslag",
+    "B1_DESC": "GPT genererer navn tilpasset din virksomhet og målgruppe",
+    "B2_TITLE": "Ekte tilgjengelighet",
+    "B2_DESC": "Whois-sjekk i sanntid for dine valgte endelser",
+    "B3_TITLE": "Favoritter & historikk",
+    "B3_DESC": "Lagre søkene dine og fortsett dem når du vil",
+    "B4_TITLE": "Flere endelser",
+    "B4_DESC": ".com, .no, .io, .net… sjekk alle endelser på én gang",
+    "CTA": "Finn domenenavnet mitt gratis",
+    "FREE_NOTE": "Intet abonnement · Ingen kredittkort · 100 gratis kreditter ved registrering"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Prosjekter",
+    "PROJECT_NEW": "Nytt",
+    "PROJECT_OPEN": "Åpne",
+    "CREDITS": "Kreditter",
+    "LOGOUT": "Logg ut",
+    "LOGIN": "Logg inn / Registrer",
+    "MANAGE_ACCOUNT": "Administrer kontoen min",
+    "BILLING": "Fakturering",
+    "FOOTER": "Utviklet av",
+    "SECURE_ACCESS": "Sikker tilgang",
+    "LOGIN_REQUIRED": "Logg inn for å begynne å søke etter domenenavn.",
+    "ADMIN": "Administrasjon"
+  },
+  "PROJECTS": {
+    "TITLE": "Mine Prosjekter",
+    "SUBTITLE": "Fortsett søkene dine der du slapp.",
+    "EMPTY": "Ingen prosjekter ennå.",
+    "OPEN": "Åpne",
+    "DATE": "Sist oppdatert",
+    "DELETE": "Slett",
+    "CONFIRM_DELETE": "Er du sikker på at du vil slette dette prosjektet?",
+    "DELETE_SUCCESS": "Prosjekt slettet",
+    "SUCCESS": "Ferdig"
+  },
+  "BILLING": {
+    "TITLE": "Kreditter",
+    "TAGLINE": "Liker du ikke abonnementer? Det gjør ikke vi heller.",
+    "TAGLINE_SUB": "100 gratis kreditter hver måned og pakker uten binding om du trenger det.",
+    "FREE_TITLE": "tilgjengelige kreditter",
+    "FREE_RESET": "Fornyes {{date}}",
+    "PACK_TITLE": "Kjøp kreditter",
+    "PACK_CREDITS": "{{n}} kreditter",
+    "PACK_PER_CREDIT": "{{price}} / kreditt",
+    "BUY_BTN": "Kjøp",
+    "PACK_BALANCE": "og {{n}} kjøpte kreditter",
+    "CREDITS": "kreditter",
+    "FREE_MONTHLY": "månedlige gratis kreditter",
+    "PACK_POPULAR": "Populær",
+    "PACK_DECOUVERTE_NAME": "Oppdagelse",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Betaling bekreftet!",
+    "SUCCESS_MESSAGE": "Kredittene dine er lagt til kontoen. Du kan fortsette søkene dine.",
+    "CREDITS_ADDED": "+{{count}} kreditter lagt til — totalt: {{total}} kreditter",
+    "CANCEL_TITLE": "Betaling avbrutt",
+    "CANCEL_MESSAGE": "Betalingen ble ikke gjennomført. Ingen beløp er belastet.",
+    "BACK_HOME": "Tilbake til forsiden"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Beskrivelse",
+      "KEYWORDS": "Nøkkelord",
+      "EXTENSIONS": "Endelser",
+      "DOMAINS": "Domener"
+    },
+    "STEP1": {
+      "TITLE": "Ditt Prosjekt",
+      "PROJECT_NAME_TITLE": "Prosjektnavn (valgfritt)",
+      "SUBTITLE": "Beskriv løsningen din, målgruppen din og verdiene dine.",
+      "PLACEHOLDER": "F.eks.: En plattform for lokal og miljøvennlig blomsterlevering...",
+      "REFINE_BTN": "Omformuler med AI",
+      "CONTINUE_BTN": "Fortsett til nøkkelord",
+      "SUGGESTION_TITLE": "Foreslått omformulering:",
+      "USE_VERSION": "Bruk denne versjonen"
+    },
+    "STEP2": {
+      "TITLE": "Konfigurasjon",
+      "SUBTITLE": "Tilpass nøkkelordene dine og definer målgruppen din.",
+      "KEYWORDS_TITLE": "Nøkkelord",
+      "EXTENSIONS_TITLE": "Domeneendelser",
+      "ADD_PLACEHOLDER": "Legg til et nøkkelord...",
+      "MATCH_MODE": "Tilgjengelighetskriterium",
+      "MATCH_ANY": "Minst én endelse tilgjengelig",
+      "MATCH_ALL": "Alle endelser tilgjengelige",
+      "BACK_BTN": "Tilbake",
+      "NEXT_BTN": "Fortsett til endelser",
+      "SEARCH_BTN": "Søk domener",
+      "TARGET_TITLE": "Målgruppe",
+      "TARGET_INTL": "Internasjonal",
+      "TARGET_LOCAL": "Lokal / Regional",
+      "LANGUAGE": "Språk:",
+      "LANGUAGE_PLACEHOLDER": "Velg et språk",
+      "NAMING_STYLES_TITLE": "Navnestiler (valgfritt)",
+      "DESCRIPTIVE_TOGGLE": "Beskrivende navn — f.eks.: bakeri-oslo.no",
+      "CULTURAL_TOGGLE": "Kulturelle referanser — f.eks.: askeladden-butikk.no"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "beskrivende",
+      "CULTURAL": "kulturell"
+    },
+    "STEP3": {
+      "TITLE": "Tilgjengelige {{extensions}} domener",
+      "SUBTITLE": "Her er forslagene våre for prosjektet ditt.",
+      "NOTE": "Merk: Vi analyserte {{total}} navneideer, men bare {{count}} var virkelig tilgjengelige.",
+      "NO_RESULTS": "Ingen domener funnet. Prøv å endre nøkkelordene.",
+      "MORE_BTN": "10 flere forslag",
+      "CREDITS_LEFT": "{{n}} kreditter igjen",
+      "BUY_CREDITS_BTN": "Kjøp kreditter",
+      "BUY_COL_HEADER": "Kjøp hos en registrar",
+      "NEW_PROJECT_BTN": "Nytt prosjekt",
+      "COPY_TABLE": "Kopier tabell",
+      "COPIED": "Kopiert!",
+      "ANALYSIS_PENDING": "AI-analyse pågår…",
+      "ANALYSIS_TOGGLE": "Se navneanalyse",
+      "ADD_MANUAL_PLACEHOLDER": "f.eks.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Sjekk",
+      "MANUAL_TOOLTIP": "Lagt til manuelt",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filter aktivt",
+      "MANUAL_NOT_AVAILABLE": "{{names}} oppfyller ikke tilgjengelighetskriteriene og er skjult av det aktive filteret.",
+      "PICK_BEST_BTN": "Hjelp meg å velge",
+      "PICK_TITLE": "AI-anbefaling",
+      "PICK_LOADING": "Analyserer kandidater…",
+      "PICK_COPY": "Kopier navn",
+      "PICK_OTHER": "Andre kandidater:",
+      "PICK_ALL": "Blant alle resultater",
+      "PICK_FAVOURITES": "Bare blant favoritter",
+      "PICK_URGENCY_TITLE": "Gode navn forsvinner raskt.",
+      "PICK_URGENCY_SUB": "Dette er ledig nå — kanskje ikke i morgen. La ikke noen andre registrere det før deg.",
+      "PICK_BUY_BTN": "Kjøp dette domenet"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Søket tar lengre tid enn forventet. Vil du fortsette å vente?",
+      "KEEP_WAITING": "Fortsett å vente",
+      "CANCEL": "Avbryt og prøv igjen"
+    },
+    "LOADING": "AI jobber for deg...",
+    "STREAM": {
+      "GENERATING": "AI genererer nye navneideer...",
+      "CHECKING": "Sjekker {{name}}",
+      "PROGRESS": "{{checked}} kandidater vurdert — {{found}} tilgjengelige så langt"
+    },
+    "RECHECKING": "Sjekker tilgjengelighet...",
+    "RECHECK_ERROR": "Kunne ikke sjekke tilgjengeligheten. Prøv igjen.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Fyll på kreditter",
+      "MESSAGE": "Hvor mange kreditter vil du legge til på kontoen din?",
+      "QUANTITY": "Antall",
+      "CANCEL": "Avbryt",
+      "BUY": "Fyll på"
+    }
+  }
+}

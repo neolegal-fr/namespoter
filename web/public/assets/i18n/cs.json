@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Relevantní a volný název domény — ihned.",
+    "SUBTITLE": "Popište svůj projekt několika slovy — AI udělá zbytek.",
+    "B1_TITLE": "Návrhy AI",
+    "B1_DESC": "GPT generuje názvy přizpůsobené vaší aktivitě a cílové skupině",
+    "B2_TITLE": "Skutečná dostupnost",
+    "B2_DESC": "Kontrola Whois v reálném čase pro vybrané přípony",
+    "B3_TITLE": "Oblíbené & historie",
+    "B3_DESC": "Ukládejte svá vyhledávání a kdykoli se k nim vraťte",
+    "B4_TITLE": "Více přípon",
+    "B4_DESC": ".com, .cz, .io, .net… zkontrolujte všechny přípony najednou",
+    "CTA": "Najít mou doménu zdarma",
+    "FREE_NOTE": "Bez předplatného · Bez kreditní karty · 100 kreditů zdarma při registraci"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projekty",
+    "PROJECT_NEW": "Nový",
+    "PROJECT_OPEN": "Otevřít",
+    "CREDITS": "Kredity",
+    "LOGOUT": "Odhlásit se",
+    "LOGIN": "Přihlásit / Registrovat",
+    "MANAGE_ACCOUNT": "Spravovat můj účet",
+    "BILLING": "Fakturace",
+    "FOOTER": "Vyvinuto",
+    "SECURE_ACCESS": "Zabezpečený přístup",
+    "LOGIN_REQUIRED": "Přihlaste se a začněte hledat názvy domén.",
+    "ADMIN": "Administrace"
+  },
+  "PROJECTS": {
+    "TITLE": "Moje Projekty",
+    "SUBTITLE": "Pokračujte ve svých vyhledáváních tam, kde jste skončili.",
+    "EMPTY": "Zatím žádné projekty.",
+    "OPEN": "Otevřít",
+    "DATE": "Naposledy aktualizováno",
+    "DELETE": "Smazat",
+    "CONFIRM_DELETE": "Opravdu chcete smazat tento projekt?",
+    "DELETE_SUCCESS": "Projekt smazán",
+    "SUCCESS": "Hotovo"
+  },
+  "BILLING": {
+    "TITLE": "Kredity",
+    "TAGLINE": "Nemáte rádi předplatné? My také ne.",
+    "TAGLINE_SUB": "100 kreditů zdarma každý měsíc a balíčky bez závazků, pokud potřebujete.",
+    "FREE_TITLE": "dostupných kreditů",
+    "FREE_RESET": "Obnova {{date}}",
+    "PACK_TITLE": "Koupit kredity",
+    "PACK_CREDITS": "{{n}} kreditů",
+    "PACK_PER_CREDIT": "{{price}} / kredit",
+    "BUY_BTN": "Koupit",
+    "PACK_BALANCE": "a {{n}} zakoupených kreditů",
+    "CREDITS": "kreditů",
+    "FREE_MONTHLY": "měsíční bezplatné kredity",
+    "PACK_POPULAR": "Oblíbené",
+    "PACK_DECOUVERTE_NAME": "Objev",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Platba potvrzena!",
+    "SUCCESS_MESSAGE": "Vaše kredity byly přidány na účet. Můžete pokračovat ve vyhledávání.",
+    "CREDITS_ADDED": "+{{count}} kreditů přidáno — celkem: {{total}} kreditů",
+    "CANCEL_TITLE": "Platba zrušena",
+    "CANCEL_MESSAGE": "Vaše platba nebyla provedena. Žádná částka nebyla stržena.",
+    "BACK_HOME": "Zpět na hlavní stránku"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Popis",
+      "KEYWORDS": "Klíčová slova",
+      "EXTENSIONS": "Přípony",
+      "DOMAINS": "Domény"
+    },
+    "STEP1": {
+      "TITLE": "Váš Projekt",
+      "PROJECT_NAME_TITLE": "Název projektu (volitelný)",
+      "SUBTITLE": "Popište své řešení, cílovou skupinu a hodnoty.",
+      "PLACEHOLDER": "Např.: Platforma pro doručování místních a ekologických květin...",
+      "REFINE_BTN": "Přeformulovat s AI",
+      "CONTINUE_BTN": "Pokračovat na klíčová slova",
+      "SUGGESTION_TITLE": "Navrhované přeformulování:",
+      "USE_VERSION": "Použít tuto verzi"
+    },
+    "STEP2": {
+      "TITLE": "Konfigurace",
+      "SUBTITLE": "Upravte klíčová slova a definujte svou cílovou skupinu.",
+      "KEYWORDS_TITLE": "Klíčová slova",
+      "EXTENSIONS_TITLE": "Přípony domény",
+      "ADD_PLACEHOLDER": "Přidat klíčové slovo...",
+      "MATCH_MODE": "Kritérium dostupnosti",
+      "MATCH_ANY": "Alespoň jedna přípona dostupná",
+      "MATCH_ALL": "Všechny přípony dostupné",
+      "BACK_BTN": "Zpět",
+      "NEXT_BTN": "Pokračovat na přípony",
+      "SEARCH_BTN": "Hledat domény",
+      "TARGET_TITLE": "Cílová skupina",
+      "TARGET_INTL": "Mezinárodní",
+      "TARGET_LOCAL": "Místní / Regionální",
+      "LANGUAGE": "Jazyk:",
+      "LANGUAGE_PLACEHOLDER": "Vyberte jazyk",
+      "NAMING_STYLES_TITLE": "Styly pojmenování (volitelné)",
+      "DESCRIPTIVE_TOGGLE": "Popisné názvy — např.: pekarna-praha.cz",
+      "CULTURAL_TOGGLE": "Kulturní reference — např.: svejk-shop.cz"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "popisný",
+      "CULTURAL": "kulturní"
+    },
+    "STEP3": {
+      "TITLE": "Dostupné domény {{extensions}}",
+      "SUBTITLE": "Zde jsou naše návrhy pro váš projekt.",
+      "NOTE": "Poznámka: Analyzovali jsme {{total}} nápadů na názvy, ale pouze {{count}} bylo skutečně dostupných.",
+      "NO_RESULTS": "Žádná doména nenalezena. Zkuste změnit klíčová slova.",
+      "MORE_BTN": "Dalších 10 návrhů",
+      "CREDITS_LEFT": "Zbývá {{n}} kreditů",
+      "BUY_CREDITS_BTN": "Koupit kredity",
+      "BUY_COL_HEADER": "Koupit u registrátora",
+      "NEW_PROJECT_BTN": "Nový projekt",
+      "COPY_TABLE": "Kopírovat tabulku",
+      "COPIED": "Zkopírováno!",
+      "ANALYSIS_PENDING": "Probíhá analýza AI…",
+      "ANALYSIS_TOGGLE": "Zobrazit analýzu názvu",
+      "ADD_MANUAL_PLACEHOLDER": "např.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Zkontrolovat",
+      "MANUAL_TOOLTIP": "Přidáno ručně",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtr aktivní",
+      "MANUAL_NOT_AVAILABLE": "{{names}} nesplňuje kritéria dostupnosti a je skryto aktivním filtrem.",
+      "PICK_BEST_BTN": "Pomozte mi vybrat",
+      "PICK_TITLE": "Doporučení AI",
+      "PICK_LOADING": "Analyzuji kandidáty…",
+      "PICK_COPY": "Kopírovat název",
+      "PICK_OTHER": "Další kandidáti:",
+      "PICK_ALL": "Ze všech výsledků",
+      "PICK_FAVOURITES": "Pouze z oblíbených",
+      "PICK_URGENCY_TITLE": "Dobré názvy mizí rychle.",
+      "PICK_URGENCY_SUB": "Tato doména je nyní volná — možná ne zítra. Nenechte ji zaregistrovat někdo jiný před vámi.",
+      "PICK_BUY_BTN": "Koupit tuto doménu"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Vyhledávání trvá déle než očekáváno. Chcete pokračovat v čekání?",
+      "KEEP_WAITING": "Pokračovat v čekání",
+      "CANCEL": "Zrušit a zkusit znovu"
+    },
+    "LOADING": "AI pracuje pro vás...",
+    "STREAM": {
+      "GENERATING": "AI generuje nové nápady na názvy...",
+      "CHECKING": "Kontroluji {{name}}",
+      "PROGRESS": "{{checked}} kandidátů vyhodnoceno — {{found}} dostupných zatím"
+    },
+    "RECHECKING": "Kontrola dostupnosti...",
+    "RECHECK_ERROR": "Nelze zkontrolovat dostupnost. Zkuste to znovu.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Dobít kredity",
+      "MESSAGE": "Kolik kreditů chcete přidat na svůj účet?",
+      "QUANTITY": "Množství",
+      "CANCEL": "Zrušit",
+      "BUY": "Dobít"
+    }
+  }
+}

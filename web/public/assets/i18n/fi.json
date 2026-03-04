@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Sopiva ja vapaa verkkotunnus — heti.",
+    "SUBTITLE": "Kuvaile projektiasi muutamalla sanalla — tekoäly tekee loput.",
+    "B1_TITLE": "Tekoälyehdotukset",
+    "B1_DESC": "GPT luo nimiä jotka sopivat toimintaasi ja kohderyhmääsi",
+    "B2_TITLE": "Todellinen saatavuus",
+    "B2_DESC": "Whois-tarkistus reaaliajassa valitsemillesi päätteille",
+    "B3_TITLE": "Suosikit & historia",
+    "B3_DESC": "Tallenna hakusi ja jatka niitä milloin tahansa",
+    "B4_TITLE": "Useita päätteitä",
+    "B4_DESC": ".com, .fi, .io, .net… tarkista kaikki päätteet kerralla",
+    "CTA": "Löydä verkkotunnukseni ilmaiseksi",
+    "FREE_NOTE": "Ei tilausta · Ei luottokorttia · 100 ilmaista krediittiä rekisteröinnissä"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projektit",
+    "PROJECT_NEW": "Uusi",
+    "PROJECT_OPEN": "Avaa",
+    "CREDITS": "Krediitit",
+    "LOGOUT": "Kirjaudu ulos",
+    "LOGIN": "Kirjaudu / Rekisteröidy",
+    "MANAGE_ACCOUNT": "Hallitse tiliäni",
+    "BILLING": "Laskutus",
+    "FOOTER": "Kehittänyt",
+    "SECURE_ACCESS": "Turvallinen pääsy",
+    "LOGIN_REQUIRED": "Kirjaudu sisään aloittaaksesi verkkotunnusten etsimisen.",
+    "ADMIN": "Hallinto"
+  },
+  "PROJECTS": {
+    "TITLE": "Omat Projektit",
+    "SUBTITLE": "Jatka hakujasi siitä mihin jäit.",
+    "EMPTY": "Ei projekteja vielä.",
+    "OPEN": "Avaa",
+    "DATE": "Viimeksi päivitetty",
+    "DELETE": "Poista",
+    "CONFIRM_DELETE": "Haluatko varmasti poistaa tämän projektin?",
+    "DELETE_SUCCESS": "Projekti poistettu",
+    "SUCCESS": "Valmis"
+  },
+  "BILLING": {
+    "TITLE": "Krediitit",
+    "TAGLINE": "Etkö pidä tilauksista? Me emme myöskään.",
+    "TAGLINE_SUB": "100 ilmaista krediittiä joka kuukausi ja paketteja ilman sitoumuksia tarvittaessa.",
+    "FREE_TITLE": "käytettävissä olevat krediitit",
+    "FREE_RESET": "Uusitaan {{date}}",
+    "PACK_TITLE": "Osta krediittejä",
+    "PACK_CREDITS": "{{n}} krediittiä",
+    "PACK_PER_CREDIT": "{{price}} / krediitti",
+    "BUY_BTN": "Osta",
+    "PACK_BALANCE": "ja {{n}} ostettua krediittiä",
+    "CREDITS": "krediittiä",
+    "FREE_MONTHLY": "kuukausittaiset ilmaiskrediitit",
+    "PACK_POPULAR": "Suosittu",
+    "PACK_DECOUVERTE_NAME": "Tutustu",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Maksu vahvistettu!",
+    "SUCCESS_MESSAGE": "Krediittisi on lisätty tilillesi. Voit jatkaa hakujasi.",
+    "CREDITS_ADDED": "+{{count}} krediittiä lisätty — yhteensä: {{total}} krediittiä",
+    "CANCEL_TITLE": "Maksu peruutettu",
+    "CANCEL_MESSAGE": "Maksua ei suoritettu. Mitään summaa ei veloitettu.",
+    "BACK_HOME": "Takaisin etusivulle"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Kuvaus",
+      "KEYWORDS": "Avainsanat",
+      "EXTENSIONS": "Päätteet",
+      "DOMAINS": "Verkkotunnukset"
+    },
+    "STEP1": {
+      "TITLE": "Projektisi",
+      "PROJECT_NAME_TITLE": "Projektin nimi (valinnainen)",
+      "SUBTITLE": "Kuvaile ratkaisuasi, kohderyhmääsi ja arvojasi.",
+      "PLACEHOLDER": "Esim.: Paikallisen ja ekologisen kukkatoimituksen alusta...",
+      "REFINE_BTN": "Muotoile uudelleen tekoälyllä",
+      "CONTINUE_BTN": "Jatka avainsanoihin",
+      "SUGGESTION_TITLE": "Ehdotettu uudelleenmuotoilu:",
+      "USE_VERSION": "Käytä tätä versiota"
+    },
+    "STEP2": {
+      "TITLE": "Asetukset",
+      "SUBTITLE": "Muokkaa avainsanoja ja määritä kohderyhmäsi.",
+      "KEYWORDS_TITLE": "Avainsanat",
+      "EXTENSIONS_TITLE": "Verkkotunnuspäätteet",
+      "ADD_PLACEHOLDER": "Lisää avainsana...",
+      "MATCH_MODE": "Saatavuuskriteeri",
+      "MATCH_ANY": "Vähintään yksi pääte saatavilla",
+      "MATCH_ALL": "Kaikki päätteet saatavilla",
+      "BACK_BTN": "Takaisin",
+      "NEXT_BTN": "Jatka päätteisiin",
+      "SEARCH_BTN": "Hae verkkotunnuksia",
+      "TARGET_TITLE": "Kohderyhmä",
+      "TARGET_INTL": "Kansainvälinen",
+      "TARGET_LOCAL": "Paikallinen / Alueellinen",
+      "LANGUAGE": "Kieli:",
+      "LANGUAGE_PLACEHOLDER": "Valitse kieli",
+      "NAMING_STYLES_TITLE": "Nimityylit (valinnainen)",
+      "DESCRIPTIVE_TOGGLE": "Kuvaavat nimet — esim.: leipomo-helsinki.fi",
+      "CULTURAL_TOGGLE": "Kulttuuriviittaukset — esim.: moomins-shop.fi"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "kuvaava",
+      "CULTURAL": "kulttuurinen"
+    },
+    "STEP3": {
+      "TITLE": "Saatavilla olevat {{extensions}} verkkotunnukset",
+      "SUBTITLE": "Tässä ehdotuksemme projektiisi.",
+      "NOTE": "Huom: Analysoimme {{total}} nimiehdotusta, mutta vain {{count}} oli todella saatavilla.",
+      "NO_RESULTS": "Verkkotunnusta ei löydy. Kokeile muuttaa avainsanoja.",
+      "MORE_BTN": "10 lisää ehdotusta",
+      "CREDITS_LEFT": "{{n}} krediittiä jäljellä",
+      "BUY_CREDITS_BTN": "Osta krediittejä",
+      "BUY_COL_HEADER": "Osta rekisteröijältä",
+      "NEW_PROJECT_BTN": "Uusi projekti",
+      "COPY_TABLE": "Kopioi taulukko",
+      "COPIED": "Kopioitu!",
+      "ANALYSIS_PENDING": "Tekoälyanalyysi käynnissä…",
+      "ANALYSIS_TOGGLE": "Näytä nimianalyysi",
+      "ADD_MANUAL_PLACEHOLDER": "esim.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Tarkista",
+      "MANUAL_TOOLTIP": "Lisätty manuaalisesti",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Suodatin aktiivinen",
+      "MANUAL_NOT_AVAILABLE": "{{names}} ei täytä saatavuuskriteereitä ja on piilotettu aktiivisen suodattimen vuoksi.",
+      "PICK_BEST_BTN": "Auta minua valitsemaan",
+      "PICK_TITLE": "Tekoälysuositus",
+      "PICK_LOADING": "Analysoidaan ehdokkaita…",
+      "PICK_COPY": "Kopioi nimi",
+      "PICK_OTHER": "Muut ehdokkaat:",
+      "PICK_ALL": "Kaikista tuloksista",
+      "PICK_FAVOURITES": "Vain suosikeista",
+      "PICK_URGENCY_TITLE": "Hyvät nimet menevät nopeasti.",
+      "PICK_URGENCY_SUB": "Tämä on nyt vapaa — ehkä ei enää huomenna. Älä anna jonkun muun rekisteröidä sitä ennen sinua.",
+      "PICK_BUY_BTN": "Osta tämä verkkotunnus"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Haku kestää odotettua kauemmin. Haluatko jatkaa odottamista?",
+      "KEEP_WAITING": "Jatka odottamista",
+      "CANCEL": "Peruuta ja yritä uudelleen"
+    },
+    "LOADING": "Tekoäly työskentelee puolestasi...",
+    "STREAM": {
+      "GENERATING": "Tekoäly luo uusia nimiehdotuksia...",
+      "CHECKING": "Tarkistetaan {{name}}",
+      "PROGRESS": "{{checked}} ehdokasta arvioitu — {{found}} saatavilla tällä hetkellä"
+    },
+    "RECHECKING": "Tarkistetaan saatavuutta...",
+    "RECHECK_ERROR": "Saatavuuden tarkistus epäonnistui. Yritä uudelleen.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Lataa krediittejä",
+      "MESSAGE": "Kuinka monta krediittiä haluat lisätä tilillesi?",
+      "QUANTITY": "Määrä",
+      "CANCEL": "Peruuta",
+      "BUY": "Lataa"
+    }
+  }
+}

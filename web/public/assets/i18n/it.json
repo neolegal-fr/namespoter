@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Un nome di dominio pertinente e disponibile, subito.",
+    "SUBTITLE": "Descrivi il tuo progetto in poche parole — l'IA fa il resto.",
+    "B1_TITLE": "Suggerimenti IA",
+    "B1_DESC": "GPT genera nomi adattati alla tua attività e al tuo pubblico",
+    "B2_TITLE": "Disponibilità reale",
+    "B2_DESC": "Verifica Whois in tempo reale sulle estensioni di tua scelta",
+    "B3_TITLE": "Preferiti e cronologia",
+    "B3_DESC": "Salva le tue ricerche e riprendile quando vuoi",
+    "B4_TITLE": "Multi-estensioni",
+    "B4_DESC": ".com, .it, .io, .net… verifica tutte le estensioni in una volta",
+    "CTA": "Trovare il mio nome di dominio gratuitamente",
+    "FREE_NOTE": "Nessun abbonamento · Nessuna carta di credito · 100 crediti gratis alla registrazione"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Progetti",
+    "PROJECT_NEW": "Nuovo",
+    "PROJECT_OPEN": "Apri",
+    "CREDITS": "Crediti",
+    "LOGOUT": "Disconnetti",
+    "LOGIN": "Accedi / Registrati",
+    "MANAGE_ACCOUNT": "Gestisci il mio account",
+    "BILLING": "Fatturazione",
+    "FOOTER": "Sviluppato da",
+    "SECURE_ACCESS": "Accesso sicuro",
+    "LOGIN_REQUIRED": "Accedi per iniziare a cercare nomi di dominio.",
+    "ADMIN": "Amministrazione"
+  },
+  "PROJECTS": {
+    "TITLE": "I miei Progetti",
+    "SUBTITLE": "Riprendi le tue ricerche da dove le avevi lasciate.",
+    "EMPTY": "Nessun progetto per il momento.",
+    "OPEN": "Apri",
+    "DATE": "Ultimo aggiornamento",
+    "DELETE": "Elimina",
+    "CONFIRM_DELETE": "Vuoi davvero eliminare questo progetto?",
+    "DELETE_SUCCESS": "Progetto eliminato con successo",
+    "SUCCESS": "Successo"
+  },
+  "BILLING": {
+    "TITLE": "Crediti",
+    "TAGLINE": "Non ami gli abbonamenti? Neanche noi.",
+    "TAGLINE_SUB": "100 crediti gratuiti ogni mese e pacchetti senza impegno se ne hai bisogno.",
+    "FREE_TITLE": "crediti disponibili",
+    "FREE_RESET": "Rinnovo il {{date}}",
+    "PACK_TITLE": "Acquista crediti",
+    "PACK_CREDITS": "{{n}} crediti",
+    "PACK_PER_CREDIT": "{{price}} / credito",
+    "BUY_BTN": "Acquista",
+    "PACK_BALANCE": "e {{n}} crediti acquistati",
+    "CREDITS": "crediti",
+    "FREE_MONTHLY": "crediti mensili gratuiti",
+    "PACK_POPULAR": "Popolare",
+    "PACK_DECOUVERTE_NAME": "Scoperta",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Pagamento confermato!",
+    "SUCCESS_MESSAGE": "I tuoi crediti sono stati aggiunti al tuo account. Puoi riprendere le tue ricerche.",
+    "CREDITS_ADDED": "+{{count}} crediti aggiunti — totale: {{total}} crediti",
+    "CANCEL_TITLE": "Pagamento annullato",
+    "CANCEL_MESSAGE": "Il tuo pagamento non è stato effettuato. Nessun importo è stato addebitato.",
+    "BACK_HOME": "Torna alla home"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Descrizione",
+      "KEYWORDS": "Parole chiave",
+      "EXTENSIONS": "Estensioni",
+      "DOMAINS": "Domini"
+    },
+    "STEP1": {
+      "TITLE": "Il tuo Progetto",
+      "PROJECT_NAME_TITLE": "Nome del progetto (opzionale)",
+      "SUBTITLE": "Descrivi la tua soluzione, il tuo pubblico e i tuoi valori.",
+      "PLACEHOLDER": "Es.: Una piattaforma di consegna di fiori locali ed ecologici...",
+      "REFINE_BTN": "Riformulare con l'IA",
+      "CONTINUE_BTN": "Continua alle parole chiave",
+      "SUGGESTION_TITLE": "Riformulazione suggerita:",
+      "USE_VERSION": "Usa questa versione"
+    },
+    "STEP2": {
+      "TITLE": "Configurazione",
+      "SUBTITLE": "Regola le tue parole chiave e definisci il tuo obiettivo.",
+      "KEYWORDS_TITLE": "Parole chiave",
+      "EXTENSIONS_TITLE": "Estensioni di dominio",
+      "ADD_PLACEHOLDER": "Aggiungi una parola chiave...",
+      "MATCH_MODE": "Criterio di disponibilità",
+      "MATCH_ANY": "Almeno un'estensione disponibile",
+      "MATCH_ALL": "Tutte le estensioni disponibili",
+      "BACK_BTN": "Indietro",
+      "NEXT_BTN": "Continua alle estensioni",
+      "SEARCH_BTN": "Cerca domini",
+      "TARGET_TITLE": "Obiettivo",
+      "TARGET_INTL": "Internazionale",
+      "TARGET_LOCAL": "Locale / Regionale",
+      "LANGUAGE": "Lingua:",
+      "LANGUAGE_PLACEHOLDER": "Scegli una lingua",
+      "NAMING_STYLES_TITLE": "Stili di nomi (opzionale)",
+      "DESCRIPTIVE_TOGGLE": "Nomi descrittivi — es.: panetteria-roma.it",
+      "CULTURAL_TOGGLE": "Riferimenti culturali — es.: pinocchio-shop.it"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "descrittivo",
+      "CULTURAL": "culturale"
+    },
+    "STEP3": {
+      "TITLE": "Domini {{extensions}} disponibili",
+      "SUBTITLE": "Ecco i nostri suggerimenti per il tuo progetto.",
+      "NOTE": "Nota: Abbiamo analizzato {{total}} idee di nomi, ma solo {{count}} erano davvero disponibili.",
+      "NO_RESULTS": "Nessun dominio trovato. Prova a cambiare le parole chiave.",
+      "MORE_BTN": "10 suggerimenti in più",
+      "CREDITS_LEFT": "{{n}} crediti rimanenti",
+      "BUY_CREDITS_BTN": "Acquista crediti",
+      "BUY_COL_HEADER": "Acquista da un registrar",
+      "NEW_PROJECT_BTN": "Nuovo progetto",
+      "COPY_TABLE": "Copia tabella",
+      "COPIED": "Copiato!",
+      "ANALYSIS_PENDING": "Analisi IA in corso…",
+      "ANALYSIS_TOGGLE": "Vedi analisi del nome",
+      "ADD_MANUAL_PLACEHOLDER": "es.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Verifica",
+      "MANUAL_TOOLTIP": "Aggiunto manualmente",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtro attivo",
+      "MANUAL_NOT_AVAILABLE": "{{names}} non soddisfa i criteri di disponibilità ed è nascosto dal filtro attivo.",
+      "PICK_BEST_BTN": "Aiutami a scegliere",
+      "PICK_TITLE": "Raccomandazione IA",
+      "PICK_LOADING": "Analisi dei candidati in corso…",
+      "PICK_COPY": "Copia nome",
+      "PICK_OTHER": "Altri candidati:",
+      "PICK_ALL": "Tra tutti i risultati",
+      "PICK_FAVOURITES": "Solo tra i preferiti",
+      "PICK_URGENCY_TITLE": "I buoni nomi vanno in fretta.",
+      "PICK_URGENCY_SUB": "Questo è libero adesso — forse non lo sarà domani. Non lasciare che qualcun altro lo registri prima di te.",
+      "PICK_BUY_BTN": "Acquista questo dominio"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "La ricerca sta richiedendo più tempo del previsto. Vuoi continuare ad aspettare?",
+      "KEEP_WAITING": "Continua ad aspettare",
+      "CANCEL": "Annulla e riprova"
+    },
+    "LOADING": "L'IA sta lavorando per te...",
+    "STREAM": {
+      "GENERATING": "L'IA genera nuove idee di nomi...",
+      "CHECKING": "Verifica di {{name}}",
+      "PROGRESS": "{{checked}} candidati valutati — {{found}} disponibili per ora"
+    },
+    "RECHECKING": "Verifica disponibilità in corso...",
+    "RECHECK_ERROR": "Impossibile verificare la disponibilità. Riprova.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Ricaricare i crediti",
+      "MESSAGE": "Quanti crediti vuoi aggiungere al tuo account?",
+      "QUANTITY": "Quantità",
+      "CANCEL": "Annulla",
+      "BUY": "Ricarica"
+    }
+  }
+}

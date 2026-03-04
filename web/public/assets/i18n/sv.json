@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Ett relevant och ledigt domännamn — direkt.",
+    "SUBTITLE": "Beskriv ditt projekt med några ord — AI gör resten.",
+    "B1_TITLE": "AI-förslag",
+    "B1_DESC": "GPT genererar namn anpassade till din verksamhet och målgrupp",
+    "B2_TITLE": "Verklig tillgänglighet",
+    "B2_DESC": "Whois-kontroll i realtid för dina valda ändelser",
+    "B3_TITLE": "Favoriter & historik",
+    "B3_DESC": "Spara dina sökningar och återuppta dem när du vill",
+    "B4_TITLE": "Flera ändelser",
+    "B4_DESC": ".com, .se, .io, .net… kontrollera alla ändelser på en gång",
+    "CTA": "Hitta mitt domännamn gratis",
+    "FREE_NOTE": "Ingen prenumeration · Inget kreditkort · 100 gratispoäng vid registrering"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projekt",
+    "PROJECT_NEW": "Nytt",
+    "PROJECT_OPEN": "Öppna",
+    "CREDITS": "Poäng",
+    "LOGOUT": "Logga ut",
+    "LOGIN": "Logga in / Registrera",
+    "MANAGE_ACCOUNT": "Hantera mitt konto",
+    "BILLING": "Fakturering",
+    "FOOTER": "Utvecklad av",
+    "SECURE_ACCESS": "Säker åtkomst",
+    "LOGIN_REQUIRED": "Logga in för att börja söka efter domännamn.",
+    "ADMIN": "Administration"
+  },
+  "PROJECTS": {
+    "TITLE": "Mina Projekt",
+    "SUBTITLE": "Återuppta dina sökningar där du slutade.",
+    "EMPTY": "Inga projekt ännu.",
+    "OPEN": "Öppna",
+    "DATE": "Senast uppdaterad",
+    "DELETE": "Ta bort",
+    "CONFIRM_DELETE": "Vill du verkligen ta bort detta projekt?",
+    "DELETE_SUCCESS": "Projekt borttaget",
+    "SUCCESS": "Klart"
+  },
+  "BILLING": {
+    "TITLE": "Poäng",
+    "TAGLINE": "Gillar du inte prenumerationer? Det gör inte vi heller.",
+    "TAGLINE_SUB": "100 gratispoäng varje månad och paket utan bindningstid om du behöver.",
+    "FREE_TITLE": "tillgängliga poäng",
+    "FREE_RESET": "Förnyelse {{date}}",
+    "PACK_TITLE": "Köp poäng",
+    "PACK_CREDITS": "{{n}} poäng",
+    "PACK_PER_CREDIT": "{{price}} / poäng",
+    "BUY_BTN": "Köp",
+    "PACK_BALANCE": "och {{n}} köpta poäng",
+    "CREDITS": "poäng",
+    "FREE_MONTHLY": "månatliga gratispoäng",
+    "PACK_POPULAR": "Populär",
+    "PACK_DECOUVERTE_NAME": "Upptäckt",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Betalning bekräftad!",
+    "SUCCESS_MESSAGE": "Dina poäng har lagts till ditt konto. Du kan återuppta dina sökningar.",
+    "CREDITS_ADDED": "+{{count}} poäng tillagda — totalt: {{total}} poäng",
+    "CANCEL_TITLE": "Betalning avbruten",
+    "CANCEL_MESSAGE": "Din betalning genomfördes inte. Inget belopp har debiterats.",
+    "BACK_HOME": "Tillbaka till startsidan"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Beskrivning",
+      "KEYWORDS": "Nyckelord",
+      "EXTENSIONS": "Ändelser",
+      "DOMAINS": "Domäner"
+    },
+    "STEP1": {
+      "TITLE": "Ditt Projekt",
+      "PROJECT_NAME_TITLE": "Projektnamn (valfritt)",
+      "SUBTITLE": "Beskriv din lösning, din målgrupp och dina värderingar.",
+      "PLACEHOLDER": "T.ex.: En plattform för lokal och miljövänlig blomsterleverans...",
+      "REFINE_BTN": "Omformulera med AI",
+      "CONTINUE_BTN": "Fortsätt till nyckelord",
+      "SUGGESTION_TITLE": "Föreslagen omformulering:",
+      "USE_VERSION": "Använd denna version"
+    },
+    "STEP2": {
+      "TITLE": "Konfiguration",
+      "SUBTITLE": "Justera dina nyckelord och definiera din målgrupp.",
+      "KEYWORDS_TITLE": "Nyckelord",
+      "EXTENSIONS_TITLE": "Domänändelser",
+      "ADD_PLACEHOLDER": "Lägg till ett nyckelord...",
+      "MATCH_MODE": "Tillgänglighetskriterium",
+      "MATCH_ANY": "Minst en ändelse tillgänglig",
+      "MATCH_ALL": "Alla ändelser tillgängliga",
+      "BACK_BTN": "Tillbaka",
+      "NEXT_BTN": "Fortsätt till ändelser",
+      "SEARCH_BTN": "Sök domäner",
+      "TARGET_TITLE": "Målgrupp",
+      "TARGET_INTL": "Internationell",
+      "TARGET_LOCAL": "Lokal / Regional",
+      "LANGUAGE": "Språk:",
+      "LANGUAGE_PLACEHOLDER": "Välj ett språk",
+      "NAMING_STYLES_TITLE": "Namnsstilar (valfritt)",
+      "DESCRIPTIVE_TOGGLE": "Beskrivande namn — t.ex.: bageri-stockholm.se",
+      "CULTURAL_TOGGLE": "Kulturella referenser — t.ex.: pippi-butiken.se"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "beskrivande",
+      "CULTURAL": "kulturell"
+    },
+    "STEP3": {
+      "TITLE": "Tillgängliga {{extensions}} domäner",
+      "SUBTITLE": "Här är våra förslag för ditt projekt.",
+      "NOTE": "Obs: Vi analyserade {{total}} namnidéer, men bara {{count}} var verkligen tillgängliga.",
+      "NO_RESULTS": "Ingen domän hittades. Prova att byta nyckelord.",
+      "MORE_BTN": "10 fler förslag",
+      "CREDITS_LEFT": "{{n}} poäng kvar",
+      "BUY_CREDITS_BTN": "Köp poäng",
+      "BUY_COL_HEADER": "Köp hos en registrar",
+      "NEW_PROJECT_BTN": "Nytt projekt",
+      "COPY_TABLE": "Kopiera tabell",
+      "COPIED": "Kopierat!",
+      "ANALYSIS_PENDING": "AI-analys pågår…",
+      "ANALYSIS_TOGGLE": "Visa namnanalys",
+      "ADD_MANUAL_PLACEHOLDER": "t.ex.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Kontrollera",
+      "MANUAL_TOOLTIP": "Tillagd manuellt",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filter aktivt",
+      "MANUAL_NOT_AVAILABLE": "{{names}} uppfyller inte tillgänglighetskriterierna och döljs av det aktiva filtret.",
+      "PICK_BEST_BTN": "Hjälp mig välja",
+      "PICK_TITLE": "AI-rekommendation",
+      "PICK_LOADING": "Analyserar kandidater…",
+      "PICK_COPY": "Kopiera namn",
+      "PICK_OTHER": "Andra kandidater:",
+      "PICK_ALL": "Bland alla resultat",
+      "PICK_FAVOURITES": "Bara bland favoriter",
+      "PICK_URGENCY_TITLE": "Bra namn försvinner snabbt.",
+      "PICK_URGENCY_SUB": "Det här är ledigt nu — kanske inte imorgon. Låt inte någon annan registrera det före dig.",
+      "PICK_BUY_BTN": "Köp denna domän"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Sökningen tar längre tid än förväntat. Vill du fortsätta vänta?",
+      "KEEP_WAITING": "Fortsätt vänta",
+      "CANCEL": "Avbryt och försök igen"
+    },
+    "LOADING": "AI arbetar åt dig...",
+    "STREAM": {
+      "GENERATING": "AI genererar nya namnidéer...",
+      "CHECKING": "Kontrollerar {{name}}",
+      "PROGRESS": "{{checked}} kandidater utvärderade — {{found}} tillgängliga hittills"
+    },
+    "RECHECKING": "Kontrollerar tillgänglighet...",
+    "RECHECK_ERROR": "Kunde inte kontrollera tillgängligheten. Försök igen.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Fyll på poäng",
+      "MESSAGE": "Hur många poäng vill du lägga till ditt konto?",
+      "QUANTITY": "Antal",
+      "CANCEL": "Avbryt",
+      "BUY": "Fyll på"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "İlgili ve uygun bir alan adı — hemen.",
+    "SUBTITLE": "Projenizi birkaç kelimeyle açıklayın — yapay zeka gerisini halleder.",
+    "B1_TITLE": "YZ Önerileri",
+    "B1_DESC": "GPT, faaliyetinize ve hedef kitlenize uygun isimler üretir",
+    "B2_TITLE": "Gerçek Uygunluk",
+    "B2_DESC": "Seçtiğiniz uzantılar için gerçek zamanlı Whois kontrolü",
+    "B3_TITLE": "Favoriler & Geçmiş",
+    "B3_DESC": "Aramalarınızı kaydedin ve istediğiniz zaman devam edin",
+    "B4_TITLE": "Çoklu Uzantılar",
+    "B4_DESC": ".com, .com.tr, .io, .net… tüm uzantıları bir anda kontrol edin",
+    "CTA": "Alan adımı ücretsiz bul",
+    "FREE_NOTE": "Abonelik yok · Kredi kartı yok · Kayıtta 100 ücretsiz kredi"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projeler",
+    "PROJECT_NEW": "Yeni",
+    "PROJECT_OPEN": "Aç",
+    "CREDITS": "Krediler",
+    "LOGOUT": "Çıkış Yap",
+    "LOGIN": "Giriş Yap / Kayıt Ol",
+    "MANAGE_ACCOUNT": "Hesabımı Yönet",
+    "BILLING": "Faturalama",
+    "FOOTER": "Geliştiren",
+    "SECURE_ACCESS": "Güvenli Erişim",
+    "LOGIN_REQUIRED": "Alan adı aramaya başlamak için giriş yapın.",
+    "ADMIN": "Yönetim"
+  },
+  "PROJECTS": {
+    "TITLE": "Projelerim",
+    "SUBTITLE": "Aramalarınıza kaldığınız yerden devam edin.",
+    "EMPTY": "Henüz proje yok.",
+    "OPEN": "Aç",
+    "DATE": "Son güncelleme",
+    "DELETE": "Sil",
+    "CONFIRM_DELETE": "Bu projeyi silmek istediğinizden emin misiniz?",
+    "DELETE_SUCCESS": "Proje silindi",
+    "SUCCESS": "Tamamlandı"
+  },
+  "BILLING": {
+    "TITLE": "Krediler",
+    "TAGLINE": "Abonelikleri sevmiyor musunuz? Biz de sevmiyoruz.",
+    "TAGLINE_SUB": "Her ay 100 ücretsiz kredi ve ihtiyaç duyduğunuzda taahhütsüz paketler.",
+    "FREE_TITLE": "kullanılabilir kredi",
+    "FREE_RESET": "Yenileme {{date}}",
+    "PACK_TITLE": "Kredi Satın Al",
+    "PACK_CREDITS": "{{n}} kredi",
+    "PACK_PER_CREDIT": "{{price}} / kredi",
+    "BUY_BTN": "Satın Al",
+    "PACK_BALANCE": "ve {{n}} satın alınan kredi",
+    "CREDITS": "kredi",
+    "FREE_MONTHLY": "aylık ücretsiz krediler",
+    "PACK_POPULAR": "Popüler",
+    "PACK_DECOUVERTE_NAME": "Keşif",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Ödeme Onaylandı!",
+    "SUCCESS_MESSAGE": "Kredileriniz hesabınıza eklendi. Aramalarınıza devam edebilirsiniz.",
+    "CREDITS_ADDED": "+{{count}} kredi eklendi — toplam: {{total}} kredi",
+    "CANCEL_TITLE": "Ödeme İptal Edildi",
+    "CANCEL_MESSAGE": "Ödemeniz gerçekleşmedi. Herhangi bir tutar tahsil edilmedi.",
+    "BACK_HOME": "Ana Sayfaya Dön"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Açıklama",
+      "KEYWORDS": "Anahtar Kelimeler",
+      "EXTENSIONS": "Uzantılar",
+      "DOMAINS": "Alan Adları"
+    },
+    "STEP1": {
+      "TITLE": "Projeniz",
+      "PROJECT_NAME_TITLE": "Proje adı (isteğe bağlı)",
+      "SUBTITLE": "Çözümünüzü, hedef kitlenizi ve değerlerinizi açıklayın.",
+      "PLACEHOLDER": "Örn.: Yerel ve ekolojik çiçek teslimatı platformu...",
+      "REFINE_BTN": "YZ ile Yeniden Formüle Et",
+      "CONTINUE_BTN": "Anahtar kelimelere devam et",
+      "SUGGESTION_TITLE": "Önerilen yeniden formülasyon:",
+      "USE_VERSION": "Bu sürümü kullan"
+    },
+    "STEP2": {
+      "TITLE": "Yapılandırma",
+      "SUBTITLE": "Anahtar kelimelerinizi ayarlayın ve hedef kitlenizi tanımlayın.",
+      "KEYWORDS_TITLE": "Anahtar Kelimeler",
+      "EXTENSIONS_TITLE": "Alan Adı Uzantıları",
+      "ADD_PLACEHOLDER": "Anahtar kelime ekle...",
+      "MATCH_MODE": "Uygunluk Kriteri",
+      "MATCH_ANY": "En az bir uzantı uygun",
+      "MATCH_ALL": "Tüm uzantılar uygun",
+      "BACK_BTN": "Geri",
+      "NEXT_BTN": "Uzantılara devam et",
+      "SEARCH_BTN": "Alan adı ara",
+      "TARGET_TITLE": "Hedef Kitle",
+      "TARGET_INTL": "Uluslararası",
+      "TARGET_LOCAL": "Yerel / Bölgesel",
+      "LANGUAGE": "Dil:",
+      "LANGUAGE_PLACEHOLDER": "Bir dil seçin",
+      "NAMING_STYLES_TITLE": "Adlandırma Stilleri (isteğe bağlı)",
+      "DESCRIPTIVE_TOGGLE": "Açıklayıcı isimler — örn.: istanbul-cicekci.com.tr",
+      "CULTURAL_TOGGLE": "Kültürel referanslar — örn.: nasreddin-shop.com.tr"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "açıklayıcı",
+      "CULTURAL": "kültürel"
+    },
+    "STEP3": {
+      "TITLE": "Uygun {{extensions}} Alan Adları",
+      "SUBTITLE": "Projeniz için önerilerimiz.",
+      "NOTE": "Not: {{total}} isim fikri analiz ettik, ancak yalnızca {{count}} gerçekten uygundu.",
+      "NO_RESULTS": "Alan adı bulunamadı. Anahtar kelimeleri değiştirmeyi deneyin.",
+      "MORE_BTN": "10 öneri daha",
+      "CREDITS_LEFT": "{{n}} kredi kaldı",
+      "BUY_CREDITS_BTN": "Kredi Satın Al",
+      "BUY_COL_HEADER": "Kayıt kuruluşundan satın al",
+      "NEW_PROJECT_BTN": "Yeni Proje",
+      "COPY_TABLE": "Tabloyu Kopyala",
+      "COPIED": "Kopyalandı!",
+      "ANALYSIS_PENDING": "YZ analizi devam ediyor…",
+      "ANALYSIS_TOGGLE": "İsim analizini gör",
+      "ADD_MANUAL_PLACEHOLDER": "örn.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Kontrol Et",
+      "MANUAL_TOOLTIP": "Manuel eklendi",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtre aktif",
+      "MANUAL_NOT_AVAILABLE": "{{names}} uygunluk kriterlerini karşılamıyor ve aktif filtre tarafından gizleniyor.",
+      "PICK_BEST_BTN": "Seçmeme yardım et",
+      "PICK_TITLE": "YZ Önerisi",
+      "PICK_LOADING": "Adaylar analiz ediliyor…",
+      "PICK_COPY": "İsmi Kopyala",
+      "PICK_OTHER": "Diğer adaylar:",
+      "PICK_ALL": "Tüm sonuçlar arasından",
+      "PICK_FAVOURITES": "Yalnızca favoriler arasından",
+      "PICK_URGENCY_TITLE": "İyi isimler hızla kayboluyor.",
+      "PICK_URGENCY_SUB": "Bu şu an uygun — belki yarın olmayacak. Başkasının sizden önce tescil ettirmesine izin vermeyin.",
+      "PICK_BUY_BTN": "Bu alan adını satın al"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Arama beklenenden uzun sürdü. Beklemeye devam etmek ister misiniz?",
+      "KEEP_WAITING": "Beklemeye devam et",
+      "CANCEL": "İptal et ve tekrar dene"
+    },
+    "LOADING": "YZ sizin için çalışıyor...",
+    "STREAM": {
+      "GENERATING": "YZ yeni isim fikirleri üretiyor...",
+      "CHECKING": "{{name}} kontrol ediliyor",
+      "PROGRESS": "{{checked}} aday değerlendirildi — şimdiye kadar {{found}} uygun"
+    },
+    "RECHECKING": "Uygunluk kontrol ediliyor...",
+    "RECHECK_ERROR": "Uygunluk kontrol edilemedi. Tekrar deneyin.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Kredi Yükle",
+      "MESSAGE": "Hesabınıza kaç kredi eklemek istiyorsunuz?",
+      "QUANTITY": "Miktar",
+      "CANCEL": "İptal",
+      "BUY": "Yükle"
+    }
+  }
+}

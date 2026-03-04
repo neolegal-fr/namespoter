@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Der passende und verfügbare Domainname, sofort.",
+    "SUBTITLE": "Beschreiben Sie Ihr Projekt in wenigen Worten — die KI erledigt den Rest.",
+    "B1_TITLE": "KI-Vorschläge",
+    "B1_DESC": "GPT generiert auf Ihre Aktivität und Zielgruppe zugeschnittene Namen",
+    "B2_TITLE": "Echte Verfügbarkeit",
+    "B2_DESC": "Whois-Prüfung in Echtzeit für Ihre gewünschten Endungen",
+    "B3_TITLE": "Favoriten & Verlauf",
+    "B3_DESC": "Speichern Sie Ihre Suchen und nehmen Sie sie jederzeit wieder auf",
+    "B4_TITLE": "Multi-Endungen",
+    "B4_DESC": ".com, .de, .io, .net… prüfen Sie alle Endungen auf einmal",
+    "CTA": "Meinen Domainnamen kostenlos finden",
+    "FREE_NOTE": "Kein Abonnement · Keine Kreditkarte · 100 Gratisguthaben bei Registrierung"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projekte",
+    "PROJECT_NEW": "Neu",
+    "PROJECT_OPEN": "Öffnen",
+    "CREDITS": "Guthaben",
+    "LOGOUT": "Abmelden",
+    "LOGIN": "Anmelden / Registrieren",
+    "MANAGE_ACCOUNT": "Konto verwalten",
+    "BILLING": "Abrechnung",
+    "FOOTER": "Entwickelt von",
+    "SECURE_ACCESS": "Sicherer Zugang",
+    "LOGIN_REQUIRED": "Bitte melden Sie sich an, um mit der Domainsuche zu beginnen.",
+    "ADMIN": "Administration"
+  },
+  "PROJECTS": {
+    "TITLE": "Meine Projekte",
+    "SUBTITLE": "Setzen Sie Ihre Suchen dort fort, wo Sie aufgehört haben.",
+    "EMPTY": "Noch keine Projekte.",
+    "OPEN": "Öffnen",
+    "DATE": "Zuletzt aktualisiert",
+    "DELETE": "Löschen",
+    "CONFIRM_DELETE": "Möchten Sie dieses Projekt wirklich löschen?",
+    "DELETE_SUCCESS": "Projekt erfolgreich gelöscht",
+    "SUCCESS": "Erfolg"
+  },
+  "BILLING": {
+    "TITLE": "Guthaben",
+    "TAGLINE": "Keine Abonnements? Wir auch nicht.",
+    "TAGLINE_SUB": "Jeden Monat 100 Gratisguthaben und unverbindliche Pakete bei Bedarf.",
+    "FREE_TITLE": "verfügbare Guthaben",
+    "FREE_RESET": "Erneuerung am {{date}}",
+    "PACK_TITLE": "Guthaben kaufen",
+    "PACK_CREDITS": "{{n}} Guthaben",
+    "PACK_PER_CREDIT": "{{price}} / Guthaben",
+    "BUY_BTN": "Kaufen",
+    "PACK_BALANCE": "und {{n}} gekaufte Guthaben",
+    "CREDITS": "Guthaben",
+    "FREE_MONTHLY": "monatliche Gratisguthaben",
+    "PACK_POPULAR": "Beliebt",
+    "PACK_DECOUVERTE_NAME": "Entdeckung",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Zahlung bestätigt!",
+    "SUCCESS_MESSAGE": "Ihr Guthaben wurde Ihrem Konto gutgeschrieben. Sie können Ihre Suche fortsetzen.",
+    "CREDITS_ADDED": "+{{count}} Guthaben hinzugefügt — gesamt: {{total}} Guthaben",
+    "CANCEL_TITLE": "Zahlung abgebrochen",
+    "CANCEL_MESSAGE": "Ihre Zahlung wurde nicht durchgeführt. Es wurde kein Betrag abgebucht.",
+    "BACK_HOME": "Zurück zur Startseite"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Beschreibung",
+      "KEYWORDS": "Schlüsselwörter",
+      "EXTENSIONS": "Endungen",
+      "DOMAINS": "Domains"
+    },
+    "STEP1": {
+      "TITLE": "Ihr Projekt",
+      "PROJECT_NAME_TITLE": "Projektname (optional)",
+      "SUBTITLE": "Beschreiben Sie Ihre Lösung, Ihre Zielgruppe und Ihre Werte.",
+      "PLACEHOLDER": "Z.B.: Eine Plattform für lokale und umweltfreundliche Blumenlieferung...",
+      "REFINE_BTN": "Mit KI umformulieren",
+      "CONTINUE_BTN": "Weiter zu den Schlüsselwörtern",
+      "SUGGESTION_TITLE": "Vorgeschlagene Umformulierung:",
+      "USE_VERSION": "Diese Version verwenden"
+    },
+    "STEP2": {
+      "TITLE": "Konfiguration",
+      "SUBTITLE": "Passen Sie Ihre Schlüsselwörter an und definieren Sie Ihre Zielgruppe.",
+      "KEYWORDS_TITLE": "Schlüsselwörter",
+      "EXTENSIONS_TITLE": "Domain-Endungen",
+      "ADD_PLACEHOLDER": "Schlüsselwort hinzufügen...",
+      "MATCH_MODE": "Verfügbarkeitskriterium",
+      "MATCH_ANY": "Mindestens eine Endung verfügbar",
+      "MATCH_ALL": "Alle Endungen verfügbar",
+      "BACK_BTN": "Zurück",
+      "NEXT_BTN": "Weiter zu den Endungen",
+      "SEARCH_BTN": "Domains suchen",
+      "TARGET_TITLE": "Zielgruppe",
+      "TARGET_INTL": "International",
+      "TARGET_LOCAL": "Lokal / Regional",
+      "LANGUAGE": "Sprache:",
+      "LANGUAGE_PLACEHOLDER": "Sprache wählen",
+      "NAMING_STYLES_TITLE": "Namenstile (optional)",
+      "DESCRIPTIVE_TOGGLE": "Beschreibende Namen — z.B.: baeckerei-muenchen.de",
+      "CULTURAL_TOGGLE": "Kulturelle Referenzen — z.B.: rotkappchen.de"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "beschreibend",
+      "CULTURAL": "kulturell"
+    },
+    "STEP3": {
+      "TITLE": "Verfügbare {{extensions}} Domains",
+      "SUBTITLE": "Hier sind unsere Vorschläge für Ihr Projekt.",
+      "NOTE": "Hinweis: Wir haben {{total}} Namensideen analysiert, aber nur {{count}} waren wirklich verfügbar.",
+      "NO_RESULTS": "Keine Domain gefunden. Versuchen Sie andere Schlüsselwörter.",
+      "MORE_BTN": "10 weitere Vorschläge",
+      "CREDITS_LEFT": "{{n}} Guthaben übrig",
+      "BUY_CREDITS_BTN": "Guthaben kaufen",
+      "BUY_COL_HEADER": "Bei einem Registrar kaufen",
+      "NEW_PROJECT_BTN": "Neues Projekt",
+      "COPY_TABLE": "Tabelle kopieren",
+      "COPIED": "Kopiert!",
+      "ANALYSIS_PENDING": "KI-Analyse läuft…",
+      "ANALYSIS_TOGGLE": "Namensanalyse anzeigen",
+      "ADD_MANUAL_PLACEHOLDER": "z.B.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Prüfen",
+      "MANUAL_TOOLTIP": "Manuell hinzugefügt",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filter aktiv",
+      "MANUAL_NOT_AVAILABLE": "{{names}} erfüllt die Verfügbarkeitskriterien nicht und wird durch den aktiven Filter ausgeblendet.",
+      "PICK_BEST_BTN": "Hilf mir zu wählen",
+      "PICK_TITLE": "KI-Empfehlung",
+      "PICK_LOADING": "Kandidaten werden analysiert…",
+      "PICK_COPY": "Namen kopieren",
+      "PICK_OTHER": "Andere Kandidaten:",
+      "PICK_ALL": "Aus allen Ergebnissen",
+      "PICK_FAVOURITES": "Nur aus Favoriten",
+      "PICK_URGENCY_TITLE": "Gute Namen gehen schnell weg.",
+      "PICK_URGENCY_SUB": "Dieser ist gerade frei — vielleicht nicht mehr morgen. Lassen Sie ihn nicht von jemand anderem registrieren.",
+      "PICK_BUY_BTN": "Diese Domain kaufen"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Die Suche dauert länger als erwartet. Möchten Sie weiter warten?",
+      "KEEP_WAITING": "Weiter warten",
+      "CANCEL": "Abbrechen und erneut versuchen"
+    },
+    "LOADING": "Die KI arbeitet für Sie...",
+    "STREAM": {
+      "GENERATING": "Die KI generiert neue Namensideen...",
+      "CHECKING": "Prüfung von {{name}}",
+      "PROGRESS": "{{checked}} Kandidaten bewertet — {{found}} derzeit verfügbar"
+    },
+    "RECHECKING": "Verfügbarkeit wird geprüft...",
+    "RECHECK_ERROR": "Verfügbarkeit konnte nicht geprüft werden. Bitte erneut versuchen.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Guthaben aufladen",
+      "MESSAGE": "Wie viele Guthaben möchten Sie Ihrem Konto hinzufügen?",
+      "QUANTITY": "Menge",
+      "CANCEL": "Abbrechen",
+      "BUY": "Aufladen"
+    }
+  }
+}

@@ -47,11 +47,12 @@ function initializeApp(keycloak: KeycloakService, translate: TranslateService, c
     });
 
     // 2. Initialiser la langue
-    translate.addLangs(['fr', 'en']);
+    const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
+    translate.addLangs(supportedLangs);
     translate.setDefaultLang('fr');
-    
-    const browserLang = translate.getBrowserLang();
-    translate.use(browserLang?.match(/en|fr/) ? browserLang : 'fr');
+
+    const browserLang = translate.getBrowserLang() ?? '';
+    translate.use(supportedLangs.includes(browserLang) ? browserLang : 'fr');
   };
 }
 

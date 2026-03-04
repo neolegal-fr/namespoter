@@ -46,10 +46,11 @@ import { Dialog } from 'primeng/dialog';
         <ng-template pTemplate="end">
           <div class="flex align-items-center gap-2">
 
-            <!-- Langue Toggle -->
-            <button (click)="toggleLang()" class="lang-toggle cursor-pointer border-circle p-2" style="background: none; border: none; transition: background 0.15s">
-              <span [class]="'fi fi-' + (selectedLang === 'fr' ? 'fr' : 'gb')" style="font-size: 1.25rem"></span>
+            <!-- Langue Selector -->
+            <button (click)="langMenu.toggle($event)" class="lang-toggle cursor-pointer border-circle p-2" style="background: none; border: none; transition: background 0.15s">
+              <span [class]="currentFlagClass" style="font-size: 1.25rem"></span>
             </button>
+            <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body"></p-menu>
 
             <ng-container *ngIf="isLoggedIn()">
               <p-button
@@ -218,10 +219,37 @@ export class AppComponent implements OnInit {
   selectedLang = 'fr';
   userName = signal('');
   
-  languages = [
-    { label: 'FR', code: 'fr', flag: 'fr' },
-    { label: 'EN', code: 'en', flag: 'gb' }
+  readonly languages = [
+    { label: 'Čeština',    code: 'cs', flag: 'fi fi-cz' },
+    { label: 'Dansk',      code: 'da', flag: 'fi fi-dk' },
+    { label: 'Deutsch',    code: 'de', flag: 'fi fi-de' },
+    { label: 'English',    code: 'en', flag: 'fi fi-gb' },
+    { label: 'Español',    code: 'es', flag: 'fi fi-es' },
+    { label: 'Suomi',      code: 'fi', flag: 'fi fi-fi' },
+    { label: 'Français',   code: 'fr', flag: 'fi fi-fr' },
+    { label: 'Magyar',     code: 'hu', flag: 'fi fi-hu' },
+    { label: 'Italiano',   code: 'it', flag: 'fi fi-it' },
+    { label: 'Nederlands', code: 'nl', flag: 'fi fi-nl' },
+    { label: 'Norsk',      code: 'no', flag: 'fi fi-no' },
+    { label: 'Polski',     code: 'pl', flag: 'fi fi-pl' },
+    { label: 'Português',  code: 'pt', flag: 'fi fi-pt' },
+    { label: 'Română',     code: 'ro', flag: 'fi fi-ro' },
+    { label: 'Svenska',    code: 'sv', flag: 'fi fi-se' },
+    { label: 'Türkçe',     code: 'tr', flag: 'fi fi-tr' },
+    { label: 'Русский',    code: 'ru', flag: 'fi fi-ru' },
+    { label: '日本語',      code: 'ja', flag: 'fi fi-jp' },
+    { label: '中文',        code: 'zh', flag: 'fi fi-cn' },
   ];
+
+  readonly langMenuItems: MenuItem[] = this.languages.map(l => ({
+    label: l.label,
+    icon: l.flag,
+    command: () => this.setLang(l.code)
+  }));
+
+  get currentFlagClass(): string {
+    return this.languages.find(l => l.code === this.selectedLang)?.flag ?? 'fi fi-fr';
+  }
 
   profileMenuItems: MenuItem[] = [];
   projectMenuItems: MenuItem[] = [];
@@ -255,7 +283,7 @@ export class AppComponent implements OnInit {
       const keycloakLocale = token?.locale ?? token?.preferred_locale ?? (profile as any).attributes?.locale?.[0];
       if (keycloakLocale) {
         const lang = String(keycloakLocale).toLowerCase().slice(0, 2);
-        if (['fr', 'en'].includes(lang)) this.setLang(lang);
+        if (this.languages.some(l => l.code === lang)) this.setLang(lang);
       }
 
       setTimeout(() => { this.updateProfileMenu(); this.updateProjectMenu(); });
@@ -343,10 +371,6 @@ export class AppComponent implements OnInit {
     this.currentLang.set(lang);
     this.selectedLang = lang;
     document.documentElement.lang = lang;
-  }
-
-  toggleLang() {
-    this.setLang(this.selectedLang === 'fr' ? 'en' : 'fr');
   }
 
   loadCredits() {

@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Trafna i dostępna nazwa domeny — od razu.",
+    "SUBTITLE": "Opisz swój projekt kilkoma słowami — AI zrobi resztę.",
+    "B1_TITLE": "Sugestie AI",
+    "B1_DESC": "GPT generuje nazwy dopasowane do Twojej działalności i grupy docelowej",
+    "B2_TITLE": "Prawdziwa dostępność",
+    "B2_DESC": "Sprawdzanie Whois w czasie rzeczywistym dla wybranych rozszerzeń",
+    "B3_TITLE": "Ulubione i historia",
+    "B3_DESC": "Zapisuj swoje wyszukiwania i wracaj do nich kiedy chcesz",
+    "B4_TITLE": "Wiele rozszerzeń",
+    "B4_DESC": ".com, .pl, .io, .net… sprawdź wszystkie rozszerzenia jednocześnie",
+    "CTA": "Znaleźć moją domenę za darmo",
+    "FREE_NOTE": "Bez subskrypcji · Bez karty kredytowej · 100 darmowych kredytów przy rejestracji"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projekty",
+    "PROJECT_NEW": "Nowy",
+    "PROJECT_OPEN": "Otwórz",
+    "CREDITS": "Kredyty",
+    "LOGOUT": "Wyloguj",
+    "LOGIN": "Zaloguj / Zarejestruj się",
+    "MANAGE_ACCOUNT": "Zarządzaj kontem",
+    "BILLING": "Rozliczenia",
+    "FOOTER": "Stworzone przez",
+    "SECURE_ACCESS": "Bezpieczny dostęp",
+    "LOGIN_REQUIRED": "Zaloguj się, aby zacząć szukać nazw domen.",
+    "ADMIN": "Administracja"
+  },
+  "PROJECTS": {
+    "TITLE": "Moje Projekty",
+    "SUBTITLE": "Wróć do swoich wyszukiwań tam, gdzie je przerwałeś.",
+    "EMPTY": "Brak projektów.",
+    "OPEN": "Otwórz",
+    "DATE": "Ostatnia aktualizacja",
+    "DELETE": "Usuń",
+    "CONFIRM_DELETE": "Czy na pewno chcesz usunąć ten projekt?",
+    "DELETE_SUCCESS": "Projekt usunięty pomyślnie",
+    "SUCCESS": "Sukces"
+  },
+  "BILLING": {
+    "TITLE": "Kredyty",
+    "TAGLINE": "Nie lubisz subskrypcji? My też nie.",
+    "TAGLINE_SUB": "100 darmowych kredytów każdego miesiąca i pakiety bez zobowiązań w razie potrzeby.",
+    "FREE_TITLE": "dostępnych kredytów",
+    "FREE_RESET": "Odnowienie {{date}}",
+    "PACK_TITLE": "Kup kredyty",
+    "PACK_CREDITS": "{{n}} kredytów",
+    "PACK_PER_CREDIT": "{{price}} / kredyt",
+    "BUY_BTN": "Kup",
+    "PACK_BALANCE": "i {{n}} kupionych kredytów",
+    "CREDITS": "kredytów",
+    "FREE_MONTHLY": "miesięczne darmowe kredyty",
+    "PACK_POPULAR": "Popularny",
+    "PACK_DECOUVERTE_NAME": "Odkrycie",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Płatność potwierdzona!",
+    "SUCCESS_MESSAGE": "Twoje kredyty zostały dodane do konta. Możesz wznowić wyszukiwanie.",
+    "CREDITS_ADDED": "+{{count}} kredytów dodanych — łącznie: {{total}} kredytów",
+    "CANCEL_TITLE": "Płatność anulowana",
+    "CANCEL_MESSAGE": "Twoja płatność nie została zrealizowana. Żadna kwota nie została pobrana.",
+    "BACK_HOME": "Powrót do strony głównej"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Opis",
+      "KEYWORDS": "Słowa kluczowe",
+      "EXTENSIONS": "Rozszerzenia",
+      "DOMAINS": "Domeny"
+    },
+    "STEP1": {
+      "TITLE": "Twój Projekt",
+      "PROJECT_NAME_TITLE": "Nazwa projektu (opcjonalna)",
+      "SUBTITLE": "Opisz swoje rozwiązanie, grupę docelową i wartości.",
+      "PLACEHOLDER": "Np.: Platforma dostarczania lokalnych i ekologicznych kwiatów...",
+      "REFINE_BTN": "Przeformułuj z AI",
+      "CONTINUE_BTN": "Przejdź do słów kluczowych",
+      "SUGGESTION_TITLE": "Sugerowane przeformułowanie:",
+      "USE_VERSION": "Użyj tej wersji"
+    },
+    "STEP2": {
+      "TITLE": "Konfiguracja",
+      "SUBTITLE": "Dostosuj słowa kluczowe i zdefiniuj swoją grupę docelową.",
+      "KEYWORDS_TITLE": "Słowa kluczowe",
+      "EXTENSIONS_TITLE": "Rozszerzenia domeny",
+      "ADD_PLACEHOLDER": "Dodaj słowo kluczowe...",
+      "MATCH_MODE": "Kryterium dostępności",
+      "MATCH_ANY": "Co najmniej jedno rozszerzenie dostępne",
+      "MATCH_ALL": "Wszystkie rozszerzenia dostępne",
+      "BACK_BTN": "Wstecz",
+      "NEXT_BTN": "Przejdź do rozszerzeń",
+      "SEARCH_BTN": "Szukaj domen",
+      "TARGET_TITLE": "Cel",
+      "TARGET_INTL": "Międzynarodowy",
+      "TARGET_LOCAL": "Lokalny / Regionalny",
+      "LANGUAGE": "Język:",
+      "LANGUAGE_PLACEHOLDER": "Wybierz język",
+      "NAMING_STYLES_TITLE": "Style nazw (opcjonalne)",
+      "DESCRIPTIVE_TOGGLE": "Nazwy opisowe — np.: piekarnia-krakow.pl",
+      "CULTURAL_TOGGLE": "Odniesienia kulturowe — np.: smok-wawelski.pl"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "opisowy",
+      "CULTURAL": "kulturowy"
+    },
+    "STEP3": {
+      "TITLE": "Dostępne domeny {{extensions}}",
+      "SUBTITLE": "Oto nasze sugestie dla Twojego projektu.",
+      "NOTE": "Uwaga: Przeanalizowaliśmy {{total}} pomysłów na nazwy, ale tylko {{count}} były naprawdę dostępne.",
+      "NO_RESULTS": "Nie znaleziono domeny. Spróbuj zmienić słowa kluczowe.",
+      "MORE_BTN": "10 kolejnych sugestii",
+      "CREDITS_LEFT": "{{n}} kredytów pozostało",
+      "BUY_CREDITS_BTN": "Kup kredyty",
+      "BUY_COL_HEADER": "Kup u rejestratora",
+      "NEW_PROJECT_BTN": "Nowy projekt",
+      "COPY_TABLE": "Kopiuj tabelę",
+      "COPIED": "Skopiowano!",
+      "ANALYSIS_PENDING": "Analiza AI w toku…",
+      "ANALYSIS_TOGGLE": "Zobacz analizę nazwy",
+      "ADD_MANUAL_PLACEHOLDER": "np.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Sprawdź",
+      "MANUAL_TOOLTIP": "Dodano ręcznie",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtr aktywny",
+      "MANUAL_NOT_AVAILABLE": "{{names}} nie spełnia kryteriów dostępności i jest ukryte przez aktywny filtr.",
+      "PICK_BEST_BTN": "Pomóż mi wybrać",
+      "PICK_TITLE": "Rekomendacja AI",
+      "PICK_LOADING": "Analiza kandydatów w toku…",
+      "PICK_COPY": "Kopiuj nazwę",
+      "PICK_OTHER": "Inni kandydaci:",
+      "PICK_ALL": "Spośród wszystkich wyników",
+      "PICK_FAVOURITES": "Tylko spośród ulubionych",
+      "PICK_URGENCY_TITLE": "Dobre nazwy znikają szybko.",
+      "PICK_URGENCY_SUB": "Ta jest teraz wolna — może nie być jutro. Nie pozwól, żeby ktoś inny ją zarejestrował przed tobą.",
+      "PICK_BUY_BTN": "Kup tę domenę"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Wyszukiwanie trwa dłużej niż oczekiwano. Czy chcesz dalej czekać?",
+      "KEEP_WAITING": "Czekaj dalej",
+      "CANCEL": "Anuluj i spróbuj ponownie"
+    },
+    "LOADING": "AI pracuje dla Ciebie...",
+    "STREAM": {
+      "GENERATING": "AI generuje nowe pomysły na nazwy...",
+      "CHECKING": "Sprawdzanie {{name}}",
+      "PROGRESS": "{{checked}} kandydatów ocenionych — {{found}} dostępnych na razie"
+    },
+    "RECHECKING": "Sprawdzanie dostępności...",
+    "RECHECK_ERROR": "Nie można sprawdzić dostępności. Spróbuj ponownie.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Doładuj kredyty",
+      "MESSAGE": "Ile kredytów chcesz dodać do swojego konta?",
+      "QUANTITY": "Ilość",
+      "CANCEL": "Anuluj",
+      "BUY": "Doładuj"
+    }
+  }
+}

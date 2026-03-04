@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Releváns és szabad domain név — azonnal.",
+    "SUBTITLE": "Írja le projektjét néhány szóval — az AI elvégzi a többit.",
+    "B1_TITLE": "AI javaslatok",
+    "B1_DESC": "A GPT az Ön tevékenységéhez és célközönségéhez igazított neveket generál",
+    "B2_TITLE": "Valódi elérhetőség",
+    "B2_DESC": "Valós idejű Whois ellenőrzés a kiválasztott végzésekhez",
+    "B3_TITLE": "Kedvencek & előzmények",
+    "B3_DESC": "Mentse el kereséseit és folytassa őket bármikor",
+    "B4_TITLE": "Több végzés",
+    "B4_DESC": ".com, .hu, .io, .net… ellenőrizze az összes végzést egyszerre",
+    "CTA": "Keresse meg domain nevét ingyen",
+    "FREE_NOTE": "Előfizetés nélkül · Hitelkártya nélkül · 100 ingyenes kredit regisztrációkor"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Projektek",
+    "PROJECT_NEW": "Új",
+    "PROJECT_OPEN": "Megnyitás",
+    "CREDITS": "Kreditek",
+    "LOGOUT": "Kijelentkezés",
+    "LOGIN": "Bejelentkezés / Regisztráció",
+    "MANAGE_ACCOUNT": "Fiókom kezelése",
+    "BILLING": "Számlázás",
+    "FOOTER": "Fejlesztette",
+    "SECURE_ACCESS": "Biztonságos hozzáférés",
+    "LOGIN_REQUIRED": "Jelentkezzen be a domain nevek kereséséhez.",
+    "ADMIN": "Adminisztráció"
+  },
+  "PROJECTS": {
+    "TITLE": "Saját Projektek",
+    "SUBTITLE": "Folytassa kereséseit ott, ahol abbahagyta.",
+    "EMPTY": "Még nincs projekt.",
+    "OPEN": "Megnyitás",
+    "DATE": "Utolsó frissítés",
+    "DELETE": "Törlés",
+    "CONFIRM_DELETE": "Biztosan törölni szeretné ezt a projektet?",
+    "DELETE_SUCCESS": "Projekt törölve",
+    "SUCCESS": "Kész"
+  },
+  "BILLING": {
+    "TITLE": "Kreditek",
+    "TAGLINE": "Nem szereti az előfizetéseket? Mi sem.",
+    "TAGLINE_SUB": "Havonta 100 ingyenes kredit és kötelezettségmentes csomagok, ha szükséges.",
+    "FREE_TITLE": "elérhető kredit",
+    "FREE_RESET": "Megújítás: {{date}}",
+    "PACK_TITLE": "Kreditek vásárlása",
+    "PACK_CREDITS": "{{n}} kredit",
+    "PACK_PER_CREDIT": "{{price}} / kredit",
+    "BUY_BTN": "Vásárlás",
+    "PACK_BALANCE": "és {{n}} vásárolt kredit",
+    "CREDITS": "kredit",
+    "FREE_MONTHLY": "havi ingyenes kreditek",
+    "PACK_POPULAR": "Népszerű",
+    "PACK_DECOUVERTE_NAME": "Felfedezés",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Fizetés megerősítve!",
+    "SUCCESS_MESSAGE": "A kreditjeit hozzáadtuk a fiókjához. Folytathatja a kereséseket.",
+    "CREDITS_ADDED": "+{{count}} kredit hozzáadva — összesen: {{total}} kredit",
+    "CANCEL_TITLE": "Fizetés megszakítva",
+    "CANCEL_MESSAGE": "A fizetése nem történt meg. Nem vontak le összeget.",
+    "BACK_HOME": "Vissza a főoldalra"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Leírás",
+      "KEYWORDS": "Kulcsszavak",
+      "EXTENSIONS": "Végzések",
+      "DOMAINS": "Domainek"
+    },
+    "STEP1": {
+      "TITLE": "Az Ön Projektje",
+      "PROJECT_NAME_TITLE": "Projekt neve (opcionális)",
+      "SUBTITLE": "Írja le megoldását, célközönségét és értékeit.",
+      "PLACEHOLDER": "Pl.: Helyi és ökológiai virágszállítási platform...",
+      "REFINE_BTN": "Átfogalmazás AI-val",
+      "CONTINUE_BTN": "Tovább a kulcsszavakhoz",
+      "SUGGESTION_TITLE": "Javasolt átfogalmazás:",
+      "USE_VERSION": "Ezen verzió használata"
+    },
+    "STEP2": {
+      "TITLE": "Konfiguráció",
+      "SUBTITLE": "Állítsa be a kulcsszavakat és határozza meg a célközönséget.",
+      "KEYWORDS_TITLE": "Kulcsszavak",
+      "EXTENSIONS_TITLE": "Domain végzések",
+      "ADD_PLACEHOLDER": "Kulcsszó hozzáadása...",
+      "MATCH_MODE": "Elérhetőségi kritérium",
+      "MATCH_ANY": "Legalább egy végzés elérhető",
+      "MATCH_ALL": "Minden végzés elérhető",
+      "BACK_BTN": "Vissza",
+      "NEXT_BTN": "Tovább a végzésekhez",
+      "SEARCH_BTN": "Domainek keresése",
+      "TARGET_TITLE": "Célközönség",
+      "TARGET_INTL": "Nemzetközi",
+      "TARGET_LOCAL": "Helyi / Regionális",
+      "LANGUAGE": "Nyelv:",
+      "LANGUAGE_PLACEHOLDER": "Válasszon nyelvet",
+      "NAMING_STYLES_TITLE": "Névstílusok (opcionális)",
+      "DESCRIPTIVE_TOGGLE": "Leíró nevek — pl.: pekseg-budapest.hu",
+      "CULTURAL_TOGGLE": "Kulturális utalások — pl.: piroska-shop.hu"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "leíró",
+      "CULTURAL": "kulturális"
+    },
+    "STEP3": {
+      "TITLE": "Elérhető {{extensions}} domainek",
+      "SUBTITLE": "Íme a javaslataink a projektjéhez.",
+      "NOTE": "Megjegyzés: {{total}} névötletet elemeztünk, de csak {{count}} volt valóban elérhető.",
+      "NO_RESULTS": "Nem található domain. Próbálja megváltoztatni a kulcsszavakat.",
+      "MORE_BTN": "Még 10 javaslat",
+      "CREDITS_LEFT": "{{n}} kredit maradt",
+      "BUY_CREDITS_BTN": "Kreditek vásárlása",
+      "BUY_COL_HEADER": "Vásárlás regisztrátornál",
+      "NEW_PROJECT_BTN": "Új projekt",
+      "COPY_TABLE": "Táblázat másolása",
+      "COPIED": "Másolva!",
+      "ANALYSIS_PENDING": "AI elemzés folyamatban…",
+      "ANALYSIS_TOGGLE": "Névelemzés megtekintése",
+      "ADD_MANUAL_PLACEHOLDER": "pl.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Ellenőrzés",
+      "MANUAL_TOOLTIP": "Manuálisan hozzáadva",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Szűrő aktív",
+      "MANUAL_NOT_AVAILABLE": "A(z) {{names}} nem felel meg az elérhetőségi kritériumoknak, és az aktív szűrő elrejti.",
+      "PICK_BEST_BTN": "Segítsen választani",
+      "PICK_TITLE": "AI ajánlás",
+      "PICK_LOADING": "Jelöltek elemzése…",
+      "PICK_COPY": "Név másolása",
+      "PICK_OTHER": "Más jelöltek:",
+      "PICK_ALL": "Az összes eredmény közül",
+      "PICK_FAVOURITES": "Csak a kedvencek közül",
+      "PICK_URGENCY_TITLE": "A jó nevek gyorsan eltűnnek.",
+      "PICK_URGENCY_SUB": "Ez most szabad — talán holnap már nem. Ne hagyja, hogy más regisztrálja előtte.",
+      "PICK_BUY_BTN": "Domain megvásárlása"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "A keresés a vártnál tovább tart. Szeretne tovább várni?",
+      "KEEP_WAITING": "Várakozás folytatása",
+      "CANCEL": "Mégse és újrapróbálás"
+    },
+    "LOADING": "Az AI dolgozik Önnek...",
+    "STREAM": {
+      "GENERATING": "Az AI új névötleteket generál...",
+      "CHECKING": "{{name}} ellenőrzése",
+      "PROGRESS": "{{checked}} jelölt kiértékelve — {{found}} elérhető eddig"
+    },
+    "RECHECKING": "Elérhetőség ellenőrzése...",
+    "RECHECK_ERROR": "Nem sikerült ellenőrizni az elérhetőséget. Próbálja újra.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Kreditek feltöltése",
+      "MESSAGE": "Hány kreditet szeretne hozzáadni a fiókjához?",
+      "QUANTITY": "Mennyiség",
+      "CANCEL": "Mégse",
+      "BUY": "Feltöltés"
+    }
+  }
+}

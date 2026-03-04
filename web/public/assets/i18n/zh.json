@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "立即找到相关且可用的域名。",
+    "SUBTITLE": "用几个词描述您的项目——AI完成其余的工作。",
+    "B1_TITLE": "AI建议",
+    "B1_DESC": "GPT生成适合您业务和目标受众的名称",
+    "B2_TITLE": "真实可用性",
+    "B2_DESC": "对所选后缀进行实时Whois查询",
+    "B3_TITLE": "收藏夹与历史记录",
+    "B3_DESC": "保存您的搜索，随时继续",
+    "B4_TITLE": "多种后缀",
+    "B4_DESC": ".com、.cn、.io、.net……一次检查所有后缀",
+    "CTA": "免费找到我的域名",
+    "FREE_NOTE": "无需订阅 · 无需信用卡 · 注册即获100免费积分"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "项目",
+    "PROJECT_NEW": "新建",
+    "PROJECT_OPEN": "打开",
+    "CREDITS": "积分",
+    "LOGOUT": "退出登录",
+    "LOGIN": "登录 / 注册",
+    "MANAGE_ACCOUNT": "管理我的账户",
+    "BILLING": "账单",
+    "FOOTER": "开发者",
+    "SECURE_ACCESS": "安全访问",
+    "LOGIN_REQUIRED": "请登录以开始搜索域名。",
+    "ADMIN": "管理"
+  },
+  "PROJECTS": {
+    "TITLE": "我的项目",
+    "SUBTITLE": "从您离开的地方继续搜索。",
+    "EMPTY": "暂无项目。",
+    "OPEN": "打开",
+    "DATE": "最后更新",
+    "DELETE": "删除",
+    "CONFIRM_DELETE": "确定要删除此项目吗？",
+    "DELETE_SUCCESS": "项目已删除",
+    "SUCCESS": "成功"
+  },
+  "BILLING": {
+    "TITLE": "积分",
+    "TAGLINE": "不喜欢订阅？我们也不喜欢。",
+    "TAGLINE_SUB": "每月100免费积分，按需购买无承诺套餐。",
+    "FREE_TITLE": "可用积分",
+    "FREE_RESET": "续期时间：{{date}}",
+    "PACK_TITLE": "购买积分",
+    "PACK_CREDITS": "{{n}}积分",
+    "PACK_PER_CREDIT": "{{price}} / 积分",
+    "BUY_BTN": "购买",
+    "PACK_BALANCE": "和{{n}}已购积分",
+    "CREDITS": "积分",
+    "FREE_MONTHLY": "每月免费积分",
+    "PACK_POPULAR": "热门",
+    "PACK_DECOUVERTE_NAME": "探索",
+    "PACK_PRO_NAME": "专业版",
+    "PACK_MAX_NAME": "旗舰版"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "支付已确认！",
+    "SUCCESS_MESSAGE": "您的积分已添加到账户。您可以继续搜索。",
+    "CREDITS_ADDED": "+{{count}}积分已添加——总计：{{total}}积分",
+    "CANCEL_TITLE": "支付已取消",
+    "CANCEL_MESSAGE": "您的支付未完成。未扣除任何金额。",
+    "BACK_HOME": "返回首页"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "描述",
+      "KEYWORDS": "关键词",
+      "EXTENSIONS": "后缀",
+      "DOMAINS": "域名"
+    },
+    "STEP1": {
+      "TITLE": "您的项目",
+      "PROJECT_NAME_TITLE": "项目名称（可选）",
+      "SUBTITLE": "描述您的解决方案、目标受众和价值观。",
+      "PLACEHOLDER": "例如：本地环保鲜花配送平台……",
+      "REFINE_BTN": "用AI重新表述",
+      "CONTINUE_BTN": "继续到关键词",
+      "SUGGESTION_TITLE": "建议的重新表述：",
+      "USE_VERSION": "使用此版本"
+    },
+    "STEP2": {
+      "TITLE": "配置",
+      "SUBTITLE": "调整您的关键词并定义目标受众。",
+      "KEYWORDS_TITLE": "关键词",
+      "EXTENSIONS_TITLE": "域名后缀",
+      "ADD_PLACEHOLDER": "添加关键词...",
+      "MATCH_MODE": "可用性标准",
+      "MATCH_ANY": "至少一个后缀可用",
+      "MATCH_ALL": "所有后缀均可用",
+      "BACK_BTN": "返回",
+      "NEXT_BTN": "继续到后缀",
+      "SEARCH_BTN": "搜索域名",
+      "TARGET_TITLE": "目标受众",
+      "TARGET_INTL": "国际",
+      "TARGET_LOCAL": "本地 / 地区",
+      "LANGUAGE": "语言：",
+      "LANGUAGE_PLACEHOLDER": "选择语言",
+      "NAMING_STYLES_TITLE": "命名风格（可选）",
+      "DESCRIPTIVE_TOGGLE": "描述性名称——例如：beijing-hua-shop.cn",
+      "CULTURAL_TOGGLE": "文化参考——例如：longmen-boutique.cn"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "描述性",
+      "CULTURAL": "文化性"
+    },
+    "STEP3": {
+      "TITLE": "可用的{{extensions}}域名",
+      "SUBTITLE": "以下是我们为您项目提供的建议。",
+      "NOTE": "注意：我们分析了{{total}}个名称创意，但只有{{count}}个真正可用。",
+      "NO_RESULTS": "未找到域名。请尝试更改关键词。",
+      "MORE_BTN": "再显示10个建议",
+      "CREDITS_LEFT": "剩余{{n}}积分",
+      "BUY_CREDITS_BTN": "购买积分",
+      "BUY_COL_HEADER": "在注册商处购买",
+      "NEW_PROJECT_BTN": "新建项目",
+      "COPY_TABLE": "复制表格",
+      "COPIED": "已复制！",
+      "ANALYSIS_PENDING": "AI分析进行中……",
+      "ANALYSIS_TOGGLE": "查看名称分析",
+      "ADD_MANUAL_PLACEHOLDER": "例如：florizon、bloomly、verdana",
+      "ADD_MANUAL_BTN": "检查",
+      "MANUAL_TOOLTIP": "手动添加",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "筛选器已启用",
+      "MANUAL_NOT_AVAILABLE": "{{names}}不符合可用性标准，已被启用的筛选器隐藏。",
+      "PICK_BEST_BTN": "帮我选择",
+      "PICK_TITLE": "AI推荐",
+      "PICK_LOADING": "正在分析候选项……",
+      "PICK_COPY": "复制名称",
+      "PICK_OTHER": "其他候选项：",
+      "PICK_ALL": "从所有结果中选",
+      "PICK_FAVOURITES": "仅从收藏夹中选",
+      "PICK_URGENCY_TITLE": "好名字消失得很快。",
+      "PICK_URGENCY_SUB": "这个名字现在是空的——明天可能就不是了。不要让别人比您先注册。",
+      "PICK_BUY_BTN": "购买此域名"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "搜索时间比预期长。您要继续等待吗？",
+      "KEEP_WAITING": "继续等待",
+      "CANCEL": "取消并重试"
+    },
+    "LOADING": "AI正在为您工作...",
+    "STREAM": {
+      "GENERATING": "AI正在生成新的名称创意...",
+      "CHECKING": "正在检查{{name}}",
+      "PROGRESS": "已评估{{checked}}个候选项——目前{{found}}个可用"
+    },
+    "RECHECKING": "正在检查可用性...",
+    "RECHECK_ERROR": "无法检查可用性。请重试。",
+    "CREDIT_DIALOG": {
+      "TITLE": "充值积分",
+      "MESSAGE": "您想向账户添加多少积分？",
+      "QUANTITY": "数量",
+      "CANCEL": "取消",
+      "BUY": "充值"
+    }
+  }
+}

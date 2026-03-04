@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "最適な空きドメイン名を、今すぐ。",
+    "SUBTITLE": "プロジェクトを数語で説明すれば、AIが残りを行います。",
+    "B1_TITLE": "AI提案",
+    "B1_DESC": "GPTがあなたのビジネスとターゲット層に合った名前を生成します",
+    "B2_TITLE": "実際の空き確認",
+    "B2_DESC": "選択した拡張子のリアルタイムWhois確認",
+    "B3_TITLE": "お気に入り＆履歴",
+    "B3_DESC": "検索を保存していつでも再開できます",
+    "B4_TITLE": "複数の拡張子",
+    "B4_DESC": ".com、.jp、.io、.net…すべての拡張子を一度に確認",
+    "CTA": "無料でドメイン名を見つける",
+    "FREE_NOTE": "サブスクリプション不要 · クレジットカード不要 · 登録時100クレジット無料"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "プロジェクト",
+    "PROJECT_NEW": "新規",
+    "PROJECT_OPEN": "開く",
+    "CREDITS": "クレジット",
+    "LOGOUT": "ログアウト",
+    "LOGIN": "ログイン / 登録",
+    "MANAGE_ACCOUNT": "アカウント管理",
+    "BILLING": "課金",
+    "FOOTER": "開発者",
+    "SECURE_ACCESS": "セキュアアクセス",
+    "LOGIN_REQUIRED": "ドメイン名を検索するにはログインしてください。",
+    "ADMIN": "管理"
+  },
+  "PROJECTS": {
+    "TITLE": "マイプロジェクト",
+    "SUBTITLE": "中断した検索を再開できます。",
+    "EMPTY": "プロジェクトがまだありません。",
+    "OPEN": "開く",
+    "DATE": "最終更新日",
+    "DELETE": "削除",
+    "CONFIRM_DELETE": "このプロジェクトを削除してもよろしいですか？",
+    "DELETE_SUCCESS": "プロジェクトが削除されました",
+    "SUCCESS": "完了"
+  },
+  "BILLING": {
+    "TITLE": "クレジット",
+    "TAGLINE": "サブスクリプションが嫌いですか？私たちもそうです。",
+    "TAGLINE_SUB": "毎月100クレジット無料、必要に応じてコミットメントなしのパッケージをご利用いただけます。",
+    "FREE_TITLE": "利用可能クレジット",
+    "FREE_RESET": "更新日: {{date}}",
+    "PACK_TITLE": "クレジット購入",
+    "PACK_CREDITS": "{{n}}クレジット",
+    "PACK_PER_CREDIT": "{{price}} / クレジット",
+    "BUY_BTN": "購入",
+    "PACK_BALANCE": "と購入済み{{n}}クレジット",
+    "CREDITS": "クレジット",
+    "FREE_MONTHLY": "毎月の無料クレジット",
+    "PACK_POPULAR": "人気",
+    "PACK_DECOUVERTE_NAME": "発見",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "支払い確認済み！",
+    "SUCCESS_MESSAGE": "クレジットがアカウントに追加されました。検索を再開できます。",
+    "CREDITS_ADDED": "+{{count}}クレジット追加 — 合計: {{total}}クレジット",
+    "CANCEL_TITLE": "支払いがキャンセルされました",
+    "CANCEL_MESSAGE": "支払いが完了しませんでした。金額は請求されていません。",
+    "BACK_HOME": "ホームに戻る"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "説明",
+      "KEYWORDS": "キーワード",
+      "EXTENSIONS": "拡張子",
+      "DOMAINS": "ドメイン"
+    },
+    "STEP1": {
+      "TITLE": "あなたのプロジェクト",
+      "PROJECT_NAME_TITLE": "プロジェクト名（任意）",
+      "SUBTITLE": "ソリューション、ターゲット層、価値観を説明してください。",
+      "PLACEHOLDER": "例：地元の環境に優しい花の配達プラットフォーム...",
+      "REFINE_BTN": "AIで言い換える",
+      "CONTINUE_BTN": "キーワードへ続く",
+      "SUGGESTION_TITLE": "提案された言い換え：",
+      "USE_VERSION": "このバージョンを使用"
+    },
+    "STEP2": {
+      "TITLE": "設定",
+      "SUBTITLE": "キーワードを調整し、ターゲット層を定義してください。",
+      "KEYWORDS_TITLE": "キーワード",
+      "EXTENSIONS_TITLE": "ドメイン拡張子",
+      "ADD_PLACEHOLDER": "キーワードを追加...",
+      "MATCH_MODE": "利用可能基準",
+      "MATCH_ANY": "少なくとも1つの拡張子が利用可能",
+      "MATCH_ALL": "すべての拡張子が利用可能",
+      "BACK_BTN": "戻る",
+      "NEXT_BTN": "拡張子へ続く",
+      "SEARCH_BTN": "ドメイン検索",
+      "TARGET_TITLE": "ターゲット層",
+      "TARGET_INTL": "国際",
+      "TARGET_LOCAL": "ローカル / リージョナル",
+      "LANGUAGE": "言語：",
+      "LANGUAGE_PLACEHOLDER": "言語を選択",
+      "NAMING_STYLES_TITLE": "命名スタイル（任意）",
+      "DESCRIPTIVE_TOGGLE": "説明的な名前 — 例：tokyo-hana-delivery.jp",
+      "CULTURAL_TOGGLE": "文化的参照 — 例：fuji-shop.jp"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "説明的",
+      "CULTURAL": "文化的"
+    },
+    "STEP3": {
+      "TITLE": "利用可能な{{extensions}}ドメイン",
+      "SUBTITLE": "プロジェクトへの提案です。",
+      "NOTE": "注意：{{total}}の名前アイデアを分析しましたが、実際に利用可能だったのは{{count}}のみでした。",
+      "NO_RESULTS": "ドメインが見つかりません。キーワードを変更してみてください。",
+      "MORE_BTN": "さらに10件の提案",
+      "CREDITS_LEFT": "残り{{n}}クレジット",
+      "BUY_CREDITS_BTN": "クレジット購入",
+      "BUY_COL_HEADER": "レジストラで購入",
+      "NEW_PROJECT_BTN": "新規プロジェクト",
+      "COPY_TABLE": "テーブルをコピー",
+      "COPIED": "コピーしました！",
+      "ANALYSIS_PENDING": "AI分析中…",
+      "ANALYSIS_TOGGLE": "名前分析を表示",
+      "ADD_MANUAL_PLACEHOLDER": "例：florizon、bloomly、verdana",
+      "ADD_MANUAL_BTN": "確認",
+      "MANUAL_TOOLTIP": "手動で追加",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "フィルター有効",
+      "MANUAL_NOT_AVAILABLE": "{{names}}は利用可能基準を満たしておらず、アクティブなフィルターで非表示になっています。",
+      "PICK_BEST_BTN": "選択を手伝ってください",
+      "PICK_TITLE": "AI推薦",
+      "PICK_LOADING": "候補を分析中…",
+      "PICK_COPY": "名前をコピー",
+      "PICK_OTHER": "他の候補：",
+      "PICK_ALL": "すべての結果から",
+      "PICK_FAVOURITES": "お気に入りのみから",
+      "PICK_URGENCY_TITLE": "良い名前はすぐになくなります。",
+      "PICK_URGENCY_SUB": "今は空いています — 明日はわかりません。他の人に先に登録されないようにしてください。",
+      "PICK_BUY_BTN": "このドメインを購入"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "検索が予想より時間がかかっています。待ち続けますか？",
+      "KEEP_WAITING": "待ち続ける",
+      "CANCEL": "キャンセルして再試行"
+    },
+    "LOADING": "AIがあなたのために作業中...",
+    "STREAM": {
+      "GENERATING": "AIが新しい名前のアイデアを生成中...",
+      "CHECKING": "{{name}}を確認中",
+      "PROGRESS": "{{checked}}件の候補を評価 — 現在{{found}}件が利用可能"
+    },
+    "RECHECKING": "利用可能状況を確認中...",
+    "RECHECK_ERROR": "利用可能状況を確認できませんでした。再試行してください。",
+    "CREDIT_DIALOG": {
+      "TITLE": "クレジットをチャージ",
+      "MESSAGE": "アカウントにいくつクレジットを追加しますか？",
+      "QUANTITY": "数量",
+      "CANCEL": "キャンセル",
+      "BUY": "チャージ"
+    }
+  }
+}

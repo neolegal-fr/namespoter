@@ -1,0 +1,161 @@
+{
+  "LANDING": {
+    "TAGLINE": "Un nume de domeniu relevant și disponibil — imediat.",
+    "SUBTITLE": "Descrie proiectul tău în câteva cuvinte — AI face restul.",
+    "B1_TITLE": "Sugestii AI",
+    "B1_DESC": "GPT generează nume adaptate activității și publicului tău țintă",
+    "B2_TITLE": "Disponibilitate reală",
+    "B2_DESC": "Verificare Whois în timp real pentru extensiile alese",
+    "B3_TITLE": "Favorite & istoric",
+    "B3_DESC": "Salvează căutările tale și reia-le oricând dorești",
+    "B4_TITLE": "Mai multe extensii",
+    "B4_DESC": ".com, .ro, .io, .net… verifică toate extensiile dintr-o dată",
+    "CTA": "Găsește numele meu de domeniu gratuit",
+    "FREE_NOTE": "Fără abonament · Fără card de credit · 100 credite gratuite la înregistrare"
+  },
+  "APP": {
+    "TITLE": "Namorama",
+    "PROJECTS": "Proiecte",
+    "PROJECT_NEW": "Nou",
+    "PROJECT_OPEN": "Deschide",
+    "CREDITS": "Credite",
+    "LOGOUT": "Deconectare",
+    "LOGIN": "Conectare / Înregistrare",
+    "MANAGE_ACCOUNT": "Gestionează contul meu",
+    "BILLING": "Facturare",
+    "FOOTER": "Dezvoltat de",
+    "SECURE_ACCESS": "Acces securizat",
+    "LOGIN_REQUIRED": "Conectează-te pentru a începe căutarea numelor de domeniu.",
+    "ADMIN": "Administrare"
+  },
+  "PROJECTS": {
+    "TITLE": "Proiectele Mele",
+    "SUBTITLE": "Reia căutările tale de unde ai rămas.",
+    "EMPTY": "Niciun proiect încă.",
+    "OPEN": "Deschide",
+    "DATE": "Ultima actualizare",
+    "DELETE": "Șterge",
+    "CONFIRM_DELETE": "Ești sigur că vrei să ștergi acest proiect?",
+    "DELETE_SUCCESS": "Proiect șters",
+    "SUCCESS": "Succes"
+  },
+  "BILLING": {
+    "TITLE": "Credite",
+    "TAGLINE": "Nu-ți plac abonamentele? Nici nouă nu ne plac.",
+    "TAGLINE_SUB": "100 credite gratuite în fiecare lună și pachete fără angajament dacă ai nevoie.",
+    "FREE_TITLE": "credite disponibile",
+    "FREE_RESET": "Reînnoire la {{date}}",
+    "PACK_TITLE": "Cumpără credite",
+    "PACK_CREDITS": "{{n}} credite",
+    "PACK_PER_CREDIT": "{{price}} / credit",
+    "BUY_BTN": "Cumpără",
+    "PACK_BALANCE": "și {{n}} credite cumpărate",
+    "CREDITS": "credite",
+    "FREE_MONTHLY": "credite gratuite lunare",
+    "PACK_POPULAR": "Popular",
+    "PACK_DECOUVERTE_NAME": "Descoperire",
+    "PACK_PRO_NAME": "Pro",
+    "PACK_MAX_NAME": "Max"
+  },
+  "PAYMENT": {
+    "SUCCESS_TITLE": "Plată confirmată!",
+    "SUCCESS_MESSAGE": "Creditele tale au fost adăugate în cont. Poți relua căutările.",
+    "CREDITS_ADDED": "+{{count}} credite adăugate — total: {{total}} credite",
+    "CANCEL_TITLE": "Plată anulată",
+    "CANCEL_MESSAGE": "Plata ta nu a fost efectuată. Nicio sumă nu a fost debitată.",
+    "BACK_HOME": "Înapoi la pagina principală"
+  },
+  "WIZARD": {
+    "STEPS": {
+      "DESCRIPTION": "Descriere",
+      "KEYWORDS": "Cuvinte cheie",
+      "EXTENSIONS": "Extensii",
+      "DOMAINS": "Domenii"
+    },
+    "STEP1": {
+      "TITLE": "Proiectul Tău",
+      "PROJECT_NAME_TITLE": "Numele proiectului (opțional)",
+      "SUBTITLE": "Descrie soluția ta, publicul țintă și valorile tale.",
+      "PLACEHOLDER": "Ex.: O platformă de livrare de flori locale și ecologice...",
+      "REFINE_BTN": "Reformulează cu AI",
+      "CONTINUE_BTN": "Continuă la cuvinte cheie",
+      "SUGGESTION_TITLE": "Reformulare sugerată:",
+      "USE_VERSION": "Folosește această versiune"
+    },
+    "STEP2": {
+      "TITLE": "Configurare",
+      "SUBTITLE": "Ajustează cuvintele cheie și definește-ți publicul țintă.",
+      "KEYWORDS_TITLE": "Cuvinte cheie",
+      "EXTENSIONS_TITLE": "Extensii de domeniu",
+      "ADD_PLACEHOLDER": "Adaugă un cuvânt cheie...",
+      "MATCH_MODE": "Criteriu de disponibilitate",
+      "MATCH_ANY": "Cel puțin o extensie disponibilă",
+      "MATCH_ALL": "Toate extensiile disponibile",
+      "BACK_BTN": "Înapoi",
+      "NEXT_BTN": "Continuă la extensii",
+      "SEARCH_BTN": "Caută domenii",
+      "TARGET_TITLE": "Public țintă",
+      "TARGET_INTL": "Internațional",
+      "TARGET_LOCAL": "Local / Regional",
+      "LANGUAGE": "Limbă:",
+      "LANGUAGE_PLACEHOLDER": "Alege o limbă",
+      "NAMING_STYLES_TITLE": "Stiluri de denumire (opțional)",
+      "DESCRIPTIVE_TOGGLE": "Nume descriptive — ex.: florarie-bucuresti.ro",
+      "CULTURAL_TOGGLE": "Referințe culturale — ex.: miorita-shop.ro"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "descriptiv",
+      "CULTURAL": "cultural"
+    },
+    "STEP3": {
+      "TITLE": "Domenii {{extensions}} disponibile",
+      "SUBTITLE": "Iată sugestiile noastre pentru proiectul tău.",
+      "NOTE": "Notă: Am analizat {{total}} idei de nume, dar doar {{count}} erau cu adevărat disponibile.",
+      "NO_RESULTS": "Niciun domeniu găsit. Încearcă să schimbi cuvintele cheie.",
+      "MORE_BTN": "Încă 10 sugestii",
+      "CREDITS_LEFT": "{{n}} credite rămase",
+      "BUY_CREDITS_BTN": "Cumpără credite",
+      "BUY_COL_HEADER": "Cumpără de la un registrar",
+      "NEW_PROJECT_BTN": "Proiect nou",
+      "COPY_TABLE": "Copiază tabel",
+      "COPIED": "Copiat!",
+      "ANALYSIS_PENDING": "Analiză AI în curs…",
+      "ANALYSIS_TOGGLE": "Vezi analiza numelui",
+      "ADD_MANUAL_PLACEHOLDER": "ex.: florizon, bloomly, verdana",
+      "ADD_MANUAL_BTN": "Verifică",
+      "MANUAL_TOOLTIP": "Adăugat manual",
+      "MANUAL_NOT_AVAILABLE_SUMMARY": "Filtru activ",
+      "MANUAL_NOT_AVAILABLE": "{{names}} nu îndeplinește criteriile de disponibilitate și este ascuns de filtrul activ.",
+      "PICK_BEST_BTN": "Ajută-mă să aleg",
+      "PICK_TITLE": "Recomandare AI",
+      "PICK_LOADING": "Se analizează candidații…",
+      "PICK_COPY": "Copiază numele",
+      "PICK_OTHER": "Alți candidați:",
+      "PICK_ALL": "Din toate rezultatele",
+      "PICK_FAVOURITES": "Doar din favorite",
+      "PICK_URGENCY_TITLE": "Numele bune dispar rapid.",
+      "PICK_URGENCY_SUB": "Acesta este liber acum — poate nu va fi mâine. Nu lăsa pe altcineva să îl înregistreze înaintea ta.",
+      "PICK_BUY_BTN": "Cumpără acest domeniu"
+    },
+    "TIMEOUT": {
+      "MESSAGE": "Căutarea durează mai mult decât era prevăzut. Vrei să continui să aștepți?",
+      "KEEP_WAITING": "Continuă să aștepți",
+      "CANCEL": "Anulează și încearcă din nou"
+    },
+    "LOADING": "AI lucrează pentru tine...",
+    "STREAM": {
+      "GENERATING": "AI generează noi idei de nume...",
+      "CHECKING": "Se verifică {{name}}",
+      "PROGRESS": "{{checked}} candidați evaluați — {{found}} disponibili până acum"
+    },
+    "RECHECKING": "Se verifică disponibilitatea...",
+    "RECHECK_ERROR": "Nu s-a putut verifica disponibilitatea. Încearcă din nou.",
+    "CREDIT_DIALOG": {
+      "TITLE": "Reîncarcă credite",
+      "MESSAGE": "Câte credite vrei să adaugi în contul tău?",
+      "QUANTITY": "Cantitate",
+      "CANCEL": "Anulează",
+      "BUY": "Reîncarcă"
+    }
+  }
+}
