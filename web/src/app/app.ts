@@ -342,6 +342,7 @@ export class AppComponent implements OnInit {
     this.translate.use(lang);
     this.currentLang.set(lang);
     this.selectedLang = lang;
+    document.documentElement.lang = lang;
   }
 
   toggleLang() {

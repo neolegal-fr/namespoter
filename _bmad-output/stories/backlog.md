@@ -460,7 +460,7 @@
 
 ## US-017 · Extended European Language Support
 
-**Status**: ⚠️ Partial (FR/EN implemented; DE, ES, IT, etc. not yet)
+**Status**: ✅ Implemented
 
 **As a** user targeting a non-English, non-French European market,
 **I want** to select my target language from a broader list of European languages,
@@ -1287,7 +1287,7 @@ The current table view works well on desktop but is overwhelming on mobile and c
 | US-014 · Stripe packs + subscription | High | High | 🟠 Next | ✅ Done |
 | US-015 · Exclude already-evaluated candidates | High | Low | 🟠 Next | ✅ Done |
 | US-016 · Memorable brand criteria in prompt | High | Low | 🟠 Next | ✅ Done |
-| US-017 · Extended European language support | Medium | Low | 🟠 Next | ⚠️ Partial |
+| US-017 · Extended European language support | Medium | Low | 🟠 Next | ✅ Done |
 | US-019 · Configurable batch size ("More") | Medium | Low | 🟠 Next | ⚠️ Partial |
 | US-020 · Feedback form + 1 000 credit reward | High | Medium | 🟠 Next | ❌ To do |
 | US-022 · "Buy on registrar" button (OVH, Namecheap, Gandi) | High | Low | 🟠 Next | ❌ To do |
