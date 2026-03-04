@@ -191,35 +191,35 @@ export class WizardComponent implements OnInit {
       label: 'OVH',
       url: (n: string, exts: string[]) => {
         const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${d}`;
+        return `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
       },
     },
     {
       label: 'Namecheap',
       url: (n: string, exts: string[]) => {
         const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.namecheap.com/domains/registration/results.aspx?domain=${d}`;
+        return `https://www.namecheap.com/domains/registration/results.aspx?domain=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
       },
     },
     {
       label: 'GoDaddy',
       url: (n: string, exts: string[]) => {
         const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.godaddy.com/domainsearch/find?domainToCheck=${d}`;
+        return `https://www.godaddy.com/domainsearch/find?domainToCheck=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
       },
     },
     {
       label: 'Gandi',
       url: (n: string, exts: string[]) => {
         const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://shop.gandi.net/fr/domain/suggest?search=${d}`;
+        return `https://shop.gandi.net/fr/domain/suggest?search=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
       },
     },
     {
       label: 'Hostinger',
       url: (n: string, exts: string[]) => {
         const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=${d}`;
+        return `https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
       },
     },
   ];
