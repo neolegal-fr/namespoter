@@ -398,7 +398,9 @@ export class AppComponent implements OnInit {
   }
 
   login() {
-    this.keycloak.login();
+    // zh uses BCP47 zh-Hans to match Keycloak's base theme message file
+    const kcLocale = this.selectedLang === 'zh' ? 'zh-Hans' : this.selectedLang;
+    this.keycloak.login({ locale: kcLocale });
   }
 
   logout() {

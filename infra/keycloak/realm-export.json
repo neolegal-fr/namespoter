@@ -7,7 +7,7 @@
   "adminTheme": "keycloak",
   "emailTheme": "namorama",
   "internationalizationEnabled": true,
-  "supportedLocales": ["cs", "da", "de", "en", "es", "fi", "fr", "hu", "it", "ja", "nl", "no", "pl", "pt-BR", "ro", "ru", "sv", "tr", "zh-CN"],
+  "supportedLocales": ["cs", "da", "de", "en", "es", "fi", "fr", "hu", "it", "ja", "nl", "no", "pl", "pt", "ro", "ru", "sv", "tr", "zh-Hans"],
   "defaultLocale": "fr",
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
