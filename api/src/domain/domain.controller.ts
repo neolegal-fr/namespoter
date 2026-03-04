@@ -111,6 +111,8 @@ export class DomainController {
           emit(event);
           if (event.type === 'result') results.push(event.domain);
         },
+        dto.descriptiveNames ?? false,
+        dto.culturalNames ?? false,
       );
 
       const actualCost = results.length;
@@ -179,6 +181,9 @@ export class DomainController {
       dto.matchMode,
       dto.locale,
       dto.excludeNames ?? [],
+      undefined,
+      dto.descriptiveNames ?? false,
+      dto.culturalNames ?? false,
     );
 
     const actualCost = results.length;

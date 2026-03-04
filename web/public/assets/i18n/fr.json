@@ -116,7 +116,14 @@
       "TARGET_INTL": "International",
       "TARGET_LOCAL": "Local / Régional",
       "LANGUAGE": "Langue :",
-      "LANGUAGE_PLACEHOLDER": "Choisir une langue"
+      "LANGUAGE_PLACEHOLDER": "Choisir une langue",
+      "NAMING_STYLES_TITLE": "Styles de noms (optionnel)",
+      "DESCRIPTIVE_TOGGLE": "Noms descriptifs — ex : boulangerie-provence.com",
+      "CULTURAL_TOGGLE": "Références culturelles — ex : petit-poucet.com"
+    },
+    "STYLE": {
+      "DESCRIPTIVE": "descriptif",
+      "CULTURAL": "culturel"
     },
     "STEP3": {
       "TITLE": "Domaines {{extensions}} disponibles",

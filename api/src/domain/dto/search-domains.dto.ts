@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional, MinLength, MaxLength, ArrayMinSize, ArrayMaxSize, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional, IsBoolean, MinLength, MaxLength, ArrayMinSize, ArrayMaxSize, Matches } from 'class-validator';
 
 export enum MatchMode {
   ANY = 'any',
@@ -48,4 +48,12 @@ export class SearchDomainsDto {
   @IsString({ each: true })
   @IsOptional()
   excludeNames?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  descriptiveNames?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  culturalNames?: boolean;
 }

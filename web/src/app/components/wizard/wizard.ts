@@ -59,6 +59,11 @@ export class WizardComponent implements OnInit {
   isLocal = signal(false);
   localeOverride = signal<string>('');
 
+  // ─── US-032 : Naming styles (local mode only) ─────────────
+  descriptiveNames = signal(false);
+  culturalNames = signal(false);
+  // ────────────────────────────────────────────────────────────
+
   private readonly EXT_TO_LOCALE: Record<string, string> = {
     '.fr': 'fr', '.be': 'fr', '.ch': 'fr',
     '.de': 'de', '.at': 'de',
@@ -368,6 +373,7 @@ export class WizardComponent implements OnInit {
         this.domains.set(project.suggestions.map((s: any) => ({
           id: s.id,
           name: s.domainName,
+          style: s.style || 'standard',
           allExtensions: s.availability,
           isFavorite: s.isFavorite,
           analysis: s.analysis ?? null,
@@ -433,6 +439,8 @@ export class WizardComponent implements OnInit {
     this.matchMode.set('all');
     this.isLocal.set(false);
     this.localeOverride.set('');
+    this.descriptiveNames.set(false);
+    this.culturalNames.set(false);
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
     if (!this.isLoggedIn()) this.showLanding.set(true);
@@ -919,6 +927,9 @@ export class WizardComponent implements OnInit {
       locale: this.effectiveLocale(),
       // US-015 — lors d'un append, exclure tous les noms déjà évalués
       excludeNames: append ? this.domains().map(d => d.name) : [],
+      // US-032 — naming styles (local mode only)
+      descriptiveNames: this.isLocal() ? this.descriptiveNames() : false,
+      culturalNames: this.isLocal() ? this.culturalNames() : false,
     }, token).subscribe({
       next: (event: any) => {
         this.clearSearchTimeout();
@@ -933,7 +944,7 @@ export class WizardComponent implements OnInit {
             : null);
 
         } else if (event.type === 'result') {
-          const domain = { id: null as string | null, name: event.domain.name, allExtensions: event.domain.allExtensions, isFavorite: false };
+          const domain = { id: null as string | null, name: event.domain.name, style: event.domain.style || 'standard', allExtensions: event.domain.allExtensions, isFavorite: false };
           this.domains.update(d => [...d, domain]);
           this.streamProgress.update(p => p ? { ...p, found: this.domains().length } : null);
 

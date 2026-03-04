@@ -80,6 +80,7 @@ export class ProjectsService {
         project,
         domainName: d.name,
         availability: d.allExtensions,
+        style: d.style || 'standard',
       }),
     );
 

@@ -92,7 +92,14 @@ export class DomainService {
     }
   }
 
-  async generateDomainIdeas(description: string, keywords: string[], locale?: string, excludeNames: string[] = []): Promise<string[]> {
+  async generateDomainIdeas(
+    description: string,
+    keywords: string[],
+    locale?: string,
+    excludeNames: string[] = [],
+    descriptiveNames = false,
+    culturalNames = false,
+  ): Promise<{ name: string; style: string }[]> {
     const vocabStr = keywords.join(', ');
     const localeInstruction = locale
       ? `Names should resonate with a "${locale}"-language audience. Prefer names that are easy to pronounce in that language, and may incorporate roots, sounds, or cultural references familiar to its speakers. Local or regional words are encouraged alongside invented ones.`
@@ -103,52 +110,89 @@ export class DomainService {
       ? `\nAlready tested — do NOT reproduce any of these names: ${excludeNames.slice(0, 200).join(', ')}\n`
       : '';
 
+    // US-032 — calculate proportions across active styles
+    const activeStyles = ['standard', ...(descriptiveNames ? ['descriptive'] : []), ...(culturalNames ? ['cultural'] : [])];
+    const total = 30;
+    const perStyle = Math.floor(total / activeStyles.length);
+    const counts = Object.fromEntries(activeStyles.map((s, i) => [s, i < total % activeStyles.length ? perStyle + 1 : perStyle]));
+
+    const styleInstructions: string[] = [];
+
+    styleInstructions.push(`
+=== STYLE "standard" (generate exactly ${counts['standard']} names) ===
+Classic startup-style brand names. Criteria:
+- SHORT: ≤ 10 characters, ideally 2-3 syllables max.
+- EASY TO PRONOUNCE: must pass the "radio test".
+- NO HYPHENS OR NUMBERS.
+- DISTINCTIVE: avoid generic constructs. Aim for invented or unexpected combinations.
+- EVOCATIVE of the product's benefit or sector.
+Techniques: portmanteaus, short compound words, evocative metaphors, invented names with Latin/Greek roots.
+${localeInstruction}`);
+
+    if (descriptiveNames) {
+      styleInstructions.push(`
+=== STYLE "descriptive" (generate exactly ${counts['descriptive']} names) ===
+Descriptive domain names targeting local/regional markets. Criteria:
+- Can be LONGER (up to 28 characters with hyphens).
+- Must CLEARLY DESCRIBE the business activity and optionally a geographic reference (infer from description).
+- HYPHENS ARE ALLOWED and encouraged between words.
+- Must sound natural in the target language.
+- Examples: boulangerie-provence.com, plombier-lyon.fr, menuiserie-bretagne.fr`);
+    }
+
+    if (culturalNames) {
+      styleInstructions.push(`
+=== STYLE "cultural" (generate exactly ${counts['cultural']} names) ===
+Domain names referencing public domain cultural works, characters, places, or folklore. Criteria:
+- May reference fairy tales, mythology, fables, classic literature, historical figures (public domain only).
+- HYPHENS ARE ALLOWED.
+- No justification needed — just strong, memorable cultural references tied to the project spirit.
+- Examples: petit-poucet.fr, hercule-plomberie.com, cendrillon-mode.fr`);
+    }
+
     const prompt = `
       You are a world-class branding and naming expert.
-      Your mission is to generate 30 ORIGINAL brand names for the following project:
+      Generate ORIGINAL domain-name bases for the following project:
       Description: "${description}"
       Semantic keywords: ${vocabStr}
       ${exclusionSection}
 
-      Brand name quality criteria (ALL MANDATORY — US-016):
-      1. SHORT: ≤ 10 characters, ideally 2-3 syllables max.
-      2. EASY TO PRONOUNCE: must pass the "radio test" — a person hearing it once can spell it correctly. No ambiguous letter clusters.
-      3. EASY TO SPELL: no unexpected silent letters, no confusing double-letter patterns unless intentional.
-      4. DISTINCTIVE: avoid generic constructs (e.g. "easybooking", "quickservice"). Aim for invented or unexpected combinations.
-      5. NO HYPHENS OR NUMBERS in the name.
-      6. EVOCATIVE: the name should suggest the product's benefit, emotion, or sector without being too literal.
-      7. LEGALLY SAFER: avoid well-known brand names, proper nouns, or exact dictionary words from the sector.
+      ${styleInstructions.join('\n')}
 
-      ${localeInstruction}
+      IMPORTANT:
+      - Generate exactly the number of names specified per style (total: ${total}).
+      - Each name must include a "style" field matching its style key exactly.
+      - For "standard" names: no hyphens, no numbers, lowercase letters only.
+      - For "descriptive" and "cultural" names: lowercase, hyphens allowed, no numbers.
 
-      Use a mix of these naming techniques:
-      - Portmanteaus (merging 2 relevant words).
-      - Short, elegant compound words.
-      - Evocative metaphors linked to the client benefit.
-      - Invented names with a strong Latin, Greek, or language-appropriate root.
-
-      Your response must be ONLY a JSON object with a "names" key containing a list of strings (name only, no extension).
-      Example: {"names": ["Altro", "Velora", "Flowly"]}
+      Your response must be ONLY a JSON object with a "names" key containing a list of objects.
+      Example: {"names": [{"name": "velora", "style": "standard"}, {"name": "boulangerie-provence", "style": "descriptive"}, {"name": "petit-poucet", "style": "cultural"}]}
     `;
 
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 600,
+        max_tokens: 900,
         temperature: 0.95,
         response_format: { type: 'json_object' }
       });
 
       const content = response.choices[0].message.content;
       if (!content) return [];
-      
+
       const parsed = JSON.parse(content);
-      const names: string[] = parsed.names || [];
-      
-      return names
-        .map(name => name.trim().toLowerCase().replace(/[^a-z0-9]/g, ''))
-        .filter(name => name.length > 3);
+      const items: { name: string; style?: string }[] = parsed.names || [];
+
+      return items
+        .map(item => {
+          const style = activeStyles.includes(item.style ?? '') ? (item.style ?? 'standard') : 'standard';
+          const cleaned = style === 'standard'
+            ? item.name.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+            : item.name.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
+          return { name: cleaned, style };
+        })
+        .filter(item => item.name.length > 3);
     } catch (error) {
       this.logger.error('Erreur lors de la génération des noms:', error);
       return [];
@@ -288,6 +332,8 @@ ${langInstruction}`;
     locale?: string,
     excludeNames: string[] = [],
     onEvent?: (event: Record<string, any>) => void,
+    descriptiveNames = false,
+    culturalNames = false,
   ): Promise<{ results: any[], totalChecked: number }> {
     const finalResults: any[] = [];
     // US-015 — pre-seed with already-evaluated names so the LLM never re-proposes them
@@ -297,25 +343,25 @@ ${langInstruction}`;
 
     while (finalResults.length < targetCount && attempts < maxAttempts) {
       onEvent?.({ type: 'generating' });
-      const names = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames]);
+      const items = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames], descriptiveNames, culturalNames);
 
-      const newNames = names.filter(name => !checkedNames.has(name));
-      newNames.forEach(name => checkedNames.add(name));
+      const newItems = items.filter(item => !checkedNames.has(item.name));
+      newItems.forEach(item => checkedNames.add(item.name));
 
-      if (newNames.length === 0) {
+      if (newItems.length === 0) {
         attempts++;
         continue;
       }
 
-      for (const name of newNames) {
+      for (const item of newItems) {
         if (finalResults.length >= targetCount) break;
 
-        onEvent?.({ type: 'candidate', name, checkedSoFar: checkedNames.size });
+        onEvent?.({ type: 'candidate', name: item.name, checkedSoFar: checkedNames.size });
 
         const extStatus: Record<string, boolean> = {};
 
         await Promise.all(extensions.map(async (ext) => {
-          extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`);
+          extStatus[ext] = await this.isDomainAvailable(`${item.name}${ext}`);
         }));
 
         const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext]);
@@ -328,7 +374,7 @@ ${langInstruction}`;
         }
 
         if (isMatch) {
-          const domain = { name, availableExtensions: availableExts, allExtensions: extStatus };
+          const domain = { name: item.name, style: item.style, availableExtensions: availableExts, allExtensions: extStatus };
           finalResults.push(domain);
           onEvent?.({ type: 'result', domain });
         }

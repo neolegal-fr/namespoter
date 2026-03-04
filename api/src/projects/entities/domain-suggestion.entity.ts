@@ -18,6 +18,9 @@ export class DomainSuggestion {
   @Column({ nullable: true, type: 'text' })
   analysis: string | null;
 
+  @Column({ nullable: true, default: 'standard' })
+  style: string;
+
   @ManyToOne(() => Project, (project) => project.suggestions)
   project: Project;
 }
