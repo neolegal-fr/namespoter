@@ -1034,44 +1034,49 @@ The backend currently uses `gpt-3.5-turbo` for all AI calls (keyword generation,
 
 ---
 
-## US-032 · Long-Form "Phrase" Domain Names for Local Market Targeting
+## US-032 · Alternative Domain Name Styles for Local Market Targeting
 
-**Status**: ❌ To do
+**Status**: ✅ Implemented
 
-**As a** user who has selected a local/regional market target,
-**I want** the app to also suggest phrase-based domain names (longer, conversational names in my target language),
-**So that** I can explore a style of domain that is natural-sounding, memorable in the local language, and often still available.
+**As a** freelancer or artisan targeting a local market,
+**I want** the app to suggest descriptive or culturally-referenced domain names as alternatives to short startup-style names,
+**So that** I can find available, credible, and locally resonant domains when short names are all taken.
 
 ### Context
-When targeting a local market (US-001), short invented names may feel foreign or SEO-weak. Phrase-based domains (e.g. `monboulangerparis.fr`, `jetrouvemonpsy.fr`, `deinhandwerker.de`) are a proven alternative: they rank on long-tail keywords, are easy to remember and type, and tend to have much higher availability than short names. This generation mode complements — but does not replace — the standard short-name search.
+Short invented names often feel foreign or SEO-weak for local independents (artisans, therapists, local traders). Two alternative styles address this: **descriptive names** that combine activity + location/adjective (e.g. `boulangerie-provence.fr`), and **cultural references** drawn from the worldwide public domain (fairy tales, mythology, folklore) that metaphorically evoke the product (e.g. `petit-poucet.com` for a GPS beacon for the blind). Both styles are offered as opt-in toggles alongside the standard short-name search.
 
 ### Acceptance Criteria
 
 #### Frontend — Step 2 (Keywords / Options)
-- [ ] When `isLocal` is active (US-001), a toggle appears in Step 2: **"Also suggest phrase-style domains"** (off by default)
-- [ ] When enabled, the search request includes `phraseDomains: true`
-- [ ] In the results table (Step 3), phrase-style domains are visually distinguished with a badge or icon (e.g. 📝 or "phrase") so the user can tell them apart from short names
-- [ ] The toggle state is persisted in the wizard state and saved with the project
+- [ ] When `isLocal` is active (US-001), two independent toggles appear in Step 2 (both off by default):
+  - **"Noms descriptifs"** — activity + location/adjective combinations, hyphens allowed
+  - **"Références culturelles"** — public domain cultural references that evoke the product
+- [ ] Active toggles are included in the search request (`descriptiveNames: true`, `culturalNames: true`)
+- [ ] Results from all active modes are **mixed** in the existing table, each with a style badge (`descriptif` / `culturel`)
+- [ ] Toggle states are persisted in the wizard state and saved with the project
 
-#### Backend — Phrase Domain Generation
-- [ ] When `phraseDomains: true`, `DomainService.generateDomainIdeas()` runs a **second, separate prompt** targeting phrase-style names:
-  - Prompt instruction (adapted to the active locale):
-    > "Generate 10 domain name ideas that are natural phrases or short sentences in {locale} language. They should be 3–6 words long, use no hyphens, and describe what the product or service does in everyday language. Examples for French: `jetrouvemonpsy`, `monboulangerparis`, `lecoachdevotreequipe`. Return only a JSON array of lowercase strings without spaces or dots."
-  - The phrase prompt runs in parallel with (or after) the standard short-name prompt
-  - The resulting names are merged into the candidate list before Whois verification
-- [ ] Phrase domains are flagged with `style: 'phrase'` in the `DomainSuggestion` entity (new optional field, default `'standard'`)
-- [ ] Credit deduction is identical to standard suggestions (1 credit per domain found available, or the premium multiplier if US-031 is active)
-- [ ] `phraseDomains` is only accepted when `locale` is set (guard: returns 400 if `phraseDomains: true` and no locale)
+#### Backend — Unified Prompt Generation
+- [ ] A single LLM prompt generates the full batch (10 names by default) incorporating all active styles
+- [ ] The prompt instructs the model to infer location/culture from the project description — no extra user input required
+- [ ] When `descriptiveNames: true`: include names in the form `[activity]-[location/adjective]` in the target language, hyphens allowed
+- [ ] When `culturalNames: true`: include names drawn from worldwide public domain (fairy tales, mythology, folklore, proverbs, historical figures) that metaphorically fit the product — no restrictions on source, no justification required
+- [ ] The model distributes the 10 names proportionally across active styles (e.g. if both toggles active: ~3 standard + ~3 descriptive + ~4 cultural, or similar mix)
+- [ ] Each generated name is returned with a `style` tag: `'standard'`, `'descriptive'`, or `'cultural'`
+- [ ] Guards: both flags require `locale` to be set (400 if locale missing)
+- [ ] Credit deduction identical to standard suggestions (1 credit per available domain)
 
 #### Whois Verification
-- [ ] Phrase-style domains go through the same Whois verification pipeline as standard domains — no special handling required
+- [ ] All styles go through the same Whois pipeline — no special handling
+
+#### Data
+- [ ] `DomainSuggestion` entity gets an optional `style` varchar column (default `'standard'`)
+- [ ] Migration required
 
 ### Technical Notes
-- The second prompt can be added as a private `generatePhraseDomainIdeas(description, keywords, locale, model)` method in `DomainService`, following the same structure as `generateDomainIdeas()`
-- Both prompts can be fired concurrently with `Promise.all` to keep latency low
-- If the total candidate pool (standard + phrase) exceeds the target batch size, prioritise standard names first; include phrase names up to the remaining quota
-- The `style` column on `DomainSuggestion` is a simple `varchar` with default `'standard'`; migration required
-- Frontend badge: a small `p-tag` with severity `secondary` and value "phrase" appended next to the domain name in the table
+- Modify the existing prompt in `DomainService.generateDomainIdeas()` to conditionally append style instructions based on active flags — one call, one response to parse
+- `style` is returned as a field alongside each name in the LLM JSON response: `[{ "name": "petit-poucet", "style": "cultural" }, ...]`
+- Frontend badge: `p-tag` with severity `secondary` for `descriptif`, severity `info` for `culturel`
+- The `style` field on `DomainSuggestion` must be restored when loading a saved project
 
 ---
 
@@ -1291,7 +1296,7 @@ The current table view works well on desktop but is overwhelming on mobile and c
 | US-029 · Subscription management & self-service cancellation | High | Medium | 🟠 Next | ✅ Done |
 | US-030 · Import description from a web page URL | High | Medium | 🟠 Next | ❌ To do |
 | US-031 · LLM model selection — Standard vs. Premium | High | Medium | 🟠 Next | ❌ To do |
-| US-032 · Long-form "phrase" domain names for local targeting | Medium | Low | 🟠 Next | ❌ To do |
+| US-032 · Long-form "phrase" domain names for local targeting | Medium | Low | 🟠 Next | ✅ Done |
 | US-033 · Tinder mode — swipe to like / dislike domain names | High | Medium | 🟠 Next | ❌ To do |
 | US-034 · Google Analytics integration | High | Low | 🟠 Next | ❌ To do |
 | US-005 · Pros & cons analysis | High | High | 🟡 Later | ✅ Done |
@@ -1388,7 +1393,7 @@ Credits are permanent (no expiry on purchased packs). The monthly free allocatio
 
 ## US-039 · Responsive Table on Mobile
 
-**Status**: ❌ To do
+**Status**: ✅ Implemented
 
 **As a** user browsing domain results on a smartphone,
 **I want** the results table to be readable and usable on a small screen,
@@ -1480,7 +1485,7 @@ The site currently has no consent mechanism. Even without advertising trackers, 
 
 ## US-041 · Admin Section — User Management & Activity Dashboard
 
-**Status**: ❌ To do
+**Status**: ✅ Implemented
 
 **As an** administrator of Namorama,
 **I want** a protected back-office section accessible only to users with the `admin` role in the Keycloak realm,
@@ -1579,3 +1584,40 @@ Finding an available domain name is only half the battle — a name that is free
 - Legal advice or interpretation of trademark classes
 - Monitoring / trademark watch alerts
 - Blocking users from using conflicting names (informational only)
+
+---
+
+## US-043 · Social Media Handle Availability Check
+
+**Status**: ❌ To do
+
+**As a** user searching for a brand name,
+**I want** to see whether the corresponding handle is available on major social networks,
+**So that** I can choose a name I can claim consistently across all my online presence.
+
+### Context
+
+A domain name is only one piece of a brand's online identity. Users need to secure the same (or similar) handle on Instagram, X (Twitter), TikTok, LinkedIn, and Facebook. Checking social availability alongside domain availability makes Namorama a complete brand-naming tool rather than a pure domain search.
+
+### Acceptance Criteria
+
+- [ ] For each domain result, icons for major social networks (Instagram, X, TikTok, LinkedIn, Facebook) are displayed in the results row
+- [ ] Each icon is visually marked as available (🟢), taken (🔴), or unknown/unchecked (⚪)
+- [ ] The check runs asynchronously after domain results appear — it does not block the main results
+- [ ] Clicking an icon opens the relevant profile URL or signup page pre-filled with the name
+- [ ] Results are cached per name within the session to avoid redundant requests
+- [ ] The feature is clearly labelled as indicative (handles may be taken after the check)
+
+### Technical Notes
+
+- Social networks do not expose public availability APIs — the most practical approach is to attempt fetching `https://www.instagram.com/{name}`, `https://x.com/{name}`, etc. and interpret HTTP response codes (404 = likely available, 200 = taken)
+- This must be done server-side (the API) to avoid CORS issues
+- Rate limiting and caching are critical — one check per name per session maximum
+- Some networks (LinkedIn, Facebook) use profile slugs that may not match handle conventions exactly; document known differences
+- Alternative: link directly to a third-party tool such as Namecheckr or Instantdomainsearch for social checks, with no backend logic required
+
+### Out of Scope
+
+- Reserving or claiming handles on behalf of the user
+- Checking username variations (exact match only)
+- Paid / authenticated API integrations with social networks
