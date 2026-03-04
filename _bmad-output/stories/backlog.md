@@ -852,7 +852,7 @@ Keycloak supports custom themes via a `themes/` folder mounted into the containe
 
 ## US-028 · Fix Dropdown Menus Rendering Too Low on Scroll
 
-**Status**: ⚠️ Partial (appendTo="body" appliqué, à valider en test réel)
+**Status**: ✅ Implemented
 
 **As a** user who has scrolled down the page,
 **I want** dropdown menus (Select, language picker, match-mode selector) to open at the correct position relative to their trigger,
@@ -1278,7 +1278,7 @@ The current table view works well on desktop but is overwhelming on mobile and c
 | US-021 · Explain credit cost in UI | High | Low | 🔴 Now | ⚠️ Partial |
 | US-025 · Auto-favourite manually added domains | High | Low | 🔴 Now | ✅ Done |
 | US-027 · Move streaming progress panel position | Medium | Low | 🔴 Now | ✅ Done |
-| US-028 · Fix dropdown menus rendering too low on scroll | High | Low | 🔴 Now | ⚠️ Partial |
+| US-028 · Fix dropdown menus rendering too low on scroll | High | Low | 🔴 Now | ✅ Done |
 | US-004 · Locale from Keycloak | Medium | Low | 🟠 Next | ✅ Done |
 | US-006 · Landing page redesign | High | Medium | 🟠 Next | ✅ Done |
 | US-001 · International/local toggle | Medium | Medium | 🟠 Next | ✅ Done |
