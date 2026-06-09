@@ -479,7 +479,7 @@ export class WizardComponent implements OnInit {
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
     if (!this.isLoggedIn()) this.showLanding.set(true);
-    this.router.navigate(['/']);
+    this.router.navigate(['/app']);
     this.cdr.detectChanges();
   }
 

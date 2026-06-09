@@ -80,6 +80,6 @@ export class PaymentResultComponent implements OnInit {
   }
 
   goHome() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/app']);
   }
 }
