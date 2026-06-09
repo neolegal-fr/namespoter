@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LandingComponent } from './components/landing/landing';
 import { WizardComponent } from './components/wizard/wizard';
 import { PaymentResultComponent } from './components/payment-result/payment-result';
 import { AdminComponent } from './components/admin/admin.component';
@@ -10,7 +11,8 @@ import { PrivacyComponent } from './components/privacy/privacy.component';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
-  { path: '', component: WizardComponent },
+  { path: '', component: LandingComponent },
+  { path: 'app', component: WizardComponent },
   { path: 'projects/:id', component: WizardComponent },
   { path: 'payment/success', component: PaymentResultComponent },
   { path: 'payment/cancel', component: PaymentResultComponent },

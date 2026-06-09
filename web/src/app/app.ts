@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectorRef, inject, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, RouterModule } from '@angular/router';
 import { UserService, CreditInfo } from './services/user';
 import { ProjectService } from './services/project';
@@ -6,7 +6,7 @@ import { PaymentService, PackType } from './services/payment';
 import { FeedbackService } from './services/feedback';
 import { CookieConsentService } from './services/cookie-consent';
 import { KeycloakService } from 'keycloak-angular';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
@@ -102,7 +102,7 @@ import { Dialog } from 'primeng/dialog';
       </p-menubar>
 
       <div class="flex flex-column align-items-center w-full px-3 py-3 md:py-5" style="flex: 1">
-        <div class="w-full" [style.max-width]="router.url.startsWith('/admin') ? '72rem' : '44rem'">
+        <div class="w-full" [style.max-width]="router.url.startsWith('/admin') ? '72rem' : (router.url === '/' ? '64rem' : '44rem')">
           <router-outlet></router-outlet>
         </div>
       </div>
@@ -389,17 +389,24 @@ export class AppComponent implements OnInit {
     private cookieConsent: CookieConsentService,
     private feedbackService: FeedbackService,
     private messageService: MessageService,
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   async ngOnInit() {
-    this.cookieConsent.init();
-    this.isLoggedIn.set(await this.keycloak.isLoggedIn());
-    this.isAdmin.set(this.keycloak.isUserInRole('admin'));
+    // Langue (sans accès navigateur) — utile au prerender SSG de la landing.
     const lang = this.translate.currentLang || 'fr';
     this.currentLang.set(lang);
     this.selectedLang = lang;
+
+    // Tout le reste dépend du navigateur (cookie consent, Keycloak, document,
+    // gtag) : on l'ignore côté serveur pour ne pas casser le prerender.
+    if (!isPlatformBrowser(this.platformId)) return;
+
     document.documentElement.lang = lang;
-    
+    this.cookieConsent.init();
+    this.isLoggedIn.set(await this.keycloak.isLoggedIn());
+    this.isAdmin.set(this.keycloak.isUserInRole('admin'));
+
     if (this.isLoggedIn()) {
       const profile = await this.keycloak.loadUserProfile();
       this.userName.set(profile.firstName || profile.username || '');
@@ -512,18 +519,18 @@ export class AppComponent implements OnInit {
       this.projectService.refreshProjects().subscribe();
       this.projectService.showDrawer.set(true);
     };
-    if (this.router.url.startsWith('/admin')) {
-      this.router.navigate(['/']).then(() => setTimeout(show, 100));
-    } else {
+    if (this.router.url.startsWith('/app')) {
       show();
+    } else {
+      this.router.navigate(['/app']).then(() => setTimeout(show, 100));
     }
   }
 
   newProject() {
-    if (this.router.url.startsWith('/admin')) {
-      this.router.navigate(['/']).then(() => setTimeout(() => this.projectService.resetWizard(), 100));
-    } else {
+    if (this.router.url.startsWith('/app')) {
       this.projectService.resetWizard();
+    } else {
+      this.router.navigate(['/app']).then(() => setTimeout(() => this.projectService.resetWizard(), 100));
     }
   }
 

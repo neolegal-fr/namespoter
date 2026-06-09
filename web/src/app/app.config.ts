@@ -1,6 +1,8 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http';
+import { of } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -15,18 +17,39 @@ import { routes } from './app.routes';
 import { ConfigService } from './services/config';
 
 export class CustomTranslateLoader implements TranslateLoader {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private isBrowser: boolean) {}
   getTranslation(lang: string): Observable<any> {
+    // Au prerender (SSG), l'URL relative des fichiers i18n n'est pas résolvable
+    // côté serveur : on renvoie un dictionnaire vide. La landing prérendue
+    // affiche du texte écrit en dur ; les traductions du shell sont chargées
+    // côté client après hydratation.
+    if (!this.isBrowser) return of({});
     return this.http.get(`./assets/i18n/${lang}.json`);
   }
 }
 
-export function HttpLoaderFactory(http: HttpClient) {
-  return new CustomTranslateLoader(http);
+export function HttpLoaderFactory(http: HttpClient, platformId: Object) {
+  return new CustomTranslateLoader(http, isPlatformBrowser(platformId));
 }
 
-function initializeApp(keycloak: KeycloakService, translate: TranslateService, config: ConfigService) {
+function initializeApp(
+  keycloak: KeycloakService,
+  translate: TranslateService,
+  config: ConfigService,
+  platformId: Object,
+) {
   return async () => {
+    const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
+    translate.addLangs(supportedLangs);
+    translate.setDefaultLang('fr');
+
+    // Côté serveur (prerender SSG) : pas de Keycloak, pas de fetch relatif,
+    // pas de navigator. On rend la landing en français par défaut.
+    if (!isPlatformBrowser(platformId)) {
+      translate.use('fr');
+      return;
+    }
+
     // 1. Charger la config runtime (URLs d'env)
     await config.load();
 
@@ -54,11 +77,7 @@ function initializeApp(keycloak: KeycloakService, translate: TranslateService, c
       // L'app charge en mode non-authentifié ; l'utilisateur peut se connecter manuellement.
     }
 
-    // 2. Initialiser la langue
-    const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
-    translate.addLangs(supportedLangs);
-    translate.setDefaultLang('fr');
-
+    // 3. Langue depuis le navigateur
     const browserLang = translate.getBrowserLang() ?? '';
     translate.use(supportedLangs.includes(browserLang) ? browserLang : 'fr');
   };
@@ -68,7 +87,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptorsFromDi(), withFetch()),
     provideAnimations(),
     providePrimeNG({
         theme: {
@@ -83,7 +102,7 @@ export const appConfig: ApplicationConfig = {
         loader: {
           provide: TranslateLoader,
           useFactory: HttpLoaderFactory,
-          deps: [HttpClient]
+          deps: [HttpClient, PLATFORM_ID]
         }
       })
     ),
@@ -91,7 +110,7 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       multi: true,
-      deps: [KeycloakService, TranslateService, ConfigService]
+      deps: [KeycloakService, TranslateService, ConfigService, PLATFORM_ID]
     },
     KeycloakService,
     {
