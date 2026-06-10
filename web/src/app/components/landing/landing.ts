@@ -165,6 +165,31 @@ import { ButtonModule } from 'primeng/button';
         </div>
       </section>
 
+      <!-- Ressources / liens internes SEO -->
+      <section style="margin-top: 3.5rem">
+        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 2rem; color: var(--p-surface-900)">
+          Ressources pour bien nommer votre marque
+        </h2>
+        <div class="landing-grid" style="max-width: 44rem; margin: 0 auto">
+          <a routerLink="/guides/trouver-nom-de-marque" class="landing-card" style="text-decoration: none; color: inherit; display: block">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
+              Comment trouver un nom de marque disponible
+            </h3>
+            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
+              La méthode en 5 étapes pour trouver un nom mémorable dont le domaine est encore libre.
+            </p>
+          </a>
+          <a routerLink="/comparatif-generateurs-de-noms" class="landing-card" style="text-decoration: none; color: inherit; display: block">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
+              Comparatif des générateurs de noms
+            </h3>
+            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
+              Quel outil choisir, et pourquoi la vérification de disponibilité réelle change tout.
+            </p>
+          </a>
+        </div>
+      </section>
+
       <!-- CTA final -->
       <section style="margin: 4rem 0 2rem; text-align: center">
         <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--p-surface-900)">
