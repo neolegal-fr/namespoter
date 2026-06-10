@@ -99,3 +99,77 @@ body {
     background: #4f46e5 !important;
     border-color: #4f46e5 !important;
 }
+
+/* ─── Pages de contenu / articles SEO ─────────────── */
+.article {
+    line-height: 1.65;
+    color: var(--p-surface-700);
+}
+.article h1 {
+    font-size: clamp(1.8rem, 4.5vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--p-surface-900);
+    margin: 0 0 0.75rem;
+}
+.article .lead {
+    font-size: 1.15rem;
+    color: var(--p-surface-600);
+    line-height: 1.6;
+    margin: 0 0 2rem;
+}
+.article h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--p-surface-900);
+    margin: 2.5rem 0 0.85rem;
+    scroll-margin-top: 5rem;
+}
+.article h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--p-surface-900);
+    margin: 1.75rem 0 0.5rem;
+}
+.article p {
+    margin: 0 0 1rem;
+}
+.article ul, .article ol {
+    margin: 0 0 1.25rem;
+    padding-left: 1.4rem;
+}
+.article li {
+    margin-bottom: 0.5rem;
+}
+.article a {
+    color: var(--p-primary-700, #047857);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.article .meta {
+    font-size: 0.85rem;
+    color: var(--p-surface-500);
+    margin-bottom: 1.5rem;
+}
+/* Tableau comparatif */
+.article .compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0 2rem;
+    font-size: 0.95rem;
+}
+.article .compare th,
+.article .compare td {
+    border: 1px solid var(--p-surface-200);
+    padding: 0.7rem 0.85rem;
+    text-align: left;
+    vertical-align: top;
+}
+.article .compare thead th {
+    background: var(--p-surface-50);
+    font-weight: 700;
+    color: var(--p-surface-900);
+}
+.article .compare .yes { color: var(--p-primary-600, #059669); font-weight: 600; }
+.article .compare .no { color: var(--p-surface-400); }

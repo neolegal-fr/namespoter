@@ -8,10 +8,14 @@ import { AdminUsersComponent } from './components/admin/admin-users.component';
 import { AdminFeedbackComponent } from './components/admin/admin-feedback.component';
 import { LegalComponent } from './components/legal/legal.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
+import { GuideNomDeMarqueComponent } from './components/content/guide-nom-de-marque';
+import { ComparatifGenerateursComponent } from './components/content/comparatif-generateurs';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
+  { path: 'guides/trouver-nom-de-marque', component: GuideNomDeMarqueComponent },
+  { path: 'comparatif-generateurs-de-noms', component: ComparatifGenerateursComponent },
   { path: 'app', component: WizardComponent },
   { path: 'projects/:id', component: WizardComponent },
   { path: 'payment/success', component: PaymentResultComponent },
