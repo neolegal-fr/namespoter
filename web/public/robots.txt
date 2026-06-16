@@ -1,5 +1,7 @@
 User-agent: *
 Disallow: /admin
 Disallow: /payment/
+Disallow: /app
+Disallow: /projects/
 
 Sitemap: https://namorama.com/sitemap.xml

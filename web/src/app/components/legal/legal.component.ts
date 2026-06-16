@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
+import { applyContentSeo } from '../content/content-seo';
 
 @Component({
   selector: 'app-legal',
@@ -103,12 +104,21 @@ import { RouterModule } from '@angular/router';
 export class LegalComponent implements OnInit {
   lang = signal('fr');
 
-  constructor(private translate: TranslateService) {}
+  constructor(private translate: TranslateService) {
+    applyContentSeo({
+      title: 'Mentions légales',
+      description:
+        'Mentions légales de Namorama : éditeur, directeur de la publication, hébergeur et propriété intellectuelle du service.',
+      path: '/legal',
+    });
+  }
 
   ngOnInit() {
-    this.lang.set(this.translate.currentLang?.startsWith('fr') ? 'fr' : 'en');
+    // FR par défaut (notamment au prerender, où currentLang peut être absent) :
+    // on ne bascule en anglais que si la langue active commence par « en ».
+    this.lang.set(this.translate.currentLang?.startsWith('en') ? 'en' : 'fr');
     this.translate.onLangChange.subscribe(e => {
-      this.lang.set(e.lang?.startsWith('fr') ? 'fr' : 'en');
+      this.lang.set(e.lang?.startsWith('en') ? 'en' : 'fr');
     });
   }
 }
