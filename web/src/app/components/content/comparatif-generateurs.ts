@@ -105,8 +105,9 @@ import { applyContentSeo } from './content-seo';
         Namorama.
       </p>
       <p>
-        Pour la méthode complète, lisez notre guide
-        <a routerLink="/guides/trouver-nom-de-marque">comment trouver un nom de marque disponible</a>.
+        Vous hésitez avec un outil précis&nbsp;? Voyez notre comparaison détaillée
+        <a routerLink="/namorama-vs-namelix">Namorama vs Namelix</a>. Pour la méthode complète, lisez
+        notre guide <a routerLink="/guides/trouver-nom-de-marque">comment trouver un nom de marque disponible</a>.
       </p>
 
       <app-article-cta></app-article-cta>

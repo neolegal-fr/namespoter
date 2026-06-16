@@ -46,6 +46,10 @@ import { applyContentSeo } from './content-seo';
           <h2>Comparatif des générateurs de noms</h2>
           <p>Quel outil choisir, et pourquoi la vérification de disponibilité réelle change tout.</p>
         </a>
+        <a routerLink="/namorama-vs-namelix" class="guide-item">
+          <h2>Namorama vs Namelix</h2>
+          <p>Le comparatif détaillé : disponibilité réelle, extension locale et suggestions en français.</p>
+        </a>
       </div>
 
       <app-article-cta></app-article-cta>

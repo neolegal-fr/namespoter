@@ -10,6 +10,7 @@ import { LegalComponent } from './components/legal/legal.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { GuideNomDeMarqueComponent } from './components/content/guide-nom-de-marque';
 import { ComparatifGenerateursComponent } from './components/content/comparatif-generateurs';
+import { ComparatifNamelixComponent } from './components/content/comparatif-namelix';
 import { GuidesIndexComponent } from './components/content/guides-index';
 import { GuideNomEntrepriseComponent } from './components/content/guide-nom-entreprise';
 import { GuideNomDeProduitComponent } from './components/content/guide-nom-de-produit';
@@ -24,6 +25,7 @@ export const routes: Routes = [
   { path: 'guides/trouver-nom-de-produit', component: GuideNomDeProduitComponent },
   { path: 'guides/trouver-nom-de-startup', component: GuideNomDeStartupComponent },
   { path: 'comparatif-generateurs-de-noms', component: ComparatifGenerateursComponent },
+  { path: 'namorama-vs-namelix', component: ComparatifNamelixComponent },
   { path: 'app', component: WizardComponent },
   { path: 'projects/:id', component: WizardComponent },
   { path: 'payment/success', component: PaymentResultComponent },
