@@ -10,7 +10,11 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
  */
 export const serverRoutes: ServerRoute[] = [
   { path: '', renderMode: RenderMode.Prerender },
+  { path: 'guides', renderMode: RenderMode.Prerender },
   { path: 'guides/trouver-nom-de-marque', renderMode: RenderMode.Prerender },
+  { path: 'guides/trouver-nom-entreprise', renderMode: RenderMode.Prerender },
+  { path: 'guides/trouver-nom-de-produit', renderMode: RenderMode.Prerender },
+  { path: 'guides/trouver-nom-de-startup', renderMode: RenderMode.Prerender },
   { path: 'comparatif-generateurs-de-noms', renderMode: RenderMode.Prerender },
   { path: 'legal', renderMode: RenderMode.Prerender },
   { path: 'privacy', renderMode: RenderMode.Prerender },

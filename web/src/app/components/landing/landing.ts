@@ -22,7 +22,7 @@ import { ButtonModule } from 'primeng/button';
       <!-- Hero -->
       <header style="text-align: center; padding: 2rem 0 1rem">
         <h1 style="font-size: clamp(1.9rem, 5vw, 2.9rem); font-weight: 800; line-height: 1.15; margin: 0 0 1rem; color: var(--p-surface-900)">
-          Générateur de noms de marque<br />avec domaine disponible
+          Trouvez le nom de marque idéal,<br />avec le domaine qui va avec
         </h1>
         <p style="font-size: 1.15rem; max-width: 42rem; margin: 0 auto 1.75rem; color: var(--p-surface-600); line-height: 1.6">
           Décrivez votre projet : l'intelligence artificielle génère des noms de marque
@@ -167,24 +167,44 @@ import { ButtonModule } from 'primeng/button';
 
       <!-- Ressources / liens internes SEO -->
       <section style="margin-top: 3.5rem">
-        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 2rem; color: var(--p-surface-900)">
-          Ressources pour bien nommer votre marque
+        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; color: var(--p-surface-900)">
+          Guides : trouver un nom et son domaine
         </h2>
+        <p style="text-align: center; color: var(--p-surface-500); margin: 0 auto 2rem; max-width: 38rem">
+          Marque, entreprise, produit, startup — la méthode pour chaque projet.
+          <a routerLink="/guides" style="color: var(--p-primary-600)">Voir tous les guides</a>.
+        </p>
         <div class="landing-grid" style="max-width: 44rem; margin: 0 auto">
           <a routerLink="/guides/trouver-nom-de-marque" class="landing-card" style="text-decoration: none; color: inherit; display: block">
             <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
-              Comment trouver un nom de marque disponible
+              Trouver un nom de marque
             </h3>
             <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              La méthode en 5 étapes pour trouver un nom mémorable dont le domaine est encore libre.
+              La méthode en 5 étapes pour un nom mémorable dont le domaine est encore libre.
             </p>
           </a>
-          <a routerLink="/comparatif-generateurs-de-noms" class="landing-card" style="text-decoration: none; color: inherit; display: block">
+          <a routerLink="/guides/trouver-nom-entreprise" class="landing-card" style="text-decoration: none; color: inherit; display: block">
             <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
-              Comparatif des générateurs de noms
+              Trouver un nom d'entreprise
             </h3>
             <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              Quel outil choisir, et pourquoi la vérification de disponibilité réelle change tout.
+              Un nom solide, libre au registre (INPI/RCS) et disponible en domaine.
+            </p>
+          </a>
+          <a routerLink="/guides/trouver-nom-de-produit" class="landing-card" style="text-decoration: none; color: inherit; display: block">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
+              Trouver un nom de produit
+            </h3>
+            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
+              Descriptif, évocateur ou inventé : nommer un produit qui marque les esprits.
+            </p>
+          </a>
+          <a routerLink="/guides/trouver-nom-de-startup" class="landing-card" style="text-decoration: none; color: inherit; display: block">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
+              Trouver un nom de startup
+            </h3>
+            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
+              Court, brandable, disponible en .com / .io / .ai dès le premier jour.
             </p>
           </a>
         </div>
