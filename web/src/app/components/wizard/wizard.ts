@@ -88,6 +88,31 @@ export class WizardComponent implements OnInit {
     '.uk': 'en', '.gb': 'en', '.au': 'en', '.us': 'en', '.ca': 'en', '.nz': 'en',
   };
 
+  // Détection géo (US-XXX) : pays (code région ISO) → extension locale proposée.
+  // On ne mappe que des ccTLD présents dans EXT_TO_LOCALE pour que la locale se
+  // résolve. Les marchés où le .com domine (US…) retombent sur le défaut .com.
+  private readonly COUNTRY_TO_EXT: Record<string, string> = {
+    FR: '.fr', BE: '.be', CH: '.ch', LU: '.fr',
+    DE: '.de', AT: '.at',
+    ES: '.es', MX: '.mx', AR: '.ar', CO: '.co',
+    IT: '.it',
+    NL: '.nl',
+    PT: '.pt', BR: '.br',
+    PL: '.pl',
+    SE: '.se', DK: '.dk', FI: '.fi', NO: '.no',
+    RO: '.ro', CZ: '.cz', HU: '.hu', TR: '.tr',
+    JP: '.jp', CN: '.cn', RU: '.ru',
+    GB: '.uk', AU: '.au', CA: '.ca', NZ: '.nz',
+  };
+
+  // Repli quand la locale navigateur n'a pas de région (ex. « fr » sans pays) :
+  // langue → ccTLD du marché principal. L'anglais retombe sur le défaut .com.
+  private readonly LANG_TO_EXT: Record<string, string> = {
+    fr: '.fr', de: '.de', es: '.es', it: '.it', nl: '.nl', pt: '.pt',
+    pl: '.pl', sv: '.se', da: '.dk', fi: '.fi', no: '.no', ro: '.ro',
+    cs: '.cz', hu: '.hu', tr: '.tr', ja: '.jp', zh: '.cn', ru: '.ru',
+  };
+
   readonly LOCALE_LABELS: Record<string, string> = {
     cs: 'Čeština',
     da: 'Dansk',
@@ -124,6 +149,47 @@ export class WizardComponent implements OnInit {
     if (!this.isLocal()) return null;
     return this.localeOverride() || this.detectedLocale() || null;
   });
+
+  /**
+   * Déduit l'extension de domaine locale à partir de la locale du navigateur.
+   * Sûr côté serveur (le wizard est rendu client, mais on garde le garde-fou).
+   * Renvoie null hors zone reconnue → on garde le défaut international .com.
+   */
+  private detectRegionalExtension(): string | null {
+    if (typeof navigator === 'undefined') return null;
+    const locales = navigator.languages?.length ? navigator.languages : [navigator.language];
+    // 1) région explicite dans la locale (ex. « fr-FR » → FR → .fr)
+    for (const loc of locales) {
+      const region = loc?.split('-')[1]?.toUpperCase();
+      if (region && this.COUNTRY_TO_EXT[region]) return this.COUNTRY_TO_EXT[region];
+    }
+    // 2) repli sur la langue seule (ex. « fr » → .fr)
+    for (const loc of locales) {
+      const langCode = loc?.split('-')[0]?.toLowerCase();
+      if (langCode && this.LANG_TO_EXT[langCode]) return this.LANG_TO_EXT[langCode];
+    }
+    return null;
+  }
+
+  /**
+   * Applique les défauts régionaux selon la localisation détectée : extension
+   * locale proposée (+ .com), mode local activé et options régionales/culturelles
+   * de génération activées. Hors zone reconnue, on reste sur le défaut .com / intl.
+   */
+  private applyRegionalDefaults(): void {
+    const ext = this.detectRegionalExtension();
+    if (!ext || ext === '.com') {
+      this.selectedExtensions.set(['.com']);
+      this.isLocal.set(false);
+      this.descriptiveNames.set(false);
+      this.culturalNames.set(false);
+      return;
+    }
+    this.selectedExtensions.set([ext, '.com']);
+    this.isLocal.set(true);
+    this.descriptiveNames.set(true);
+    this.culturalNames.set(true);
+  }
   // ────────────────────────────────────────────────────────────
 
   landingBenefits = [
@@ -300,6 +366,11 @@ export class WizardComponent implements OnInit {
     });
 
     const savedState = localStorage.getItem('wizard_state');
+    if (!savedState && !this.route.snapshot.params['id']) {
+      // Visite fraîche : pré-remplir l'extension locale + options régionales
+      // selon la localisation détectée (un état restauré ou un projet priment).
+      this.applyRegionalDefaults();
+    }
     if (savedState) {
       const state = JSON.parse(savedState);
       this.description.set(state.description);
@@ -470,12 +541,9 @@ export class WizardComponent implements OnInit {
     this.domains.set([]);
     this.newKeyword.set('');
     this.newExtension.set('');
-    this.selectedExtensions.set(['.com']);
     this.matchMode.set('all');
-    this.isLocal.set(false);
     this.localeOverride.set('');
-    this.descriptiveNames.set(false);
-    this.culturalNames.set(false);
+    this.applyRegionalDefaults();
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
     if (!this.isLoggedIn()) this.showLanding.set(true);
