@@ -139,9 +139,9 @@ import { applyContentSeo } from './content-seo';
         100 crédits offerts, sans abonnement.
       </p>
       <p>
-        Pour aller plus loin&nbsp;: notre <a routerLink="/comparatif-generateurs-de-noms">comparatif général des
-        générateurs de noms</a> et notre guide <a routerLink="/guides/trouver-nom-de-marque">pour trouver un nom
-        de marque disponible</a>.
+        Pour aller plus loin&nbsp;: la comparaison <a routerLink="/namorama-vs-looka">Namorama vs Looka</a>, notre
+        <a routerLink="/comparatif-generateurs-de-noms">comparatif général des générateurs de noms</a> et notre
+        guide <a routerLink="/guides/trouver-nom-de-marque">pour trouver un nom de marque disponible</a>.
       </p>
 
       <app-article-cta></app-article-cta>

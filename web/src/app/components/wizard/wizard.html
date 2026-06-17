@@ -496,6 +496,18 @@
                [style.color]="filled ? '#f59e0b' : '#d1d5db'" style="font-size: 1rem"></i>
           </div>
         </ng-container>
+
+        <!-- Vérifier aussi : marque (INPI) + réseaux sociaux -->
+        <div style="margin-top: 0.75rem; display: flex; justify-content: center; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: 0.78rem">
+          <span class="text-500">{{ 'WIZARD.STEP3.CHECK_ALSO' | translate }}</span>
+          <a [href]="inpiUrl(result.recommended)" target="_blank" rel="noopener noreferrer" class="check-link">
+            <i class="pi pi-shield" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.CHECK_TRADEMARK' | translate }}
+          </a>
+          <a *ngFor="let s of SOCIAL_CHECKS" [href]="s.url(socialHandle(result.recommended))"
+             target="_blank" rel="noopener noreferrer" class="check-link">
+            &#64;{{ socialHandle(result.recommended) }} · {{ s.label }}
+          </a>
+        </div>
       </div>
 
       <!-- Justification -->

@@ -50,6 +50,10 @@ import { applyContentSeo } from './content-seo';
           <h2>Namorama vs Namelix</h2>
           <p>Le comparatif détaillé : disponibilité réelle, extension locale et suggestions en français.</p>
         </a>
+        <a routerLink="/namorama-vs-looka" class="guide-item">
+          <h2>Namorama vs Looka</h2>
+          <p>Nom de marque ou logo : que privilégier, et pourquoi le domaine passe d'abord.</p>
+        </a>
       </div>
 
       <app-article-cta></app-article-cta>

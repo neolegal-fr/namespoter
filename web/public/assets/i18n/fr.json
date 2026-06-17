@@ -145,6 +145,8 @@
       "NEW_PROJECT_BTN": "Nouveau projet",
       "COPY_TABLE": "Copier le tableau",
       "COPIED": "Copié !",
+      "CHECK_ALSO": "Vérifier aussi :",
+      "CHECK_TRADEMARK": "Marque (INPI)",
       "ANALYSIS_PENDING": "Analyse IA en cours…",
       "ANALYSIS_TOGGLE": "Voir l'analyse du nom",
       "ADD_MANUAL_PLACEHOLDER": "ex : florizon, bloomly, verdana",

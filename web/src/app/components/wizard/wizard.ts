@@ -293,6 +293,23 @@ export class WizardComponent implements OnInit {
     },
   ];
 
+  // Vérifications complémentaires (marque + réseaux sociaux) : liens profonds
+  // pré-remplis, dans le même esprit que les liens registrar (pas de scraping).
+  readonly SOCIAL_CHECKS = [
+    { label: 'X', url: (h: string) => `https://x.com/${h}` },
+    { label: 'Instagram', url: (h: string) => `https://www.instagram.com/${h}` },
+  ];
+
+  /** Lien vers la recherche de marque INPI (base Marques) pour un nom donné. */
+  inpiUrl(name: string): string {
+    return `https://data.inpi.fr/search?q=${encodeURIComponent(name)}&type=brands`;
+  }
+
+  /** Normalise un nom en pseudo réseau social (minuscules, alphanumérique). */
+  socialHandle(name: string): string {
+    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
   openReg = signal<string | null>(null);
 
   toggleReg(name: string, event: MouseEvent) {

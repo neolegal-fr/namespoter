@@ -17,6 +17,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'guides/trouver-nom-de-startup', renderMode: RenderMode.Prerender },
   { path: 'comparatif-generateurs-de-noms', renderMode: RenderMode.Prerender },
   { path: 'namorama-vs-namelix', renderMode: RenderMode.Prerender },
+  { path: 'namorama-vs-looka', renderMode: RenderMode.Prerender },
   { path: 'legal', renderMode: RenderMode.Prerender },
   { path: 'privacy', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Client },
