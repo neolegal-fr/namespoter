@@ -25,6 +25,31 @@ import { applyContentSeo } from './content-seo';
         domaine en temps réel.
       </p>
 
+      <h2 class="section-title">Générateurs de noms par secteur</h2>
+      <div class="guide-list">
+        <a routerLink="/generateur-nom-startup-ia" class="guide-item">
+          <h2>Générateur de nom pour startup IA</h2>
+          <p>Un nom premium pour votre startup d'intelligence artificielle, domaine (.ai / .com) vérifié.</p>
+        </a>
+        <a routerLink="/generateur-nom-ecommerce" class="guide-item">
+          <h2>Nom pour boutique en ligne (e-commerce)</h2>
+          <p>Un nom de marque e-commerce mémorable, avec le domaine .com / .fr disponible.</p>
+        </a>
+        <a routerLink="/generateur-nom-saas" class="guide-item">
+          <h2>Nom pour SaaS / logiciel B2B</h2>
+          <p>Un nom de produit crédible et évolutif, domaine .com / .io vérifié en direct.</p>
+        </a>
+        <a routerLink="/generateur-nom-marque-cosmetique" class="guide-item">
+          <h2>Nom de marque cosmétique &amp; beauté</h2>
+          <p>Un nom élégant et premium pour vos soins, cosmétiques ou bijoux.</p>
+        </a>
+        <a routerLink="/nom-de-startup-court-invente" class="guide-item">
+          <h2>Nom court &amp; inventé (façon Qonto, Stripe)</h2>
+          <p>La méthode pour un nom arbitraire, premium et disponible en .com.</p>
+        </a>
+      </div>
+
+      <h2 class="section-title">Guides méthode</h2>
       <div class="guide-list">
         <a routerLink="/guides/trouver-nom-de-marque" class="guide-item">
           <h2>Trouver un nom de marque disponible</h2>
@@ -60,6 +85,14 @@ import { applyContentSeo } from './content-seo';
     </article>
   `,
   styles: [`
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--p-surface-500);
+      margin: 2.25rem 0 0.25rem;
+    }
     .guide-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));

@@ -16,6 +16,11 @@ import { GuidesIndexComponent } from './components/content/guides-index';
 import { GuideNomEntrepriseComponent } from './components/content/guide-nom-entreprise';
 import { GuideNomDeProduitComponent } from './components/content/guide-nom-de-produit';
 import { GuideNomDeStartupComponent } from './components/content/guide-nom-de-startup';
+import { GenerateurNomStartupIaComponent } from './components/content/generateur-nom-startup-ia';
+import { GenerateurNomEcommerceComponent } from './components/content/generateur-nom-ecommerce';
+import { GenerateurNomSaasComponent } from './components/content/generateur-nom-saas';
+import { GenerateurNomMarqueCosmetiqueComponent } from './components/content/generateur-nom-marque-cosmetique';
+import { NomCourtInventeComponent } from './components/content/nom-court-invente';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -25,6 +30,11 @@ export const routes: Routes = [
   { path: 'guides/trouver-nom-entreprise', component: GuideNomEntrepriseComponent },
   { path: 'guides/trouver-nom-de-produit', component: GuideNomDeProduitComponent },
   { path: 'guides/trouver-nom-de-startup', component: GuideNomDeStartupComponent },
+  { path: 'generateur-nom-startup-ia', component: GenerateurNomStartupIaComponent },
+  { path: 'generateur-nom-ecommerce', component: GenerateurNomEcommerceComponent },
+  { path: 'generateur-nom-saas', component: GenerateurNomSaasComponent },
+  { path: 'generateur-nom-marque-cosmetique', component: GenerateurNomMarqueCosmetiqueComponent },
+  { path: 'nom-de-startup-court-invente', component: NomCourtInventeComponent },
   { path: 'comparatif-generateurs-de-noms', component: ComparatifGenerateursComponent },
   { path: 'namorama-vs-namelix', component: ComparatifNamelixComponent },
   { path: 'namorama-vs-looka', component: ComparatifLookaComponent },
