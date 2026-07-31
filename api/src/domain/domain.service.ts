@@ -20,16 +20,26 @@ export class DomainService {
   private readonly logger = new Logger(DomainService.name);
   private openai: OpenAI;
 
+  /** Modèle par défaut pour les tâches simples/rapides (reformulation, mots-clés…). */
+  private readonly model: string;
+  /** Modèle « qualité » pour les étapes créatives / à jugement (génération de noms, analyse, pick-best). */
+  private readonly creativeModel: string;
+
   constructor(private configService: ConfigService) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
     });
+    // Modèles configurables via env — cf. .env.example.
+    // IDs API GPT-5.6 : gpt-5.6-luna (rapide/éco), gpt-5.6-terra (équilibré), gpt-5.6-sol (max).
+    this.model = this.configService.get<string>('OPENAI_MODEL') ?? 'gpt-5.6-luna';
+    this.creativeModel = this.configService.get<string>('OPENAI_MODEL_CREATIVE') ?? 'gpt-5.6-terra';
+    this.logger.log(`Modèles OpenAI — simple: "${this.model}" | créatif: "${this.creativeModel}"`);
   }
 
   async refineDescription(description: string): Promise<string> {
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: this.model,
         messages: [
           {
             role: 'system',
@@ -37,7 +47,8 @@ export class DomainService {
           },
           { role: 'user', content: description },
         ],
-        max_tokens: 200,
+        max_completion_tokens: 500,
+        reasoning_effort: 'none',
       });
 
       return response.choices[0].message.content?.trim() ?? '';
@@ -50,7 +61,7 @@ export class DomainService {
   async suggestProjectName(description: string): Promise<string> {
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: this.model,
         messages: [
           {
             role: 'system',
@@ -58,7 +69,10 @@ export class DomainService {
           },
           { role: 'user', content: description },
         ],
-        max_tokens: 10,
+        // Budget généreux : sur un modèle à raisonnement, une limite trop basse
+        // (ex. 10) serait absorbée par les tokens de raisonnement → réponse vide.
+        max_completion_tokens: 200,
+        reasoning_effort: 'none',
       });
 
       return response.choices[0].message.content?.trim().replace(/[^a-zA-Z0-9]/g, '') ?? '';
@@ -75,7 +89,7 @@ export class DomainService {
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: this.model,
         messages: [
           {
             role: 'system',
@@ -87,8 +101,8 @@ export class DomainService {
           },
           { role: 'user', content: description },
         ],
-        max_tokens: 300,
-        temperature: 0.8,
+        max_completion_tokens: 600,
+        reasoning_effort: 'none',
       });
 
       const content = response.choices[0].message.content;
@@ -209,10 +223,13 @@ Respond ONLY with a JSON object. Example:
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: this.creativeModel,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1200,
-        temperature: 0.85,
+        // Budget élargi : couvre les tokens de raisonnement + le JSON de ~30 noms.
+        max_completion_tokens: 4000,
+        // 'none' : la génération tourne en boucle (jusqu'à 5×) → on privilégie la
+        // latence. terra produit d'excellents noms sans raisonnement.
+        reasoning_effort: 'none',
         response_format: { type: 'json_object' }
       });
 
@@ -253,10 +270,10 @@ Scores are integers 1-5. Be honest and concise.`;
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: this.creativeModel,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 300,
-        temperature: 0.5,
+        max_completion_tokens: 800,
+        reasoning_effort: 'low',
       });
       return response.choices[0].message.content?.trim() ?? '';
     } catch (error) {
@@ -295,10 +312,10 @@ ${langInstruction}`;
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: this.creativeModel,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200,
-        temperature: 0.3,
+        max_completion_tokens: 600,
+        reasoning_effort: 'low',
         response_format: { type: 'json_object' },
       });
       const content = response.choices[0].message.content;
