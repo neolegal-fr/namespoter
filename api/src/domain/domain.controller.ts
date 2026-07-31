@@ -158,6 +158,8 @@ export class DomainController {
         emit({
           type: 'done',
           totalChecked,
+          requested: limit,
+          found: results.length,
           projectId: project!.id,
           savedDomains,
           remainingCredits,

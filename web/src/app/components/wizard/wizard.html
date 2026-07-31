@@ -384,22 +384,28 @@
               </p-splitButton>
               <!-- Initial search (no domains yet) -->
               <p-button
-                *ngIf="domains().length === 0"
+                *ngIf="domains().length === 0 && !loading()"
                 [label]="'WIZARD.STEP2.SEARCH_BTN' | translate"
                 icon="pi pi-search"
                 severity="primary"
                 [disabled]="selectedExtensions().length === 0"
-                [loading]="loading()"
                 (onClick)="findDomains(false)">
               </p-button>
+              <!-- Stop the ongoing search (Issue #2) -->
+              <p-button
+                *ngIf="loading()"
+                [label]="'WIZARD.STEP3.STOP_BTN' | translate"
+                icon="pi pi-times-circle"
+                severity="danger"
+                (onClick)="cancelSearch()">
+              </p-button>
               <!-- More suggestions (domains already shown) -->
-              <ng-container *ngIf="domains().length > 0">
+              <ng-container *ngIf="domains().length > 0 && !loading()">
                 <ng-container *ngIf="(userService.credits$ | async) as totalCredits; else zeroCreditsBlock">
                   <p-button
                     [label]="'WIZARD.STEP3.MORE_BTN' | translate"
                     icon="pi pi-plus-circle"
                     severity="info"
-                    [loading]="loading()"
                     (onClick)="findDomains(true)">
                   </p-button>
                 </ng-container>

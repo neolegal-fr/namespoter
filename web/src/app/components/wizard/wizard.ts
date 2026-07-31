@@ -1,5 +1,6 @@
 import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService } from '../../services/domain';
@@ -324,6 +325,8 @@ export class WizardComponent implements OnInit {
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
   private searchTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  /** Souscription au flux de recherche en cours, pour pouvoir l'annuler. */
+  private searchSub: Subscription | null = null;
 
   filteredDomains = computed(() => {
     const mode = this.matchMode();
@@ -571,14 +574,24 @@ export class WizardComponent implements OnInit {
   private readonly ratingOrder: Record<string, number> = { liked: 0, neutral: 1, disliked: 2 };
 
   setRating(result: any, rating: 'liked' | 'disliked' | 'neutral') {
-    if (!result.id) return;
-
     // Mise à jour optimiste immédiate
     const previousRating = result.rating;
     result.rating = rating;
     this.domains.update(d => [...d].sort((a, b) => (this.ratingOrder[a.rating] ?? 1) - (this.ratingOrder[b.rating] ?? 1)));
     this.cdr.detectChanges();
 
+    // Résultat streamé pas encore persisté (id null pendant une recherche en cours) :
+    // on mémorise le rating, il sera envoyé au serveur dès que l'id sera attribué (event 'done').
+    if (!result.id) {
+      result.pendingRating = rating;
+      return;
+    }
+
+    this.persistRating(result, rating, previousRating);
+  }
+
+  /** Persiste le rating côté serveur et déclenche l'analyse IA si « liked ». */
+  private persistRating(result: any, rating: 'liked' | 'disliked' | 'neutral', previousRating?: string) {
     this.projectService.setRating(result.id, rating).subscribe({
       next: (res) => {
         result.rating = res.rating;
@@ -599,9 +612,11 @@ export class WizardComponent implements OnInit {
         }
       },
       error: () => {
-        result.rating = previousRating;
-        this.domains.update(d => [...d].sort((a, b) => (this.ratingOrder[a.rating] ?? 1) - (this.ratingOrder[b.rating] ?? 1)));
-        this.cdr.detectChanges();
+        if (previousRating !== undefined) {
+          result.rating = previousRating;
+          this.domains.update(d => [...d].sort((a, b) => (this.ratingOrder[a.rating] ?? 1) - (this.ratingOrder[b.rating] ?? 1)));
+          this.cdr.detectChanges();
+        }
       }
     });
   }
@@ -896,6 +911,18 @@ export class WizardComponent implements OnInit {
     }
   }
 
+  /** Issue #2 — interrompt la recherche en cours (abort du flux) et restaure l'UI. */
+  cancelSearch() {
+    if (this.searchSub) {
+      this.searchSub.unsubscribe(); // déclenche controller.abort() côté service
+      this.searchSub = null;
+    }
+    this.clearSearchTimeout();
+    this.streamProgress.set(null);
+    this.loading.set(false);
+    this.cdr.detectChanges();
+  }
+
   copyTable() {
     const exts = this.selectedExtensions();
     const header = ['Domain', ...exts].join('\t');
@@ -1114,7 +1141,7 @@ export class WizardComponent implements OnInit {
     }
     const token = await this.keycloak.getToken();
 
-    this.domainService.searchDomainsStream({
+    this.searchSub = this.domainService.searchDomainsStream({
       description: this.refinedDescription() || this.description(),
       keywords: this.keywords(),
       extensions: this.selectedExtensions(),
@@ -1156,6 +1183,29 @@ export class WizardComponent implements OnInit {
               const saved = event.savedDomains.find((s: any) => s.name === d.name);
               return saved ? { ...d, id: saved.id } : d;
             }));
+          }
+
+          // Issue #1 — persister les ratings « likés » pendant la recherche (id désormais dispo)
+          this.domains().forEach(d => {
+            if (d.id && d.pendingRating) {
+              const rating = d.pendingRating;
+              delete d.pendingRating;
+              this.persistRating(d, rating);
+            }
+          });
+
+          // Issue #3 — moins de suggestions trouvées que demandé dans le temps imparti
+          if (event.requested > 0 && (event.found ?? 0) < event.requested) {
+            this.translate.get(['WIZARD.STEP3.PARTIAL_RESULTS', 'WIZARD.STEP3.PARTIAL_SUMMARY'],
+              { count: event.found ?? 0 }).subscribe(t => {
+              this.messageService.add({
+                key: 'app', // toast racine (persistant) — le toast du wizard est détruit par la navigation vers /projects/:id
+                severity: 'info',
+                summary: t['WIZARD.STEP3.PARTIAL_SUMMARY'],
+                detail: t['WIZARD.STEP3.PARTIAL_RESULTS'],
+                life: 10000,
+              });
+            });
           }
           if (event.projectId) {
             this.projectId.set(event.projectId);
