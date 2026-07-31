@@ -15,6 +15,29 @@ function validateDomain(domain: string): void {
   }
 }
 
+/**
+ * Contraintes de naming extraites de la description libre de l'utilisateur.
+ * Les utilisateurs écrivent souvent leur brief dans la description
+ * (« nom court, 5-8 lettres, façon Qonto, éviter tech/AI ») : on l'exploite.
+ */
+export interface NamingConstraints {
+  /** Longueur mini d'un nom "standard" (défaut 7). Abaissé si l'user veut du court. */
+  minLength: number;
+  /** Longueur maxi d'un nom "standard" (défaut 12). */
+  maxLength: number;
+  /** Mots / racines à ne PAS produire (contraintes négatives explicites). */
+  avoidWords: string[];
+  /** Marques citées comme références de style (ex. Qonto, Stripe). */
+  referenceBrands: string[];
+}
+
+const DEFAULT_CONSTRAINTS: NamingConstraints = {
+  minLength: 7,
+  maxLength: 12,
+  avoidWords: [],
+  referenceBrands: [],
+};
+
 @Injectable()
 export class DomainService {
   private readonly logger = new Logger(DomainService.name);
@@ -114,6 +137,66 @@ export class DomainService {
     }
   }
 
+  /**
+   * Extrait les contraintes de naming embarquées dans la description libre :
+   * longueur souhaitée, mots à éviter, marques de référence. Robuste aux échecs
+   * (retourne les valeurs par défaut). Un seul appel léger par recherche.
+   */
+  async extractNamingConstraints(description: string): Promise<NamingConstraints> {
+    const prompt = `You extract naming constraints from a product description written by a user of a brand-name generator. The user often embeds naming instructions (desired length, "short", "X letters", brands to imitate like Qonto/Stripe/Figma, words to avoid).
+
+Return ONLY JSON:
+{"minLength": <int 3-12 or null>, "maxLength": <int 4-30 or null>, "avoidWords": ["..."], "referenceBrands": ["..."]}
+
+Rules:
+- If the user asks for a SHORT / "court" name, "X letters/lettres", or names "like/façon Qonto, Stripe, Figma, Notion", set minLength around 5 and maxLength to match the request (e.g. "5-8 letters" → min 5, max 8).
+- If no length instruction, return null for minLength and maxLength.
+- avoidWords: explicit words/roots the user says to avoid (e.g. "avoid: bet, sport, tech"). Lowercase. Empty array if none.
+- referenceBrands: brand names cited as style references. Empty array if none.
+
+Description: "${description.replace(/"/g, "'").slice(0, 800)}"`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: this.model,
+        messages: [{ role: 'user', content: prompt }],
+        max_completion_tokens: 300,
+        reasoning_effort: 'none',
+        response_format: { type: 'json_object' },
+      });
+      const content = response.choices[0].message.content;
+      if (!content) return { ...DEFAULT_CONSTRAINTS };
+      const p = JSON.parse(content);
+
+      const clamp = (v: any, lo: number, hi: number): number | null =>
+        typeof v === 'number' && v >= lo && v <= hi ? Math.round(v) : null;
+      let minLength = clamp(p.minLength, 3, 12);
+      let maxLength = clamp(p.maxLength, 4, 30);
+      // Cohérence min/max + garde-fous
+      if (minLength && maxLength && minLength > maxLength) [minLength, maxLength] = [maxLength, minLength];
+      const avoidWords = Array.isArray(p.avoidWords)
+        ? p.avoidWords.map((w: any) => String(w).toLowerCase().trim()).filter((w: string) => w.length > 1).slice(0, 20)
+        : [];
+      const referenceBrands = Array.isArray(p.referenceBrands)
+        ? p.referenceBrands.map((b: any) => String(b).trim()).filter((b: string) => b.length > 0).slice(0, 10)
+        : [];
+
+      const constraints: NamingConstraints = {
+        minLength: minLength ?? DEFAULT_CONSTRAINTS.minLength,
+        maxLength: maxLength ?? DEFAULT_CONSTRAINTS.maxLength,
+        avoidWords,
+        referenceBrands,
+      };
+      // Si min abaissé mais max resté au défaut, élargir un peu la fenêtre.
+      if (minLength && !maxLength) constraints.maxLength = Math.max(minLength + 5, DEFAULT_CONSTRAINTS.maxLength);
+      this.logger.log(`Contraintes naming: ${JSON.stringify(constraints)}`);
+      return constraints;
+    } catch (error) {
+      this.logger.error('Erreur extraction contraintes naming:', error);
+      return { ...DEFAULT_CONSTRAINTS };
+    }
+  }
+
   async generateDomainIdeas(
     description: string,
     keywords: string[],
@@ -123,7 +206,11 @@ export class DomainService {
     culturalNames = false,
     likedNames: string[] = [],
     dislikedNames: string[] = [],
+    constraints: NamingConstraints = DEFAULT_CONSTRAINTS,
   ): Promise<{ name: string; style: string }[]> {
+    const minLen = constraints.minLength;
+    const maxLen = Math.max(constraints.maxLength, minLen + 2);
+    const wantsShort = minLen < 7;
     // Assainir les keywords avant injection dans le prompt : supprimer les séquences
     // qui pourraient tromper le modèle (sauts de ligne, guillemets triples, etc.)
     const sanitizedKeywords = keywords.map(k =>
@@ -149,6 +236,16 @@ export class DomainService {
         : '',
     ].join('');
 
+    // #2 — contraintes extraites du brief : mots à éviter + marques de référence
+    const constraintSection = [
+      constraints.avoidWords.length > 0
+        ? `\nHARD NEGATIVE CONSTRAINT — do NOT produce names that CONTAIN, start with, or clearly evoke any of these words/roots: ${constraints.avoidWords.join(', ')}.\n`
+        : '',
+      constraints.referenceBrands.length > 0
+        ? `\nThe user wants names with a similar FEEL to these reference brands: ${constraints.referenceBrands.join(', ')}. Match their length, sound and premium vibe (but never copy them).\n`
+        : '',
+    ].join('');
+
     // US-032 — calculate proportions across active styles
     const activeStyles = ['standard', ...(descriptiveNames ? ['descriptive'] : []), ...(culturalNames ? ['cultural'] : [])];
     const total = 30;
@@ -164,21 +261,31 @@ export class DomainService {
     const subMetaphor = Math.ceil(stdCount * 0.25); // métaphore / concept évocateur
     const subSound    = stdCount - subShort - subCompound - subMetaphor; // sonorité / phonie
 
+    // #1 — longueur adaptative : bornes dérivées des contraintes utilisateur.
+    const shortHi = Math.min(minLen + 2, maxLen);
+    const compoundLo = Math.min(minLen + 1, maxLen);
+    const metaHi = Math.min(minLen + 3, maxLen);
+    const lengthRule = wantsShort
+      ? `- LENGTH: minimum ${minLen}, maximum ${maxLen} characters. The user EXPLICITLY wants SHORT, invented, premium names (in the spirit of Qonto, Stripe, Figma, Notion). Favor rare / uncommon letter combinations and unusual sounds to maximize the chance the domain is still available at this short length.`
+      : `- MINIMUM ${minLen} characters, MAXIMUM ${maxLen} characters. CRITICAL: names under ${minLen} characters are almost always already registered and must NOT be generated.`;
+    const shortExamples = wantsShort ? '"orva", "nyxo", "veli", "zuvo", "karos"' : '"treloxy", "voxifyn", "lumiqar", "namifex"';
+    const badShort = wantsShort ? '' : ', "trelox", "voxify", "namify" (too short — under ' + minLen + ' chars)';
+
     styleInstructions.push(`
 === STYLE "standard" (generate exactly ${stdCount} names) ===
 Classic startup-style brand names. Rules:
 - Lowercase only, NO hyphens, NO numbers.
-- MINIMUM 7 characters, MAXIMUM 12 characters. CRITICAL: names under 7 characters are almost always already registered and must NOT be generated.
+${lengthRule}
 - Must pass the "radio test" (heard once → spelled correctly).
 - MUST draw inspiration from the semantic keywords below — at least half the names must incorporate a keyword root, sound, or concept.
 
 Distribute the ${stdCount} names across these 4 sub-groups:
-  [short] ${subShort} names — concise invented words, 7-9 characters, 2 syllables. Examples: "treloxy", "voxifyn", "lumiqar", "namifex"
-  [compound] ${subCompound} names — two keyword roots fused without separator, 7-12 characters. Examples: "snapflow", "taskbloom", "brandnest"
-  [metaphor] ${subMetaphor} names — abstract concept or vivid image tied to the product's benefit, 6-10 characters. Examples: "veloria", "zephyra", "aurelix"
-  [sound] ${subSound} names — names chosen primarily for their phonetic appeal and memorability, 6-10 characters. Examples: "navioq", "kalivo", "pivoxen"
+  [short] ${subShort} names — concise invented words, ${minLen}-${shortHi} characters, 2 syllables. Examples: ${shortExamples}
+  [compound] ${subCompound} names — two keyword roots fused without separator, ${compoundLo}-${maxLen} characters. Examples: "snapflow", "taskbloom", "brandnest"
+  [metaphor] ${subMetaphor} names — abstract concept or vivid image tied to the product's benefit, ${minLen}-${metaHi} characters. Examples: "veloria", "zephyra", "aurelix"
+  [sound] ${subSound} names — names chosen primarily for their phonetic appeal and memorability, ${minLen}-${metaHi} characters. Examples: "navioq", "kalivo", "pivoxen"
 
-BAD examples (do NOT generate these kinds): "smartapp", "webtools", "clicksolution", "mybrand" (too generic), "xqtzpr" (unpronounceable), "trelox", "voxify", "namify" (too short — under 7 chars).
+BAD examples (do NOT generate these kinds): "smartapp", "webtools", "clicksolution", "mybrand" (too generic), "xqtzpr" (unpronounceable)${badShort}.
 ${localeInstruction}`);
 
     if (descriptiveNames) {
@@ -209,7 +316,7 @@ Generate ORIGINAL domain-name bases for the following project.
 
 Description: "${description}"
 Semantic keywords to draw from: ${vocabStr}
-${exclusionSection}${feedbackSection}
+${exclusionSection}${feedbackSection}${constraintSection}
 ${styleInstructions.join('\n')}
 
 IMPORTANT RULES:
@@ -240,6 +347,10 @@ Respond ONLY with a JSON object. Example:
       const items: { name: string; style?: string }[] = parsed.names || [];
 
       const CLEANED_NAME_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+      // #1 — borne basse = contrainte utilisateur (défaut 7). Les noms descriptifs/culturels
+      // peuvent être plus longs, donc on ne borne le bas que par minLen.
+      const lowerBound = Math.min(minLen, 7);
+      const avoid = constraints.avoidWords;
       return items
         .map(item => {
           const style = activeStyles.includes(item.style ?? '') ? (item.style ?? 'standard') : 'standard';
@@ -248,7 +359,15 @@ Respond ONLY with a JSON object. Example:
             : item.name.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
           return { name: cleaned, style };
         })
-        .filter(item => item.name.length >= 7 && item.name.length <= 63 && CLEANED_NAME_REGEX.test(item.name));
+        .filter(item =>
+          item.name.length >= lowerBound &&
+          // #1 — le style "standard" respecte la longueur max demandée (+1 de tolérance) ;
+          // descriptif/culturel restent bornés par la limite DNS.
+          item.name.length <= (item.style === 'standard' ? maxLen + 1 : 63) &&
+          CLEANED_NAME_REGEX.test(item.name) &&
+          // #2 — filet de sécurité : rejeter les noms contenant un mot à éviter
+          !avoid.some(w => w.length > 2 && item.name.includes(w)),
+        );
     } catch (error) {
       this.logger.error('Erreur lors de la génération des noms:', error);
       return [];
@@ -398,9 +517,12 @@ ${langInstruction}`;
     let attempts = 0;
     const maxAttempts = 5;
 
+    // #1/#2 — extraire une seule fois les contraintes de naming du brief libre
+    const constraints = await this.extractNamingConstraints(description);
+
     while (finalResults.length < targetCount && attempts < maxAttempts) {
       onEvent?.({ type: 'generating' });
-      const items = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames], descriptiveNames, culturalNames, likedNames, dislikedNames);
+      const items = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames], descriptiveNames, culturalNames, likedNames, dislikedNames, constraints);
 
       const newItems = items.filter(item => !checkedNames.has(item.name));
       newItems.forEach(item => checkedNames.add(item.name));
