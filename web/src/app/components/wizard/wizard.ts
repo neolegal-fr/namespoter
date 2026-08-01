@@ -1,5 +1,5 @@
 import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Subscription, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -470,6 +470,7 @@ export class WizardComponent implements OnInit {
     private translate: TranslateService,
     private cdr: ChangeDetectorRef,
     private router: Router,
+    private location: Location,
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -1449,7 +1450,11 @@ export class WizardComponent implements OnInit {
           if (event.projectId) {
             this.projectId.set(event.projectId);
             if (this.router.url !== `/projects/${event.projectId}`) {
-              this.router.navigate(['/projects', event.projectId], { replaceUrl: true });
+              // Simple alignement de l'URL sur le projet créé : on passe par
+              // Location plutôt que par le routeur, car une navigation
+              // ramènerait la page en haut (restauration du défilement) alors
+              // que l'utilisateur est en train de lire ses résultats.
+              this.location.replaceState(`/projects/${event.projectId}`);
             }
           }
           if (event.remainingCredits !== undefined) {

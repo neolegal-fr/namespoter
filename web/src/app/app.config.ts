@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http';
 import { of } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -92,7 +92,18 @@ function initializeApp(
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    // Par défaut, Angular conserve la position de défilement d'une route à
+    // l'autre : un lien situé en bas de la page d'accueil ouvrait donc la page
+    // suivante à la même hauteur, c'est-à-dire au milieu ou en bas de l'article.
+    // 'enabled' remet en haut à chaque nouvelle navigation, tout en restaurant
+    // la position d'origine lors d'un retour arrière.
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+        anchorScrolling: 'enabled',
+      }),
+    ),
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
     provideAnimations(),
     providePrimeNG({
