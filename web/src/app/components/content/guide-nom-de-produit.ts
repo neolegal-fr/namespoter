@@ -80,7 +80,7 @@ export class GuideNomDeProduitComponent {
     applyContentSeo({
       title: 'Comment trouver un nom de produit',
       description:
-        "Descriptif, évocateur ou inventé : la méthode pour nommer un produit mémorable et vérifier la disponibilité du domaine. L'IA de Namorama génère et teste la dispo en direct.",
+        "Descriptif, évocateur ou inventé : la méthode pour nommer un produit mémorable et vérifier la disponibilité de son domaine en direct.",
       path: '/guides/trouver-nom-de-produit',
     });
   }

@@ -18,6 +18,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'generateur-nom-startup-ia', renderMode: RenderMode.Prerender },
   { path: 'generateur-nom-ecommerce', renderMode: RenderMode.Prerender },
   { path: 'generateur-nom-saas', renderMode: RenderMode.Prerender },
+  { path: 'generateur-nom-de-produit', renderMode: RenderMode.Prerender },
   { path: 'generateur-nom-marque-cosmetique', renderMode: RenderMode.Prerender },
   { path: 'nom-de-startup-court-invente', renderMode: RenderMode.Prerender },
   { path: 'comparatif-generateurs-de-noms', renderMode: RenderMode.Prerender },

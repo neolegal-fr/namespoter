@@ -19,6 +19,7 @@ import { GuideNomDeStartupComponent } from './components/content/guide-nom-de-st
 import { GenerateurNomStartupIaComponent } from './components/content/generateur-nom-startup-ia';
 import { GenerateurNomEcommerceComponent } from './components/content/generateur-nom-ecommerce';
 import { GenerateurNomSaasComponent } from './components/content/generateur-nom-saas';
+import { GenerateurNomProduitComponent } from './components/content/generateur-nom-produit';
 import { GenerateurNomMarqueCosmetiqueComponent } from './components/content/generateur-nom-marque-cosmetique';
 import { NomCourtInventeComponent } from './components/content/nom-court-invente';
 import { adminGuard } from './guards/admin.guard';
@@ -33,6 +34,7 @@ export const routes: Routes = [
   { path: 'generateur-nom-startup-ia', component: GenerateurNomStartupIaComponent },
   { path: 'generateur-nom-ecommerce', component: GenerateurNomEcommerceComponent },
   { path: 'generateur-nom-saas', component: GenerateurNomSaasComponent },
+  { path: 'generateur-nom-de-produit', component: GenerateurNomProduitComponent },
   { path: 'generateur-nom-marque-cosmetique', component: GenerateurNomMarqueCosmetiqueComponent },
   { path: 'nom-de-startup-court-invente', component: NomCourtInventeComponent },
   { path: 'comparatif-generateurs-de-noms', component: ComparatifGenerateursComponent },

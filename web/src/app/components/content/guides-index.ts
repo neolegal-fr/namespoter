@@ -131,7 +131,7 @@ export class GuidesIndexComponent {
     applyContentSeo({
       title: 'Guides pour trouver un nom et son domaine',
       description:
-        "Tous nos guides de naming : nom de marque, d'entreprise, de produit ou de startup, avec la vérification de disponibilité du domaine en temps réel par l'IA de Namorama.",
+        "Tous nos guides de naming : nom de marque, d'entreprise, de produit ou de startup, avec la disponibilité du domaine vérifiée en temps réel.",
       path: '/guides',
     });
   }

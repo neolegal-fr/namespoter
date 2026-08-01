@@ -134,9 +134,9 @@ import { applyContentSeo } from './content-seo';
 export class ComparatifLookaComponent {
   constructor() {
     applyContentSeo({
-      title: 'Namorama vs Looka : nom de marque ou logo, que choisir',
+      title: 'Namorama vs Looka : nom de marque ou logo',
       description:
-        "Namorama ou Looka ? Comparatif honnête : disponibilité de domaine réellement vérifiée (Whois) et extension locale .fr vs créateur de logo et brand kit anglophone.",
+        "Namorama ou Looka ? Comparatif honnête : disponibilité de domaine vérifiée au Whois et extension .fr, face à un créateur de logo anglophone.",
       path: '/namorama-vs-looka',
     });
   }

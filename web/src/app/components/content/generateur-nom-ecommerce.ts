@@ -77,9 +77,9 @@ import { applyContentSeo } from './content-seo';
 export class GenerateurNomEcommerceComponent {
   constructor() {
     applyContentSeo({
-      title: 'Générateur de nom pour boutique en ligne (e-commerce)',
+      title: 'Générateur de nom pour boutique en ligne',
       description:
-        "Trouvez un nom de marque pour votre boutique en ligne, avec le domaine (.com, .fr) disponible vérifié en temps réel. Noms inventés ou descriptifs générés par l'IA de Namorama.",
+        "Trouvez un nom pour votre boutique en ligne, avec le domaine (.com, .fr) vérifié en temps réel. Noms inventés ou descriptifs générés par l'IA.",
       path: '/generateur-nom-ecommerce',
     });
   }

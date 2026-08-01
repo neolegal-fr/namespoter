@@ -85,7 +85,7 @@ export class GuideNomEntrepriseComponent {
     applyContentSeo({
       title: "Comment trouver un nom d'entreprise disponible",
       description:
-        "Méthode pour trouver un nom d'entreprise mémorable, libre au registre (INPI/RCS) et dont le domaine est disponible. L'IA de Namorama génère et vérifie la dispo en direct.",
+        "La méthode pour trouver un nom d'entreprise mémorable, libre au registre (INPI/RCS) et dont le domaine est vérifié disponible en direct.",
       path: '/guides/trouver-nom-entreprise',
     });
   }

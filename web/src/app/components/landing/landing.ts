@@ -173,6 +173,25 @@ import { ButtonModule } from 'primeng/button';
         </div>
       </section>
 
+      <!-- Générateurs par secteur : la home est la page la plus forte du site,
+           elle doit transmettre son autorité aux pages commerciales. -->
+      <section style="margin-top: 3.5rem; text-align: center">
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--p-surface-900)">
+          Un générateur adapté à votre secteur
+        </h2>
+        <p style="color: var(--p-surface-500); margin: 0 auto 1.5rem; max-width: 38rem">
+          Les codes du naming changent d'un marché à l'autre. Choisissez le vôtre.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center">
+          <a routerLink="/generateur-nom-de-produit" class="sector-link">Nom de produit</a>
+          <a routerLink="/generateur-nom-saas" class="sector-link">SaaS / logiciel B2B</a>
+          <a routerLink="/generateur-nom-startup-ia" class="sector-link">Startup IA</a>
+          <a routerLink="/generateur-nom-ecommerce" class="sector-link">Boutique en ligne</a>
+          <a routerLink="/generateur-nom-marque-cosmetique" class="sector-link">Cosmétique &amp; beauté</a>
+          <a routerLink="/nom-de-startup-court-invente" class="sector-link">Nom court et inventé</a>
+        </div>
+      </section>
+
       <!-- Ressources / liens internes SEO -->
       <section style="margin-top: 3.5rem">
         <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; color: var(--p-surface-900)">

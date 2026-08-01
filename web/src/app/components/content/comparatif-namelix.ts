@@ -151,9 +151,9 @@ import { applyContentSeo } from './content-seo';
 export class ComparatifNamelixComponent {
   constructor() {
     applyContentSeo({
-      title: 'Namorama vs Namelix : quel générateur de noms choisir',
+      title: 'Namorama vs Namelix : quel générateur choisir',
       description:
-        "Namorama ou Namelix ? Comparatif honnête : disponibilité de domaine réellement vérifiée (Whois), extension locale .fr et suggestions en français vs noms brandables anglophones.",
+        "Namorama ou Namelix ? Comparatif honnête : domaine vérifié au Whois, extension .fr et suggestions en français, face aux noms brandables anglophones.",
       path: '/namorama-vs-namelix',
     });
   }

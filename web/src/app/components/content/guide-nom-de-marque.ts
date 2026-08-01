@@ -117,7 +117,7 @@ export class GuideNomDeMarqueComponent {
     applyContentSeo({
       title: 'Comment trouver un nom de marque disponible',
       description:
-        "Méthode en 5 étapes pour trouver un nom de marque mémorable dont le domaine est libre, et comment l'IA de Namorama génère et vérifie la disponibilité en temps réel.",
+        "La méthode en 5 étapes pour trouver un nom de marque mémorable dont le domaine est libre, vérifié en temps réel par une requête Whois réelle.",
       path: '/guides/trouver-nom-de-marque',
     });
   }

@@ -74,7 +74,7 @@ import { applyContentSeo } from './content-seo';
 export class NomCourtInventeComponent {
   constructor() {
     applyContentSeo({
-      title: 'Nom de marque court et inventé (façon Qonto, Stripe)',
+      title: 'Nom de marque court et inventé, façon Qonto',
       description:
         "Trouvez un nom de marque court, inventé et premium façon Qonto ou Stripe, avec le domaine (.com, .fr) disponible vérifié en temps réel par l'IA de Namorama.",
       path: '/nom-de-startup-court-invente',

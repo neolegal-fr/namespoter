@@ -119,7 +119,7 @@ export class ComparatifGenerateursComponent {
     applyContentSeo({
       title: 'Comparatif des générateurs de noms de marque',
       description:
-        'Comment choisir un générateur de noms de marque ? Comparatif des approches (combinatoire, IA, vérification Whois réelle) et pourquoi la disponibilité de domaine fait la différence.',
+        'Comment choisir un générateur de noms ? Comparatif des approches (combinatoire, IA, Whois réel) et pourquoi la disponibilité du domaine fait la différence.',
       path: '/comparatif-generateurs-de-noms',
     });
   }

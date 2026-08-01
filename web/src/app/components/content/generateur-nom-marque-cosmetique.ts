@@ -72,7 +72,7 @@ import { applyContentSeo } from './content-seo';
 export class GenerateurNomMarqueCosmetiqueComponent {
   constructor() {
     applyContentSeo({
-      title: 'Générateur de nom pour marque cosmétique & beauté',
+      title: 'Générateur de nom pour marque cosmétique',
       description:
         "Trouvez un nom de marque élégant pour vos cosmétiques, soins ou bijoux, avec le domaine (.com, .fr) disponible vérifié en temps réel par l'IA de Namorama.",
       path: '/generateur-nom-marque-cosmetique',
