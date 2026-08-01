@@ -46,7 +46,7 @@ import { Dialog } from 'primeng/dialog';
         <ng-template pTemplate="start">
           <div class="flex align-items-center gap-2 cursor-pointer" (click)="goToHome()">
             <i class="pi pi-compass text-2xl text-primary"></i>
-            <span class="text-xl font-bold text-900">Namorama</span>
+            <span class="brand-wordmark text-xl font-bold text-900">Namorama</span>
           </div>
         </ng-template>
 
@@ -54,27 +54,33 @@ import { Dialog } from 'primeng/dialog';
           <div class="flex align-items-center gap-2">
 
             <!-- Langue Selector -->
-            <button (click)="langMenu.toggle($event)" class="lang-toggle cursor-pointer border-circle p-2" style="background: none; border: none; transition: background 0.15s">
+            <button (click)="langMenu.toggle($event)" class="lang-toggle cursor-pointer border-circle p-2"
+                    [attr.aria-label]="'APP.LANGUAGE' | translate"
+                    style="background: none; border: none; transition: background 0.15s">
               <span [class]="currentFlagClass" style="font-size: 1.25rem"></span>
             </button>
-            <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body"></p-menu>
+            <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body" styleClass="lang-menu"></p-menu>
 
             <ng-container *ngIf="isLoggedIn()">
               <p-button
                 [label]="'APP.PROJECTS' | translate"
+                [ariaLabel]="'APP.PROJECTS' | translate"
                 icon="pi pi-folder"
                 [text]="true"
                 severity="secondary"
+                styleClass="nav-btn"
                 (onClick)="projectMenu.toggle($event)">
               </p-button>
               <p-menu #projectMenu [model]="projectMenuItems" [popup]="true" appendTo="body"></p-menu>
 
               <ng-container *ngIf="isAdmin()">
                 <p-button
-                  label="Administration"
+                  [label]="'APP.ADMIN' | translate"
+                  [ariaLabel]="'APP.ADMIN' | translate"
                   icon="pi pi-shield"
                   [text]="true"
                   severity="secondary"
+                  styleClass="nav-btn"
                   (onClick)="adminMenu.toggle($event)">
                 </p-button>
                 <p-menu #adminMenu [model]="adminMenuItems" [popup]="true" appendTo="body"></p-menu>
@@ -83,9 +89,14 @@ import { Dialog } from 'primeng/dialog';
                 <p-avatar
                   icon="pi pi-user"
                   shape="circle"
-                  class="cursor-pointer ml-2"
+                  class="cursor-pointer nav-avatar"
                   styleClass="bg-primary text-primary-contrast shadow-1"
-                  (click)="userMenu.toggle($event)">
+                  role="button"
+                  tabindex="0"
+                  [ariaLabel]="'APP.MANAGE_ACCOUNT' | translate"
+                  (click)="userMenu.toggle($event)"
+                  (keydown.enter)="userMenu.toggle($event)"
+                  (keydown.space)="userMenu.toggle($event)">
                 </p-avatar>
                 <p-menu #userMenu [model]="profileMenuItems" [popup]="true" appendTo="body"></p-menu>
             </ng-container>

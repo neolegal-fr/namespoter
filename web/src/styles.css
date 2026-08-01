@@ -20,9 +20,118 @@ body {
     color: #f59e0b !important;
 }
 
+/* ─── Mot tournant du H1 (produit / marque / société) ─────────────
+   Les trois mots occupent la MÊME cellule de grille : la largeur se cale sur
+   le mot le plus long, donc aucun décalage de mise en page pendant le cycle.
+   Animation CSS pure — rien à hydrater, le prérendu SSG reste valide. */
+.word-rotator {
+    display: inline-grid;
+    vertical-align: bottom;
+    text-align: left;
+}
+
+.word-rotator__item {
+    grid-area: 1 / 1;
+    color: var(--p-primary-color);
+    opacity: 0;
+    /* Cycle de 6 s pour 3 mots : chacun reste lisible ~1,7 s, avec un fondu
+       de ~0,25 s. En dessous, le mot devient difficile à lire au passage. */
+    animation: word-rotator-cycle 6s infinite;
+}
+
+.word-rotator__item--1 { animation-delay: 0s; }
+.word-rotator__item--2 { animation-delay: 2s; }
+.word-rotator__item--3 { animation-delay: 4s; }
+
+@keyframes word-rotator-cycle {
+    0%   { opacity: 0; transform: translateY(0.3em); }
+    4%   { opacity: 1; transform: translateY(0); }
+    30%  { opacity: 1; transform: translateY(0); }
+    34%  { opacity: 0; transform: translateY(-0.3em); }
+    100% { opacity: 0; transform: translateY(-0.3em); }
+}
+
+/* Mouvement réduit : on fige sur le mot principal, celui qui porte le trafic. */
+@media (prefers-reduced-motion: reduce) {
+    .word-rotator__item {
+        animation: none;
+        opacity: 0;
+        transform: none;
+    }
+    .word-rotator__item--1 { opacity: 1; }
+}
+
+/* Séparateurs lus par Google et les lecteurs d'écran, invisibles à l'œil.
+   Positionnement absolu : ils ne participent pas à la grille du rotateur. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* ─── Bouton langue ──────────────────────────────── */
 .lang-toggle:hover {
     background: var(--p-surface-200) !important;
+}
+
+/* Cible tactile de 44px minimum (WCAG 2.5.8) sur les deux commandes
+   du coin supérieur droit, les plus imprécises au pouce. */
+.lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+/* PrimeNG pose la classe .p-avatar sur l'élément hôte : sélecteur composé,
+   pas descendant. */
+.nav-avatar.p-avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+/* 19 langues dans le popup : il doit scroller, pas dépasser du viewport. */
+.lang-menu.p-menu {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* ─── Barre de navigation en petite largeur ──────── */
+/* Le p-menubar est utilisé sans [model] (contenu 100 % projeté), donc PrimeNG
+   ne génère pas son menu hamburger : le responsive est entièrement à notre
+   charge. On dégraisse par densité plutôt que par JS, pour ne pas casser
+   l'hydratation des pages prérendues (SSG). */
+@media (max-width: 640px) {
+    /* Boutons de nav en icône seule : masquer le label ne suffit pas,
+       le padding et le gap du bouton PrimeNG resteraient. */
+    .nav-btn .p-button-label {
+        display: none;
+    }
+
+    .nav-btn.p-button {
+        width: 2.75rem;
+        min-width: 2.75rem;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .nav-btn .p-button-icon {
+        margin: 0;
+    }
+}
+
+/* Sur les très petits écrans, l'icône de marque suffit à l'identité. */
+@media (max-width: 400px) {
+    .brand-wordmark {
+        display: none;
+    }
 }
 
 /* ─── Items de projets dans le drawer ───────────── */
