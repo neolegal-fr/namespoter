@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional, IsBoolean, MinLength, MaxLength, ArrayMinSize, ArrayMaxSize, Matches, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional, IsBoolean, IsInt, Min, Max, MinLength, MaxLength, ArrayMinSize, ArrayMaxSize, Matches, IsIn } from 'class-validator';
 
 export enum MatchMode {
   ANY = 'any',
@@ -66,4 +66,35 @@ export class SearchDomainsDto {
   @IsString({ each: true })
   @IsOptional()
   dislikedNames?: string[];
+
+  /** Longueur minimale des noms générés (réglage explicite de l'écran de configuration). */
+  @IsInt()
+  @Min(5)
+  @Max(12)
+  @IsOptional()
+  minLength?: number;
+
+  /** Exemples de noms/domaines que l'utilisateur aime — servent de références de style. */
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @MaxLength(60, { each: true })
+  @IsOptional()
+  likedExamples?: string[];
+
+  /** Domaines de produits existants du même secteur, à ne pas imiter de trop près. */
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  @IsOptional()
+  competitorDomains?: string[];
+
+  /** Domaines dont l'utilisateur a explicitement rejeté le style. */
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
+  @IsOptional()
+  dislikedStyleDomains?: string[];
 }

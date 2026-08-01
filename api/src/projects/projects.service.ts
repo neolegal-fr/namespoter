@@ -41,7 +41,7 @@ export class ProjectsService {
 
   async createOrUpdate(
     user: User,
-    data: { id?: string; name?: string; description: string; keywords: string[]; extensions: string[]; matchMode: string },
+    data: { id?: string; name?: string; description: string; keywords: string[]; extensions: string[]; matchMode: string; minLength?: number; likedExamples?: string[]; dislikedExamples?: string[] },
     manager?: EntityManager,
   ): Promise<Project> {
     const repo = manager ? manager.getRepository(Project) : this.projectsRepository;
@@ -66,6 +66,9 @@ export class ProjectsService {
     project.keywords = data.keywords;
     project.extensions = data.extensions;
     project.matchMode = data.matchMode;
+    if (data.minLength !== undefined) project.minLength = data.minLength;
+    if (data.likedExamples !== undefined) project.likedExamples = data.likedExamples;
+    if (data.dislikedExamples !== undefined) project.dislikedExamples = data.dislikedExamples;
 
     return repo.save(project);
   }

@@ -31,12 +31,41 @@ export interface NamingConstraints {
   referenceBrands: string[];
 }
 
+/** Longueur mini par défaut d'un nom généré — en dessous, presque tout est déposé. */
+export const DEFAULT_MIN_NAME_LENGTH = 7;
+/** Plancher absolu réglable depuis l'UI (avec avertissement « difficile »). */
+export const MIN_NAME_LENGTH_FLOOR = 5;
+/** Plafond du réglage de longueur mini côté UI. */
+export const MAX_NAME_LENGTH_FLOOR = 12;
+
 const DEFAULT_CONSTRAINTS: NamingConstraints = {
-  minLength: 7,
+  minLength: DEFAULT_MIN_NAME_LENGTH,
   maxLength: 12,
   avoidWords: [],
   referenceBrands: [],
 };
+
+/** Paramètres d'une recherche de domaines disponibles. */
+export interface FindDomainsOptions {
+  targetCount?: number;
+  extensions?: string[];
+  matchMode?: MatchMode;
+  locale?: string;
+  excludeNames?: string[];
+  onEvent?: (event: Record<string, any>) => void;
+  descriptiveNames?: boolean;
+  culturalNames?: boolean;
+  likedNames?: string[];
+  dislikedNames?: string[];
+  /** Longueur mini choisie explicitement dans l'UI — prime sur celle extraite du brief. */
+  minLength?: number;
+  /** Noms/domaines cités par l'utilisateur comme références de style. */
+  likedExamples?: string[];
+  /** Domaines de produits existants du même secteur (à ne pas imiter de trop près). */
+  competitorDomains?: string[];
+  /** Domaines dont l'utilisateur a explicitement rejeté le style. */
+  dislikedStyleDomains?: string[];
+}
 
 @Injectable()
 export class DomainService {
@@ -197,6 +226,133 @@ Description: "${description.replace(/"/g, "'").slice(0, 800)}"`;
     }
   }
 
+  /** Construit le prompt « qui existe déjà sur ce marché ? ». */
+  private competitorsPrompt(description: string, locale: string | undefined, live: boolean): string {
+    const noteLang = locale
+      ? `Write "note" in the language with code "${locale}".`
+      : 'Write "note" in English.';
+
+    const sourceRule = live
+      ? `- Search the web first. Only list products you actually found in the search results, with the domain shown there.
+- Prefer recent sources; skip anything you could not confirm.`
+      : `- Only include companies you are genuinely confident exist with that exact domain. Skip any you are unsure about — an empty list is better than an invented one.`;
+
+    return `You map the competitive landscape. For the project described below, list up to 8 REAL, EXISTING products or companies operating in the SAME space, with their actual main domain name.
+
+Return ONLY JSON, no prose, no markdown fence: {"competitors": [{"name": "Qonto", "domain": "qonto.com", "note": "business banking for SMEs"}]}
+
+Rules:
+${sourceRule}
+- Mix international leaders and, when relevant, local players for the described market.
+- "note": max 6 words describing what the product does. ${noteLang}
+- No duplicates, lowercase domains, no URL path.
+
+Project: "${description.replace(/"/g, "'").slice(0, 800)}"`;
+  }
+
+  /** Extrait / normalise la liste de concurrents d'une réponse JSON brute. */
+  private parseCompetitors(raw: string): { name: string; domain: string; note: string }[] {
+    // Le modèle peut encadrer le JSON d'une fence markdown quand il utilise un outil.
+    const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/```$/, '');
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start === -1 || end === -1) return [];
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(cleaned.slice(start, end + 1));
+    } catch {
+      return [];
+    }
+    const items: any[] = Array.isArray(parsed?.competitors) ? parsed.competitors : [];
+
+    const seen = new Set<string>();
+    return items
+      .map(item => ({
+        name: String(item?.name ?? '').trim().slice(0, 60),
+        domain: String(item?.domain ?? '').trim().toLowerCase()
+          .replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''),
+        note: String(item?.note ?? '').trim().slice(0, 80),
+      }))
+      .filter(c => {
+        if (!c.name || !DOMAIN_REGEX.test(c.domain) || seen.has(c.domain)) return false;
+        seen.add(c.domain);
+        return true;
+      })
+      .slice(0, 8);
+  }
+
+  /**
+   * Écarte les domaines qui ne sont enregistrés nulle part : un « concurrent »
+   * dont le domaine est libre est forcément une invention du modèle.
+   * On ne teste que les domaines à deux labels (whois ne répond pas sur un
+   * sous-domaine type produit.exemple.com) — les autres passent tels quels.
+   */
+  private async dropUnregisteredDomains(
+    competitors: { name: string; domain: string; note: string }[],
+  ): Promise<{ name: string; domain: string; note: string }[]> {
+    const checks = await Promise.all(
+      competitors.map(async (c) => {
+        if (c.domain.split('.').length !== 2) return true;
+        try {
+          return !(await this.isDomainAvailable(c.domain));
+        } catch {
+          return true; // whois indisponible → on ne pénalise pas le résultat
+        }
+      }),
+    );
+    return competitors.filter((_, i) => checks[i]);
+  }
+
+  /**
+   * Liste les produits/solutions existants du même secteur avec leur domaine.
+   * Sert de repère avant la recherche : ce qui existe déjà, le ton du marché,
+   * et ce qu'il ne faut pas imiter de trop près.
+   *
+   * Voie principale : recherche web en direct (outil `web_search` de l'API
+   * Responses). Repli sur la connaissance du modèle si l'outil est indisponible.
+   * Dans les deux cas, un contrôle whois écarte les domaines non enregistrés.
+   * Jamais bloquant : renvoie une liste vide en cas d'échec.
+   */
+  async findSimilarProductDomains(
+    description: string,
+    locale?: string,
+  ): Promise<{ competitors: { name: string; domain: string; note: string }[]; source: 'web' | 'model' }> {
+    // 1) Recherche web en direct
+    try {
+      const response = await this.openai.responses.create({
+        model: this.creativeModel,
+        tools: [{ type: 'web_search' }],
+        input: this.competitorsPrompt(description, locale, true),
+        max_output_tokens: 1500,
+      });
+      const usedWeb = response.output?.some((o: any) => o.type === 'web_search_call') ?? false;
+      const competitors = this.parseCompetitors(response.output_text ?? '');
+      if (competitors.length > 0) {
+        return { competitors: await this.dropUnregisteredDomains(competitors), source: usedWeb ? 'web' : 'model' };
+      }
+      this.logger.warn('Recherche web des concurrents sans résultat exploitable — repli sur le modèle');
+    } catch (error) {
+      this.logger.error('Recherche web des concurrents indisponible, repli sur le modèle:', error);
+    }
+
+    // 2) Repli : connaissance du modèle
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: this.creativeModel,
+        messages: [{ role: 'user', content: this.competitorsPrompt(description, locale, false) }],
+        max_completion_tokens: 800,
+        reasoning_effort: 'none',
+        response_format: { type: 'json_object' },
+      });
+      const competitors = this.parseCompetitors(response.choices[0].message.content ?? '');
+      return { competitors: await this.dropUnregisteredDomains(competitors), source: 'model' };
+    } catch (error) {
+      this.logger.error('Erreur recherche des produits similaires:', error);
+      return { competitors: [], source: 'model' };
+    }
+  }
+
   async generateDomainIdeas(
     description: string,
     keywords: string[],
@@ -207,6 +363,8 @@ Description: "${description.replace(/"/g, "'").slice(0, 800)}"`;
     likedNames: string[] = [],
     dislikedNames: string[] = [],
     constraints: NamingConstraints = DEFAULT_CONSTRAINTS,
+    competitorDomains: string[] = [],
+    dislikedStyleDomains: string[] = [],
   ): Promise<{ name: string; style: string }[]> {
     const minLen = constraints.minLength;
     const maxLen = Math.max(constraints.maxLength, minLen + 2);
@@ -243,6 +401,14 @@ Description: "${description.replace(/"/g, "'").slice(0, 800)}"`;
         : '',
       constraints.referenceBrands.length > 0
         ? `\nThe user wants names with a similar FEEL to these reference brands: ${constraints.referenceBrands.join(', ')}. Match their length, sound and premium vibe (but never copy them).\n`
+        : '',
+      // #4 — repères du marché : calibrer le ton sans ressembler aux acteurs en place
+      competitorDomains.length > 0
+        ? `\nExisting products in this market already use these domains: ${competitorDomains.slice(0, 12).join(', ')}. Use them ONLY to calibrate the tone and level of the sector. Do NOT generate names that are confusingly similar to any of them (same root, same distinctive prefix/suffix, or a near-anagram) — the goal is to stand out from them.\n`
+        : '',
+      // #4 — styles que l'utilisateur a explicitement écartés en parcourant le marché
+      dislikedStyleDomains.length > 0
+        ? `\nThe user reviewed the market and explicitly REJECTED the style of these names: ${dislikedStyleDomains.slice(0, 12).join(', ')}. Avoid names sharing their feel, structure, sound or naming pattern. This is a strong signal about the user's taste.\n`
         : '',
     ].join('');
 
@@ -500,17 +666,25 @@ ${langInstruction}`;
   async findAvailableDomains(
     description: string,
     keywords: string[],
-    targetCount = 10,
-    extensions = ['.com'],
-    matchMode = MatchMode.ANY,
-    locale?: string,
-    excludeNames: string[] = [],
-    onEvent?: (event: Record<string, any>) => void,
-    descriptiveNames = false,
-    culturalNames = false,
-    likedNames: string[] = [],
-    dislikedNames: string[] = [],
-  ): Promise<{ results: any[], totalChecked: number }> {
+    options: FindDomainsOptions = {},
+  ): Promise<{ results: any[], totalChecked: number, minLengthUsed: number }> {
+    const {
+      targetCount = 10,
+      extensions = ['.com'],
+      matchMode = MatchMode.ANY,
+      locale,
+      excludeNames = [],
+      onEvent,
+      descriptiveNames = false,
+      culturalNames = false,
+      likedNames = [],
+      dislikedNames = [],
+      minLength,
+      likedExamples = [],
+      competitorDomains = [],
+      dislikedStyleDomains = [],
+    } = options;
+
     const finalResults: any[] = [];
     // US-015 — pre-seed with already-evaluated names so the LLM never re-proposes them
     const checkedNames = new Set<string>(excludeNames);
@@ -520,9 +694,19 @@ ${langInstruction}`;
     // #1/#2 — extraire une seule fois les contraintes de naming du brief libre
     const constraints = await this.extractNamingConstraints(description);
 
+    // #1 — le réglage explicite de l'UI prime sur la longueur devinée depuis le brief.
+    if (typeof minLength === 'number') {
+      constraints.minLength = Math.min(Math.max(Math.round(minLength), MIN_NAME_LENGTH_FLOOR), MAX_NAME_LENGTH_FLOOR);
+      constraints.maxLength = Math.max(constraints.maxLength, constraints.minLength + 3);
+    }
+    // #3 — les exemples de noms aimés rejoignent les références de style
+    if (likedExamples.length > 0) {
+      constraints.referenceBrands = [...new Set([...constraints.referenceBrands, ...likedExamples])].slice(0, 15);
+    }
+
     while (finalResults.length < targetCount && attempts < maxAttempts) {
       onEvent?.({ type: 'generating' });
-      const items = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames], descriptiveNames, culturalNames, likedNames, dislikedNames, constraints);
+      const items = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames], descriptiveNames, culturalNames, likedNames, dislikedNames, constraints, competitorDomains, dislikedStyleDomains);
 
       const newItems = items.filter(item => !checkedNames.has(item.name));
       newItems.forEach(item => checkedNames.add(item.name));
@@ -563,7 +747,10 @@ ${langInstruction}`;
 
     return {
       results: finalResults,
-      totalChecked: checkedNames.size
+      totalChecked: checkedNames.size,
+      // Longueur mini réellement appliquée (réglage UI ou déduite du brief) —
+      // le front s'en sert pour proposer de l'assouplir quand rien n'est trouvé.
+      minLengthUsed: constraints.minLength,
     };
   }
 }

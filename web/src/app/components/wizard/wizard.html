@@ -118,6 +118,84 @@
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP2.SUBTITLE' | translate }}</p>
         </div>
 
+        <!-- #3 / #4 : inspirations — ce qui existe déjà sur le marché + noms aimés -->
+        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+          <h4 class="section-label">{{ 'WIZARD.STEP2.INSPIRATION_TITLE' | translate }}</h4>
+
+          <!-- Liste du marché, notable ligne par ligne -->
+          <div *ngIf="competitorsLoading() || competitors().length > 0"
+               style="background: var(--p-surface-50); border: 1px solid var(--p-surface-200); border-radius: 0.625rem; padding: 0.75rem 0.875rem">
+            <button type="button"
+                    (click)="showCompetitors.set(!showCompetitors())"
+                    style="background: none; border: none; padding: 0; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; text-align: left">
+              <i class="pi pi-compass" style="font-size: 0.85rem; color: var(--p-primary-color); flex-shrink: 0"></i>
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--p-surface-700)">{{ 'WIZARD.STEP2.MARKET_TITLE' | translate }}</span>
+              <i *ngIf="competitorsLoading()" class="pi pi-spin pi-spinner" style="font-size: 0.75rem; color: var(--p-surface-400)"></i>
+              <span *ngIf="!competitorsLoading()" style="font-size: 0.75rem; color: var(--p-surface-400)">({{ competitors().length }})</span>
+              <span *ngIf="!competitorsLoading() && competitorsSource() === 'web'"
+                    style="font-size: 0.68rem; font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 999px; background: #dcfce7; color: #15803d; white-space: nowrap">
+                <i class="pi pi-globe" style="font-size: 0.6rem"></i> {{ 'WIZARD.STEP2.MARKET_LIVE_BADGE' | translate }}
+              </span>
+              <i class="pi pi-chevron-down" style="font-size: 0.7rem; color: var(--p-surface-400); margin-left: auto; transition: transform 0.2s ease"
+                 [style.transform]="showCompetitors() ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
+            </button>
+
+            <p *ngIf="competitorsLoading()" style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--p-surface-400)">
+              {{ 'WIZARD.STEP2.MARKET_LOADING' | translate }}
+            </p>
+
+            <div *ngIf="showCompetitors() && competitors().length > 0" style="margin-top: 0.625rem; display: flex; flex-direction: column; gap: 0.25rem">
+              <p style="margin: 0 0 0.25rem 0; font-size: 0.75rem; color: var(--p-surface-500); line-height: 1.45">
+                {{ 'WIZARD.STEP2.MARKET_INSTRUCTION' | translate }}
+              </p>
+
+              <div *ngFor="let c of competitors()"
+                   style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.2rem 0"
+                   [style.opacity]="competitorRating(c.domain) === 'disliked' ? 0.5 : 1">
+                <button type="button"
+                        (click)="setCompetitorRating(c.domain, 'liked')"
+                        style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
+                        [pTooltip]="'WIZARD.STEP2.MARKET_LIKE' | translate" tooltipPosition="top">
+                  <i class="pi" [class.pi-thumbs-up-fill]="competitorRating(c.domain) === 'liked'" [class.pi-thumbs-up]="competitorRating(c.domain) !== 'liked'"
+                     [style.color]="competitorRating(c.domain) === 'liked' ? '#16a34a' : '#d1d5db'"></i>
+                </button>
+                <button type="button"
+                        (click)="setCompetitorRating(c.domain, 'disliked')"
+                        style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
+                        [pTooltip]="'WIZARD.STEP2.MARKET_DISLIKE' | translate" tooltipPosition="top">
+                  <i class="pi" [class.pi-thumbs-down-fill]="competitorRating(c.domain) === 'disliked'" [class.pi-thumbs-down]="competitorRating(c.domain) !== 'disliked'"
+                     [style.color]="competitorRating(c.domain) === 'disliked' ? '#ef4444' : '#d1d5db'"></i>
+                </button>
+                <a [href]="'https://' + c.domain" target="_blank" rel="noopener noreferrer"
+                   style="font-family: monospace; font-weight: 700; color: var(--p-primary-color); text-decoration: none; flex-shrink: 0"
+                   [style.text-decoration]="competitorRating(c.domain) === 'disliked' ? 'line-through' : 'none'">{{ c.domain }}</a>
+                <span style="color: var(--p-surface-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ c.note }}</span>
+              </div>
+
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.72rem; color: var(--p-surface-400); line-height: 1.45">
+                {{ (competitorsSource() === 'web' ? 'WIZARD.STEP2.MARKET_NOTE_WEB' : 'WIZARD.STEP2.MARKET_NOTE') | translate }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Ajout libre de noms appréciés / rejetés -->
+          <div style="display: flex; align-items: center; gap: 0.5rem">
+            <i class="pi pi-thumbs-up" style="font-size: 0.85rem; color: #16a34a; flex-shrink: 0"></i>
+            <input pInputText
+                   [(ngModel)]="likedExamplesInput"
+                   [placeholder]="'WIZARD.STEP2.LIKED_EXAMPLES_PLACEHOLDER' | translate"
+                   style="flex: 1; min-width: 0; font-size: 0.9rem">
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem">
+            <i class="pi pi-thumbs-down" style="font-size: 0.85rem; color: #ef4444; flex-shrink: 0"></i>
+            <input pInputText
+                   [(ngModel)]="dislikedExamplesInput"
+                   [placeholder]="'WIZARD.STEP2.DISLIKED_EXAMPLES_PLACEHOLDER' | translate"
+                   style="flex: 1; min-width: 0; font-size: 0.9rem">
+          </div>
+          <span class="text-500" style="font-size: 0.75rem">{{ 'WIZARD.STEP2.EXAMPLES_HINT' | translate }}</span>
+        </div>
+
         <!-- Mots-clés -->
         <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
@@ -167,6 +245,38 @@
                    style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--p-primary-color); flex-shrink: 0">
             {{ 'WIZARD.STEP2.CULTURAL_TOGGLE' | translate }}
           </label>
+        </div>
+
+        <!-- #1 : Longueur minimale des noms générés -->
+        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.5rem">
+          <h4 class="section-label">{{ 'WIZARD.STEP2.MIN_LENGTH_TITLE' | translate }}</h4>
+          <p-selectButton
+            [options]="MIN_LENGTH_OPTIONS"
+            [ngModel]="minNameLength()"
+            (ngModelChange)="onMinLengthChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            [allowEmpty]="false"
+            styleClass="select-btn-full">
+          </p-selectButton>
+          <span class="text-500" style="font-size: 0.78rem">{{ 'WIZARD.STEP2.MIN_LENGTH_HINT' | translate:{ n: DEFAULT_MIN_LENGTH } }}</span>
+
+          <!-- Avertissement chiffré : part de .com déjà déposés à cette longueur -->
+          <div *ngIf="isRiskyLength()"
+               style="display: flex; align-items: flex-start; gap: 0.5rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.78rem; color: #92400e; line-height: 1.45">
+            <i class="pi pi-exclamation-triangle" style="font-size: 0.85rem; margin-top: 0.1rem; flex-shrink: 0"></i>
+            <span>{{ 'WIZARD.STEP2.MIN_LENGTH_WARNING' | translate:{ n: minNameLength(), pct: takenRate() } }}</span>
+          </div>
+
+          <!-- Contraintes déduites de la description libre -->
+          <div *ngIf="minLengthFromBrief() || briefAvoidWords().length > 0 || briefReferenceBrands().length > 0"
+               style="font-size: 0.75rem; color: var(--p-surface-500); line-height: 1.5">
+            <i class="pi pi-sparkles" style="font-size: 0.7rem; margin-right: 0.3rem"></i>
+            <span>{{ 'WIZARD.STEP2.DETECTED_FROM_BRIEF' | translate }}</span>
+            <span *ngIf="minLengthFromBrief()"> {{ 'WIZARD.STEP2.DETECTED_LENGTH' | translate:{ n: minLengthFromBrief() } }}</span>
+            <span *ngIf="briefAvoidWords().length > 0"> · {{ 'WIZARD.STEP2.DETECTED_AVOID' | translate:{ words: briefAvoidWords().join(', ') } }}</span>
+            <span *ngIf="briefReferenceBrands().length > 0"> · {{ 'WIZARD.STEP2.DETECTED_BRANDS' | translate:{ brands: briefReferenceBrands().join(', ') } }}</span>
+          </div>
         </div>
 
         <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
@@ -363,8 +473,31 @@
           </p-button>
         </div>
 
-        <div *ngIf="domains().length === 0 && totalChecked() > 0 && !loading()" class="text-center" style="padding: 2.5rem 0">
-          <p class="text-500">{{ 'WIZARD.STEP3.NO_RESULTS' | translate }}</p>
+        <!-- #2 : rien trouvé — proposer d'assouplir la longueur ou de poursuivre -->
+        <div *ngIf="domains().length === 0 && !loading() && (showNoResultHelp() || totalChecked() > 0)"
+             style="width: 100%; max-width: 36rem; text-align: left; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.625rem; padding: 1rem 1.125rem">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem">
+            <i class="pi pi-info-circle" style="color: #d97706; font-size: 0.9rem"></i>
+            <span style="font-weight: 700; color: #92400e; font-size: 0.92rem">{{ 'WIZARD.STEP3.NO_RESULTS_TITLE' | translate }}</span>
+          </div>
+          <p style="margin: 0 0 0.875rem 0; font-size: 0.82rem; color: #b45309; line-height: 1.5">
+            {{ (isRiskyLength() ? 'WIZARD.STEP3.NO_RESULTS_SHORT' : 'WIZARD.STEP3.NO_RESULTS_EXPLAIN') | translate:{ n: minNameLength() } }}
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+            <p-button *ngIf="minNameLength() < MAX_LENGTH_SETTING"
+              [label]="'WIZARD.STEP3.NO_RESULTS_RELAX' | translate:{ n: relaxedLength() }"
+              icon="pi pi-arrow-up-right"
+              size="small"
+              (onClick)="relaxLengthAndRetry()">
+            </p-button>
+            <p-button
+              [label]="'WIZARD.STEP3.NO_RESULTS_CONTINUE' | translate"
+              icon="pi pi-refresh"
+              severity="secondary"
+              size="small"
+              (onClick)="findDomains(true)">
+            </p-button>
+          </div>
         </div>
 
         <!-- Boutons de navigation -->
@@ -568,7 +701,7 @@
   <div *ngIf="loading() && !streamProgress()" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 50; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px)">
      <div style="text-align: center">
         <p-progressSpinner></p-progressSpinner>
-        <p class="mt-3 font-semibold" style="color: #2563eb">{{ 'WIZARD.LOADING' | translate }}</p>
+        <p class="mt-3 font-semibold" style="color: #2563eb">{{ loadingKey() | translate }}</p>
      </div>
   </div>
 </div>

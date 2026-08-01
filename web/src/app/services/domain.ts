@@ -3,6 +3,27 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config';
 
+/** Contraintes de naming extraites du brief libre par l'IA. */
+export interface NamingConstraints {
+  minLength: number;
+  maxLength: number;
+  avoidWords: string[];
+  referenceBrands: string[];
+}
+
+/** Produit existant du même secteur, avec son domaine. */
+export interface CompetitorDomain {
+  name: string;
+  domain: string;
+  note: string;
+}
+
+/** Résultat du repérage marché — `source` indique si la liste vient d'une recherche web live. */
+export interface CompetitorsResult {
+  competitors: CompetitorDomain[];
+  source: 'web' | 'model';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,6 +44,16 @@ export class DomainService {
     return this.http.post<{ keywords: string[] }>(`${this.apiUrl}/keywords`, { description, ...(locale ? { locale } : {}) });
   }
 
+  /** Contraintes de naming devinées depuis la description (longueur, mots à éviter…). */
+  extractConstraints(description: string): Observable<NamingConstraints> {
+    return this.http.post<NamingConstraints>(`${this.apiUrl}/constraints`, { description });
+  }
+
+  /** Produits existants du même secteur et leurs domaines (repères avant la recherche). */
+  findCompetitors(description: string, locale?: string | null): Observable<CompetitorsResult> {
+    return this.http.post<CompetitorsResult>(`${this.apiUrl}/competitors`, { description, ...(locale ? { locale } : {}) });
+  }
+
   analyzeName(suggestionId: string, lang?: string): Observable<{ analysis: string }> {
     return this.http.post<{ analysis: string }>(`${this.apiUrl}/analyze`, { suggestionId, lang });
   }
@@ -40,7 +71,7 @@ export class DomainService {
   }
 
   searchDomainsStream(
-    params: { description: string; keywords: string[]; extensions: string[]; matchMode: string; projectId?: string; projectName?: string; locale?: string | null; excludeNames?: string[]; descriptiveNames?: boolean; culturalNames?: boolean; likedNames?: string[]; dislikedNames?: string[] },
+    params: { description: string; keywords: string[]; extensions: string[]; matchMode: string; projectId?: string; projectName?: string; locale?: string | null; excludeNames?: string[]; descriptiveNames?: boolean; culturalNames?: boolean; likedNames?: string[]; dislikedNames?: string[]; minLength?: number; likedExamples?: string[]; competitorDomains?: string[]; dislikedStyleDomains?: string[] },
     token: string,
   ): Observable<any> {
     return new Observable(observer => {

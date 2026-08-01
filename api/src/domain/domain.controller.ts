@@ -43,6 +43,20 @@ export class DomainController {
     return { keywords };
   }
 
+  /** #1 — contraintes de naming devinées depuis le brief, pour pré-remplir l'écran de configuration. */
+  @Public()
+  @Post('constraints')
+  async constraints(@Body() dto: RefineDescriptionDto) {
+    return this.domainService.extractNamingConstraints(dto.description);
+  }
+
+  /** #4 — produits existants du même secteur et leurs domaines, avant de lancer la recherche. */
+  @Public()
+  @Post('competitors')
+  async competitors(@Body() dto: RefineDescriptionDto) {
+    return this.domainService.findSimilarProductDomains(dto.description, dto.locale);
+  }
+
   @Post('analyze')
   async analyze(
     @Body('suggestionId') suggestionId: string,
@@ -109,22 +123,28 @@ export class DomainController {
     const results: any[] = [];
 
     try {
-      const { totalChecked } = await this.domainService.findAvailableDomains(
+      const { totalChecked, minLengthUsed } = await this.domainService.findAvailableDomains(
         dto.description,
         dto.keywords,
-        limit,
-        dto.extensions,
-        dto.matchMode,
-        dto.locale,
-        dto.excludeNames ?? [],
-        (event) => {
-          emit(event);
-          if (event.type === 'result') results.push(event.domain);
+        {
+          targetCount: limit,
+          extensions: dto.extensions,
+          matchMode: dto.matchMode,
+          locale: dto.locale,
+          excludeNames: dto.excludeNames ?? [],
+          onEvent: (event) => {
+            emit(event);
+            if (event.type === 'result') results.push(event.domain);
+          },
+          descriptiveNames: dto.descriptiveNames ?? false,
+          culturalNames: dto.culturalNames ?? false,
+          likedNames: dto.likedNames ?? [],
+          dislikedNames: dto.dislikedNames ?? [],
+          minLength: dto.minLength,
+          likedExamples: dto.likedExamples ?? [],
+          competitorDomains: dto.competitorDomains ?? [],
+          dislikedStyleDomains: dto.dislikedStyleDomains ?? [],
         },
-        dto.descriptiveNames ?? false,
-        dto.culturalNames ?? false,
-        dto.likedNames ?? [],
-        dto.dislikedNames ?? [],
       );
 
       const actualCost = results.length;
@@ -143,6 +163,9 @@ export class DomainController {
               keywords: dto.keywords,
               extensions: dto.extensions || ['.com'],
               matchMode: dto.matchMode || 'any',
+              minLength: dto.minLength,
+              likedExamples: dto.likedExamples,
+              dislikedExamples: dto.dislikedStyleDomains,
             },
             manager,
           );
@@ -158,6 +181,7 @@ export class DomainController {
         emit({
           type: 'done',
           totalChecked,
+          minLengthUsed,
           requested: limit,
           found: results.length,
           projectId: project!.id,
@@ -187,19 +211,24 @@ export class DomainController {
     const limit = Math.min(10, user.totalCredits);
 
     // Opérations externes (IA + Whois) hors transaction pour ne pas bloquer la DB
-    const { results, totalChecked } = await this.domainService.findAvailableDomains(
+    const { results, totalChecked, minLengthUsed } = await this.domainService.findAvailableDomains(
       dto.description,
       dto.keywords,
-      limit,
-      dto.extensions,
-      dto.matchMode,
-      dto.locale,
-      dto.excludeNames ?? [],
-      undefined,
-      dto.descriptiveNames ?? false,
-      dto.culturalNames ?? false,
-      dto.likedNames ?? [],
-      dto.dislikedNames ?? [],
+      {
+        targetCount: limit,
+        extensions: dto.extensions,
+        matchMode: dto.matchMode,
+        locale: dto.locale,
+        excludeNames: dto.excludeNames ?? [],
+        descriptiveNames: dto.descriptiveNames ?? false,
+        culturalNames: dto.culturalNames ?? false,
+        likedNames: dto.likedNames ?? [],
+        dislikedNames: dto.dislikedNames ?? [],
+        minLength: dto.minLength,
+        likedExamples: dto.likedExamples ?? [],
+        competitorDomains: dto.competitorDomains ?? [],
+        dislikedStyleDomains: dto.dislikedStyleDomains ?? [],
+      },
     );
 
     const actualCost = results.length;
@@ -218,6 +247,9 @@ export class DomainController {
             keywords: dto.keywords,
             extensions: dto.extensions || ['.com'],
             matchMode: dto.matchMode || 'any',
+            minLength: dto.minLength,
+            likedExamples: dto.likedExamples,
+            dislikedExamples: dto.dislikedStyleDomains,
           },
           manager,
         );
@@ -235,6 +267,7 @@ export class DomainController {
     return {
       domains: results,
       totalChecked,
+      minLengthUsed,
       projectId: project!.id,
       creditsDebited: actualCost,
       remainingCredits: newTotal,

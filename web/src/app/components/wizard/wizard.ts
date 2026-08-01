@@ -1,9 +1,10 @@
 import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { DomainService } from '../../services/domain';
+import { DomainService, CompetitorDomain } from '../../services/domain';
 import { KeycloakService } from 'keycloak-angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Steps } from 'primeng/steps';
@@ -65,6 +66,122 @@ export class WizardComponent implements OnInit {
   // ─── US-032 : Naming styles (local mode only) ─────────────
   descriptiveNames = signal(false);
   culturalNames = signal(false);
+  // ────────────────────────────────────────────────────────────
+
+  // ─── #1 : Longueur minimale des noms générés ──────────────
+  /** En dessous de 5 caractères, quasiment tout est déjà déposé. */
+  readonly MIN_LENGTH_FLOOR = 5;
+  readonly DEFAULT_MIN_LENGTH = 7;
+  readonly MAX_LENGTH_SETTING = 7;
+  readonly MIN_LENGTH_OPTIONS = [5, 6, 7].map(v => ({ label: `≥ ${v}`, value: v }));
+
+  /**
+   * Part des .com déjà déposés, par longueur de nom.
+   *
+   * Mesuré le 01/08/2026 sur 340 noms prononçables tirés au sort (motifs CVCVC,
+   * CVCVCV, CVCCVC…), vérifiés par notre propre Whois :
+   *   5 caractères → 83 % pris (IC 95 % : 76–90, n=120)
+   *   6 caractères → 34 % pris (IC 95 % : 28–40, n=220)
+   *   7 caractères →  2,5 % pris (n=120)
+   * Les chiffres publiés en ligne (« 70 % des 5 lettres sont libres ») comptent
+   * toutes les combinaisons, y compris imprononçables — sans intérêt ici.
+   *
+   * On affiche la borne basse de l'intervalle, arrondie : le message reste vrai
+   * même dans l'hypothèse la plus défavorable à notre mesure.
+   */
+  readonly TAKEN_RATE: Record<number, number> = { 5: 75, 6: 25 };
+
+  /** Part de .com déjà pris à afficher pour la longueur choisie (0 si non pertinent). */
+  takenRate = computed(() => this.TAKEN_RATE[this.minNameLength()] ?? 0);
+  minNameLength = signal(this.DEFAULT_MIN_LENGTH);
+  /** L'utilisateur a réglé la longueur à la main → l'extraction IA ne l'écrase plus. */
+  private minLengthTouched = signal(false);
+  /** Longueur déduite de la description libre (affichée comme « détecté »). */
+  minLengthFromBrief = signal<number | null>(null);
+  /** Autres contraintes devinées du brief, affichées pour transparence. */
+  briefAvoidWords = signal<string[]>([]);
+  briefReferenceBrands = signal<string[]>([]);
+
+  /** Vrai dès que la longueur demandée passe sous le seuil « raisonnable ». */
+  isRiskyLength = computed(() => this.minNameLength() < this.DEFAULT_MIN_LENGTH);
+  /** Longueur proposée quand on assouplit la contrainte après un échec. */
+  relaxedLength = computed(() => Math.min(this.minNameLength() + 2, this.MAX_LENGTH_SETTING));
+
+  onMinLengthChange(value: number) {
+    this.minNameLength.set(value);
+    this.minLengthTouched.set(true);
+  }
+
+  // ─── #3 : Exemples de noms aimés / rejetés (saisie libre, étape réglages) ──
+  likedExamplesInput = signal('');
+  dislikedExamplesInput = signal('');
+
+  /** Normalise une saisie libre « qonto.com, notion.so » en liste de noms. */
+  private parseExamples(raw: string): string[] {
+    return [...new Set(
+      raw
+        .split(/[\s,;]+/)
+        .map(t => t.trim().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''))
+        .filter(t => t.length > 1)
+        .map(t => t.slice(0, 60))
+    )];
+  }
+
+  /** Noms aimés saisis à la main par l'utilisateur. */
+  manualLikedExamples = computed(() => this.parseExamples(this.likedExamplesInput()));
+  /** Noms rejetés saisis à la main par l'utilisateur. */
+  manualDislikedExamples = computed(() => this.parseExamples(this.dislikedExamplesInput()));
+
+  // ─── #4 : Produits existants du même secteur ──────────────
+  competitors = signal<CompetitorDomain[]>([]);
+  /** 'web' = liste issue d'une recherche web en direct, 'model' = connaissance du modèle. */
+  competitorsSource = signal<'web' | 'model'>('model');
+  competitorsLoading = signal(false);
+  private competitorsLoaded = signal(false);
+  showCompetitors = signal(true);
+
+  /**
+   * L'avis sur un domaine du marché n'est pas stocké à part : il se lit dans les
+   * listes d'exemples, qui restent la seule source de vérité. Noter une ligne
+   * revient donc à l'ajouter ou la retirer de la liste correspondante, et une
+   * retouche à la main dans le champ texte éteint le pouce en conséquence.
+   */
+  competitorRating(domain: string): 'liked' | 'disliked' | 'neutral' {
+    if (this.manualLikedExamples().includes(domain)) return 'liked';
+    if (this.manualDislikedExamples().includes(domain)) return 'disliked';
+    return 'neutral';
+  }
+
+  setCompetitorRating(domain: string, rating: 'liked' | 'disliked') {
+    const next = this.competitorRating(domain) === rating ? 'neutral' : rating;
+    this.likedExamplesInput.update(v => this.toggleInList(v, domain, next === 'liked'));
+    this.dislikedExamplesInput.update(v => this.toggleInList(v, domain, next === 'disliked'));
+  }
+
+  /** Ajoute ou retire un nom d'une saisie libre « a.com, b.com », sans doublon. */
+  private toggleInList(raw: string, domain: string, present: boolean): string {
+    const items = this.parseExamples(raw).filter(item => item !== domain);
+    if (present) items.push(domain);
+    return items.join(', ');
+  }
+
+  /** Domaines du marché ni aimés ni rejetés : simple contexte dont il faut se démarquer. */
+  neutralCompetitorDomains = computed(() => {
+    const liked = new Set(this.manualLikedExamples());
+    const disliked = new Set(this.manualDislikedExamples());
+    return this.competitors()
+      .map(c => c.domain)
+      .filter(d => !liked.has(d) && !disliked.has(d));
+  });
+
+  /** Références de style envoyées à l'IA (marché aimé + saisie libre confondus). */
+  styleReferences = computed(() => this.manualLikedExamples().slice(0, 10));
+
+  /** Styles rejetés envoyés à l'IA. */
+  rejectedStyleReferences = computed(() => this.manualDislikedExamples().slice(0, 12));
+
+  // ─── #2 : Aide quand la recherche ne trouve rien ──────────
+  showNoResultHelp = signal(false);
   // ────────────────────────────────────────────────────────────
 
   private readonly EXT_TO_LOCALE: Record<string, string> = {
@@ -203,6 +320,8 @@ export class WizardComponent implements OnInit {
   activeIndex = signal(0);
   maxActiveIndex = signal(0);
   loading = signal(false);
+  /** Clé i18n du message de l'overlay de chargement, selon l'étape en cours. */
+  loadingKey = signal('WIZARD.LOADING');
   isLoggedIn = signal(false);
   showLanding = signal(false);
 
@@ -400,6 +519,12 @@ export class WizardComponent implements OnInit {
       this.selectedExtensions.set(state.selectedExtensions || ['.com']);
       this.matchMode.set(state.matchMode || 'all');
       this.projectId.set(state.projectId || null);
+      if (state.minNameLength) {
+        this.minNameLength.set(Math.min(Math.max(state.minNameLength, this.MIN_LENGTH_FLOOR), this.MAX_LENGTH_SETTING));
+        this.minLengthTouched.set(true);
+      }
+      this.likedExamplesInput.set(state.likedExamplesInput || '');
+      this.dislikedExamplesInput.set(state.dislikedExamplesInput || '');
       localStorage.removeItem('wizard_state');
       
       if (this.isLoggedIn()) {
@@ -444,7 +569,69 @@ export class WizardComponent implements OnInit {
   }
 
   goToExtensions() {
+    // #4 — repères du marché chargés en tâche de fond, avant le lancement de la recherche
+    this.loadCompetitors();
     this.nextStep(); // step 1 (keywords) → step 2 (extensions)
+  }
+
+  /**
+   * #1 — récupère les contraintes de naming devinées depuis la description libre
+   * et pré-remplit le réglage de longueur (sauf si l'utilisateur l'a déjà touché).
+   */
+  private loadNamingConstraints(description: string) {
+    this.domainService.extractConstraints(description).subscribe({
+      next: (c) => {
+        this.minLengthFromBrief.set(c.minLength ?? null);
+        this.briefAvoidWords.set(c.avoidWords ?? []);
+        this.briefReferenceBrands.set(c.referenceBrands ?? []);
+        if (!this.minLengthTouched() && typeof c.minLength === 'number') {
+          const clamped = Math.min(Math.max(c.minLength, this.MIN_LENGTH_FLOOR), this.MAX_LENGTH_SETTING);
+          this.minNameLength.set(clamped);
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => { /* non bloquant : on garde le défaut */ },
+    });
+  }
+
+  /**
+   * #4 — produits/solutions déjà présents sur le marché décrit, avec leur domaine.
+   * Résout toujours (jamais de rejet) : un échec de repérage ne doit pas bloquer
+   * le passage à l'étape suivante.
+   */
+  loadCompetitors(force = false): Promise<void> {
+    if (this.competitorsLoading() || (this.competitorsLoaded() && !force)) return Promise.resolve();
+    const desc = this.refinedDescription() || this.description();
+    if (!desc || desc.trim().length < 10) return Promise.resolve();
+
+    this.competitorsLoading.set(true);
+    this.cdr.detectChanges();
+
+    return new Promise<void>((resolve) => {
+      // `complete` ne se déclenche pas après `error` : les deux voies doivent
+      // libérer la promesse, sinon l'étape 1 resterait bloquée sur un échec.
+      const done = () => {
+        this.competitorsLoaded.set(true);
+        this.competitorsLoading.set(false);
+        this.cdr.detectChanges();
+        resolve();
+      };
+      this.domainService.findCompetitors(desc, this.effectiveLocale() ?? this.translate.currentLang).subscribe({
+        next: (res) => {
+          this.competitors.set(res.competitors ?? []);
+          this.competitorsSource.set(res.source ?? 'model');
+        },
+        error: done,
+        complete: done,
+      });
+    });
+  }
+
+  /** #2 — relance en assouplissant la contrainte de longueur. */
+  relaxLengthAndRetry() {
+    this.onMinLengthChange(Math.min(this.minNameLength() + 2, this.MAX_LENGTH_SETTING));
+    this.showNoResultHelp.set(false);
+    this.findDomains(false);
   }
 
   // Navigation
@@ -495,7 +682,16 @@ export class WizardComponent implements OnInit {
         this.keywords.set(project.keywords || []);
         this.selectedExtensions.set(project.extensions);
         this.matchMode.set(project.matchMode);
-        
+        // Réglages de génération enregistrés avec le projet (#1 / #3)
+        if (project.minLength) {
+          // Un projet ancien peut porter une longueur qui n'est plus proposée (8, 9…) :
+          // on la ramène dans la plage du sélecteur pour qu'il reste cohérent.
+          this.minNameLength.set(Math.min(Math.max(project.minLength, this.MIN_LENGTH_FLOOR), this.MAX_LENGTH_SETTING));
+          this.minLengthTouched.set(true);
+        }
+        this.likedExamplesInput.set((project.likedExamples ?? []).join(', '));
+        this.dislikedExamplesInput.set((project.dislikedExamples ?? []).join(', '));
+
         this.domains.set(project.suggestions.map((s: any) => ({
           id: s.id,
           name: s.domainName,
@@ -563,6 +759,16 @@ export class WizardComponent implements OnInit {
     this.newExtension.set('');
     this.matchMode.set('all');
     this.localeOverride.set('');
+    this.minNameLength.set(this.DEFAULT_MIN_LENGTH);
+    this.minLengthTouched.set(false);
+    this.minLengthFromBrief.set(null);
+    this.briefAvoidWords.set([]);
+    this.briefReferenceBrands.set([]);
+    this.likedExamplesInput.set('');
+    this.dislikedExamplesInput.set('');
+    this.competitors.set([]);
+    this.competitorsLoaded.set(false);
+    this.showNoResultHelp.set(false);
     this.applyRegionalDefaults();
     this.activeIndex.set(0);
     this.maxActiveIndex.set(0);
@@ -982,18 +1188,30 @@ export class WizardComponent implements OnInit {
       });
     }
 
-    this.domainService.generateKeywords(descToUse, this.effectiveLocale() ?? this.translate.currentLang).subscribe({
-      next: (res: { keywords: string[] }) => {
-        this.keywords.set(res.keywords);
-        this.loading.set(false);
-        this.nextStep();
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loading.set(false);
-        this.cdr.detectChanges();
-      }
-    });
+    // #1 — en parallèle des mots-clés : contraintes de naming déduites du brief
+    this.loadNamingConstraints(descToUse);
+
+    // Les inspirations ouvrent l'écran de configuration : on ne bascule qu'une fois
+    // le marché identifié, pour ne pas afficher une section vide en chargement.
+    this.loadingKey.set('WIZARD.LOADING_MARKET');
+
+    const keywords$ = this.domainService
+      .generateKeywords(descToUse, this.effectiveLocale() ?? this.translate.currentLang)
+      .pipe(catchError(() => of(null)));
+
+    const [keywordsResult] = await Promise.all([
+      firstValueFrom(keywords$),
+      this.loadCompetitors(),
+    ]);
+
+    this.loadingKey.set('WIZARD.LOADING');
+    this.loading.set(false);
+
+    if (keywordsResult) {
+      this.keywords.set(keywordsResult.keywords);
+      this.nextStep();
+    }
+    this.cdr.detectChanges();
   }
 
   private meetsMatchMode(allExtensions: Record<string, boolean | null>): boolean {
@@ -1120,6 +1338,9 @@ export class WizardComponent implements OnInit {
         selectedExtensions: this.selectedExtensions(),
         matchMode: this.matchMode(),
         projectId: this.projectId(),
+        minNameLength: this.minNameLength(),
+        likedExamplesInput: this.likedExamplesInput(),
+        dislikedExamplesInput: this.dislikedExamplesInput(),
         pendingSearch: true,
       };
       localStorage.setItem('wizard_state', JSON.stringify(state));
@@ -1128,6 +1349,7 @@ export class WizardComponent implements OnInit {
     }
 
     if (!append) this.domains.set([]);
+    this.showNoResultHelp.set(false);
     this.loading.set(true);
     this.streamProgress.set({ phase: 'generating', checked: 0, found: 0 });
     this.startSearchTimeout();
@@ -1157,6 +1379,14 @@ export class WizardComponent implements OnInit {
       // US-046 — feedback utilisateur pour affiner la génération suivante
       likedNames: this.domains().filter(d => d.rating === 'liked').map(d => d.name),
       dislikedNames: this.domains().filter(d => d.rating === 'disliked').map(d => d.name),
+      // #1 — longueur mini explicite (prime sur celle déduite du brief)
+      minLength: this.minNameLength(),
+      // #3 — références de style : saisie libre + domaines du marché aimés
+      likedExamples: this.styleReferences(),
+      // #4 — reste du marché : contexte dont il faut se démarquer
+      competitorDomains: this.neutralCompetitorDomains(),
+      // #4 — styles explicitement rejetés : saisie libre + marché rejeté
+      dislikedStyleDomains: this.rejectedStyleReferences(),
     }, token).subscribe({
       next: (event: any) => {
         this.clearSearchTimeout();
@@ -1194,8 +1424,17 @@ export class WizardComponent implements OnInit {
             }
           });
 
+          // #2 — rien trouvé : on propose d'assouplir la longueur ou de poursuivre
+          if ((event.found ?? 0) === 0 && this.domains().length === 0) {
+            if (event.minLengthUsed && !this.minLengthTouched()) {
+              this.minNameLength.set(event.minLengthUsed);
+            }
+            this.showNoResultHelp.set(true);
+          }
+
           // Issue #3 — moins de suggestions trouvées que demandé dans le temps imparti
-          if (event.requested > 0 && (event.found ?? 0) < event.requested) {
+          // (le panneau dédié prend le relais quand on n'a strictement rien trouvé)
+          if (event.requested > 0 && (event.found ?? 0) > 0 && (event.found ?? 0) < event.requested) {
             this.translate.get(['WIZARD.STEP3.PARTIAL_RESULTS', 'WIZARD.STEP3.PARTIAL_SUMMARY'],
               { count: event.found ?? 0 }).subscribe(t => {
               this.messageService.add({

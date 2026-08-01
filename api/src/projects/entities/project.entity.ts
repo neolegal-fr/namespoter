@@ -22,6 +22,18 @@ export class Project {
   @Column({ default: 'any' })
   matchMode: string;
 
+  /** Longueur minimale des noms générés (réglage de l'écran de configuration). */
+  @Column({ type: 'int', default: 7 })
+  minLength: number;
+
+  /** Exemples de noms/domaines aimés, servant de références de style. */
+  @Column('simple-array', { default: '' })
+  likedExamples: string[];
+
+  /** Exemples de noms/domaines dont le style est rejeté. */
+  @Column('simple-array', { default: '' })
+  dislikedExamples: string[];
+
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 

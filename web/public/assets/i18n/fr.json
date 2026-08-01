@@ -1,8 +1,8 @@
 {
   "LANDING": {
-    "TAGLINE": "Un nom de domaine disponible, pertinent et mémorable. Vite.",
-    "SUBTITLE": "Décrivez votre projet en quelques mots. L'IA génère des noms de marque originaux — et vérifie que le domaine est disponible en temps réel.",
-    "B1_TITLE": "Noms de marque sur mesure",
+    "TAGLINE": "Un nom de produit, de marque ou de société — dont le domaine est libre.",
+    "SUBTITLE": "Décrivez votre projet en quelques mots. L'IA analyse votre marché, génère des noms originaux — et vérifie en temps réel que le domaine est disponible.",
+    "B1_TITLE": "Des noms sur mesure",
     "B1_DESC": "L'IA génère des idées adaptées à votre activité, votre cible et vos valeurs",
     "B2_TITLE": "Disponibilité vérifiée en temps réel",
     "B2_DESC": "Vérification Whois instantanée sur toutes les extensions de votre choix",
@@ -34,7 +34,8 @@
     "DELETE_ACCOUNT_TITLE": "Supprimer mon compte",
     "DELETE_ACCOUNT_MSG": "Cette action est irréversible. Tous vos projets et crédits seront définitivement supprimés.",
     "DELETE_ACCOUNT_BTN": "Supprimer définitivement",
-    "CANCEL": "Annuler"
+    "CANCEL": "Annuler",
+    "LANGUAGE": "Changer de langue"
   },
   "ADMIN": {
     "TITLE": "Administration",
@@ -94,23 +95,23 @@
   "WIZARD": {
     "STEPS": {
       "DESCRIPTION": "Description",
-      "KEYWORDS": "Mots-clés",
+      "KEYWORDS": "Configuration",
       "EXTENSIONS": "Extensions",
       "DOMAINS": "Domaines"
     },
     "STEP1": {
       "TITLE": "Votre Projet",
       "PROJECT_NAME_TITLE": "Nom du projet (optionnel)",
-      "SUBTITLE": "Décrivez votre solution, votre cible et vos valeurs.",
+      "SUBTITLE": "Décrivez votre produit, votre activité et votre cible. L'IA s'en sert aussi pour repérer votre marché.",
       "PLACEHOLDER": "Ex: Une plateforme de livraison de fleurs locales et éco-responsables...",
       "REFINE_BTN": "Reformuler avec l'IA",
-      "CONTINUE_BTN": "Continuer vers les mots-clés",
+      "CONTINUE_BTN": "Continuer vers la configuration",
       "SUGGESTION_TITLE": "Reformulation suggérée :",
       "USE_VERSION": "Utiliser cette version"
     },
     "STEP2": {
       "TITLE": "Configuration",
-      "SUBTITLE": "Ajustez vos mots-clés et définissez votre cible.",
+      "SUBTITLE": "Vos inspirations, vos mots-clés, votre public cible et la longueur des noms.",
       "KEYWORDS_TITLE": "Mots-clés",
       "EXTENSIONS_TITLE": "Extensions de domaine",
       "ADD_PLACEHOLDER": "Ajouter un mot-clé...",
@@ -120,14 +121,33 @@
       "BACK_BTN": "Retour",
       "NEXT_BTN": "Continuer vers les extensions",
       "SEARCH_BTN": "Rechercher des domaines",
-      "TARGET_TITLE": "Cible",
+      "TARGET_TITLE": "Public cible",
       "TARGET_INTL": "International",
       "TARGET_LOCAL": "Local / Régional",
       "LANGUAGE": "Langue :",
       "LANGUAGE_PLACEHOLDER": "Choisir une langue",
       "NAMING_STYLES_TITLE": "Styles de noms (optionnel)",
       "DESCRIPTIVE_TOGGLE": "Noms descriptifs — ex : boulangerie-provence.com",
-      "CULTURAL_TOGGLE": "Références culturelles — ex : petit-poucet.com"
+      "CULTURAL_TOGGLE": "Références culturelles — ex : petit-poucet.com",
+      "MIN_LENGTH_TITLE": "Longueur des noms",
+      "MIN_LENGTH_HINT": "Longueur minimale des noms générés. À {{n}} caractères, presque tout est encore libre — c'est le meilleur compromis entre originalité et disponibilité.",
+      "MIN_LENGTH_WARNING": "Attention, c'est difficile : plus de {{pct}} % des .com de {{n}} caractères prononçables sont déjà pris. La recherche peut ne rien trouver, ou prendre plus longtemps.",
+      "DETECTED_FROM_BRIEF": "Déduit de votre description :",
+      "DETECTED_LENGTH": "longueur ≥ {{n}}",
+      "DETECTED_AVOID": "à éviter : {{words}}",
+      "DETECTED_BRANDS": "références de style : {{brands}}",
+      "MARKET_TITLE": "Ce qui existe déjà dans votre secteur",
+      "MARKET_NOTE": "Liste indicative générée par l'IA — elle sert de repère sur le ton du marché, et les noms proposés s'en démarqueront.",
+      "MARKET_NOTE_WEB": "Trouvé par recherche web en direct, domaines vérifiés comme enregistrés. Sert de repère sur le ton du marché — les noms proposés s'en démarqueront.",
+      "MARKET_LIVE_BADGE": "recherche web",
+      "INSPIRATION_TITLE": "Inspirations",
+      "MARKET_INSTRUCTION": "Dites ce qui vous plaît ou non dans les noms existants : l'IA s'inspirera des 👍 et évitera le style des 👎.",
+      "MARKET_LOADING": "Recherche des solutions existantes sur le web…",
+      "MARKET_LIKE": "J'aime ce style",
+      "MARKET_DISLIKE": "Je n'aime pas ce style",
+      "LIKED_EXAMPLES_PLACEHOLDER": "Noms que vous aimez : qonto.com, notion.so…",
+      "DISLIKED_EXAMPLES_PLACEHOLDER": "Noms que vous n'aimez pas : mabelleboutique.fr…",
+      "EXAMPLES_HINT": "L'IA s'inspirera du style, de la longueur et de la sonorité des premiers — et évitera ceux des seconds."
     },
     "STYLE": {
       "DESCRIPTIVE": "descriptif",
@@ -170,7 +190,12 @@
       "FILTER_HIDE_DISLIKED": "Masquer les noms rejetés",
       "PICK_URGENCY_TITLE": "Les bons noms partent vite.",
       "PICK_URGENCY_SUB": "Celui-ci est libre en ce moment — peut-être plus demain. Ne laissez pas quelqu'un d'autre l'enregistrer avant vous.",
-      "PICK_BUY_BTN": "Acheter ce domaine"
+      "PICK_BUY_BTN": "Acheter ce domaine",
+      "NO_RESULTS_TITLE": "Aucun nom disponible trouvé",
+      "NO_RESULTS_EXPLAIN": "Tous les noms testés (≥ {{n}} caractères) sont déjà pris. Vous pouvez poursuivre la recherche : l'IA explorera d'autres pistes.",
+      "NO_RESULTS_SHORT": "Tous les noms testés sont déjà pris. À {{n}} caractères, presque tout est déposé : augmenter la longueur multiplie fortement vos chances.",
+      "NO_RESULTS_RELAX": "Passer à ≥ {{n}} caractères et relancer",
+      "NO_RESULTS_CONTINUE": "Poursuivre la recherche"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
@@ -191,7 +216,8 @@
       "QUANTITY": "Quantité",
       "CANCEL": "Annuler",
       "BUY": "Recharger"
-    }
+    },
+    "LOADING_MARKET": "Analyse des solutions existantes sur votre marché…"
   },
   "FEEDBACK": {
     "MENU_ITEM": "Donner mon avis — jusqu'à 500 crédits offerts",
