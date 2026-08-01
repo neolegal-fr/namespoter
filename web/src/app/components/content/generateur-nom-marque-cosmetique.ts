@@ -51,6 +51,42 @@ import { applyContentSeo } from './content-seo';
         subheading="Décrivez votre gamme, l'IA propose des noms élégants et vérifie le domaine (.com, .fr) en direct."
       ></app-article-cta>
 
+      <h2 id="positionnement">Le nom doit trancher entre trois territoires</h2>
+      <p>
+        En cosmétique plus qu'ailleurs, le nom porte une promesse avant même que le produit soit vu. Trois
+        territoires dominent le marché, et ils n'appellent pas du tout les mêmes sonorités.
+      </p>
+      <ul>
+        <li>
+          <strong>Naturel et clean beauty</strong> — racines végétales ou latines, voyelles ouvertes, sonorités
+          douces. Attention&nbsp;: c'est le territoire le plus saturé, et les mots évidents (<em>bio</em>,
+          <em>pure</em>, <em>nature</em>, <em>green</em>) sont pris depuis longtemps, en domaine comme en marque.
+        </li>
+        <li>
+          <strong>Premium et dermatologique</strong> — noms courts, consonnes nettes, souvent inventés, avec une
+          connotation scientifique. Le nom doit inspirer le sérieux sans devenir froid.
+        </li>
+        <li>
+          <strong>Joyeux et accessible</strong> — jeux de mots, ton direct, complicité. Efficace pour se
+          distinguer, mais c'est le territoire qui vieillit le plus vite et qui s'exporte le plus mal.
+        </li>
+      </ul>
+
+      <h2 id="contraintes">Deux contraintes propres au secteur</h2>
+      <p>
+        <strong>La lisibilité sur l'emballage.</strong> Votre nom sera imprimé petit, parfois sur un tube de
+        quelques centimètres, souvent lu à bout de bras en rayon. Un nom long, une orthographe inhabituelle ou
+        un accent mal placé se paient immédiatement — et se paient aussi quand la cliente cherche la marque de
+        mémoire sur son téléphone.
+      </p>
+      <p>
+        <strong>La classe 3 est particulièrement encombrée.</strong> C'est la classe INPI des cosmétiques et
+        parfums, l'une des plus disputées qui soit. Un nom peut être libre en <code>.com</code> et déjà déposé
+        par une marque existante&nbsp;: la vérification d'antériorité n'est pas une formalité dans ce secteur,
+        c'est un préalable. Attention également aux termes réglementés ou trompeurs&nbsp;: un nom qui suggère un
+        effet thérapeutique peut vous exposer bien au-delà du droit des marques.
+      </p>
+
       <h2 id="conseils">Avant de lancer votre marque</h2>
       <ul>
         <li>Vérifiez que le nom est <strong>libre à l'INPI</strong> (classe cosmétiques / bijoux) — la beauté est
@@ -59,6 +95,33 @@ import { applyContentSeo } from './content-seo';
         <li>Assurez-vous que le nom <strong>ne se limite pas</strong> à votre premier produit si vous comptez
           élargir la gamme.</li>
       </ul>
+
+      <h2 id="faq">Questions fréquentes</h2>
+      <h3>Faut-il un nom qui évoque la nature&nbsp;?</h3>
+      <p>
+        C'est le réflexe le plus courant, donc le plus concurrentiel. Le champ lexical végétal est
+        saturé&nbsp;: vous y serez juste une marque de plus. Un nom évocateur ou inventé, qui suggère une
+        sensation plutôt qu'un ingrédient, se distingue mieux et se protège nettement plus facilement.
+      </p>
+      <h3>Un nom en anglais ou en français&nbsp;?</h3>
+      <p>
+        Le français reste un atout considérable en cosmétique, y compris à l'export&nbsp;: l'origine française
+        est un argument de vente en soi sur ce marché. Un nom français bien sonnant vaut souvent mieux qu'un nom
+        anglais interchangeable.
+      </p>
+      <h3>Le nom doit-il décrire le produit&nbsp;?</h3>
+      <p>
+        Non, et c'est même risqué. Un nom descriptif se protège mal juridiquement, et il vous enferme&nbsp;:
+        une marque nommée d'après une crème visage se retrouve coincée le jour où elle lance des soins corps
+        ou du maquillage.
+      </p>
+      <h3>Faut-il réserver le <code>.fr</code> et le <code>.com</code>&nbsp;?</h3>
+      <p>
+        Si votre budget le permet, oui. En cosmétique, la marque circule beaucoup par le bouche-à-oreille et
+        les réseaux&nbsp;: les gens tapent votre nom de mémoire, avec l'extension qui leur vient à l'esprit.
+        Réservez au minimum celle de votre marché principal, et vérifiez que l'autre n'est pas détenue par un
+        concurrent.
+      </p>
 
       <h2 id="suite">Guides liés</h2>
       <ul>

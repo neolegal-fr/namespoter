@@ -53,12 +53,74 @@ import { applyContentSeo } from './content-seo';
         subheading="Décrivez votre produit IA, l'IA génère des noms premium et vérifie le domaine (.ai, .com, .io) en direct."
       ></app-article-cta>
 
+      <h2 id="cliches">Les clichés du naming IA, et pourquoi les éviter</h2>
+      <p>
+        Aucun secteur n'a produit autant de noms interchangeables en aussi peu de temps. Les schémas
+        saturés sont identifiables en un coup d'œil&nbsp;:
+      </p>
+      <ul>
+        <li>
+          <strong>Le suffixe <code>-AI</code></strong> accolé à un mot courant. C'est devenu si systématique
+          que le suffixe ne signale plus rien — sinon que vous nommez en 2024. Il vieillira exactement comme
+          les <code>-2.0</code> et les <code>e-</code> avant lui.
+        </li>
+        <li>
+          <strong>Le champ lexical cognitif</strong> — <em>mind</em>, <em>brain</em>, <em>neuro</em>,
+          <em>synapse</em>, <em>cortex</em>. Épuisé, en domaine comme en marque.
+        </li>
+        <li>
+          <strong>La mythologie grecque</strong>, réflexe du secteur depuis dix ans. Les noms disponibles y
+          sont désormais rares et les collisions fréquentes.
+        </li>
+      </ul>
+      <p>
+        Le vrai test&nbsp;: votre nom fonctionnera-t-il encore quand l'IA ne sera plus un argument mais une
+        évidence, comme l'est devenu le cloud&nbsp;? Les marques qui ont traversé les vagues technologiques
+        précédentes portent des noms qui ne mentionnaient jamais la technologie.
+      </p>
+
+      <h2 id="levee">Ce que votre nom dit à un investisseur</h2>
+      <p>
+        Si vous prévoyez de lever des fonds, deux détails comptent plus qu'on ne le croit. D'abord, un nom que
+        l'on doit épeler en réunion, ou dont le <code>.com</code> appartient visiblement à quelqu'un d'autre,
+        envoie un signal d'amateurisme — c'est injuste, mais c'est ainsi. Ensuite, un nom trop collé à votre
+        cas d'usage initial complique le récit du pivot, alors que les startups IA pivotent
+        particulièrement souvent.
+      </p>
+
       <h2 id="extension">.ai, .com ou .io pour une startup IA&nbsp;?</h2>
       <p>
         Le <code>.ai</code> affiche immédiatement votre positionnement et de nombreuses startups IA l'adoptent.
         Le <code>.com</code> reste le réflexe de confiance mondial&nbsp;; le <code>.io</code> est un classique de
         la tech. La règle pragmatique&nbsp;: choisissez un nom dont <strong>au moins une extension forte est
         libre maintenant</strong>, plutôt qu'un nom parfait dont le <code>.com</code> est inaccessible.
+      </p>
+
+      <h2 id="faq">Questions fréquentes</h2>
+      <h3>Faut-il mettre « AI » dans le nom&nbsp;?</h3>
+      <p>
+        Généralement non. C'est le réflexe le plus répandu, donc celui qui distingue le moins, et il date votre
+        marque. Mieux vaut un nom qui tiendra quand l'IA sera un acquis — vous expliquerez ce que vous faites
+        dans votre accroche, pas dans votre nom.
+      </p>
+      <h3>Le <code>.ai</code> vaut-il son prix&nbsp;?</h3>
+      <p>
+        Il est nettement plus cher que le <code>.com</code> au renouvellement, et c'est un coût récurrent à
+        assumer. Il signale clairement le secteur et reste bien plus disponible, ce qui le rend séduisant au
+        démarrage&nbsp;; en contrepartie, il inscrit durablement votre marque dans une catégorie que vous
+        quitterez peut-être.
+      </p>
+      <h3>Un nom inventé ou un mot existant&nbsp;?</h3>
+      <p>
+        Inventé, dans la grande majorité des cas. Les mots existants pertinents sont pris depuis longtemps en
+        <code>.com</code>, et ils se protègent mal comme marque. Un nom inventé de 6 à 8 caractères offre le
+        meilleur rapport entre disponibilité, mémorisation et solidité juridique.
+      </p>
+      <h3>Mon nom doit-il fonctionner en anglais&nbsp;?</h3>
+      <p>
+        Si vous visez un marché international ou des investisseurs étrangers, oui&nbsp;: vérifiez au minimum la
+        prononciation et l'absence de faux ami. Un nom inventé sans langue identifiable reste le choix le plus
+        sûr — c'est d'ailleurs ce que font la plupart des marques qui s'exportent.
       </p>
 
       <h2 id="suite">Guides liés</h2>

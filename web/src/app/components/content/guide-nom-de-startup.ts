@@ -50,12 +50,63 @@ import { applyContentSeo } from './content-seo';
         subheading="Décrivez votre projet, l'IA génère des noms brandables et vérifie le domaine en direct."
       ></app-article-cta>
 
+      <h2 id="longueur">Pourquoi les noms très courts sont un piège</h2>
+      <p>
+        Qonto, Stripe, Notion&nbsp;: les modèles que tout fondateur cite ont des noms de cinq ou six lettres.
+        L'imitation est compréhensible, mais elle se heurte à une réalité mesurable. Sur des noms prononçables
+        tirés au sort et vérifiés au Whois, nous avons observé qu'<strong>environ 83&nbsp;% des
+        <code>.com</code> de 5 caractères sont déjà pris</strong>, contre à peu près 34&nbsp;% à
+        6 caractères, et moins de 3&nbsp;% à 7 caractères.
+      </p>
+      <p>
+        Deux caractères de plus font donc basculer la recherche de «&nbsp;presque impossible&nbsp;» à
+        «&nbsp;presque toujours faisable&nbsp;». Rappelez-vous aussi que ces marques ont acheté leur domaine il
+        y a dix ans, ou l'ont racheté à prix fort. Viser cinq lettres est un choix légitime, à condition de
+        savoir qu'il coûtera soit beaucoup de temps, soit beaucoup d'argent.
+      </p>
+
+      <h2 id="pivot">Un nom qui survit au pivot</h2>
+      <p>
+        La plupart des startups changent de produit, de cible ou de modèle avant de trouver leur marché. Un nom
+        collé au premier positionnement devient alors un frein narratif&nbsp;: il faut l'expliquer à chaque
+        présentation, ou en changer au pire moment.
+      </p>
+      <p>
+        D'où la préférence, presque systématique dans l'écosystème, pour les noms <strong>évocateurs ou
+        inventés</strong> plutôt que descriptifs. Un nom qui ne promet rien de précis ne peut pas devenir faux.
+      </p>
+
       <h2 id="extension">Faut-il absolument le .com ?</h2>
       <p>
         Le <code>.com</code> inspire confiance et reste le réflexe mondial, mais beaucoup de belles réussites
         sont parties sur <code>.io</code>, <code>.ai</code> ou <code>.co</code>. La règle pragmatique&nbsp;:
         choisissez un nom dont au moins une extension forte est libre aujourd'hui, plutôt qu'un nom parfait
         dont le <code>.com</code> est inaccessible. Vous pourrez toujours racheter l'extension premium plus tard.
+      </p>
+
+      <h2 id="faq">Questions fréquentes</h2>
+      <h3>Un nom inventé ou un mot existant&nbsp;?</h3>
+      <p>
+        Inventé, dans la grande majorité des cas&nbsp;: les mots existants pertinents sont pris depuis
+        longtemps en <code>.com</code> et se protègent mal comme marque. Un nom inventé de 6 à 8 caractères
+        offre le meilleur compromis entre disponibilité, mémorisation et solidité juridique.
+      </p>
+      <h3>Le nom compte-t-il pour lever des fonds&nbsp;?</h3>
+      <p>
+        Il ne fera pas la décision, mais il pèse sur la première impression. Un nom qu'on doit épeler en
+        réunion, ou dont le <code>.com</code> appartient manifestement à quelqu'un d'autre, envoie un signal
+        d'amateurisme. C'est injuste, et c'est ainsi.
+      </p>
+      <h3>Faut-il un nom qui fonctionne en anglais&nbsp;?</h3>
+      <p>
+        Si l'international fait partie du plan, vérifiez au minimum la prononciation et l'absence de faux ami.
+        Un nom inventé sans langue identifiable reste le choix le plus robuste.
+      </p>
+      <h3>Que faire si tous les bons noms sont pris&nbsp;?</h3>
+      <p>
+        Trois leviers, dans cet ordre&nbsp;: allonger d'un ou deux caractères, ce qui change tout&nbsp;; passer
+        du descriptif à l'inventé&nbsp;; élargir aux extensions crédibles de votre secteur. À éviter&nbsp;: les
+        orthographes déformées, qui se paient à chaque conversation.
       </p>
 
       <h2 id="suite">Guides liés</h2>
