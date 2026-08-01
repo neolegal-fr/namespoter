@@ -118,18 +118,18 @@ Le serveur n'a **pas** `jq`, mais il a python3. Un script d'analyse est fourni e
 
 ```bash
 # Tunnel de conversion : volumétrie par étape, taux d'aboutissement, abandons
-ssh nicolas@192.168.1.95 "sudo python3 - funnel" < scripts/analyze-logs.py
+ssh nicolas@192.168.1.95 "python3 - funnel" < scripts/analyze-logs.py
 
 # Erreurs et avertissements, regroupés par fréquence
-ssh nicolas@192.168.1.95 "sudo python3 - errors" < scripts/analyze-logs.py
+ssh nicolas@192.168.1.95 "python3 - errors" < scripts/analyze-logs.py
 
 # Requêtes les plus lentes / codes de statut par route / lignes brutes
-ssh nicolas@192.168.1.95 "sudo python3 - slow"   < scripts/analyze-logs.py
-ssh nicolas@192.168.1.95 "sudo python3 - http"   < scripts/analyze-logs.py
-ssh nicolas@192.168.1.95 "sudo python3 - raw"    < scripts/analyze-logs.py
+ssh nicolas@192.168.1.95 "python3 - slow"   < scripts/analyze-logs.py
+ssh nicolas@192.168.1.95 "python3 - http"   < scripts/analyze-logs.py
+ssh nicolas@192.168.1.95 "python3 - raw"    < scripts/analyze-logs.py
 ```
 
-Les fichiers sont écrits par le conteneur (qui tourne en root), d'où le `sudo`.
+Les fichiers appartiennent à root (écrits par le conteneur) mais sont lisibles par tous : pas besoin de `sudo`, qui échouerait d'ailleurs en SSH non interactif.
 
 > Le `docker-compose.yml` de prod n'est pas versionné dans ce dépôt. Toute modification (volume de logs, rotation) est à reporter à la main sur le serveur, et une sauvegarde datée est créée avant chaque changement.
 
