@@ -1867,3 +1867,44 @@ C'est aussi un différenciateur de marché : les recherches du 01/08/2026 confir
 - Dépend de US-042 (lien de vérification de marque), déjà en place.
 - Attention au périmètre géographique : l'INPI ne couvre que la France. Pour une cible européenne, l'EUIPO est la base pertinente — à traiter comme une extension ultérieure, pas dans cette story.
 - Risque produit : afficher « marque disponible » à tort engage la responsabilité perçue du service. Préférer une formulation prudente (« aucun dépôt identique trouvé dans la base INPI ») à une affirmation de disponibilité.
+
+---
+
+## US-049 · Pages localisées indexables (hreflang) — décision et mise en œuvre
+
+**Status**: ❌ To do
+
+**As a** responsable du référencement de Namorama,
+**I want to** que Google indexe une version par langue des pages de contenu,
+**So that** le site capte des requêtes hors du marché français.
+
+### Contexte
+
+L'interface se traduit en 19 langues, mais **aucune page indexable n'est localisée** : les pages de contenu (landing, guides, générateurs) sont écrites en dur en français, précisément pour que le HTML prérendu contienne du texte exploitable par Google. Le sélecteur de langue ne traduit que la coque applicative (menu, wizard) et ne change pas d'URL.
+
+Google indexe des **URL**, pas un état applicatif : un changement de langue côté client ne produit aucune page nouvelle. En l'état, Google ne peut voir que la version française, et c'est cohérent.
+
+### Prérequis à toute annotation hreflang
+
+Les trois conditions doivent être réunies **ensemble**, sinon ne rien publier :
+
+1. une URL distincte par langue (préfixe `/en/…`, ou sous-domaine) ;
+2. un contenu réellement traduit et prérendu à cette URL ;
+3. des annotations `hreflang` réciproques entre toutes les versions, plus `x-default`.
+
+⚠️ Publier des `hreflang` vers des pages non réellement traduites (ou traduites automatiquement) est **contre-productif** : Google déclasse les quasi-doublons et cela dilue les pages françaises qui fonctionnent aujourd'hui.
+
+### Acceptance Criteria
+- [ ] Décision documentée sur le périmètre : quelles langues, quelles pages (probablement l'anglais seul, sur 3 à 5 pages à forte intention, pas les 19 langues ni les 16 pages)
+- [ ] Choix technique arbitré : build localisé Angular (`$localize` + `i18n`) contre composants dupliqués sous `/en/`, avec les coûts de maintenance associés
+- [ ] Une URL distincte et prérendue par couple (page, langue)
+- [ ] `applyContentSeo` étend le `<head>` avec les `<link rel="alternate" hreflang="…">` réciproques et le `x-default`
+- [ ] `<html lang>` reflète la langue de la page prérendue (aujourd'hui toujours `fr`)
+- [ ] `sitemap.xml` liste chaque version localisée
+- [ ] Contenu rédigé ou relu par un humain — pas de traduction automatique publiée telle quelle
+- [ ] Vérification post-déploiement dans la Search Console (rapport de ciblage international)
+
+### Notes
+- Le trafic actuel est français et l'effort de contenu prioritaire reste l'étoffement des pages existantes (cf. audit du 01/08/2026 : plusieurs pages encore sous 500 mots). Localiser avant d'avoir des pages solides revient à dupliquer un contenu faible.
+- Alternative assumée et parfaitement valable : **ne pas localiser le contenu**, garder le site français pour Google, et traiter les 19 langues de l'interface comme un simple confort applicatif. C'est l'option recommandée tant que la traction française n'est pas installée.
+- Ne pas confondre avec la locale de génération des noms (`effectiveLocale`), qui influence l'IA et n'a aucun rapport avec l'indexation.
