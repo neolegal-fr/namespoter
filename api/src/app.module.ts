@@ -18,6 +18,8 @@ import { ProjectsModule } from './projects/projects.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AdminModule } from './admin/admin.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { LoggingModule } from './common/logging/logging.module';
+import { EventsController } from './events/events.controller';
 
 @Module({
   imports: [
@@ -46,6 +48,7 @@ import { FeedbackModule } from './feedback/feedback.module';
       }),
       inject: [ConfigService],
     }),
+    LoggingModule,
     DomainModule,
     UsersModule,
     ProjectsModule,
@@ -53,7 +56,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     AdminModule,
     FeedbackModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, EventsController],
   providers: [
     AppService,
     {

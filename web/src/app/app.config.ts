@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
 import { routes } from './app.routes';
 import { ConfigService } from './services/config';
 import { SessionKeeperService } from './services/session-keeper';
+import { AnalyticsService } from './services/analytics';
 
 export class CustomTranslateLoader implements TranslateLoader {
   constructor(private http: HttpClient, private isBrowser: boolean) {}
@@ -39,6 +40,7 @@ function initializeApp(
   config: ConfigService,
   platformId: Object,
   sessionKeeper: SessionKeeperService,
+  analytics: AnalyticsService,
 ) {
   return async () => {
     const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
@@ -82,6 +84,10 @@ function initializeApp(
     // 2 bis. Renouvellement périodique du jeton tant que l'onglet est utilisé,
     // pour ne pas tomber sur le timeout d'inactivité entre deux appels API.
     sessionKeeper.start();
+
+    // Remonte les erreurs JavaScript non capturées : sans ça, un plantage du
+    // front ne laisse aucune trace côté serveur.
+    analytics.installErrorReporting();
 
     // 3. Langue depuis le navigateur
     const browserLang = translate.getBrowserLang() ?? '';
@@ -127,7 +133,7 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       multi: true,
-      deps: [KeycloakService, TranslateService, ConfigService, PLATFORM_ID, SessionKeeperService]
+      deps: [KeycloakService, TranslateService, ConfigService, PLATFORM_ID, SessionKeeperService, AnalyticsService]
     },
     KeycloakService,
     {

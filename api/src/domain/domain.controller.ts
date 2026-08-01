@@ -10,6 +10,7 @@ import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
 import { UsersService } from '../users/users.service';
 import { ProjectsService } from '../projects/projects.service';
 import { Project } from '../projects/entities/project.entity';
+import { AppLoggerService } from '../common/logging/app-logger.service';
 
 @Controller('domain')
 export class DomainController {
@@ -20,6 +21,7 @@ export class DomainController {
     private readonly usersService: UsersService,
     private readonly projectsService: ProjectsService,
     @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly events: AppLoggerService,
   ) {}
 
   @Public()
@@ -108,6 +110,7 @@ export class DomainController {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
 
     if (user.totalCredits <= 0) {
+      this.events.event('search_blocked_no_credits', { userId: keycloakUser.sub });
       res.status(403).json({ message: 'Crédits insuffisants' });
       return;
     }
@@ -121,6 +124,18 @@ export class DomainController {
 
     const limit = Math.min(10, user.totalCredits);
     const results: any[] = [];
+    const startedAt = Date.now();
+
+    this.events.event('search_started', {
+      userId: keycloakUser.sub,
+      extensions: (dto.extensions ?? ['.com']).join(','),
+      matchMode: dto.matchMode,
+      minLength: dto.minLength,
+      keywords: dto.keywords.length,
+      hasCompetitors: (dto.competitorDomains ?? []).length > 0,
+      hasStyleRefs: (dto.likedExamples ?? []).length > 0,
+      isAppend: (dto.excludeNames ?? []).length > 0,
+    });
 
     try {
       const { totalChecked, minLengthUsed } = await this.domainService.findAvailableDomains(
@@ -178,6 +193,18 @@ export class DomainController {
           }
         });
 
+        this.events.event('search_completed', {
+          userId: keycloakUser.sub,
+          found: results.length,
+          requested: limit,
+          totalChecked,
+          minLengthUsed,
+          durationMs: Date.now() - startedAt,
+          // Le cas qui mérite le plus d'attention : l'utilisateur a attendu
+          // pour rien, et c'est le premier motif d'abandon attendu.
+          emptyResult: results.length === 0,
+        });
+
         emit({
           type: 'done',
           totalChecked,
@@ -194,6 +221,11 @@ export class DomainController {
       }
     } catch (error) {
       this.logger.error('Erreur pendant le streaming:', error);
+      this.events.event('search_failed', {
+        userId: keycloakUser.sub,
+        durationMs: Date.now() - startedAt,
+        reason: error instanceof Error ? error.message : String(error),
+      });
       emit({ type: 'error', message: 'Erreur lors de la recherche' });
     }
 

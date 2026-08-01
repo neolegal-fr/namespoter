@@ -27,6 +27,7 @@ import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { UserService } from '../../services/user';
 import { ProjectService } from '../../services/project';
 import { FeedbackService } from '../../services/feedback';
+import { AnalyticsService } from '../../services/analytics';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -477,6 +478,7 @@ export class WizardComponent implements OnInit {
     private appRef: ApplicationRef,
     private sanitizer: DomSanitizer,
     private feedbackService: FeedbackService,
+    private analytics: AnalyticsService,
   ) {}
 
   openFeedback() {
@@ -630,6 +632,7 @@ export class WizardComponent implements OnInit {
 
   /** #2 — relance en assouplissant la contrainte de longueur. */
   relaxLengthAndRetry() {
+    this.analytics.track('no_result_relax_clicked', { from: this.minNameLength() });
     this.onMinLengthChange(Math.min(this.minNameLength() + 2, this.MAX_LENGTH_SETTING));
     this.showNoResultHelp.set(false);
     this.findDomains(false);
@@ -638,6 +641,7 @@ export class WizardComponent implements OnInit {
   // Navigation
   nextStep() {
     this.activeIndex.update(val => val + 1);
+    this.analytics.track('wizard_step_viewed', { step: this.activeIndex() });
     this.maxActiveIndex.set(Math.max(this.maxActiveIndex(), this.activeIndex()));
     this.cdr.detectChanges();
   }
@@ -1120,6 +1124,7 @@ export class WizardComponent implements OnInit {
 
   /** Issue #2 — interrompt la recherche en cours (abort du flux) et restaure l'UI. */
   cancelSearch() {
+    this.analytics.track('search_cancelled_by_user', { found: this.domains().length });
     if (this.searchSub) {
       this.searchSub.unsubscribe(); // déclenche controller.abort() côté service
       this.searchSub = null;
@@ -1345,6 +1350,9 @@ export class WizardComponent implements OnInit {
         pendingSearch: true,
       };
       localStorage.setItem('wizard_state', JSON.stringify(state));
+      // Point de fuite majeur : on quitte l'app pour Keycloak. Si l'écart entre
+      // ce compteur et search_started est important, c'est ici que ça bloque.
+      this.analytics.track('login_required_before_search');
       this.keycloak.login();
       return;
     }
