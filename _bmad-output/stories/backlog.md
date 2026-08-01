@@ -1809,3 +1809,61 @@ ${dislikedNames.join(', ')}
 - **US-015**: `dislikedNames` merged into exclusion list for re-generation
 - **US-018**: "Aide-moi à choisir" uses `likedDomains` (renamed from `favourites`)
 - **US-033**: Tinder Mode's `dislikedNames` signal should write to the same `rating` field introduced here, ensuring the two views stay in sync
+
+---
+
+## US-047 · Référencement externe — présence dans les comparatifs de générateurs de noms
+
+**Status**: ❌ To do
+
+**As a** fondateur de Namorama,
+**I want to** être listé dans les articles comparatifs qui captent déjà la requête « générateur de nom de marque »,
+**So that** j'obtienne du trafic qualifié et des backlinks sans devoir surpasser ces articles en référencement.
+
+### Contexte
+
+Audit du 01/08/2026 : l'article de référence sur la requête en France ([Dropizi](https://www.dropizi.fr/blog/generateur-nom-marque)) fait environ 3 400 mots, liste 22 outils — et **ne mentionne pas Namorama**. Les pages du site font 315 à 643 mots : les surpasser frontalement demanderait un effort de contenu considérable. Se faire ajouter à ces listes coûte un e-mail.
+
+L'angle à défendre est unique et vérifiable : **Namorama est le seul de ces outils à vérifier la disponibilité par une requête Whois réelle** au moment de la recherche, là où les autres estiment ou ne vérifient rien. Les recherches confirment aussi qu'aucun ne vérifie les marques déposées (cf. US-048).
+
+### Acceptance Criteria
+- [ ] Liste des articles cibles constituée (au minimum : Dropizi, Affumt, jenova.ai, generateurdenoms.com, chatgpt.fr) avec le contact de leur rédacteur
+- [ ] Modèle d'e-mail rédigé : angle « seul générateur à vérifier au Whois réel », capture d'écran du tableau de disponibilité, offre de crédits gratuits pour test
+- [ ] Prise de contact effectuée pour chaque cible, avec suivi des réponses
+- [ ] Au moins 3 mentions obtenues, avec lien suivi (non `nofollow` si possible)
+- [ ] Trafic de référence mesuré dans Search Console / analytics 4 semaines après publication
+
+### Notes
+- Priorité haute : meilleur rapport effort/impact identifié dans l'audit SEO.
+- Les pages comparatives internes (`/namorama-vs-namelix`, `/namorama-vs-looka`, `/comparatif-generateurs-de-noms`) servent d'argumentaire prêt à l'emploi lors de la prise de contact.
+- À relancer une fois par trimestre : ces listicles sont mis à jour régulièrement (« [2026] » dans les titres).
+
+---
+
+## US-048 · Vérification de disponibilité de marque (INPI) — fonctionnalité et page SEO
+
+**Status**: ❌ To do
+
+**As a** utilisateur qui a trouvé un nom dont le domaine est libre,
+**I want to** savoir si ce nom est déjà déposé comme marque avant de m'engager,
+**So that** je n'investisse pas dans une identité que je devrai abandonner pour raison juridique.
+
+### Contexte
+
+Un domaine libre ne garantit rien juridiquement : un nom peut être disponible en `.com` et déjà déposé à l'INPI dans la classe visée. C'est le principal angle mort du parcours actuel — l'app se contente d'un lien profond vers la recherche INPI (cf. US-042), sans vérification intégrée.
+
+C'est aussi un différenciateur de marché : les recherches du 01/08/2026 confirment que **la quasi-totalité des générateurs de noms ne vérifient que le domaine, jamais la marque déposée**. Namorama vérifie déjà réellement le domaine ; étendre la promesse à la marque prolonge naturellement son positionnement « disponibilité réelle, pas estimée ».
+
+### Acceptance Criteria
+- [ ] Étude de faisabilité de l'API INPI (données ouvertes marques) : couverture, quotas, conditions d'utilisation, fraîcheur des données
+- [ ] Si l'API le permet : recherche automatique du nom dans la base Marques, avec restitution du statut (aucun dépôt trouvé / dépôt existant, avec classes concernées)
+- [ ] Résultat affiché dans le tableau de suggestions, distinct de la disponibilité de domaine, avec un niveau de confiance explicite
+- [ ] Avertissement juridique clair : l'outil ne remplace pas une recherche d'antériorité ni l'avis d'un conseil en propriété industrielle
+- [ ] Repli propre si l'API est indisponible : le lien profond INPI actuel reste affiché
+- [ ] Page de contenu `/verifier-disponibilite-nom-marque` visant l'intention « vérifier si un nom de marque est disponible », reliée depuis la home et les guides
+- [ ] Décision documentée sur le modèle : inclus dans les crédits ou fonctionnalité distincte
+
+### Notes
+- Dépend de US-042 (lien de vérification de marque), déjà en place.
+- Attention au périmètre géographique : l'INPI ne couvre que la France. Pour une cible européenne, l'EUIPO est la base pertinente — à traiter comme une extension ultérieure, pas dans cette story.
+- Risque produit : afficher « marque disponible » à tort engage la responsabilité perçue du service. Préférer une formulation prudente (« aucun dépôt identique trouvé dans la base INPI ») à une affirmation de disponibilité.

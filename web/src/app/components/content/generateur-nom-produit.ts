@@ -65,6 +65,39 @@ import { applyContentSeo } from './content-seo';
         </li>
       </ul>
 
+      <h2 id="produit-vs-marque">Nommer un produit ou nommer une marque&nbsp;?</h2>
+      <p>
+        La question est rarement posée, et elle change tout. Nommer une entreprise engage pour dix ans
+        et doit couvrir une activité qui va évoluer. <strong>Nommer un produit engage moins, mais doit
+        porter plus</strong>&nbsp;: le nom doit vendre un bénéfice précis, à un public précis, souvent
+        face à des concurrents directs sur une même étagère ou une même page de résultats.
+      </p>
+      <p>
+        Trois architectures possibles, à choisir avant de chercher des mots&nbsp;:
+      </p>
+      <ul>
+        <li>
+          <strong>Marque unique</strong> — le produit porte le nom de l'entreprise, éventuellement suivi
+          d'un descriptif (<em>Google Agenda</em>, <em>Apple Watch</em>). Simple, capitalise sur la
+          notoriété existante, mais chaque produit engage la marque entière.
+        </li>
+        <li>
+          <strong>Marque endossée</strong> — le produit a son nom propre, adossé à celui de la maison
+          (<em>Nespresso by Nestlé</em>). Le meilleur des deux mondes, au prix d'une communication plus
+          lourde.
+        </li>
+        <li>
+          <strong>Produit autonome</strong> — le nom vit seul, sans lien visible avec l'entreprise. C'est
+          la voie obligée quand vous visez des publics très différents, ou quand vous préparez une revente.
+        </li>
+      </ul>
+      <p>
+        Si vous lancez votre premier produit, la question est en général tranchée d'avance&nbsp;: le nom
+        du produit <em>est</em> la marque. Dans ce cas, appliquez les exigences les plus strictes, celles
+        d'un nom d'entreprise — voyez notre
+        <a routerLink="/guides/trouver-nom-de-marque">guide du nom de marque</a>.
+      </p>
+
       <h2 id="criteres">Les critères qui comptent vraiment</h2>
       <ul>
         <li><strong>Le test de la radio</strong>&nbsp;: entendu une fois, il doit s'écrire sans hésitation.
@@ -111,6 +144,70 @@ import { applyContentSeo } from './content-seo';
         <li><strong>Choisissez</strong> parmi les noms dont le domaine est libre, comparez les extensions
           dans le tableau, et réservez celui qui vous plaît chez votre registrar.</li>
       </ol>
+
+      <h2 id="secteurs">Les codes changent selon le secteur</h2>
+      <p>
+        Un nom qui fonctionne pour un logiciel B2B sonnerait faux sur un pot de crème. Quelques repères
+        observés sur les marchés que nos utilisateurs ciblent le plus&nbsp;:
+      </p>
+      <ul>
+        <li>
+          <strong>Logiciel et SaaS</strong> — court, prononçable à l'anglaise, souvent un mot inventé ou
+          un verbe détourné. Les suffixes <code>-flow</code>, <code>-ops</code>, <code>-hub</code>
+          fonctionnent, mais sont devenus si courants qu'ils vous font ressembler à tout le monde.
+          Extension <code>.com</code> ou <code>.io</code>.
+          Voir <a routerLink="/generateur-nom-saas">le générateur dédié au SaaS</a>.
+        </li>
+        <li>
+          <strong>E-commerce et produits physiques</strong> — la lisibilité prime, parce que le nom sera
+          lu sur un emballage et tapé de mémoire. Les noms composés de deux mots courants marchent bien.
+          Voir <a routerLink="/generateur-nom-ecommerce">le générateur pour boutique en ligne</a>.
+        </li>
+        <li>
+          <strong>Cosmétique et bien-être</strong> — sonorités douces, voyelles ouvertes, références
+          naturelles ou latines. Le nom doit être agréable à prononcer, presque à murmurer.
+          Voir <a routerLink="/generateur-nom-marque-cosmetique">le générateur cosmétique</a>.
+        </li>
+        <li>
+          <strong>Application mobile</strong> — contrainte spécifique&nbsp;: le nom doit rester lisible
+          sous une icône, donc très court, et être trouvable dans un moteur de recherche d'app saturé.
+        </li>
+      </ul>
+
+      <h2 id="faq">Questions fréquentes</h2>
+      <h3>Comment trouver un nom de produit original&nbsp;?</h3>
+      <p>
+        En partant de ce qui existe déjà, pour vous en écarter délibérément. La plupart des noms
+        « originaux » trouvés seul ressemblent en fait beaucoup à ceux du marché, parce qu'on puise dans
+        le même vocabulaire. Namorama identifie d'abord les noms utilisés dans votre secteur, puis génère
+        en s'en démarquant explicitement.
+      </p>
+      <h3>Le nom de mon produit doit-il contenir un mot-clé pour le référencement&nbsp;?</h3>
+      <p>
+        Non. C'était vrai il y a quinze ans, ça ne l'est plus&nbsp;: Google ne privilégie plus les noms de
+        domaine à mots-clés exacts, et un nom générique vous rend impossible à distinguer de vos
+        concurrents. Mieux vaut un nom distinctif que vous pourrez faire connaître, et travailler le
+        référencement dans le contenu.
+      </p>
+      <h3>Combien de temps faut-il pour trouver un nom de produit&nbsp;?</h3>
+      <p>
+        En procédant à la main, comptez plusieurs jours, dont l'essentiel passé à découvrir que les noms
+        trouvés sont déjà pris. En générant et vérifiant simultanément, une séance de vingt minutes suffit
+        généralement à obtenir une liste de dix candidats réellement disponibles.
+      </p>
+      <h3>Que faire si tous les noms qui me plaisent sont pris&nbsp;?</h3>
+      <p>
+        Trois leviers, dans cet ordre&nbsp;: allonger d'un ou deux caractères, ce qui change tout&nbsp;;
+        passer d'un nom descriptif à un nom inventé&nbsp;; élargir aux extensions pertinentes
+        (<code>.fr</code>, <code>.io</code>) plutôt que de vous acharner sur le <code>.com</code>.
+        Éviter en revanche les orthographes déformées, qui vous coûteront à chaque conversation.
+      </p>
+      <h3>Puis-je déposer un nom de produit comme marque&nbsp;?</h3>
+      <p>
+        Oui, si le signe est distinctif et libre de droits antérieurs dans votre classe d'activité. Un
+        nom inventé se protège beaucoup mieux qu'un nom descriptif. Vérifiez l'antériorité auprès de
+        l'INPI avant tout engagement, et faites-vous accompagner pour le dépôt lui-même.
+      </p>
 
       <h2 id="suite">Pour aller plus loin</h2>
       <ul>
