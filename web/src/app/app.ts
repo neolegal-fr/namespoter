@@ -20,6 +20,7 @@ import { InputText } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 
 import { Dialog } from 'primeng/dialog';
+import { Drawer } from 'primeng/drawer';
 
 @Component({
   selector: 'app-root',
@@ -35,6 +36,7 @@ import { Dialog } from 'primeng/dialog';
     AvatarModule,
     FormsModule,
     Dialog,
+    Drawer,
     DatePipe,
     Toast,
     Textarea,
@@ -62,13 +64,22 @@ import { Dialog } from 'primeng/dialog';
             <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body" styleClass="lang-menu"></p-menu>
 
             <ng-container *ngIf="isLoggedIn()">
+              <!-- Compteur de crédits : visible en permanence, c'est le signal
+                   de valeur consommée et le point d'entrée vers les packs. -->
+              <button type="button"
+                      class="credits-pill"
+                      [attr.aria-label]="('APP.CREDITS' | translate) + ': ' + credits()"
+                      (click)="triggerCreditDialog()">
+                <i class="pi pi-bolt"></i><span>{{ credits() }}</span>
+              </button>
+
               <p-button
                 [label]="'APP.PROJECTS' | translate"
                 [ariaLabel]="'APP.PROJECTS' | translate"
                 icon="pi pi-folder"
                 [text]="true"
                 severity="secondary"
-                styleClass="nav-btn"
+                styleClass="nav-btn nav-btn--desktop"
                 (onClick)="projectMenu.toggle($event)">
               </p-button>
               <p-menu #projectMenu [model]="projectMenuItems" [popup]="true" appendTo="body"></p-menu>
@@ -80,7 +91,7 @@ import { Dialog } from 'primeng/dialog';
                   icon="pi pi-shield"
                   [text]="true"
                   severity="secondary"
-                  styleClass="nav-btn"
+                  styleClass="nav-btn nav-btn--desktop"
                   (onClick)="adminMenu.toggle($event)">
                 </p-button>
                 <p-menu #adminMenu [model]="adminMenuItems" [popup]="true" appendTo="body"></p-menu>
@@ -94,9 +105,9 @@ import { Dialog } from 'primeng/dialog';
                   role="button"
                   tabindex="0"
                   [ariaLabel]="'APP.MANAGE_ACCOUNT' | translate"
-                  (click)="userMenu.toggle($event)"
-                  (keydown.enter)="userMenu.toggle($event)"
-                  (keydown.space)="userMenu.toggle($event)">
+                  (click)="openAccountMenu($event, userMenu)"
+                  (keydown.enter)="openAccountMenu($event, userMenu)"
+                  (keydown.space)="openAccountMenu($event, userMenu)">
                 </p-avatar>
                 <p-menu #userMenu [model]="profileMenuItems" [popup]="true" appendTo="body"></p-menu>
             </ng-container>
@@ -111,6 +122,57 @@ import { Dialog } from 'primeng/dialog';
           </div>
         </ng-template>
       </p-menubar>
+
+      <!--
+        Panneau de compte mobile, ancré en bas dans la zone du pouce. Il remplace
+        les menus déroulants du header sous 640 px : on n'essaie plus de faire
+        tenir une navigation desktop dans 360 px. Le choix entre panneau et menu
+        se fait au clic (matchMedia), pas au rendu, pour ne pas casser
+        l'hydratation des pages prérendues.
+      -->
+      <p-drawer [visible]="showAccountSheet()"
+                (visibleChange)="showAccountSheet.set($event)"
+                position="bottom"
+                [showCloseIcon]="false"
+                styleClass="account-sheet"
+                [style]="{ height: 'auto', maxHeight: '85vh' }">
+        <div class="account-sheet__grab"></div>
+
+        <div class="account-sheet__identity">
+          <div class="account-sheet__name">{{ userName() }}</div>
+          <div class="account-sheet__email">{{ userEmail() }}</div>
+        </div>
+
+        <button type="button" class="account-sheet__credits" (click)="sheetCredits()">
+          <span><i class="pi pi-bolt"></i> {{ credits() }} {{ 'BILLING.CREDITS' | translate }}</span>
+          <span class="account-sheet__topup">{{ 'APP.TOP_UP' | translate }}</span>
+        </button>
+
+        <nav class="account-sheet__rows">
+          <button type="button" class="account-sheet__row" (click)="sheetNewProject()">
+            <i class="pi pi-plus"></i><span>{{ 'APP.PROJECT_NEW' | translate }}</span>
+          </button>
+          <button type="button" class="account-sheet__row" (click)="sheetProjects()">
+            <i class="pi pi-folder-open"></i><span>{{ 'APP.PROJECT_OPEN' | translate }}</span>
+          </button>
+          <button type="button" class="account-sheet__row" (click)="sheetAccount()">
+            <i class="pi pi-cog"></i><span>{{ 'APP.MANAGE_ACCOUNT' | translate }}</span>
+          </button>
+
+          <ng-container *ngIf="isAdmin()">
+            <div class="account-sheet__section">{{ 'APP.ADMIN' | translate }}</div>
+            <button type="button" class="account-sheet__row" *ngFor="let item of adminMenuItems"
+                    (click)="sheetAdmin(item)">
+              <i [class]="item.icon"></i><span>{{ item.label }}</span>
+            </button>
+          </ng-container>
+
+          <div class="account-sheet__section"></div>
+          <button type="button" class="account-sheet__row" (click)="sheetLogout()">
+            <i class="pi pi-sign-out"></i><span>{{ 'APP.LOGOUT' | translate }}</span>
+          </button>
+        </nav>
+      </p-drawer>
 
       <div class="flex flex-column align-items-center w-full px-3 py-3 md:py-5" style="flex: 1">
         <div class="w-full" [style.max-width]="router.url.startsWith('/admin') ? '72rem' : (router.url === '/' ? '64rem' : '44rem')">
@@ -378,6 +440,49 @@ export class AppComponent implements OnInit {
     { label: 'Utilisateurs', icon: 'pi pi-users',     command: () => this.router.navigate(['/admin/users']) },
     { label: 'Feedbacks',    icon: 'pi pi-comment',   command: () => this.router.navigate(['/admin/feedback']) },
   ];
+
+  /** Panneau de compte mobile (bottom sheet). */
+  showAccountSheet = signal(false);
+
+  /**
+   * Sous 640 px, l'avatar ouvre le panneau ancré en bas ; au-delà, le menu
+   * déroulant habituel. Le test se fait au clic — donc toujours côté
+   * navigateur — et non au rendu, qui doit rester identique au prérendu SSG.
+   */
+  openAccountMenu(event: Event, desktopMenu: { toggle: (e: Event) => void }) {
+    const isMobile = typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 640px)').matches;
+    if (isMobile) {
+      this.showAccountSheet.set(true);
+    } else {
+      desktopMenu.toggle(event);
+    }
+  }
+
+  /**
+   * Ferme le panneau AVANT d'exécuter l'action : sans ça, ouvrir le dialogue
+   * de crédits par-dessus superpose deux overlays et verrouille deux fois le
+   * défilement de la page.
+   */
+  private fromSheet(action: () => void) {
+    this.showAccountSheet.set(false);
+    setTimeout(() => action());
+  }
+
+  sheetCredits()    { this.fromSheet(() => this.triggerCreditDialog()); }
+  sheetNewProject() { this.fromSheet(() => this.newProject()); }
+  sheetProjects()   { this.fromSheet(() => this.openProjects()); }
+  sheetLogout()     { this.fromSheet(() => this.logout()); }
+
+  /** Console de gestion de compte Keycloak (mot de passe, e-mail, 2FA). */
+  sheetAccount() {
+    this.fromSheet(() => this.keycloak.getKeycloakInstance().accountManagement());
+  }
+
+  /** Entrée d'administration : les commandes viennent du menu existant. */
+  sheetAdmin(item: MenuItem) {
+    this.fromSheet(() => item.command?.({ item } as any));
+  }
 
   // Feedback
   showFeedbackDialog = signal(false);

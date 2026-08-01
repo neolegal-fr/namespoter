@@ -103,12 +103,168 @@ body {
     overflow-y: auto;
 }
 
+/* ─── Liens vers les générateurs sectoriels (home) ── */
+.sector-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 0.9rem;
+    border: 1px solid var(--p-surface-200);
+    border-radius: 999px;
+    background: var(--p-surface-0);
+    color: var(--p-surface-700);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.sector-link:hover {
+    border-color: var(--p-primary-color);
+    color: var(--p-primary-color);
+    background: var(--p-surface-50);
+}
+
+/* ─── Pastille de crédits ────────────────────────── */
+.credits-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2.75rem;
+    padding: 0 0.7rem;
+    border: 1px solid var(--p-surface-200);
+    border-radius: 999px;
+    background: var(--p-surface-50);
+    color: var(--p-surface-700);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.credits-pill:hover {
+    background: var(--p-surface-100);
+    border-color: var(--p-surface-300);
+}
+
+.credits-pill .pi-bolt {
+    font-size: 0.8rem;
+    color: #f59e0b;
+}
+
+/* ─── Panneau de compte mobile (bottom sheet) ────── */
+.account-sheet.p-drawer {
+    border-radius: 1rem 1rem 0 0;
+}
+
+/* Marge de sécurité pour les téléphones à barre gestuelle. */
+.account-sheet .p-drawer-content {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+.account-sheet__grab {
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: var(--p-surface-300);
+    margin: 0 auto 1rem;
+}
+
+.account-sheet__identity {
+    padding: 0 0.25rem 0.75rem;
+}
+
+.account-sheet__name {
+    font-weight: 700;
+    color: var(--p-surface-900);
+}
+
+.account-sheet__email {
+    font-size: 0.8rem;
+    color: var(--p-surface-500);
+}
+
+.account-sheet__credits {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0 0.9rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--p-surface-200);
+    border-radius: 0.625rem;
+    background: var(--p-surface-50);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--p-surface-800);
+    cursor: pointer;
+}
+
+.account-sheet__credits .pi-bolt {
+    color: #f59e0b;
+    margin-right: 0.25rem;
+}
+
+.account-sheet__topup {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--p-primary-color);
+}
+
+.account-sheet__rows {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Lignes pleine largeur de 3rem : cibles confortables en zone du pouce. */
+.account-sheet__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0 0.25rem;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    color: var(--p-surface-800);
+    text-align: left;
+    cursor: pointer;
+}
+
+.account-sheet__row:active {
+    background: var(--p-surface-100);
+}
+
+.account-sheet__row i {
+    font-size: 0.95rem;
+    color: var(--p-surface-500);
+    flex-shrink: 0;
+}
+
+.account-sheet__section {
+    margin: 0.5rem 0;
+    border-top: 1px solid var(--p-surface-200);
+    padding-top: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--p-surface-400);
+}
+
 /* ─── Barre de navigation en petite largeur ──────── */
 /* Le p-menubar est utilisé sans [model] (contenu 100 % projeté), donc PrimeNG
    ne génère pas son menu hamburger : le responsive est entièrement à notre
    charge. On dégraisse par densité plutôt que par JS, pour ne pas casser
    l'hydratation des pages prérendues (SSG). */
 @media (max-width: 640px) {
+    /* Projets et Administration passent dans le panneau de compte : le header
+       se réduit à identité, langue, crédits et avatar. */
+    .nav-btn--desktop {
+        display: none;
+    }
+
     /* Boutons de nav en icône seule : masquer le label ne suffit pas,
        le padding et le gap du bouton PrimeNG resteraient. */
     .nav-btn .p-button-label {

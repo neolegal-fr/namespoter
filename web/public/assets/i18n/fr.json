@@ -35,7 +35,8 @@
     "DELETE_ACCOUNT_MSG": "Cette action est irréversible. Tous vos projets et crédits seront définitivement supprimés.",
     "DELETE_ACCOUNT_BTN": "Supprimer définitivement",
     "CANCEL": "Annuler",
-    "LANGUAGE": "Changer de langue"
+    "LANGUAGE": "Changer de langue",
+    "TOP_UP": "Recharger"
   },
   "ADMIN": {
     "TITLE": "Administration",
