@@ -21,12 +21,18 @@ import { AnalyticsService } from './services/analytics';
 export class CustomTranslateLoader implements TranslateLoader {
   constructor(private http: HttpClient, private isBrowser: boolean) {}
   getTranslation(lang: string): Observable<any> {
-    // Au prerender (SSG), l'URL relative des fichiers i18n n'est pas résolvable
-    // côté serveur : on renvoie un dictionnaire vide. La landing prérendue
-    // affiche du texte écrit en dur ; les traductions du shell sont chargées
-    // côté client après hydratation.
+    // Au prerender (SSG), rien n'est résolvable côté serveur : on renvoie un
+    // dictionnaire vide. La landing prérendue affiche du texte écrit en dur ;
+    // les traductions du shell sont chargées côté client après hydratation.
     if (!this.isBrowser) return of({});
-    return this.http.get(`./assets/i18n/${lang}.json`);
+
+    // Chemin ABSOLU, impérativement. En relatif, « ./assets/… » se résout
+    // contre l'URL courante : depuis /guides/xxx ou /projects/:id, la requête
+    // partait vers /guides/assets/i18n/de.json, où le fallback SPA de nginx
+    // renvoie index.html avec un code 200. ngx-translate recevait donc du HTML
+    // au lieu du JSON, échouait sans bruit, et changer de langue ne faisait
+    // plus rien dès qu'on n'était pas à la racine.
+    return this.http.get(`/assets/i18n/${lang}.json`);
   }
 }
 
