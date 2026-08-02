@@ -92,6 +92,8 @@
       "TITLE": "Konfiguration",
       "SUBTITLE": "Passen Sie Ihre Schlüsselwörter an und definieren Sie Ihre Zielgruppe.",
       "KEYWORDS_TITLE": "Schlüsselwörter",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} Schlüsselwörter",
+      "KEYWORDS_FULL": "Grenze von {{max}} Schlüsselwörtern erreicht: Entfernen Sie eines, um ein weiteres hinzuzufügen.",
       "EXTENSIONS_TITLE": "Domain-Endungen",
       "ADD_PLACEHOLDER": "Schlüsselwort hinzufügen...",
       "MATCH_MODE": "Verfügbarkeitskriterium",

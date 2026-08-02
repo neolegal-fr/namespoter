@@ -198,14 +198,20 @@
 
         <!-- Mots-clés -->
         <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
-          <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem">
+            <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
+            <span [style.color]="keywordsFull() ? '#ef4444' : ''" class="text-500" style="font-size: 0.75rem; flex-shrink: 0">
+              {{ 'WIZARD.STEP2.KEYWORDS_COUNT' | translate:{ n: keywords().length, max: MAX_KEYWORDS } }}
+            </span>
+          </div>
           <div class="flex gap-2">
-            <input pInputText type="text" [(ngModel)]="newKeyword" class="flex-1" [placeholder]="'WIZARD.STEP2.ADD_PLACEHOLDER' | translate" (keydown.enter)="addKeyword()">
-            <p-button icon="pi pi-plus" (onClick)="addKeyword()"></p-button>
+            <input pInputText type="text" [(ngModel)]="newKeyword" class="flex-1" [disabled]="keywordsFull()" [placeholder]="'WIZARD.STEP2.ADD_PLACEHOLDER' | translate" (keydown.enter)="addKeyword()">
+            <p-button icon="pi pi-plus" [disabled]="keywordsFull()" (onClick)="addKeyword()"></p-button>
           </div>
           <div class="chips-container">
             <p-chip *ngFor="let keyword of keywords()" [label]="keyword" [removable]="true" (onRemove)="removeKeyword(keyword)"></p-chip>
           </div>
+          <span *ngIf="keywordsFull()" class="text-500" style="font-size: 0.75rem">{{ 'WIZARD.STEP2.KEYWORDS_FULL' | translate:{ max: MAX_KEYWORDS } }}</span>
         </div>
 
         <!-- Cible internationale ou locale -->

@@ -92,6 +92,8 @@
       "TITLE": "設定",
       "SUBTITLE": "キーワードを調整し、ターゲット層を定義してください。",
       "KEYWORDS_TITLE": "キーワード",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} キーワード",
+      "KEYWORDS_FULL": "キーワードの上限（{{max}}）に達しました。追加するには 1 つ削除してください。",
       "EXTENSIONS_TITLE": "ドメイン拡張子",
       "ADD_PLACEHOLDER": "キーワードを追加...",
       "MATCH_MODE": "利用可能基準",

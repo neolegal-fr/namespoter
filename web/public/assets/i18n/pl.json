@@ -92,6 +92,8 @@
       "TITLE": "Konfiguracja",
       "SUBTITLE": "Dostosuj słowa kluczowe i zdefiniuj swoją grupę docelową.",
       "KEYWORDS_TITLE": "Słowa kluczowe",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} słów kluczowych",
+      "KEYWORDS_FULL": "Osiągnięto limit {{max}} słów kluczowych: usuń jedno, aby dodać kolejne.",
       "EXTENSIONS_TITLE": "Rozszerzenia domeny",
       "ADD_PLACEHOLDER": "Dodaj słowo kluczowe...",
       "MATCH_MODE": "Kryterium dostępności",

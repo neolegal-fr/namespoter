@@ -92,6 +92,8 @@
       "TITLE": "Configurare",
       "SUBTITLE": "Ajustează cuvintele cheie și definește-ți publicul țintă.",
       "KEYWORDS_TITLE": "Cuvinte cheie",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} cuvinte cheie",
+      "KEYWORDS_FULL": "Limita de {{max}} cuvinte cheie a fost atinsă: eliminați unul pentru a adăuga altul.",
       "EXTENSIONS_TITLE": "Extensii de domeniu",
       "ADD_PLACEHOLDER": "Adaugă un cuvânt cheie...",
       "MATCH_MODE": "Criteriu de disponibilitate",

@@ -92,6 +92,8 @@
       "TITLE": "Konfigurasjon",
       "SUBTITLE": "Tilpass nøkkelordene dine og definer målgruppen din.",
       "KEYWORDS_TITLE": "Nøkkelord",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} nøkkelord",
+      "KEYWORDS_FULL": "Grensen på {{max}} nøkkelord er nådd: fjern ett for å legge til et nytt.",
       "EXTENSIONS_TITLE": "Domeneendelser",
       "ADD_PLACEHOLDER": "Legg til et nøkkelord...",
       "MATCH_MODE": "Tilgjengelighetskriterium",

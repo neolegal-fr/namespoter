@@ -92,6 +92,8 @@
       "TITLE": "Yapılandırma",
       "SUBTITLE": "Anahtar kelimelerinizi ayarlayın ve hedef kitlenizi tanımlayın.",
       "KEYWORDS_TITLE": "Anahtar Kelimeler",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} anahtar kelime",
+      "KEYWORDS_FULL": "{{max}} anahtar kelime sınırına ulaşıldı: yeni bir tane eklemek için birini kaldırın.",
       "EXTENSIONS_TITLE": "Alan Adı Uzantıları",
       "ADD_PLACEHOLDER": "Anahtar kelime ekle...",
       "MATCH_MODE": "Uygunluk Kriteri",

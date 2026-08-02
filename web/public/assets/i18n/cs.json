@@ -92,6 +92,8 @@
       "TITLE": "Konfigurace",
       "SUBTITLE": "Upravte klíčová slova a definujte svou cílovou skupinu.",
       "KEYWORDS_TITLE": "Klíčová slova",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} klíčových slov",
+      "KEYWORDS_FULL": "Dosažen limit {{max}} klíčových slov: jedno odeberte, abyste mohli přidat další.",
       "EXTENSIONS_TITLE": "Přípony domény",
       "ADD_PLACEHOLDER": "Přidat klíčové slovo...",
       "MATCH_MODE": "Kritérium dostupnosti",

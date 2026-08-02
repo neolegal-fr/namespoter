@@ -92,6 +92,8 @@
       "TITLE": "Asetukset",
       "SUBTITLE": "Muokkaa avainsanoja ja määritä kohderyhmäsi.",
       "KEYWORDS_TITLE": "Avainsanat",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} avainsanaa",
+      "KEYWORDS_FULL": "{{max}} avainsanan raja saavutettu: poista yksi lisätäksesi uuden.",
       "EXTENSIONS_TITLE": "Verkkotunnuspäätteet",
       "ADD_PLACEHOLDER": "Lisää avainsana...",
       "MATCH_MODE": "Saatavuuskriteeri",

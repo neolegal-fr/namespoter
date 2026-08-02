@@ -92,6 +92,8 @@
       "TITLE": "Configuratie",
       "SUBTITLE": "Pas uw trefwoorden aan en definieer uw doelgroep.",
       "KEYWORDS_TITLE": "Trefwoorden",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} trefwoorden",
+      "KEYWORDS_FULL": "Limiet van {{max}} trefwoorden bereikt: verwijder er een om een nieuwe toe te voegen.",
       "EXTENSIONS_TITLE": "Domeinextensies",
       "ADD_PLACEHOLDER": "Trefwoord toevoegen...",
       "MATCH_MODE": "Beschikbaarheidscriterium",

@@ -2,6 +2,18 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from
 import { Request, Response } from 'express';
 import { AppLoggerService } from '../logging/app-logger.service';
 
+/**
+ * Routes dont un refus de validation est une étape de parcours perdue.
+ *
+ * La requête est rejetée par le ValidationPipe **avant** d'atteindre le
+ * contrôleur : aucun `search_started` n'est émis, et le tunnel affiche alors
+ * 100 % de réussite alors que l'utilisateur n'a jamais pu lancer sa recherche.
+ * Ces événements comblent l'angle mort.
+ */
+const BLOCKED_FUNNEL_ROUTES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/^\/domain\/search/, 'search_blocked_validation'],
+];
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   constructor(private readonly logger: AppLoggerService) {}
@@ -20,6 +32,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message = typeof res === 'string' ? res : (res as any).message || message;
     }
 
+    const detail = Array.isArray(message) ? message.join(' | ') : String(message);
+    const requestId = response.getHeader('X-Request-Id') as string | undefined;
+
     // Toutes les erreurs sont journalisées, y compris les 4xx : ce sont elles
     // qui révèlent les blocages vécus par les utilisateurs (crédits épuisés,
     // validation refusée, session expirée). La pile n'est utile que sur les 5xx.
@@ -27,14 +42,26 @@ export class AllExceptionsFilter implements ExceptionFilter {
       kind: 'log',
       level: status >= 500 ? 'error' : 'warn',
       context: 'HttpException',
-      message: Array.isArray(message) ? message.join(' | ') : String(message),
+      message: detail,
       status,
       method: request.method,
       path: request.url,
       userId: request.user?.sub,
-      requestId: response.getHeader('X-Request-Id') as string | undefined,
+      requestId,
       stack: status >= 500 && exception instanceof Error ? exception.stack : undefined,
     });
+
+    if (status === HttpStatus.BAD_REQUEST) {
+      const blocked = BLOCKED_FUNNEL_ROUTES.find(([pattern]) => pattern.test(request.path));
+      if (blocked) {
+        this.logger.event(blocked[1], {
+          userId: request.user?.sub,
+          requestId,
+          path: request.path,
+          reason: detail.slice(0, 200),
+        });
+      }
+    }
 
     response.status(status).json({
       statusCode: status,

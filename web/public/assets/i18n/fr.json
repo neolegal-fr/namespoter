@@ -114,6 +114,8 @@
       "TITLE": "Configuration",
       "SUBTITLE": "Vos inspirations, vos mots-clés, votre public cible et la longueur des noms.",
       "KEYWORDS_TITLE": "Mots-clés",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} mots-clés",
+      "KEYWORDS_FULL": "Limite de {{max}} mots-clés atteinte : retirez-en un pour en ajouter un autre.",
       "EXTENSIONS_TITLE": "Extensions de domaine",
       "ADD_PLACEHOLDER": "Ajouter un mot-clé...",
       "MATCH_MODE": "Critère de disponibilité",

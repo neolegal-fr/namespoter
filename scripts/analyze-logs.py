@@ -26,6 +26,7 @@ LOG_GLOB = "/var/snap/docker/common/namorama/logs/api/app-*.ndjson"
 FUNNEL = [
     ("wizard_step_viewed", "Étape du wizard vue"),
     ("login_required_before_search", "Redirigé vers la connexion"),
+    ("search_blocked_validation", "Refusé avant départ : saisie invalide"),
     ("search_started", "Recherche lancée"),
     ("search_completed", "Recherche terminée"),
     ("search_blocked_no_credits", "Bloqué : crédits épuisés"),
@@ -75,8 +76,22 @@ def funnel(rows):
 
     started = events.get("search_started", 0)
     completed = events.get("search_completed", 0)
-    if started:
-        print(f"\n  Recherches abouties : {completed}/{started} ({100*completed/started:.0f} %)")
+    blocked = events.get("search_blocked_validation", 0)
+    # Le dénominateur compte les tentatives, pas les départs : une recherche
+    # refusée par la validation n'atteint jamais le contrôleur, donc n'émet
+    # aucun `search_started`. L'ignorer afficherait 100 % de réussite sur un
+    # parcours où l'utilisateur s'est heurté à un mur.
+    tentatives = started + blocked
+    if tentatives:
+        print(f"\n  Recherches abouties : {completed}/{tentatives} ({100*completed/tentatives:.0f} %)")
+    if blocked:
+        print(f"  Refusées avant même de démarrer : {blocked}/{tentatives} ({100*blocked/tentatives:.0f} %)")
+        motifs = Counter(
+            str(r.get("reason"))[:70]
+            for r in rows if r.get("context") == "search_blocked_validation"
+        )
+        for motif, n in motifs.most_common(5):
+            print(f"      {n:4}×  {motif}")
 
     vides = sum(1 for r in rows if r.get("context") == "search_completed" and r.get("emptyResult"))
     if completed:

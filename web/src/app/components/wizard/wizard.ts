@@ -338,7 +338,15 @@ export class WizardComponent implements OnInit {
   // Étape 2
   keywords = signal<string[]>([]);
   newKeyword = signal('');
-  
+  /**
+   * Doit rester aligné sur `@ArrayMaxSize(50)` de SearchDomainsDto : au-delà,
+   * l'API rejette la recherche par un 400 que rien n'explique à l'écran.
+   * L'IA peut renvoyer plus de 50 mots-clés, et l'utilisateur peut en ajouter :
+   * toute affectation passe donc par `setKeywords`.
+   */
+  readonly MAX_KEYWORDS = 50;
+  keywordsFull = computed(() => this.keywords().length >= this.MAX_KEYWORDS);
+
   newExtension = signal('');
   selectedExtensions = signal<string[]>(['.com']);
   matchMode = signal('all');
@@ -518,7 +526,7 @@ export class WizardComponent implements OnInit {
       this.description.set(state.description);
       this.projectName.set(state.projectName || '');
       this.refinedDescription.set(state.refinedDescription);
-      this.keywords.set(state.keywords);
+      this.setKeywords(state.keywords);
       this.selectedExtensions.set(state.selectedExtensions || ['.com']);
       this.matchMode.set(state.matchMode || 'all');
       this.projectId.set(state.projectId || null);
@@ -684,7 +692,7 @@ export class WizardComponent implements OnInit {
         this.projectId.set(project.id);
         this.projectName.set(project.name);
         this.description.set(project.description);
-        this.keywords.set(project.keywords || []);
+        this.setKeywords(project.keywords);
         this.selectedExtensions.set(project.extensions);
         this.matchMode.set(project.matchMode);
         // Réglages de génération enregistrés avec le projet (#1 / #3)
@@ -986,7 +994,18 @@ export class WizardComponent implements OnInit {
     this.expandedAnalysisId.set(this.expandedAnalysisId() === id ? null : id);
   }
 
+  /**
+   * Seul point d'affectation des mots-clés : dédoublonne et tronque au plafond
+   * accepté par l'API. Les listes venant de l'IA, d'un projet enregistré ou du
+   * localStorage ne sont pas bornées à la source.
+   */
+  private setKeywords(list: string[] | null | undefined) {
+    const unique = [...new Set((list ?? []).filter(k => !!k))];
+    this.keywords.set(unique.slice(0, this.MAX_KEYWORDS));
+  }
+
   addKeyword() {
+    if (this.keywordsFull()) return;
     if (this.newKeyword() && !this.keywords().includes(this.newKeyword())) {
       this.keywords.update(k => [...k, this.newKeyword()]);
       this.newKeyword.set('');
@@ -1214,7 +1233,7 @@ export class WizardComponent implements OnInit {
     this.loading.set(false);
 
     if (keywordsResult) {
-      this.keywords.set(keywordsResult.keywords);
+      this.setKeywords(keywordsResult.keywords);
       this.nextStep();
     }
     this.cdr.detectChanges();

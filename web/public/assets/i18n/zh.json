@@ -92,6 +92,8 @@
       "TITLE": "配置",
       "SUBTITLE": "调整您的关键词并定义目标受众。",
       "KEYWORDS_TITLE": "关键词",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} 个关键词",
+      "KEYWORDS_FULL": "已达到 {{max}} 个关键词上限：请先移除一个再添加。",
       "EXTENSIONS_TITLE": "域名后缀",
       "ADD_PLACEHOLDER": "添加关键词...",
       "MATCH_MODE": "可用性标准",

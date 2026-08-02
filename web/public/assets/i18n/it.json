@@ -92,6 +92,8 @@
       "TITLE": "Configurazione",
       "SUBTITLE": "Regola le tue parole chiave e definisci il tuo obiettivo.",
       "KEYWORDS_TITLE": "Parole chiave",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} parole chiave",
+      "KEYWORDS_FULL": "Limite di {{max}} parole chiave raggiunto: rimuovine una per aggiungerne un'altra.",
       "EXTENSIONS_TITLE": "Estensioni di dominio",
       "ADD_PLACEHOLDER": "Aggiungi una parola chiave...",
       "MATCH_MODE": "Criterio di disponibilità",

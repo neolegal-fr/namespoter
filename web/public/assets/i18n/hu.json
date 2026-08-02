@@ -92,6 +92,8 @@
       "TITLE": "Konfiguráció",
       "SUBTITLE": "Állítsa be a kulcsszavakat és határozza meg a célközönséget.",
       "KEYWORDS_TITLE": "Kulcsszavak",
+      "KEYWORDS_COUNT": "{{n}} / {{max}} kulcsszó",
+      "KEYWORDS_FULL": "Elérte a(z) {{max}} kulcsszavas korlátot: távolítson el egyet, hogy újat adhasson hozzá.",
       "EXTENSIONS_TITLE": "Domain végzések",
       "ADD_PLACEHOLDER": "Kulcsszó hozzáadása...",
       "MATCH_MODE": "Elérhetőségi kritérium",
