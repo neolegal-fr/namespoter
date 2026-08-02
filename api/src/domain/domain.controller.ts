@@ -138,7 +138,7 @@ export class DomainController {
     });
 
     try {
-      const { totalChecked, minLengthUsed } = await this.domainService.findAvailableDomains(
+      const { totalChecked, minLengthUsed, unresolved } = await this.domainService.findAvailableDomains(
         dto.description,
         dto.keywords,
         {
@@ -203,6 +203,10 @@ export class DomainController {
           // Le cas qui mérite le plus d'attention : l'utilisateur a attendu
           // pour rien, et c'est le premier motif d'abandon attendu.
           emptyResult: results.length === 0,
+          // Vérifications non concluantes par extension. Un résultat vide
+          // accompagné d'un compteur élevé désigne une panne de WHOIS, pas
+          // un marché saturé — c'est toute la différence.
+          unresolved,
         });
 
         emit({

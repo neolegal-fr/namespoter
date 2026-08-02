@@ -1269,7 +1269,9 @@ export class WizardComponent implements OnInit {
     const tempRows = newNames.map(name => ({
       id: null as string | null,
       name,
-      allExtensions: Object.fromEntries(this.selectedExtensions().map(ext => [ext, null])),
+      // `undefined` = vérification en cours (spinner). `null` est désormais
+      // réservé à une réponse de l'API : « impossible à déterminer ».
+      allExtensions: Object.fromEntries(this.selectedExtensions().map(ext => [ext, undefined])),
       rating: 'liked' as const,
       isManual: true,
       analysisPending: false,

@@ -612,47 +612,102 @@ ${langInstruction}`;
     }
   }
 
-  async isDomainAvailable(domain: string): Promise<boolean> {
+  /**
+   * `true` libre, `false` pris, **`null` : impossible à déterminer**.
+   *
+   * Le troisième état n'est pas un raffinement : sans lui, une panne de WHOIS
+   * se présente comme un domaine pris. C'est ce qui est arrivé à `.app`, dont
+   * le serveur port 43 a été retiré au profit de RDAP — `whois.nic.app` est en
+   * NXDOMAIN, la commande échoue sans rien écrire sur stdout, et l'ancien code
+   * répondait « pris ». En mode « toutes les extensions », plus aucun candidat
+   * ne pouvait alors matcher : recherche à zéro résultat, en silence.
+   *
+   * Un doute doit rester visible plutôt que de se déguiser en réponse.
+   */
+  async isDomainAvailable(domain: string): Promise<boolean | null> {
     validateDomain(domain);
     try {
       const { stdout } = await execFileAsync('whois', [domain], { timeout: 10000 });
-      const output = stdout.toLowerCase();
-
-      // Check "available" patterns first — some TLDs (.io, .co, etc.) include
-      // registrar info for the TLD itself before the "no match" message.
-      const availablePatterns = [
-        'no match for',
-        'no match',
-        'not found',
-        'no entries found',
-        'no data found',
-        'status: available',
-        'domain not found',
-        'is available',
-      ];
-      if (availablePatterns.some(p => output.includes(p))) return true;
-
-      const takenPatterns = [
-        'domain name:',
-        'registrar:',
-        'creation date:',
-        'registry domain id:',
-        'reserved',
-      ];
-      return !takenPatterns.some(pattern => output.includes(pattern));
+      return this.readWhois(stdout);
     } catch (error: any) {
-      const errorMsg = error.stdout?.toLowerCase() || error.message?.toLowerCase() || '';
-      return errorMsg.includes('no match') || errorMsg.includes('not found') || errorMsg.includes('available');
+      // Un code de sortie non nul n'est pas l'absence de réponse : `whois`
+      // sort en erreur sur un .com libre tout en écrivant « No match for
+      // domain » sur stdout. On relit donc stdout avant de conclure.
+      return this.readWhois(error.stdout ?? '');
     }
+  }
+
+  /**
+   * Interprète une réponse WHOIS brute. Chaque registre a son vocabulaire ;
+   * l'ordre compte, car une réponse « libre » de .de ou .it contient elle aussi
+   * une ligne `Domain:`, qui ne devient un indice de domaine pris qu'une fois
+   * les marqueurs de disponibilité écartés.
+   */
+  private readWhois(raw: string): boolean | null {
+    // Chaque registre aligne ses champs à sa façon : espaces et tabulations
+    // (« Status:        AVAILABLE » chez .it et .be), points de conduite
+    // (« domain.........: » chez .fi et .no). Sans normalisation, aucun motif
+    // ne matche et un domaine pris ressort comme indéterminé.
+    const output = raw.toLowerCase()
+      .replace(/\.{2,}/g, '')
+      .replace(/[^\S\n]+/g, ' ');
+    if (!output.trim()) return null;
+
+    // Disponibilité d'abord — certains TLD (.io, .co) décrivent le registre
+    // lui-même avant d'annoncer que le domaine, lui, est libre.
+    const availablePatterns = [
+      'no match',
+      'not found',
+      'no entries found',
+      'no data found',
+      'no object found',
+      'nothing found',
+      'no information available',
+      'no information was found',
+      'status: available',
+      'status: free',
+      'domain not found',
+      'is available',
+      'is free',
+    ];
+    if (availablePatterns.some(p => output.includes(p))) return true;
+
+    // .africa répond par le seul mot « Available ». Comparaison ligne à ligne :
+    // le mot isolé se retrouve aussi dans les mentions légales des réponses
+    // « pris », où il ne signifie rien.
+    if (output.split('\n').some(line => line.trim() === 'available')) return true;
+
+    const takenPatterns = [
+      'domain name:',
+      'domain:',
+      'registrar:',
+      'creation date:',
+      'registry domain id:',
+      'status: connect',
+      'status: registered',
+      // .jp présente ses champs entre crochets plutôt qu'en « clé: valeur ».
+      '[domain name]',
+      'domain information:',
+      'reserved',
+    ];
+    if (takenPatterns.some(p => output.includes(p))) return false;
+
+    // Rien de reconnaissable. Les causes sont réelles et croissantes : serveur
+    // port 43 retiré au profit de RDAP (.app, .dev, .shop depuis mai 2026),
+    // registre qui refuse nos requêtes (.ch), TLD sans WHOIS du tout (.es),
+    // quota dépassé. Aucune des deux réponses binaires n'est acceptable ici :
+    // « pris » masquerait des noms libres, « libre » ferait payer un crédit
+    // pour un domaine déjà enregistré.
+    return null;
   }
 
   async recheckAvailability(
     names: string[],
     extensions: string[],
-  ): Promise<{ name: string; allExtensions: Record<string, boolean> }[]> {
+  ): Promise<{ name: string; allExtensions: Record<string, boolean | null> }[]> {
     return Promise.all(
       names.map(async (name) => {
-        const extStatus: Record<string, boolean> = {};
+        const extStatus: Record<string, boolean | null> = {};
         await Promise.all(
           extensions.map(async (ext) => {
             extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`);
@@ -667,7 +722,7 @@ ${langInstruction}`;
     description: string,
     keywords: string[],
     options: FindDomainsOptions = {},
-  ): Promise<{ results: any[], totalChecked: number, minLengthUsed: number }> {
+  ): Promise<{ results: any[], totalChecked: number, minLengthUsed: number, unresolved: Record<string, number> }> {
     const {
       targetCount = 10,
       extensions = ['.com'],
@@ -688,6 +743,8 @@ ${langInstruction}`;
     const finalResults: any[] = [];
     // US-015 — pre-seed with already-evaluated names so the LLM never re-proposes them
     const checkedNames = new Set<string>(excludeNames);
+    /** Vérifications non concluantes, par extension : remontées dans les logs. */
+    const unresolved = new Map<string, number>();
     let attempts = 0;
     const maxAttempts = 5;
 
@@ -721,17 +778,23 @@ ${langInstruction}`;
 
         onEvent?.({ type: 'candidate', name: item.name, checkedSoFar: checkedNames.size });
 
-        const extStatus: Record<string, boolean> = {};
+        const extStatus: Record<string, boolean | null> = {};
 
         await Promise.all(extensions.map(async (ext) => {
           extStatus[ext] = await this.isDomainAvailable(`${item.name}${ext}`);
         }));
 
-        const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext]);
+        const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext] === true);
+        // Extensions dont la disponibilité n'a pas pu être établie : elles ne
+        // doivent ni valider ni invalider un candidat, seulement se signaler.
+        const unknownExts = Object.keys(extStatus).filter(ext => extStatus[ext] === null);
+        unknownExts.forEach(ext => unresolved.set(ext, (unresolved.get(ext) ?? 0) + 1));
 
         let isMatch = false;
         if (matchMode === MatchMode.ALL) {
-          isMatch = availableExts.length === extensions.length;
+          // « Toutes les extensions » porte sur celles qu'on a su vérifier :
+          // un WHOIS en panne ne doit pas rendre la recherche infructueuse.
+          isMatch = availableExts.length > 0 && availableExts.length === extensions.length - unknownExts.length;
         } else {
           isMatch = availableExts.length > 0;
         }
@@ -751,6 +814,8 @@ ${langInstruction}`;
       // Longueur mini réellement appliquée (réglage UI ou déduite du brief) —
       // le front s'en sert pour proposer de l'assouplir quand rien n'est trouvé.
       minLengthUsed: constraints.minLength,
+      // Sans ce décompte, une panne de WHOIS se lit comme un marché saturé.
+      unresolved: Object.fromEntries(unresolved),
     };
   }
 }

@@ -62,7 +62,7 @@ export class DomainService {
     return this.http.post<{ recommended: string; reason: string }>(`${this.apiUrl}/pick-best`, { suggestions, lang });
   }
 
-  recheckDomains(names: string[], extensions: string[]): Observable<{ domains: { name: string; allExtensions: Record<string, boolean> }[] }> {
+  recheckDomains(names: string[], extensions: string[]): Observable<{ domains: { name: string; allExtensions: Record<string, boolean | null> }[] }> {
     return this.http.post<any>(`${this.apiUrl}/recheck`, { names, extensions });
   }
 

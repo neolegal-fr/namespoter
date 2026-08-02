@@ -413,7 +413,8 @@
                   </td>
                   <td *ngFor="let ext of selectedExtensions()" class="text-center px-1" style="vertical-align: top; padding-top: 0.6rem">
                     <i *ngIf="result.allExtensions[ext] === true" class="pi pi-check text-lg font-bold" [style.color]="isFullyAvailable(result) ? '#16a34a' : '#22c55e'" title="Disponible"></i>
-                    <i *ngIf="result.allExtensions[ext] === null" class="pi pi-spin pi-spinner text-base" style="color: #9ca3af" title="Vérification..."></i>
+                    <i *ngIf="result.allExtensions[ext] === undefined" class="pi pi-spin pi-spinner text-base" style="color: #9ca3af" title="Vérification..."></i>
+                    <i *ngIf="result.allExtensions[ext] === null" class="pi pi-question-circle text-base" style="color: #9ca3af" title="Disponibilité non vérifiable pour cette extension"></i>
                     <i *ngIf="result.allExtensions[ext] === false" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
                   </td>
                   <!-- US-022 : colonne achat registrar -->
@@ -629,8 +630,8 @@
         <ng-container *ngIf="getDomainByName(result.recommended) as rec">
           <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 0.375rem; flex-wrap: wrap">
             <span *ngFor="let ext of selectedExtensions()" style="font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 9999px"
-                  [style.background]="rec.allExtensions[ext] === true ? '#dcfce7' : '#fee2e2'"
-                  [style.color]="rec.allExtensions[ext] === true ? '#16a34a' : '#ef4444'">
+                  [style.background]="rec.allExtensions[ext] === true ? '#dcfce7' : rec.allExtensions[ext] === false ? '#fee2e2' : '#f3f4f6'"
+                  [style.color]="rec.allExtensions[ext] === true ? '#16a34a' : rec.allExtensions[ext] === false ? '#ef4444' : '#6b7280'">
               {{ ext }}
             </span>
           </div>
