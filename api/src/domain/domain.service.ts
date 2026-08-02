@@ -8,6 +8,30 @@ import { RdapService } from './rdap.service';
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * Candidats évalués de front. La boucle était séquentielle : 143 noms à ~1,3 s
+ * l'un font les 3 minutes qu'attendaient les utilisateurs.
+ */
+const CANDIDATE_CONCURRENCY = 6;
+
+/**
+ * Vérifications simultanées vers un **même** registre.
+ *
+ * Mesuré depuis le serveur de production, 24 vérifications par palier :
+ *
+ * - Verisign (.com) : 24/24 concluantes jusqu'à 8 en parallèle, à 37 req/s.
+ *   Aucune limite atteinte.
+ * - Google (.app, .dev) : 10/24 aussi bien à 1 qu'à 8 en parallèle. Son quota
+ *   porte sur le **volume par fenêtre de temps**, pas sur la simultanéité —
+ *   le brider ne change donc rien à ce qu'il accepte, et coûte du temps.
+ *
+ * D'où une limite volontairement lâche : elle sert de garde-fou contre les
+ * rafales pathologiques, pas de régulateur. Ce qui protège vraiment les
+ * quotas, c'est le court-circuit de checkExtensions, qui supprime des
+ * requêtes au lieu de les étaler.
+ */
+const PER_REGISTRY_CONCURRENCY = 4;
+
 const DOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9-]{1,61})+$/;
 
 function validateDomain(domain: string): void {
@@ -72,6 +96,8 @@ export interface FindDomainsOptions {
 export class DomainService {
   private readonly logger = new Logger(DomainService.name);
   private openai: OpenAI;
+  /** Une file d'attente par registre, cf. PER_REGISTRY_CONCURRENCY. */
+  private readonly registryGates = new Map<string, { active: number; queue: (() => void)[] }>();
 
   /** Modèle par défaut pour les tâches simples/rapides (reformulation, mots-clés…). */
   private readonly model: string;
@@ -630,7 +656,77 @@ ${langInstruction}`;
    */
   async isDomainAvailable(domain: string): Promise<boolean | null> {
     validateDomain(domain);
+    const tld = domain.slice(domain.lastIndexOf('.') + 1);
+    return this.withRegistryGate(tld, () => this.probe(domain));
+  }
 
+  /**
+   * Limite le nombre de vérifications simultanées vers un même registre.
+   *
+   * Les extensions différentes ne se gênent pas entre elles : chacune a sa
+   * file, et une recherche sur cinq extensions garde donc cinq flux parallèles.
+   */
+  private async withRegistryGate<T>(tld: string, task: () => Promise<T>): Promise<T> {
+    let gate = this.registryGates.get(tld);
+    if (!gate) {
+      gate = { active: 0, queue: [] };
+      this.registryGates.set(tld, gate);
+    }
+
+    if (gate.active >= PER_REGISTRY_CONCURRENCY) {
+      // La place est *transmise* par le sortant, qui ne décrémente pas : entre
+      // un décrément et la reprise effective de l'attendant, un nouvel appelant
+      // se glisserait sinon dans l'intervalle et la limite serait dépassée.
+      await new Promise<void>(resolve => gate!.queue.push(resolve));
+    } else {
+      gate.active++;
+    }
+
+    try {
+      return await task();
+    } finally {
+      const next = gate.queue.shift();
+      if (next) next();
+      else gate.active--;
+    }
+  }
+
+  /**
+   * Disponibilité d'un nom sur les extensions demandées.
+   *
+   * En mode « toutes les extensions », une seule extension prise suffit à
+   * écarter le candidat : on interroge alors les registres l'un après l'autre
+   * et on s'arrête au premier refus, au lieu des cinq requêtes systématiques
+   * d'avant. Le candidat écarté n'étant jamais affiché, les extensions non
+   * interrogées ne manquent à personne — et ces requêtes économisées sont
+   * autant de marge sur les quotas des registres.
+   *
+   * En mode « au moins une », le tableau de résultats montre chaque extension :
+   * il faut donc toutes les vérifier, et autant le faire en parallèle.
+   */
+  private async checkExtensions(
+    name: string,
+    extensions: string[],
+    matchMode: MatchMode,
+  ): Promise<Record<string, boolean | null>> {
+    const extStatus: Record<string, boolean | null> = {};
+
+    if (matchMode === MatchMode.ALL) {
+      for (const ext of extensions) {
+        const status = await this.isDomainAvailable(`${name}${ext}`);
+        extStatus[ext] = status;
+        if (status === false) break;
+      }
+      return extStatus;
+    }
+
+    await Promise.all(extensions.map(async (ext) => {
+      extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`);
+    }));
+    return extStatus;
+  }
+
+  private async probe(domain: string): Promise<boolean | null> {
     // RDAP d'abord : verdict par code HTTP, pas de motif à deviner, pas de
     // quota atteint dès la deuxième requête. Il ne couvre pas tous les TLD
     // (les ccTLD n'y sont pas obligés), d'où le repli WHOIS juste en dessous.
@@ -784,38 +880,53 @@ ${langInstruction}`;
         continue;
       }
 
-      for (const item of newItems) {
-        if (finalResults.length >= targetCount) break;
+      // Les candidats sont évalués par un petit groupe de travailleurs qui
+      // puisent dans la même file : dès qu'un nom est tranché, le suivant part,
+      // sans attendre les autres. Le compte des résultats est relu après chaque
+      // `await`, si bien qu'on ne dépasse jamais targetCount — et donc jamais
+      // le nombre de crédits que l'utilisateur a acceptés de dépenser.
+      let cursor = 0;
+      const workers = Array.from(
+        { length: Math.min(CANDIDATE_CONCURRENCY, newItems.length) },
+        async () => {
+          while (finalResults.length < targetCount) {
+            const item = newItems[cursor++];
+            if (!item) return;
 
-        onEvent?.({ type: 'candidate', name: item.name, checkedSoFar: checkedNames.size });
+            onEvent?.({ type: 'candidate', name: item.name, checkedSoFar: checkedNames.size });
 
-        const extStatus: Record<string, boolean | null> = {};
+            const extStatus = await this.checkExtensions(item.name, extensions, matchMode);
 
-        await Promise.all(extensions.map(async (ext) => {
-          extStatus[ext] = await this.isDomainAvailable(`${item.name}${ext}`);
-        }));
+            const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext] === true);
+            // Extensions dont la disponibilité n'a pas pu être établie : elles
+            // ne doivent ni valider ni invalider un candidat, seulement se
+            // signaler.
+            const unknownExts = Object.keys(extStatus).filter(ext => extStatus[ext] === null);
+            unknownExts.forEach(ext => unresolved.set(ext, (unresolved.get(ext) ?? 0) + 1));
 
-        const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext] === true);
-        // Extensions dont la disponibilité n'a pas pu être établie : elles ne
-        // doivent ni valider ni invalider un candidat, seulement se signaler.
-        const unknownExts = Object.keys(extStatus).filter(ext => extStatus[ext] === null);
-        unknownExts.forEach(ext => unresolved.set(ext, (unresolved.get(ext) ?? 0) + 1));
+            let isMatch: boolean;
+            if (matchMode === MatchMode.ALL) {
+              // « Toutes les extensions » porte sur celles qu'on a su vérifier :
+              // un registre en panne ne doit pas rendre la recherche infructueuse.
+              // Un candidat abandonné en cours de route a forcément une
+              // extension prise, donc moins d'entrées que d'extensions.
+              const checked = Object.keys(extStatus).length;
+              isMatch = checked === extensions.length
+                && availableExts.length > 0
+                && availableExts.length === checked - unknownExts.length;
+            } else {
+              isMatch = availableExts.length > 0;
+            }
 
-        let isMatch = false;
-        if (matchMode === MatchMode.ALL) {
-          // « Toutes les extensions » porte sur celles qu'on a su vérifier :
-          // un WHOIS en panne ne doit pas rendre la recherche infructueuse.
-          isMatch = availableExts.length > 0 && availableExts.length === extensions.length - unknownExts.length;
-        } else {
-          isMatch = availableExts.length > 0;
-        }
-
-        if (isMatch) {
-          const domain = { name: item.name, style: item.style, availableExtensions: availableExts, allExtensions: extStatus };
-          finalResults.push(domain);
-          onEvent?.({ type: 'result', domain });
-        }
-      }
+            if (isMatch && finalResults.length < targetCount) {
+              const domain = { name: item.name, style: item.style, availableExtensions: availableExts, allExtensions: extStatus };
+              finalResults.push(domain);
+              onEvent?.({ type: 'result', domain });
+            }
+          }
+        },
+      );
+      await Promise.all(workers);
       attempts++;
     }
 
