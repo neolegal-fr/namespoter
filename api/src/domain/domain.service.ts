@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { MatchMode } from './dto/search-domains.dto';
+import { RdapService } from './rdap.service';
 
 const execFileAsync = promisify(execFile);
 
@@ -77,7 +78,10 @@ export class DomainService {
   /** Modèle « qualité » pour les étapes créatives / à jugement (génération de noms, analyse, pick-best). */
   private readonly creativeModel: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private readonly rdap: RdapService,
+  ) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
     });
@@ -626,6 +630,13 @@ ${langInstruction}`;
    */
   async isDomainAvailable(domain: string): Promise<boolean | null> {
     validateDomain(domain);
+
+    // RDAP d'abord : verdict par code HTTP, pas de motif à deviner, pas de
+    // quota atteint dès la deuxième requête. Il ne couvre pas tous les TLD
+    // (les ccTLD n'y sont pas obligés), d'où le repli WHOIS juste en dessous.
+    const viaRdap = await this.rdap.lookup(domain);
+    if (viaRdap !== null) return viaRdap;
+
     try {
       const { stdout } = await execFileAsync('whois', [domain], { timeout: 10000 });
       return this.readWhois(stdout);

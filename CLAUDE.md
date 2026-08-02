@@ -1,6 +1,6 @@
 # Namespoter
 
-SaaS pour trouver des noms de marque et domaines disponibles à partir d'une description produit, via IA + vérification Whois réelle.
+SaaS pour trouver des noms de marque et domaines disponibles à partir d'une description produit, via IA + vérification de disponibilité réelle (RDAP, repli WHOIS).
 
 ## Stack
 
@@ -30,7 +30,7 @@ web/src/
 ├── styles.css                  # Tailwind + styles globaux
 └── index.html
 api/src/
-├── domain/                     # Recherche domaines, vérification Whois
+├── domain/                     # Recherche domaines, disponibilité (rdap.service.ts + repli whois)
 ├── projects/                   # CRUD projets
 ├── users/                      # Crédits, profil
 └── common/                     # Guards, DTOs, utilitaires
@@ -52,7 +52,18 @@ api/src/
 ### Système de crédits
 - 1 suggestion de domaine = 1 crédit
 - Crédits initiaux : 100
-- Vérification Whois via commande système `whois` (Linux)
+- Vérification de disponibilité : **RDAP d'abord, WHOIS en repli**
+
+### Disponibilité des domaines
+
+La disponibilité a **trois états** : libre, pris, et **non vérifiable** (`null`). Le troisième n'est pas un raffinement : sans lui, une panne de registre se déguise en verdict — c'est ainsi que `.app` a été déclaré pris pendant des semaines (serveur port 43 retiré), et que `.de`, `.it`, `.ch`, `.nl` ont été déclarés libres alors qu'ils étaient pris (aucun motif reconnu ⇒ ancien repli « libre »).
+
+- **RDAP** (`RdapService`) est la source primaire : le verdict est un code HTTP — **404 = libre, 200 = pris** — au lieu d'un texte à interpréter registre par registre. Serveur découvert via l'annuaire IANA (`data.iana.org/rdap/dns.json`), mis en cache 24 h, rechargement retenté au plus une fois par minute en cas de panne.
+- **WHOIS** reste le repli pour les TLD sans serveur RDAP déclaré — les ccTLD n'y sont pas obligés (`.de`, `.it`, `.be`, `.at`, `.io`, `.co`, `.jp`…). `readWhois()` normalise les alignements (espaces, tabulations, points de conduite) avant de chercher les motifs.
+- Ce qu'aucune des deux sources ne couvre reste `null` : `.es` (aucun serveur WHOIS), `.ch` (le registre refuse nos requêtes), et ponctuellement `.nl`/`.hu`/`.shop` (quota dépassé). L'interface affiche « ? », et `search_completed` porte un décompte `unresolved` par extension.
+- Le mode « toutes les extensions » ne porte que sur celles réellement vérifiées : un registre en panne ne doit pas vider une recherche.
+
+> Ne jamais faire retomber un doute sur `true` ou `false` : « pris » masque des noms libres, « libre » fait payer un crédit pour un domaine inachetable.
 
 ## Déploiement en production
 
