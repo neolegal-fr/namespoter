@@ -99,6 +99,7 @@
       "MATCH_MODE": "Criterio di disponibilità",
       "MATCH_ANY": "Almeno un'estensione disponibile",
       "MATCH_ALL": "Tutte le estensioni disponibili",
+      "MATCH_ALL_HINT": "La ricerca può richiedere più tempo: ogni nome deve essere libero su tutte le estensioni selezionate.",
       "BACK_BTN": "Indietro",
       "NEXT_BTN": "Continua alle estensioni",
       "SEARCH_BTN": "Cerca domini",

@@ -99,6 +99,7 @@
       "MATCH_MODE": "Kritérium dostupnosti",
       "MATCH_ANY": "Alespoň jedna přípona dostupná",
       "MATCH_ALL": "Všechny přípony dostupné",
+      "MATCH_ALL_HINT": "Vyhledávání může trvat déle: každý název musí být volný na všech uvedených příponách.",
       "BACK_BTN": "Zpět",
       "NEXT_BTN": "Pokračovat na přípony",
       "SEARCH_BTN": "Hledat domény",

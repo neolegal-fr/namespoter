@@ -99,6 +99,7 @@
       "MATCH_MODE": "Uygunluk Kriteri",
       "MATCH_ANY": "En az bir uzantı uygun",
       "MATCH_ALL": "Tüm uzantılar uygun",
+      "MATCH_ALL_HINT": "Arama daha uzun sürebilir: her adın seçilen tüm uzantılarda boş olması gerekir.",
       "BACK_BTN": "Geri",
       "NEXT_BTN": "Uzantılara devam et",
       "SEARCH_BTN": "Alan adı ara",

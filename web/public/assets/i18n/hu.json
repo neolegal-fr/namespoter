@@ -99,6 +99,7 @@
       "MATCH_MODE": "Elérhetőségi kritérium",
       "MATCH_ANY": "Legalább egy végzés elérhető",
       "MATCH_ALL": "Minden végzés elérhető",
+      "MATCH_ALL_HINT": "A keresés tovább tarthat: minden névnek szabadnak kell lennie az összes kiválasztott végződésen.",
       "BACK_BTN": "Vissza",
       "NEXT_BTN": "Tovább a végzésekhez",
       "SEARCH_BTN": "Domainek keresése",

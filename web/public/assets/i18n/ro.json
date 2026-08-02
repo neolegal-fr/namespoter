@@ -99,6 +99,7 @@
       "MATCH_MODE": "Criteriu de disponibilitate",
       "MATCH_ANY": "Cel puțin o extensie disponibilă",
       "MATCH_ALL": "Toate extensiile disponibile",
+      "MATCH_ALL_HINT": "Căutarea poate dura mai mult: fiecare nume trebuie să fie liber pe toate extensiile selectate.",
       "BACK_BTN": "Înapoi",
       "NEXT_BTN": "Continuă la extensii",
       "SEARCH_BTN": "Caută domenii",

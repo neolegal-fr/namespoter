@@ -99,6 +99,7 @@
       "MATCH_MODE": "Verfügbarkeitskriterium",
       "MATCH_ANY": "Mindestens eine Endung verfügbar",
       "MATCH_ALL": "Alle Endungen verfügbar",
+      "MATCH_ALL_HINT": "Die Suche kann länger dauern: Jeder Name muss bei allen ausgewählten Endungen frei sein.",
       "BACK_BTN": "Zurück",
       "NEXT_BTN": "Weiter zu den Endungen",
       "SEARCH_BTN": "Domains suchen",

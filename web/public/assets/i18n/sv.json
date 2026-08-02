@@ -99,6 +99,7 @@
       "MATCH_MODE": "Tillgänglighetskriterium",
       "MATCH_ANY": "Minst en ändelse tillgänglig",
       "MATCH_ALL": "Alla ändelser tillgängliga",
+      "MATCH_ALL_HINT": "Sökningen kan ta längre tid: varje namn måste vara ledigt på alla valda ändelser.",
       "BACK_BTN": "Tillbaka",
       "NEXT_BTN": "Fortsätt till ändelser",
       "SEARCH_BTN": "Sök domäner",

@@ -349,7 +349,16 @@ export class WizardComponent implements OnInit {
 
   newExtension = signal('');
   selectedExtensions = signal<string[]>(['.com']);
-  matchMode = signal('all');
+  /**
+   * « Au moins une extension disponible » par défaut, comme côté API.
+   *
+   * Exiger toutes les extensions est un choix légitime, mais c'est une
+   * contrainte forte : elle doit venir de l'utilisateur. Les visiteurs hors
+   * zone .com démarrent déjà avec deux extensions (cf. applyRegionalDefaults),
+   * et se voyaient donc imposer « libre sur .fr ET sur .com » sans l'avoir
+   * demandé — d'où des recherches longues et souvent bredouilles.
+   */
+  matchMode = signal('any');
   matchOptions = signal<any[]>([]);
 
   // Étape 3
@@ -528,7 +537,7 @@ export class WizardComponent implements OnInit {
       this.refinedDescription.set(state.refinedDescription);
       this.setKeywords(state.keywords);
       this.selectedExtensions.set(state.selectedExtensions || ['.com']);
-      this.matchMode.set(state.matchMode || 'all');
+      this.matchMode.set(state.matchMode || 'any');
       this.projectId.set(state.projectId || null);
       if (state.minNameLength) {
         this.minNameLength.set(Math.min(Math.max(state.minNameLength, this.MIN_LENGTH_FLOOR), this.MAX_LENGTH_SETTING));
@@ -770,7 +779,7 @@ export class WizardComponent implements OnInit {
     this.domains.set([]);
     this.newKeyword.set('');
     this.newExtension.set('');
-    this.matchMode.set('all');
+    this.matchMode.set('any');
     this.localeOverride.set('');
     this.minNameLength.set(this.DEFAULT_MIN_LENGTH);
     this.minLengthTouched.set(false);
@@ -1029,9 +1038,9 @@ export class WizardComponent implements OnInit {
       .filter(ext => /^\.[a-z]{2,10}$/.test(ext) && !this.selectedExtensions().includes(ext));
 
     if (toAdd.length > 0) {
-      if (this.selectedExtensions().length === 1 && toAdd.length >= 1) {
-        this.matchMode.set('all');
-      }
+      // Ajouter une extension ne change pas le critère de disponibilité :
+      // passer de « au moins une » à « toutes » resserre fortement la
+      // recherche, et ce n'est pas ce que demande un clic sur « + ».
       this.selectedExtensions.update(e => [...e, ...toAdd]);
       this.persistExtensions();
       this.recheckIfNeeded();

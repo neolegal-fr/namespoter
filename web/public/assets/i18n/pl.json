@@ -99,6 +99,7 @@
       "MATCH_MODE": "Kryterium dostępności",
       "MATCH_ANY": "Co najmniej jedno rozszerzenie dostępne",
       "MATCH_ALL": "Wszystkie rozszerzenia dostępne",
+      "MATCH_ALL_HINT": "Wyszukiwanie może potrwać dłużej: każda nazwa musi być wolna we wszystkich wybranych rozszerzeniach.",
       "BACK_BTN": "Wstecz",
       "NEXT_BTN": "Przejdź do rozszerzeń",
       "SEARCH_BTN": "Szukaj domen",

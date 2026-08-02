@@ -99,6 +99,7 @@
       "MATCH_MODE": "可用性标准",
       "MATCH_ANY": "至少一个后缀可用",
       "MATCH_ALL": "所有后缀均可用",
+      "MATCH_ALL_HINT": "搜索可能更耗时：每个名称必须在所有选定的后缀上均可注册。",
       "BACK_BTN": "返回",
       "NEXT_BTN": "继续到后缀",
       "SEARCH_BTN": "搜索域名",

@@ -99,6 +99,7 @@
       "MATCH_MODE": "Saatavuuskriteeri",
       "MATCH_ANY": "Vähintään yksi pääte saatavilla",
       "MATCH_ALL": "Kaikki päätteet saatavilla",
+      "MATCH_ALL_HINT": "Haku voi kestää kauemmin: jokaisen nimen on oltava vapaana kaikilla valituilla päätteillä.",
       "BACK_BTN": "Takaisin",
       "NEXT_BTN": "Jatka päätteisiin",
       "SEARCH_BTN": "Hae verkkotunnuksia",

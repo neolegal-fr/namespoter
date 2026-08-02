@@ -99,6 +99,7 @@
       "MATCH_MODE": "Beschikbaarheidscriterium",
       "MATCH_ANY": "Minstens één extensie beschikbaar",
       "MATCH_ALL": "Alle extensies beschikbaar",
+      "MATCH_ALL_HINT": "De zoekopdracht kan langer duren: elke naam moet vrij zijn op alle geselecteerde extensies.",
       "BACK_BTN": "Terug",
       "NEXT_BTN": "Doorgaan naar extensies",
       "SEARCH_BTN": "Domeinen zoeken",
