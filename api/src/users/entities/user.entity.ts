@@ -34,6 +34,17 @@ export class User {
   @Column({ nullable: true })
   locale: string;
 
+  /**
+   * Porteur du rôle realm `admin`, recopié du token à chaque passage.
+   *
+   * Le rôle vit dans Keycloak, mais les statistiques se calculent en SQL : sans
+   * cette colonne, il faudrait interroger Keycloak pour chaque agrégat. La
+   * valeur se resynchronise à chaque appel authentifié, donc un retrait de rôle
+   * se propage à la connexion suivante.
+   */
+  @Column({ default: false })
+  isAdmin: boolean;
+
   /** Dernière date de reset des crédits gratuits (lazy reset mensuel) */
   @Column({ nullable: true, type: 'datetime' })
   lastFreeReset: Date | null;

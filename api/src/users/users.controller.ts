@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, HttpCode } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService, isKeycloakAdmin } from './users.service';
 import { AuthenticatedUser } from 'nest-keycloak-connect';
 
 @Controller('users')
@@ -8,13 +8,13 @@ export class UsersController {
 
   @Get('me')
   async getMe(@AuthenticatedUser() keycloakUser: any) {
-    const user = await this.usersService.findOrCreate(
-      keycloakUser.sub,
-      keycloakUser.email,
-      keycloakUser.given_name,
-      keycloakUser.family_name,
-      keycloakUser.locale,
-    );
+    const user = await this.usersService.findOrCreate(keycloakUser.sub, {
+      email: keycloakUser.email,
+      firstName: keycloakUser.given_name,
+      lastName: keycloakUser.family_name,
+      locale: keycloakUser.locale,
+      isAdmin: isKeycloakAdmin(keycloakUser),
+    });
     return {
       keycloakId: user.keycloakId,
       email: user.email,
@@ -37,13 +37,13 @@ export class UsersController {
 
   @Get('credits')
   async getCredits(@AuthenticatedUser() keycloakUser: any) {
-    const user = await this.usersService.findOrCreate(
-      keycloakUser.sub,
-      keycloakUser.email,
-      keycloakUser.given_name,
-      keycloakUser.family_name,
-      keycloakUser.locale,
-    );
+    const user = await this.usersService.findOrCreate(keycloakUser.sub, {
+      email: keycloakUser.email,
+      firstName: keycloakUser.given_name,
+      lastName: keycloakUser.family_name,
+      locale: keycloakUser.locale,
+      isAdmin: isKeycloakAdmin(keycloakUser),
+    });
     return {
       credits: user.totalCredits,
       freeCredits: user.credits,

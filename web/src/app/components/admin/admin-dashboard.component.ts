@@ -85,6 +85,11 @@ interface PeriodOption { label: string; days: number | null; }
             </div>
           </div>
         </div>
+
+        <div style="font-size: 0.72rem; color: var(--p-surface-500); display: flex; align-items: center; gap: 0.375rem">
+          <i class="pi pi-info-circle" style="font-size: 0.75rem"></i>
+          <span>Les comptes administrateurs sont exclus de tous ces indicateurs.</span>
+        </div>
       </ng-container>
 
     </div>

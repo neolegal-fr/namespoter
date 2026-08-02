@@ -35,7 +35,7 @@ export class PaymentsController {
     if (!validTypes.includes(packType)) {
       throw new BadRequestException(`packType invalide : ${packType}`);
     }
-    const user = await this.usersService.findOrCreate(keycloakUser.sub, keycloakUser.email);
+    const user = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email });
     const url = await this.paymentsService.createPackCheckout(user, packType);
     return { url };
   }

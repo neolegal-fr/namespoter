@@ -105,41 +105,67 @@ export class AdminService {
     const periodEnd = to ?? new Date();
     const periodStart = from ?? new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+    // Les comptes admin servent à tester et à faire des démonstrations : leur
+    // activité gonflerait chaque agrégat sans rien dire de l'usage réel. Ils
+    // sont donc écartés de bout en bout — utilisateurs, projets, suggestions
+    // et crédits — et pas seulement du décompte d'utilisateurs.
     const [totalUsers, periodActiveUsers, periodNewUsers, periodNewProjects] = await Promise.all([
-      this.userRepo.count(),
+      this.userRepo.count({ where: { isAdmin: false } }),
       this.userRepo.createQueryBuilder('u')
         .where('u.lastLogin >= :from AND u.lastLogin <= :to', { from: periodStart, to: periodEnd })
+        .andWhere('u.isAdmin = false')
         .getCount(),
       this.userRepo.createQueryBuilder('u')
         .where('u.createdAt >= :from AND u.createdAt <= :to', { from: periodStart, to: periodEnd })
+        .andWhere('u.isAdmin = false')
         .getCount(),
       this.projectRepo.createQueryBuilder('p')
+        .innerJoin('p.user', 'u')
         .where('p.createdAt >= :from AND p.createdAt <= :to', { from: periodStart, to: periodEnd })
+        .andWhere('u.isAdmin = false')
         .getCount(),
     ]);
 
     const periodSuggestionsResult = await this.dataSource.query(
       `SELECT COUNT(*) as cnt FROM domain_suggestion ds
        INNER JOIN project p ON p.id = ds.projectId
-       WHERE p.createdAt >= ? AND p.createdAt <= ?`,
+       INNER JOIN user u ON u.id = p.userId
+       WHERE p.createdAt >= ? AND p.createdAt <= ? AND u.isAdmin = false`,
       [periodStart, periodEnd],
     );
     const periodSuggestions = Number(periodSuggestionsResult[0]?.cnt ?? 0);
 
     const [totalProjects, totalSuggestions] = await Promise.all([
-      this.projectRepo.count(),
-      this.suggestionRepo.count(),
+      this.projectRepo.createQueryBuilder('p')
+        .innerJoin('p.user', 'u')
+        .where('u.isAdmin = false')
+        .getCount(),
+      this.suggestionRepo.createQueryBuilder('ds')
+        .innerJoin('ds.project', 'p')
+        .innerJoin('p.user', 'u')
+        .where('u.isAdmin = false')
+        .getCount(),
     ]);
 
     const avgSuggestionsResult = await this.dataSource.query(
-      `SELECT AVG(cnt) as avg FROM (SELECT COUNT(*) as cnt FROM domain_suggestion GROUP BY projectId) sub`
+      `SELECT AVG(cnt) as avg FROM (
+         SELECT COUNT(*) as cnt FROM domain_suggestion ds
+         INNER JOIN project p ON p.id = ds.projectId
+         INNER JOIN user u ON u.id = p.userId
+         WHERE u.isAdmin = false
+         GROUP BY ds.projectId) sub`
     );
     const avgFavoritesResult = await this.dataSource.query(
-      `SELECT AVG(cnt) as avg FROM (SELECT COUNT(*) as cnt FROM domain_suggestion WHERE rating = 'liked' GROUP BY projectId) sub`
+      `SELECT AVG(cnt) as avg FROM (
+         SELECT COUNT(*) as cnt FROM domain_suggestion ds
+         INNER JOIN project p ON p.id = ds.projectId
+         INNER JOIN user u ON u.id = p.userId
+         WHERE ds.rating = 'liked' AND u.isAdmin = false
+         GROUP BY ds.projectId) sub`
     );
 
     const creditsResult = await this.dataSource.query(
-      `SELECT SUM(credits) as free, SUM(extraCredits) as pack FROM user`
+      `SELECT SUM(credits) as free, SUM(extraCredits) as pack FROM user WHERE isAdmin = false`
     );
 
     return {

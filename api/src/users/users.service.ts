@@ -8,6 +8,20 @@ import { Project } from '../projects/entities/project.entity';
 /** Quota mensuel de crédits gratuits */
 const FREE_MONTHLY_QUOTA = 100;
 
+/** Champs recopiés du token Keycloak à chaque appel authentifié. */
+export interface UserProfile {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  locale?: string;
+  isAdmin?: boolean;
+}
+
+/** Le rôle realm `admin`, tel que déclaré dans le token. */
+export function isKeycloakAdmin(token: any): boolean {
+  return Array.isArray(token?.realm_access?.roles) && token.realm_access.roles.includes('admin');
+}
+
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -34,7 +48,8 @@ export class UsersService {
     }
   }
 
-  async findOrCreate(keycloakId: string, email?: string, firstName?: string, lastName?: string, locale?: string): Promise<User> {
+  async findOrCreate(keycloakId: string, profile: UserProfile = {}): Promise<User> {
+    const { email, firstName, lastName, locale, isAdmin } = profile;
     let user = await this.usersRepository.findOne({ where: { keycloakId } });
 
     if (!user) {
@@ -44,6 +59,7 @@ export class UsersService {
         firstName,
         lastName,
         locale,
+        isAdmin: isAdmin ?? false,
         credits: FREE_MONTHLY_QUOTA,
         extraCredits: 0,
         lastFreeReset: new Date(),
@@ -57,6 +73,9 @@ export class UsersService {
       if (firstName) user.firstName = firstName;
       if (lastName) user.lastName = lastName;
       if (locale) user.locale = locale;
+      // Contrairement aux champs ci-dessus, `false` est une valeur porteuse de
+      // sens : un rôle retiré dans Keycloak doit redescendre en base.
+      if (isAdmin !== undefined) user.isAdmin = isAdmin;
     }
 
     user.lastLogin = new Date();
