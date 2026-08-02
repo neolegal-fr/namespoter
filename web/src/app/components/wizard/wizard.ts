@@ -1225,20 +1225,20 @@ export class WizardComponent implements OnInit {
     // #1 — en parallèle des mots-clés : contraintes de naming déduites du brief
     this.loadNamingConstraints(descToUse);
 
-    // Les inspirations ouvrent l'écran de configuration : on ne bascule qu'une fois
-    // le marché identifié, pour ne pas afficher une section vide en chargement.
-    this.loadingKey.set('WIZARD.LOADING_MARKET');
+    // Le repérage du marché part en tâche de fond et n'est pas attendu : il
+    // met 23 s en médiane et jusqu'à 45 s (mesuré en production), contre 3 s
+    // pour les mots-clés. Attendre le plus lent des deux retenait l'écran de
+    // configuration une trentaine de secondes sans rien apporter — la section
+    // « marché » porte son propre indicateur de chargement et se remplit
+    // seule, pendant que l'utilisateur saisit ses mots-clés et ses réglages.
+    this.loadCompetitors();
 
     const keywords$ = this.domainService
       .generateKeywords(descToUse, this.effectiveLocale() ?? this.translate.currentLang)
       .pipe(catchError(() => of(null)));
 
-    const [keywordsResult] = await Promise.all([
-      firstValueFrom(keywords$),
-      this.loadCompetitors(),
-    ]);
+    const keywordsResult = await firstValueFrom(keywords$);
 
-    this.loadingKey.set('WIZARD.LOADING');
     this.loading.set(false);
 
     if (keywordsResult) {

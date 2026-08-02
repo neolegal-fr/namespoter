@@ -349,6 +349,7 @@ Project: "${description.replace(/"/g, "'").slice(0, 800)}"`;
     locale?: string,
   ): Promise<{ competitors: { name: string; domain: string; note: string }[]; source: 'web' | 'model' }> {
     // 1) Recherche web en direct
+    const startedAt = Date.now();
     try {
       const response = await this.openai.responses.create({
         model: this.creativeModel,
@@ -356,10 +357,18 @@ Project: "${description.replace(/"/g, "'").slice(0, 800)}"`;
         input: this.competitorsPrompt(description, locale, true),
         max_output_tokens: 1500,
       });
+      const modelMs = Date.now() - startedAt;
       const usedWeb = response.output?.some((o: any) => o.type === 'web_search_call') ?? false;
       const competitors = this.parseCompetitors(response.output_text ?? '');
       if (competitors.length > 0) {
-        return { competitors: await this.dropUnregisteredDomains(competitors), source: usedWeb ? 'web' : 'model' };
+        const verifyStartedAt = Date.now();
+        const verified = await this.dropUnregisteredDomains(competitors);
+        // Ce découpage tranche une question précise : faut-il streamer cette
+        // étape ? Si le temps est dans la recherche web (avant le moindre
+        // token de réponse), un affichage progressif ne montrerait rien
+        // pendant l'essentiel de l'attente.
+        this.logger.log(`Concurrents : modèle ${modelMs} ms, vérification ${Date.now() - verifyStartedAt} ms, ${verified.length} retenus (web: ${usedWeb})`);
+        return { competitors: verified, source: usedWeb ? 'web' : 'model' };
       }
       this.logger.warn('Recherche web des concurrents sans résultat exploitable — repli sur le modèle');
     } catch (error) {
