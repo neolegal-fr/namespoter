@@ -199,7 +199,15 @@
       "NO_RESULTS_EXPLAIN": "Tous les noms testés (≥ {{n}} caractères) sont déjà pris. Vous pouvez poursuivre la recherche : l'IA explorera d'autres pistes.",
       "NO_RESULTS_SHORT": "Tous les noms testés sont déjà pris. À {{n}} caractères, presque tout est déposé : augmenter la longueur multiplie fortement vos chances.",
       "NO_RESULTS_RELAX": "Passer à ≥ {{n}} caractères et relancer",
-      "NO_RESULTS_CONTINUE": "Poursuivre la recherche"
+      "NO_RESULTS_CONTINUE": "Poursuivre la recherche",
+      "REPORT_CTA": "Rapport de disponibilité complet",
+      "REPORT_CREDITS": "crédits",
+      "REPORT_HINT": "Domaines + réseaux sociaux + marque déposée (INPI & EUIPO), affiché et envoyé par email.",
+      "REPORT_LOADING": "Analyse du domaine, des réseaux et des marques…",
+      "REPORT_NO_CREDITS": "Crédits insuffisants pour générer le rapport. Rechargez votre solde pour continuer.",
+      "REPORT_ERROR": "La génération du rapport a échoué. Réessayez dans un instant.",
+      "REPORT_OFFICIAL": "Recherche officielle INPI",
+      "REPORT_EMAILED": "Rapport envoyé par email."
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

@@ -199,7 +199,15 @@
       "NO_RESULTS_EXPLAIN": "Every name tested (≥ {{n}} characters) is already taken. You can keep searching — the AI will explore other directions.",
       "NO_RESULTS_SHORT": "Every name tested is already taken. At {{n}} characters almost everything is registered: raising the length dramatically improves your odds.",
       "NO_RESULTS_RELAX": "Switch to ≥ {{n}} characters and retry",
-      "NO_RESULTS_CONTINUE": "Keep searching"
+      "NO_RESULTS_CONTINUE": "Keep searching",
+      "REPORT_CTA": "Full availability report",
+      "REPORT_CREDITS": "credits",
+      "REPORT_HINT": "Domains + social handles + registered trademark (INPI & EUIPO), shown and emailed to you.",
+      "REPORT_LOADING": "Checking domain, social handles and trademarks…",
+      "REPORT_NO_CREDITS": "Not enough credits to generate the report. Top up your balance to continue.",
+      "REPORT_ERROR": "Report generation failed. Please try again in a moment.",
+      "REPORT_OFFICIAL": "Official INPI search",
+      "REPORT_EMAILED": "Report sent by email."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

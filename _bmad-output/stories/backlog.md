@@ -2103,7 +2103,9 @@ Le livrable premium n'est pas qu'un panneau à l'écran : l'email en fait un act
 
 ## US-054 · Surface A — Upsell « Rapport complet » dans le wizard
 
-**Status**: ❌ To do
+**Status**: ✅ Fait (05/08/2026)
+
+**Livré** : dans le dialogue « Aide-moi à choisir », les anciens liens profonds registrar/INPI/réseaux (qui ne rapportaient rien) sont remplacés par un **CTA « Rapport de disponibilité complet · 300 crédits »**. Au clic : appel `BrandReportService.full()` → spinner → affichage inline (domaines, réseaux, marque avec `match` + classes + lien INPI officiel) et confirmation « envoyé par email ». Crédits rafraîchis via `userService.updateCredits(remainingCredits)`. **403 → message « crédits insuffisants »** (même convention que la recherche). Clés i18n FR/EN ajoutées (`REPORT_*`). Événement analytics `brand_report_cta_clicked`. Build Angular OK.
 
 **As a** utilisateur en fin de wizard qui vient de trouver un nom,
 **I want to** lancer un rapport complet d'un clic au lieu de suivre des liens externes,
@@ -2129,7 +2131,11 @@ On remplace le bloc « Vérifier aussi » (liens INPI/X/Instagram, `wizard.html:
 
 ## US-055 · Surface B — Landing SEO + checker public bridé
 
-**Status**: ❌ To do
+**Status**: 🚧 Livré (05/08/2026) — anti-abus à durcir
+
+**Livré** : page `content/verifier-disponibilite-nom-de-marque` **prérendue** (route + `app.routes.server.ts` + `sitemap.xml`, priorité 0.9), avec `applyContentSeo` (titre/description/canonical), contenu > 500 mots et maillage interne (guides, générateurs, comparatifs). **Checker public bridé** : `BrandReportService.preview()` (domaine phare + réseaux, sans marque), exécuté côté navigateur au clic (prerender-safe), avec CTA vers le rapport complet (`/app`). Build : 18 routes prérendues, page vérifiée (title/canonical/H1/description présents). RGPD : l'aperçu ne capture pas d'email ; le rapport complet passe par `/app` (auth), donc pas de capture sur la landing pour l'instant.
+
+**Reste** : durcir l'anti-abus du checker public (quota par IP) côté API `preview` avant mise en avant publique ; option capture d'email + consentement sur la landing si l'on veut livrer le rapport complet sans passer par `/app`.
 
 **As a** internaute qui cherche « vérifier la disponibilité d'un nom de marque »,
 **I want to** tester gratuitement un nom sur une page dédiée puis obtenir le rapport complet,

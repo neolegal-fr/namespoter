@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
+import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from '../../services/brand-report';
 import { KeycloakService } from 'keycloak-angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Steps } from 'primeng/steps';
@@ -431,21 +432,52 @@ export class WizardComponent implements OnInit {
     },
   ];
 
-  // Vérifications complémentaires (marque + réseaux sociaux) : liens profonds
-  // pré-remplis, dans le même esprit que les liens registrar (pas de scraping).
-  readonly SOCIAL_CHECKS = [
-    { label: 'X', url: (h: string) => `https://x.com/${h}` },
-    { label: 'Instagram', url: (h: string) => `https://www.instagram.com/${h}` },
-  ];
-
   /** Lien vers la recherche de marque INPI (base Marques) pour un nom donné. */
   inpiUrl(name: string): string {
     return `https://data.inpi.fr/search?q=${encodeURIComponent(name)}&type=brands`;
   }
 
-  /** Normalise un nom en pseudo réseau social (minuscules, alphanumérique). */
-  socialHandle(name: string): string {
-    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  // ─── Rapport de disponibilité de marque (US-054) ───────────────────────────
+  // Remplace les anciens liens profonds registrar/INPI/réseaux (qui laissaient
+  // l'utilisateur faire le travail à la main) par un rapport réel et payant.
+  readonly brandReportCost = BRAND_REPORT_COST;
+  readonly brandReport = signal<BrandReport | null>(null);
+  readonly brandReportLoading = signal(false);
+  readonly brandReportError = signal<string | null>(null);
+
+  /** Déclenche le rapport complet (300 crédits) pour le nom recommandé. */
+  generateBrandReport(name: string): void {
+    if (this.brandReportLoading()) return;
+    this.brandReportLoading.set(true);
+    this.brandReportError.set(null);
+    this.brandReport.set(null);
+    this.analytics.track('brand_report_cta_clicked');
+    this.brandReportService.full(name).subscribe({
+      next: (report) => {
+        this.brandReport.set(report);
+        if (typeof report.remainingCredits === 'number') {
+          this.userService.updateCredits(report.remainingCredits);
+        }
+        this.brandReportLoading.set(false);
+      },
+      error: (err) => {
+        // 403 = crédits insuffisants (même convention que la recherche de domaines).
+        this.brandReportError.set(
+          err?.status === 403
+            ? this.translate.instant('WIZARD.STEP3.REPORT_NO_CREDITS')
+            : this.translate.instant('WIZARD.STEP3.REPORT_ERROR'),
+        );
+        this.brandReportLoading.set(false);
+      },
+    });
+  }
+
+  /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */
+  reportStatusLabel(s: Availability): string {
+    return s === 'free' ? 'Libre' : s === 'taken' ? 'Pris' : '?';
+  }
+  reportStatusColor(s: Availability): string {
+    return s === 'free' ? '#16a34a' : s === 'taken' ? '#dc2626' : '#9ca3af';
   }
 
   openReg = signal<string | null>(null);
@@ -496,6 +528,7 @@ export class WizardComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private feedbackService: FeedbackService,
     private analytics: AnalyticsService,
+    private brandReportService: BrandReportService,
   ) {}
 
   openFeedback() {
