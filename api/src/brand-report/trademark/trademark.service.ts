@@ -9,6 +9,12 @@ const LOGIN_URL = `${BASE}/auth/login`;
 const SEARCH_URL = `${BASE}/services/apidiffusion/api/marques/search`;
 const REQUEST_TIMEOUT_MS = 15000;
 
+/**
+ * Chaque notice = un appel HTTP de plus (et le quota INPI tourne à ~100/période).
+ * On n'enrichit donc les classes que pour un petit nombre de dépôts pertinents.
+ */
+const MAX_NOTICE_FETCHES = 5;
+
 /** ukey préfixe → code de collection lisible. */
 const COLLECTION_CODE: Record<string, TrademarkHit['collection']> = {
   FMARK: 'FR',
@@ -50,6 +56,7 @@ export class TrademarkService {
       const cookies = await this.authenticate();
       const data = await this.search(name, cookies);
       const hits = this.parseHits(data);
+      await this.enrichClasses(name, hits, cookies);
       return { office: 'INPI', match: this.classify(name, hits), hits, deepLink };
     } catch (err) {
       this.events.event('trademark_check_failed', { reason: err instanceof Error ? err.name : 'unknown' });
@@ -126,19 +133,66 @@ export class TrademarkService {
     }
   }
 
+  // --- Enrichissement des classes de Nice (via la notice ST66) ---------------
+
+  /**
+   * Complète `classes` pour les dépôts les plus pertinents : d'abord les
+   * correspondances exactes du nom, puis les autres, dans la limite de
+   * MAX_NOTICE_FETCHES pour ménager le quota INPI. Best-effort : une notice en
+   * échec laisse simplement `classes: []`.
+   */
+  private async enrichClasses(name: string, hits: TrademarkHit[], jar: CookieJar): Promise<void> {
+    const norm = (s: string) => s.trim().toLowerCase();
+    const targets = [...hits]
+      .filter((h) => h.noticeUrl)
+      .sort((a, b) => Number(norm(b.name) === norm(name)) - Number(norm(a.name) === norm(name)))
+      .slice(0, MAX_NOTICE_FETCHES);
+
+    await Promise.all(
+      targets.map(async (hit) => {
+        try {
+          hit.classes = await this.fetchClasses(hit.noticeUrl!, jar);
+        } catch {
+          // Best-effort : on garde classes: [].
+        }
+      }),
+    );
+  }
+
+  private async fetchClasses(noticeUrl: string, jar: CookieJar): Promise<number[]> {
+    const res = await this.fetch(noticeUrl, { method: 'GET', headers: { Accept: 'application/xml' } }, jar);
+    if (res.status !== 200) {
+      res.body?.cancel?.();
+      return [];
+    }
+    return this.extractNiceClasses(await res.text());
+  }
+
+  /** Classes de Nice depuis la notice ST66 : <ClassNumber>NN</ClassNumber>, dédupliquées et triées. */
+  private extractNiceClasses(xml: string): number[] {
+    const set = new Set<number>();
+    for (const m of xml.matchAll(/<ClassNumber>\s*(\d{1,2})\s*<\/ClassNumber>/g)) {
+      const n = Number(m[1]);
+      if (n >= 1 && n <= 45) set.add(n); // classification de Nice : classes 1 à 45
+    }
+    return [...set].sort((a, b) => a - b);
+  }
+
   // --- Parsing ---------------------------------------------------------------
 
   private parseHits(data: unknown): TrademarkHit[] {
     const results = (data as { results?: unknown[] })?.results ?? [];
     return results.map((r) => {
-      const fields = this.fieldMap((r as { fields?: FieldEntry[] }).fields ?? []);
+      const row = r as { fields?: FieldEntry[]; xml?: { href?: string } };
+      const fields = this.fieldMap(row.fields ?? []);
       const ukey = fields['ukey'] ?? '';
       return {
         name: fields['Mark'] ?? '',
-        classes: [], // non disponibles dans la recherche : nécessitent la notice (itération ultérieure)
+        classes: [],
         status: fields['MarkCurrentStatusCode'],
         collection: COLLECTION_CODE[ukey.split('|')[0]] ?? undefined,
         applicationNumber: fields['ApplicationNumber'],
+        noticeUrl: row.xml?.href,
       };
     });
   }

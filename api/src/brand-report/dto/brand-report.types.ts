@@ -39,10 +39,12 @@ export interface TrademarkResult {
 
 export interface TrademarkHit {
   name: string;
-  classes: number[]; // classes de Nice (vide en phase 1 — nécessite la notice)
+  classes: number[]; // classes de Nice (issues de la notice, pour les dépôts pertinents)
   status?: string;
   collection?: 'FR' | 'EU' | 'WO';
   applicationNumber?: string;
+  /** URL de la notice officielle (ST66) — lien « voir la notice » dans le rapport. */
+  noticeUrl?: string;
 }
 
 /** Rapport complet consommé par l'affichage, le PDF (US-053) et l'email. */
