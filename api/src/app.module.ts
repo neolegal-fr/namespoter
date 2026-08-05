@@ -18,6 +18,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AdminModule } from './admin/admin.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { BrandReportModule } from './brand-report/brand-report.module';
 import { LoggingModule } from './common/logging/logging.module';
 import { EventsController } from './events/events.controller';
 
@@ -55,6 +56,7 @@ import { EventsController } from './events/events.controller';
     PaymentsModule,
     AdminModule,
     FeedbackModule,
+    BrandReportModule,
   ],
   controllers: [AppController, EventsController],
   providers: [
