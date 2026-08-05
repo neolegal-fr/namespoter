@@ -39,9 +39,10 @@ export interface TrademarkResult {
 
 export interface TrademarkHit {
   name: string;
-  classes: number[]; // classes de Nice
+  classes: number[]; // classes de Nice (vide en phase 1 — nécessite la notice)
   status?: string;
-  collection?: string; // FMARK | CTMARK | TMINT
+  collection?: 'FR' | 'EU' | 'WO';
+  applicationNumber?: string;
 }
 
 /** Rapport complet consommé par l'affichage, le PDF (US-053) et l'email. */

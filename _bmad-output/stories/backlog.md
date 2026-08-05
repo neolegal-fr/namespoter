@@ -1999,15 +1999,19 @@ Passerelle `https://api-gateway.inpi.fr`, service `/services/apidiffusion` (JHip
 
 **Collections réelles** (via `GET /api/marques/metadata`) : `FMARK` (FR national), `CTMARK` (EUIPO/UE), `TMINT` (WOInternational) → **une seule requête couvre FR + EU + WO**, exactement le périmètre INPI+EUIPO visé. Autres endpoints utiles : `/api/marques/notice/{numNat}`, `/image/…`, `/xml/…`, `/bopi/…`. Quota observé ~**100 requêtes/période** (en-têtes `X-Rate-Limit-Remaining`, `X-Size-Limit-Remaining`).
 
-**🔴 Blocage restant (côté INPI, hors de notre code)** : `POST /api/marques/search` renvoie **HTTP 500 « 500: [no body] »** pour *toutes* les requêtes, y compris l'exemple officiel `[Mark=Jouve]` et quel que soit le format (`Accept` json ou xml, corps minimal ou complet). `/metadata` répond pourtant en 200 et la passerelle décompte bien le quota → c'est le **backend de recherche INPI en aval qui échoue**, pas notre appel. Causes probables : provisionnement de l'index pas encore effectif sur l'accès fraîchement activé (les accès PI se propagent souvent au batch hebdo du vendredi), ou incident serveur. **Action** : réessayer à J+1/après le batch, et si ça persiste ouvrir un ticket au support INPI (`support` data.inpi.fr) en joignant l'horodatage (05/08/2026 17:58 UTC) et le corps `{"query":"[Mark=Jouve]"}`. Le reste de l'intégration est prêt : dès que la recherche répond 200, le `TrademarkService` (US-051) se câble sur ce contrat sans autre inconnue.
+**✅ Blocage résolu (05/08/2026) — ce n'était PAS un problème côté INPI.** La 500 « 500: [no body] » venait de **notre corps de requête** : le champ de recherche est **`Mark_Exp`**, pas `Mark`. L'exemple `[Mark=Jouve]` de la spec INPI est **trompeur** — `Mark` est un champ *retournable* mais non *cherchable*, d'où une 500 Solr en amont. Deux corrections :
+- **query** : `[Mark_Exp=<terme>]` (et non `[Mark=…]`) ;
+- **collections en entrée** : codes courts **`FR`/`EU`/`WO`** (l'API les mappe en interne vers `FMARK`/`CTMARK`/`TMINT`).
+
+Avec ça, `POST /api/marques/search` répond **HTTP 200** (ex. `qonto` → `count:9`, dépôts FR/EU/WO avec `ApplicationNumber`, `Mark`, `MarkCurrentStatusCode`). L'auth cookie-jar minimale suffit (pas besoin de `x-forwarded-for` ni de token explicite). Contrat réponse : `results[].fields` = liste `{name,value}` ; `ukey` porte le préfixe de collection. Les **classes de Nice** ne sont pas dans la recherche — elles nécessitent la notice (`/notice/{numNat}`), à traiter en itération ultérieure. Recette rejouable : `inpi_test.sh` (fourni par l'utilisateur) et `scripts/inpi-marques-test.sh`.
 
 ---
 
 ## US-051 · Moteur backend « Rapport de marque »
 
-**Status**: 🚧 En cours — squelette + social livrés (05/08/2026), branchement INPI en attente du déblocage `/search`
+**Status**: 🚧 En cours — moteur + social + marque INPI livrés et testés en réel (05/08/2026)
 
-**Livré** : module `api/src/brand-report/` (service orchestrateur, DTO `BrandReport`, score de synthèse où `unknown` n'améliore jamais le score, controller `/brand-report` + `/brand-report/preview`). `SocialCheckService` avec adaptateurs par plateforme, Phase 1 fiable et testée en réel (GitHub, LinkedIn, Telegram, TikTok) ; Instagram/X/YouTube/Facebook en `planned` → `unknown`. Tests unitaires des adaptateurs (HTTP mocké). `TrademarkService` en repli lien profond INPI. **Reste** : brancher la vraie recherche INPI dès que `/api/marques/search` répond 200, débit crédits (US-052), PDF+email (US-053).
+**Livré** : module `api/src/brand-report/` (service orchestrateur, DTO `BrandReport`, score de synthèse où `unknown` n'améliore jamais le score, controller `/brand-report` + `/brand-report/preview`). `SocialCheckService` avec adaptateurs par plateforme, Phase 1 fiable et testée en réel (GitHub, LinkedIn, Telegram, TikTok) ; Instagram/X/YouTube/Facebook en `planned` → `unknown`. **`TrademarkService` : vraie recherche INPI opérationnelle** (auth XSRF cookie-jar + `[Mark_Exp=…]` sur collections FR/EU/WO), testée en réel (`Qonto` → match `exact`, 9 dépôts ; nom inventé → `none`) ; repli `unknown` + lien profond si INPI absent/erreur. Config via `INPI_USERNAME`/`INPI_PASSWORD` (`.env.example`). Tests unitaires des adaptateurs sociaux (HTTP mocké). **Reste** : classes de Nice (via notice), débit crédits (US-052), PDF+email (US-053).
 
 **As a** utilisateur qui a trouvé un nom,
 **I want to** obtenir en une fois l'état de disponibilité du nom sur le domaine, les réseaux sociaux et les registres de marques,
