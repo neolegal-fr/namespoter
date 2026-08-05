@@ -1931,7 +1931,7 @@ Les trois conditions doivent être réunies **ensemble**, sinon ne rien publier 
 
 ## US-050 · Spike — faisabilité des intégrations (INPI, EUIPO, handles sociaux)
 
-**Status**: ❌ To do
+**Status**: ✅ Fait (05/08/2026) — voir « Résultats du spike »
 
 **As a** équipe produit qui veut vendre un rapport de disponibilité fiable,
 **I want to** valider en amont l'accès et la fiabilité des trois sources de données,
@@ -1952,6 +1952,41 @@ Tout le reste de l'épic dépend de trois inconnues techniques. Un rapport payan
 - Bloquant pour US-051→055. Ne rien coder en surface avant sa clôture.
 - Si une source s'avère inexploitable (ex. EUIPO derrière une authentification lourde), la story consommatrice bascule sur un repli lien profond documenté, sans bloquer l'épic.
 
+### Résultats du spike (05/08/2026)
+
+**1. Handles sociaux — l'hypothèse « 200 = pris / 404 = libre » est FAUSSE en général.** La plupart des grands réseaux sont des SPA qui renvoient **200 même pour un pseudo inexistant** (le « introuvable » est rendu en JS). Mesuré depuis ce poste (une requête par pseudo, existant vs inexistant fabriqué) :
+
+| Plateforme | Existant | Inexistant | Verdict |
+|---|---|---|---|
+| GitHub | 200 | 404 | ✅ Fiable en direct (status) |
+| LinkedIn (`/company/`) | 200 | 404 | ✅ Fiable en direct (status) |
+| Telegram (`t.me`) | 200 | 302 | ✅ Fiable en direct (status, sans `-L`) |
+| TikTok | `"statusCode":0` + `userInfo` | `"statusCode":10221`, pas de `userInfo` | ✅ Fiable via **marqueur dans le corps** |
+| Pinterest | 301 | 200 | 🟡 Distinguable mais inversé — à valider (suivi de redirection) |
+| Reddit | 301 | 301 | 🟡 Indistinct en status — parsing après redirection |
+| Twitch | 200 | 200 | 🟡 SPA — nécessite l'API GraphQL ou le contenu |
+| YouTube (`/@`) | 302 | 302 | 🟡 Redirection consent — parsing après suivi |
+| Instagram | 200 (shell login) | 200 (shell login) | 🔴 Aucun marqueur exploitable sans session |
+| X / Twitter | 200 | 200 | 🔴 Nécessite authentification |
+| Facebook | 400 | 400 | 🔴 Bloque les requêtes non navigateur |
+
+→ **Conséquence de conception** : pas de vérificateur social uniforme. Il faut une **stratégie par plateforme** (status, marqueur de contenu, ou repli `unknown`). Découpage retenu :
+- **Phase 1 (fiable, gratuit, sans proxy)** : GitHub, LinkedIn, Telegram, TikTok.
+- **Phase 1.5 (parsing/redirection, à valider)** : Pinterest, Reddit, Twitch, YouTube.
+- **Phase 2 (session ou API tierce type Apify)** : Instagram, X, Facebook — sinon afficher `unknown` honnête plutôt qu'un faux « libre ».
+- Anti-bot : à l'unité tout passe ; à l'échelle, Instagram/TikTok challengent ~25-30 req/IP → prévoir proxies/actor **seulement si le volume l'exige**, sans jamais déguiser un blocage en « disponible ».
+
+**2. INPI** — API PI « diffusion » sur `api-gateway.inpi.fr/services/apidiffusion` : **401 sans authentification** (confirmé). Nécessite un **compte INPI** avec « Accès API PI » activé sur `data.inpi.fr/login` ; auth par cookie/XSRF (plus lourde en server-to-server). Données marques rafraîchies **hebdomadairement**. Gratuit (Licence Ouverte). **Découverte clé** : cette API couvre déjà **FR (INPI) + EU (EUIPO) + WO (WIPO)** — une seule intégration pourrait donc couvrir tout le périmètre marque demandé.
+
+**3. EUIPO** — API propre sur `dev.euipo.europa.eu` : **401 sans token** (confirmé). OAuth2 `client_credentials`, **1 000 requêtes/mois gratuites**, sandbox activée immédiatement, mais **la prod exige l'envoi de pièces d'identité**. Techniquement plus propre que l'INPI, mais quota faible et friction de mise en prod.
+
+**Arbitrage marque retenu** : partir sur **l'API INPI diffusion seule en phase 1** (une intégration couvre FR+EU+WO, cohérent avec le périmètre INPI+EUIPO choisi), et garder **l'API EUIPO propre comme repli/complément** si la fraîcheur hebdo ou l'auth cookie de l'INPI posent problème. Repli ultime commun : le lien profond `data.inpi.fr` déjà en place.
+
+**⚠️ Action requise (hors de ma portée — création de comptes)** : avant US-051, l'équipe doit créer les accès développeur :
+- **INPI** : `data.inpi.fr/login` → activer « Accès API PI » (obligatoire).
+- **EUIPO** (si repli retenu) : `dev.euipo.europa.eu` → créer une app + souscrire à « Trademark Search API ».
+Les secrets iront dans la config API (cf. `api/.env.example`), jamais journalisés.
+
 ---
 
 ## US-051 · Moteur backend « Rapport de marque »
@@ -1967,18 +2002,21 @@ Tout le reste de l'épic dépend de trois inconnues techniques. Un rapport payan
 Cœur de l'épic : un module `api/src/brand-report/` qui orchestre en parallèle les trois vérifications et renvoie un objet unifié. Il **réutilise le `RdapService` existant** pour le domaine et ajoute deux briques (social, marque). La vérification sociale et la vérification marque sont chacune dans leur service pour rester testables et remplaçables indépendamment.
 
 ### Acceptance Criteria
-- [ ] Module `brand-report` avec un `BrandReportService` qui compose : domaines (RDAP/WHOIS réutilisés) + handles sociaux + marque (INPI + EUIPO), en parallèle
-- [ ] `SocialCheckService` : vérifie ~12 plateformes retenues au spike (Instagram, TikTok, X, YouTube, Facebook, LinkedIn, GitHub, Threads, Pinterest, Snapchat, Twitch, Reddit) avec concurrence bornée par plateforme (cf. `PER_REGISTRY_CONCURRENCY`)
-- [ ] `InpiService` et `EuipoService` : pré-check à l'identique + racine, restituant les dépôts trouvés avec leurs classes de Nice et statut
+- [ ] Module `brand-report` avec un `BrandReportService` qui compose : domaines (RDAP/WHOIS réutilisés) + handles sociaux + marque, en parallèle
+- [ ] `SocialCheckService` avec **une stratégie par plateforme** (cf. résultats US-050, le 200/404 uniforme ne marche pas) : status pour GitHub/LinkedIn/Telegram, marqueur de contenu pour TikTok. Chaque plateforme a un adaptateur isolé et testable ; l'ajout d'une plateforme n'en casse pas une autre
+- [ ] Phase 1 sociale limitée aux 4 plateformes fiables (GitHub, LinkedIn, Telegram, TikTok) ; les autres (Instagram, X, Facebook, Pinterest, Reddit, Twitch, YouTube) renvoient explicitement `unknown` tant que leur adaptateur n'est pas livré — jamais un faux « libre »
+- [ ] `TrademarkService` fondé sur l'**API INPI diffusion** (couvre FR + EU + WO — cf. US-050), pré-check à l'identique + racine, restituant les dépôts trouvés avec leurs classes de Nice et statut ; repli lien profond `data.inpi.fr` si l'API échoue
 - [ ] Trois états stricts par item — `free` / `taken` / `unknown` — un échec de source ne se déguise jamais en « libre » (règle de disponibilité domaine étendue au social et à la marque)
-- [ ] Un **score de synthèse 0-100** documenté (pondération domaine / social / marque explicitée dans le code)
+- [ ] Un **score de synthèse 0-100** documenté (pondération domaine / social / marque explicitée dans le code ; les items `unknown` n'améliorent jamais le score)
 - [ ] DTO `BrandReport` stable (contrat consommé par le PDF, l'affichage et l'email)
 - [ ] Endpoint interne testé unitairement avec sources mockées (chaque source en panne → `unknown`, pas d'échec de la requête globale)
 
 ### Notes
-- Dépend de US-050.
+- Dépend de US-050 (fait) **et de la création des comptes API INPI/EUIPO** (action équipe signalée en US-050).
 - Best-effort par source : aucune source défaillante ne doit faire échouer le rapport entier.
 - Ne pas journaliser de PII : ni email, ni description de projet (cf. règles d'observabilité).
+- L'API EUIPO propre reste un repli/complément (US-050) si la fraîcheur hebdo ou l'auth cookie de l'INPI posent problème — pas une intégration séparée par défaut.
+- Les adaptateurs Phase 1.5/2 (Instagram, X, etc.) feront l'objet de sous-tâches ou d'une story de suivi dédiée, hors du périmètre livrable de US-051.
 
 ---
 
