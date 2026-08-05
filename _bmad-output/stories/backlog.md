@@ -2005,7 +2005,9 @@ Passerelle `https://api-gateway.inpi.fr`, service `/services/apidiffusion` (JHip
 
 ## US-051 · Moteur backend « Rapport de marque »
 
-**Status**: ❌ To do
+**Status**: 🚧 En cours — squelette + social livrés (05/08/2026), branchement INPI en attente du déblocage `/search`
+
+**Livré** : module `api/src/brand-report/` (service orchestrateur, DTO `BrandReport`, score de synthèse où `unknown` n'améliore jamais le score, controller `/brand-report` + `/brand-report/preview`). `SocialCheckService` avec adaptateurs par plateforme, Phase 1 fiable et testée en réel (GitHub, LinkedIn, Telegram, TikTok) ; Instagram/X/YouTube/Facebook en `planned` → `unknown`. Tests unitaires des adaptateurs (HTTP mocké). `TrademarkService` en repli lien profond INPI. **Reste** : brancher la vraie recherche INPI dès que `/api/marques/search` répond 200, débit crédits (US-052), PDF+email (US-053).
 
 **As a** utilisateur qui a trouvé un nom,
 **I want to** obtenir en une fois l'état de disponibilité du nom sur le domaine, les réseaux sociaux et les registres de marques,
