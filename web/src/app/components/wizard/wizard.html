@@ -100,7 +100,7 @@
 
         <div *ngIf="refinedDescription()" class="mt-4 p-3 border-left-4 border-solid border-round" style="max-width: 48rem; width: 100%; text-align: left; background: #eff6ff; border-color: #3b82f6">
           <h4 class="font-bold mb-2" style="color: #1d4ed8">{{ 'WIZARD.STEP1.SUGGESTION_TITLE' | translate }}</h4>
-          <p class="font-italic text-800">{{ refinedDescription() }}</p>
+          <p class="font-italic text-800" style="white-space: pre-line">{{ refinedDescription() }}</p>
           <div class="mt-2 text-right">
              <p-button [label]="'WIZARD.STEP1.USE_VERSION' | translate" severity="info" size="small" (onClick)="description.set(refinedDescription()); refinedDescription.set('')"></p-button>
           </div>

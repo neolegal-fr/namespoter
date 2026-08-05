@@ -125,7 +125,9 @@ export class DomainService {
         messages: [
           {
             role: 'system',
-            content: 'Tu es un expert en marketing et branding. Reformule et complète la description suivante pour en extraire l\'essence et la valeur ajoutée du produit. Sois concis mais percutant.',
+            content:
+              'Tu es un expert en marketing et branding. Reformule et complète la description suivante pour en extraire l\'essence et la valeur ajoutée du produit. Sois concis mais percutant. ' +
+              'Réponds en texte brut uniquement : pas de Markdown, pas de titres (#), pas de gras/italique (*, **, _), pas de listes à puces ni de numérotation. Un ou deux paragraphes simples séparés par un saut de ligne.',
           },
           { role: 'user', content: description },
         ],
@@ -133,11 +135,27 @@ export class DomainService {
         reasoning_effort: 'none',
       });
 
-      return response.choices[0].message.content?.trim() ?? '';
+      return this.stripMarkdown(response.choices[0].message.content?.trim() ?? '');
     } catch (error) {
       this.logger.error('Erreur lors de la reformulation IA:', error);
       throw error;
     }
+  }
+
+  /**
+   * Filet de sécurité : retire le formatage Markdown éventuellement produit par
+   * l'IA (titres, gras/italique, puces...) pour ne renvoyer que du texte brut.
+   */
+  private stripMarkdown(text: string): string {
+    return text
+      .replace(/^\s{0,3}#{1,6}\s+/gm, '') // titres ###
+      .replace(/^\s*([-*+]|\d+[.)])\s+/gm, '') // listes à puces / numérotées
+      .replace(/(\*\*|__)(.*?)\1/g, '$2') // gras
+      .replace(/(\*|_)(.*?)\1/g, '$2') // italique
+      .replace(/`([^`]+)`/g, '$1') // code inline
+      .replace(/^\s*>\s?/gm, '') // citations
+      .replace(/\n{3,}/g, '\n\n') // espaces verticaux excessifs
+      .trim();
   }
 
   async suggestProjectName(description: string): Promise<string> {
