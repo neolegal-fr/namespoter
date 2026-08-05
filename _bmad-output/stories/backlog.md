@@ -2042,7 +2042,9 @@ Cœur de l'épic : un module `api/src/brand-report/` qui orchestre en parallèle
 
 ## US-052 · Débit crédits (300) et déclenchement du rapport
 
-**Status**: ❌ To do
+**Status**: ✅ Fait (05/08/2026)
+
+**Livré** : `POST /brand-report` (authentifié) débite **`BRAND_REPORT_COST = 300`** crédits (constante centralisée). Génération AVANT débit → un échec ne consomme rien ; débit atomique via `dataSource.transaction` + `decrementCredits` (renvoie `-1` si insuffisant → rollback, sûr face à la concurrence). Crédits insuffisants → `ForbiddenException('Crédits insuffisants')` (même convention que la recherche de domaines, gérée par le front), sans génération. Réponse enrichie de `remainingCredits`. Événements `brand_report_blocked_no_credits` / `brand_report_generated` (sans PII au-delà du `sub`). Tests unitaires du controller : blocage, débit après génération, course au débit (19/19).
 
 **As a** exploitant du service,
 **I want to** que chaque rapport complet coûte 300 crédits, débités atomiquement,
