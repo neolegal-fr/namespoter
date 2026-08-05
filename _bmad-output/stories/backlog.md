@@ -1987,6 +1987,20 @@ Tout le reste de l'épic dépend de trois inconnues techniques. Un rapport payan
 - **EUIPO** (si repli retenu) : `dev.euipo.europa.eu` → créer une app + souscrire à « Trademark Search API ».
 Les secrets iront dans la config API (cf. `api/.env.example`), jamais journalisés.
 
+### Recette d'intégration INPI Marques (rétro-conçue le 05/08/2026)
+
+Passerelle `https://api-gateway.inpi.fr`, service `/services/apidiffusion` (JHipster + CSRF double-submit). Flux validé de bout en bout (script `scripts/inpi-marques-test.sh`) :
+
+1. **Cookie XSRF** : `GET /services/uaa/api/authenticate` avec un cookie-jar → pose `XSRF-TOKEN`.
+2. **Login** : `POST /auth/login`, corps `{"username","password"}`, en-tête `X-XSRF-TOKEN` = valeur du cookie → **HTTP 200**, session dans le jar. Le compte est le compte INPI principal (l'« Accès API PI » y a été activé), pas un compte technique distinct.
+3. **Recherche** : `POST /services/apidiffusion/api/marques/search`, `Content-Type: application/json`, en-tête `X-XSRF-TOKEN` **relu à chaque appel** (le token tourne à chaque requête — sinon 403 `Invalid CSRF Token`). Corps = objet **`TrademarkQuery`**.
+
+`TrademarkQuery` (spec `/services/apidiffusion/v2/api-docs`) : `query` (string, **DSL par champ** ex. `"[Mark=Jouve]"` — pas du texte libre), `collections` (array), `fields`, `size`, `position`, `sortList`, `facetsList`, `withFacets`, `withCTMRevendication`.
+
+**Collections réelles** (via `GET /api/marques/metadata`) : `FMARK` (FR national), `CTMARK` (EUIPO/UE), `TMINT` (WOInternational) → **une seule requête couvre FR + EU + WO**, exactement le périmètre INPI+EUIPO visé. Autres endpoints utiles : `/api/marques/notice/{numNat}`, `/image/…`, `/xml/…`, `/bopi/…`. Quota observé ~**100 requêtes/période** (en-têtes `X-Rate-Limit-Remaining`, `X-Size-Limit-Remaining`).
+
+**🔴 Blocage restant (côté INPI, hors de notre code)** : `POST /api/marques/search` renvoie **HTTP 500 « 500: [no body] »** pour *toutes* les requêtes, y compris l'exemple officiel `[Mark=Jouve]` et quel que soit le format (`Accept` json ou xml, corps minimal ou complet). `/metadata` répond pourtant en 200 et la passerelle décompte bien le quota → c'est le **backend de recherche INPI en aval qui échoue**, pas notre appel. Causes probables : provisionnement de l'index pas encore effectif sur l'accès fraîchement activé (les accès PI se propagent souvent au batch hebdo du vendredi), ou incident serveur. **Action** : réessayer à J+1/après le batch, et si ça persiste ouvrir un ticket au support INPI (`support` data.inpi.fr) en joignant l'horodatage (05/08/2026 17:58 UTC) et le corps `{"query":"[Mark=Jouve]"}`. Le reste de l'intégration est prêt : dès que la recherche répond 200, le `TrademarkService` (US-051) se câble sur ce contrat sans autre inconnue.
+
 ---
 
 ## US-051 · Moteur backend « Rapport de marque »
