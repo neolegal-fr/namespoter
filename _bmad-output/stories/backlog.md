@@ -2070,7 +2070,13 @@ Réutilise le système de crédits et Stripe existants (`users.service.ts`, `pay
 
 ## US-053 · Livraison du rapport — affichage + envoi par email (PDF)
 
-**Status**: ❌ To do
+**Status**: 🚧 Backend fait (05/08/2026) — livraison email OK ; vrai PDF reporté
+
+**Livré** : `report-renderer.ts` rend le `BrandReport` en **document HTML autonome** (score, domaines, réseaux, marque + classes, disclaimer, CTA INPI, échappement anti-injection). `ReportMailService` l'envoie via `MailService.send()` (méthode générique best-effort ajoutée), en corps d'email **et** en pièce jointe imprimable. Le controller l'appelle après débit, best-effort (`emailed` dans la réponse ; un échec email ne casse pas la requête ni ne rembourse en silence). RGPD : adresse = compte de l'utilisateur (livraison, pas prospection) ; consentement de capture sur landing → US-055. Tests renderer + email (22/22).
+
+**Décision — pas de vrai PDF pour l'instant** : `npm install pdfkit` échoue sur un conflit de peer-deps, et forcer le lockfile en autonomie est risqué pour le build/CI. Le livrable est un HTML autonome imprimable en PDF (« Imprimer → Enregistrer en PDF »). Vrai PDF (pdfkit avec `--legacy-peer-deps` validé, ou service de rendu) = amélioration ultérieure, contrat renderer inchangé.
+
+**Reste** : état UI « génération/envoi en cours » (relève des surfaces US-054/055).
 
 **As a** utilisateur qui a payé un rapport,
 **I want to** le voir immédiatement à l'écran et le recevoir par email en PDF,

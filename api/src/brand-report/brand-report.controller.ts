@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
 import { BrandReportService, BRAND_REPORT_COST } from './brand-report.service';
+import { ReportMailService } from './report-mail.service';
 import { BrandReportRequestDto } from './dto/brand-report.dto';
 import { UsersService } from '../users/users.service';
 import { AppLoggerService } from '../common/logging/app-logger.service';
@@ -13,6 +14,7 @@ export class BrandReportController {
 
   constructor(
     private readonly brandReport: BrandReportService,
+    private readonly reportMail: ReportMailService,
     private readonly usersService: UsersService,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly events: AppLoggerService,
@@ -38,7 +40,7 @@ export class BrandReportController {
   @Post()
   async full(
     @Body() dto: BrandReportRequestDto,
-    @AuthenticatedUser() keycloakUser: { sub: string },
+    @AuthenticatedUser() keycloakUser: { sub: string; email?: string },
   ) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
     if (user.totalCredits < BRAND_REPORT_COST) {
@@ -61,7 +63,9 @@ export class BrandReportController {
       cost: BRAND_REPORT_COST,
       score: report.score,
     });
-    // TODO US-053 : générer le PDF et l'envoyer par email (avec consentement RGPD).
-    return { ...report, remainingCredits };
+
+    // Envoi du rapport par email (best-effort : n'échoue jamais la requête).
+    const emailed = await this.reportMail.sendReport(keycloakUser.email, report);
+    return { ...report, remainingCredits, emailed };
   }
 }
