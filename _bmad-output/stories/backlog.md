@@ -1919,7 +1919,7 @@ Les trois conditions doivent être réunies **ensemble**, sinon ne rien publier 
 **Positionnement marché** (étude du 05/08/2026) : le concurrent direct NameScore.io facture ce type de rapport 50 $/unité ; les checkers de pseudos (Namechk, KnowEm) sont gratuits ou en réservation ; la recherche d'antériorité juridique (LegalStart) va de 50 à 350 €. Le trou de marché est un **rapport automatisé, en français, entre le gratuit et le juridique**. Aucun générateur de noms francophone ne couvre les trois plans à la fois.
 
 **Décisions cadrées** :
-- **Modèle** : facturé en **crédits — 300 crédits par rapport** (≈ 9 € en valeur pack à 0,018 €/crédit ; évite le « quasi-gratuit » qu'auraient donné 20-30 crédits sur un quota mensuel de 100).
+- **Modèle** : facturé en **crédits — 500 crédits par rapport** (≈ 9 € = un pack Découverte entier à 0,018 €/crédit ; évite le « quasi-gratuit » qu'auraient donné 20-30 crédits sur un quota mensuel de 100). *(Relevé de 300 à 500 le 06/08/2026.)*
 - **Périmètre marque** : **INPI (France) + EUIPO (Union européenne)**. Pas d'USPTO en phase 1.
 - **Deux surfaces, un seul moteur** : upsell dans le wizard (**US-054**) + landing SEO publique avec checker bridé (**US-055**).
 - **Livraison** : affichage immédiat **et** envoi par email (rétention + capture de lead), sous consentement RGPD explicite.
@@ -2044,7 +2044,7 @@ Cœur de l'épic : un module `api/src/brand-report/` qui orchestre en parallèle
 
 **Status**: ✅ Fait (05/08/2026)
 
-**Livré** : `POST /brand-report` (authentifié) débite **`BRAND_REPORT_COST = 300`** crédits (constante centralisée). Génération AVANT débit → un échec ne consomme rien ; débit atomique via `dataSource.transaction` + `decrementCredits` (renvoie `-1` si insuffisant → rollback, sûr face à la concurrence). Crédits insuffisants → `ForbiddenException('Crédits insuffisants')` (même convention que la recherche de domaines, gérée par le front), sans génération. Réponse enrichie de `remainingCredits`. Événements `brand_report_blocked_no_credits` / `brand_report_generated` (sans PII au-delà du `sub`). Tests unitaires du controller : blocage, débit après génération, course au débit (19/19).
+**Livré** : `POST /brand-report` (authentifié) débite **`BRAND_REPORT_COST = 500`** crédits (constante centralisée). Génération AVANT débit → un échec ne consomme rien ; débit atomique via `dataSource.transaction` + `decrementCredits` (renvoie `-1` si insuffisant → rollback, sûr face à la concurrence). Crédits insuffisants → `ForbiddenException('Crédits insuffisants')` (même convention que la recherche de domaines, gérée par le front), sans génération. Réponse enrichie de `remainingCredits`. Événements `brand_report_blocked_no_credits` / `brand_report_generated` (sans PII au-delà du `sub`). Tests unitaires du controller : blocage, débit après génération, course au débit (19/19).
 
 **As a** exploitant du service,
 **I want to** que chaque rapport complet coûte 300 crédits, débités atomiquement,
@@ -2105,7 +2105,7 @@ Le livrable premium n'est pas qu'un panneau à l'écran : l'email en fait un act
 
 **Status**: ✅ Fait (05/08/2026)
 
-**Livré** : dans le dialogue « Aide-moi à choisir », les anciens liens profonds registrar/INPI/réseaux (qui ne rapportaient rien) sont remplacés par un **CTA « Rapport de disponibilité complet · 300 crédits »**. Au clic : appel `BrandReportService.full()` → spinner → affichage inline (domaines, réseaux, marque avec `match` + classes + lien INPI officiel) et confirmation « envoyé par email ». Crédits rafraîchis via `userService.updateCredits(remainingCredits)`. **403 → message « crédits insuffisants »** (même convention que la recherche). Clés i18n FR/EN ajoutées (`REPORT_*`). Événement analytics `brand_report_cta_clicked`. Build Angular OK.
+**Livré** (refonte 06/08/2026) : sur **chaque ligne de résultat**, le bouton registrar (OVH, qui ne rapportait rien) est remplacé par un bouton **« Rapport »**. Le CTA de « Aide-moi à choisir » y renvoie aussi. Parcours : bouton → **écran de confirmation** (rappelle le coût 500 crédits + solde ; si insuffisant → propose l'achat via `showCreditDialog` ; confirme l'**email destinataire** pré-rempli depuis Keycloak + **ajout d'autres adresses** séparées par virgule) → génération → **rapport en plein écran** (domaines + réseaux + marque `match`/classes/lien INPI, « envoyé par email »). Chaque **domaine libre** propose « Réserver » (lien registrar déplacé dans le rapport). Backend : DTO `emails[]` validés (`IsEmail`), envoi multi-destinataires. Crédits rafraîchis (`updateCredits`). Clés i18n FR/EN. Builds OK.
 
 **As a** utilisateur en fin de wizard qui vient de trouver un nom,
 **I want to** lancer un rapport complet d'un clic au lieu de suivre des liens externes,
