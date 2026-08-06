@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayMaxSize, MinLength, MaxLength, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayMaxSize, MinLength, MaxLength, IsEmail, IsBoolean } from 'class-validator';
 
 export class BrandReportRequestDto {
   @IsString()
@@ -20,4 +20,9 @@ export class BrandReportRequestDto {
   @ArrayMaxSize(5)
   @IsEmail({}, { each: true, message: 'Adresse email invalide' })
   emails?: string[];
+
+  /** Forcer une régénération (ignore le cache et redébite). */
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean;
 }

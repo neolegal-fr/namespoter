@@ -32,6 +32,12 @@ export class BrandReportController {
     return this.brandReport.generate(dto.name, { preview: true });
   }
 
+  /** Noms pour lesquels ce compte a déjà un rapport (le front affiche « Voir le rapport »). */
+  @Get('mine')
+  async mine(@AuthenticatedUser() keycloakUser: { sub: string }) {
+    return { names: await this.store.listNames(keycloakUser.sub) };
+  }
+
   /**
    * Rapport déjà généré pour ce (compte, nom) — permet au front de proposer un
    * lien « voir le rapport » plutôt que de refacturer 500 crédits.
@@ -59,8 +65,8 @@ export class BrandReportController {
   ) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
 
-    // Déjà généré → on le renvoie tel quel, sans refacturer.
-    const cached = await this.store.find(keycloakUser.sub, dto.name);
+    // Déjà généré → on le renvoie tel quel, sans refacturer (sauf régénération forcée).
+    const cached = dto.force ? null : await this.store.find(keycloakUser.sub, dto.name);
     if (cached) {
       this.events.event('brand_report_cache_hit', { sub: keycloakUser.sub });
       return { ...cached, remainingCredits: user.totalCredits, emailed: false, cached: true };

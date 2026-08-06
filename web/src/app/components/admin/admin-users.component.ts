@@ -11,6 +11,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AdminService, AdminUser } from '../../services/admin.service';
+import { UserService } from '../../services/user';
 import { KeycloakService } from 'keycloak-angular';
 
 @Component({
@@ -136,6 +137,7 @@ export class AdminUsersComponent implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private keycloak: KeycloakService,
+    private userService: UserService,
   ) {}
 
   ngOnInit() {
@@ -217,6 +219,10 @@ export class AdminUsersComponent implements OnInit {
         this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
         this.savingUserId.set(null);
         this.editingUserId.set(null);
+        // Si on vient d'ajuster ses propres crédits, rafraîchir le compteur global.
+        if (updated.keycloakId === this.currentKeycloakId()) {
+          this.userService.getCredits().subscribe();
+        }
         this.messageService.add({
           severity: 'success',
           summary: 'Crédits mis à jour',

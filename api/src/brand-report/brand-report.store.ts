@@ -22,6 +22,12 @@ export class BrandReportStore {
     return row?.report ?? null;
   }
 
+  /** Clés (noms normalisés) des rapports déjà générés par ce compte. */
+  async listNames(keycloakId: string): Promise<string[]> {
+    const rows = await this.repo.find({ where: { keycloakId }, select: { nameKey: true } });
+    return rows.map((r) => r.nameKey);
+  }
+
   /** Mémorise (ou met à jour) le rapport pour ce (compte, nom). */
   async save(keycloakId: string, name: string, report: BrandReport): Promise<void> {
     const nameKey = this.key(name);

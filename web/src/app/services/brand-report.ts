@@ -83,12 +83,18 @@ export class BrandReportService {
     return this.http.get<{ exists: boolean; report?: BrandReport }>(`${this.apiUrl}/existing`, { params: { name } });
   }
 
+  /** Noms déjà rapportés par l'utilisateur (pour afficher « Voir le rapport »). */
+  mine(): Observable<{ names: string[] }> {
+    return this.http.get<{ names: string[] }>(`${this.apiUrl}/mine`);
+  }
+
   /** Rapport complet (authentifié, payant ; le token est ajouté par l'intercepteur). */
-  full(name: string, options?: { extensions?: string[]; emails?: string[] }): Observable<BrandReport> {
+  full(name: string, options?: { extensions?: string[]; emails?: string[]; force?: boolean }): Observable<BrandReport> {
     return this.http.post<BrandReport>(this.apiUrl, {
       name,
       ...(options?.extensions ? { extensions: options.extensions } : {}),
       ...(options?.emails?.length ? { emails: options.emails } : {}),
+      ...(options?.force ? { force: true } : {}),
     });
   }
 }

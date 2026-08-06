@@ -224,7 +224,16 @@
       "REPORT_SOCIALS": "Réseaux sociaux",
       "REPORT_TRADEMARK": "Marque déposée",
       "REPORT_STRENGTHS": "Forces",
-      "REPORT_WATCHOUT": "Point de vigilance"
+      "REPORT_WATCHOUT": "Point de vigilance",
+      "REPORT_VIEW": "Voir le rapport",
+      "REPORT_VIEW_HINT": "Rapport déjà généré — consultation gratuite.",
+      "REPORT_SAMPLE_LINK": "Voir un exemple de rapport",
+      "REPORT_SAMPLE_BANNER": "Exemple de rapport (pour namorama) — voici ce que vous obtiendrez.",
+      "REPORT_SAMPLE_CTA": "Générer mon rapport",
+      "REPORT_GENERATED_ON": "Généré le",
+      "REPORT_REGENERATE": "Régénérer",
+      "REPORT_HERO_LABEL": "Domaine recommandé à réserver",
+      "REPORT_DEPOSIT": "Déposer ma marque à l'INPI"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

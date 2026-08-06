@@ -422,7 +422,12 @@
                   </td>
                   <!-- Rapport de disponibilité de marque (US-054) — remplace l'ancien bouton registrar -->
                   <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem; vertical-align: top; padding-top: 0.5rem">
-                    <button type="button" class="report-btn" (click)="askBrandReport(result.name); $event.stopPropagation()"
+                    <!-- Déjà généré : un lien explicite, pas un bouton payant -->
+                    <a *ngIf="hasReport(result.name)" class="report-link" (click)="askBrandReport(result.name); $event.stopPropagation()"
+                       [pTooltip]="'WIZARD.STEP3.REPORT_VIEW_HINT' | translate" tooltipPosition="left">
+                      <i class="pi pi-file-check"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_VIEW' | translate }}</span>
+                    </a>
+                    <button *ngIf="!hasReport(result.name)" type="button" class="report-btn" (click)="askBrandReport(result.name); $event.stopPropagation()"
                             [pTooltip]="'WIZARD.STEP3.REPORT_HINT' | translate" tooltipPosition="left">
                       <i class="pi pi-verified"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_SHORT' | translate }}</span>
                     </button>
@@ -703,6 +708,9 @@
 
     <div style="display: flex; flex-direction: column; gap: 1rem">
       <p style="margin: 0; font-size: 0.9rem; color: #374151">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
+      <a class="report-link" style="align-self: flex-start" (click)="showSampleReport()">
+        <i class="pi pi-eye"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_LINK' | translate }}
+      </a>
 
       <!-- Coût + solde -->
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem; background: #f3f4f6; border-radius: 8px; font-size: 0.9rem">
@@ -764,10 +772,16 @@
 
     <div style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1.25rem">
 
-      <!-- Chargement -->
-      <div *ngIf="brandReportLoading()" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 3rem 0">
-        <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }"></p-progressSpinner>
-        <p style="color: #6b7280; font-size: 0.9rem; margin: 0">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}</p>
+      <!-- Chargement : skeleton par section (perception de rapidité) -->
+      <div *ngIf="brandReportLoading()" style="display: flex; flex-direction: column; gap: 1rem">
+        <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 0 0 0.5rem">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}</p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap">
+          <div class="sk-block" style="flex: 1 1 160px; height: 84px"></div>
+          <div class="sk-block" style="flex: 1 1 160px; height: 84px"></div>
+        </div>
+        <div class="sk-block" style="height: 150px"></div>
+        <div class="sk-block" style="height: 110px"></div>
+        <div class="sk-block" style="height: 110px"></div>
       </div>
 
       <!-- Erreur -->
@@ -775,6 +789,29 @@
 
       <!-- Résultat -->
       <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem">
+
+        <!-- Bannière exemple -->
+        <div *ngIf="isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.7rem 1rem; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px">
+          <span style="font-size: 0.88rem; color: #3730a3"><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
+          <button type="button" class="report-cta" (click)="showReportDialog.set(false)">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
+        </div>
+
+        <!-- Barre cache : date + régénérer -->
+        <div *ngIf="!isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; font-size: 0.78rem; color: #9ca3af">
+          <span><i class="pi pi-clock" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.REPORT_GENERATED_ON' | translate }} {{ formatReportDate(report.generatedAt) }}<span *ngIf="report.cached"> · {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}</span></span>
+          <a *ngIf="report.cached" class="report-link" (click)="regenerateBrandReport()"><i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.REPORT_REGENERATE' | translate }} ({{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }})</a>
+        </div>
+
+        <!-- Action héro : réserver le meilleur domaine libre -->
+        <div *ngIf="heroFreeDomain(report) as hero" class="report-hero">
+          <div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em; opacity: .85">{{ 'WIZARD.STEP3.REPORT_HERO_LABEL' | translate }}</div>
+            <div style="font-family: monospace; font-size: 1.25rem; font-weight: 800; margin-top: 0.15rem">{{ hero.domain }}</div>
+          </div>
+          <a [href]="reserveDomainUrl(report.name, hero.extension, 0)" target="_blank" rel="noopener noreferrer" class="report-hero__btn">
+            <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
+          </a>
+        </div>
 
         <!-- Scores en tête -->
         <div style="display: flex; gap: 1rem; flex-wrap: wrap">
@@ -831,15 +868,34 @@
               <span *ngSwitchCase="'none'" style="color: #16a34a; font-weight: 600"><i class="pi pi-check-circle"></i> Aucun dépôt identique trouvé (INPI / EUIPO / OMPI)</span>
               <span *ngSwitchCase="'exact'" style="color: #dc2626; font-weight: 600"><i class="pi pi-times-circle"></i> Marque identique déjà déposée</span>
               <span *ngSwitchCase="'similar'" style="color: #d97706; font-weight: 600"><i class="pi pi-exclamation-triangle"></i> Marques proches existantes</span>
-              <span *ngSwitchDefault style="color: #9ca3af; font-weight: 600">Vérification indisponible</span>
+              <span *ngSwitchDefault style="color: #9ca3af; font-weight: 600"><i class="pi pi-question-circle"></i> Vérification automatique indisponible</span>
             </span>
-            <ul *ngIf="report.trademark.hits.length" style="margin: 0.5rem 0 0.3rem; padding-left: 1.1rem; color: #4b5563; font-size: 0.84rem">
+
+            <!-- Explication concrète + prochaines actions -->
+            <p [ngSwitch]="report.trademark.match" style="margin: 0.5rem 0 0; color: #4b5563; font-size: 0.85rem; line-height: 1.55">
+              <span *ngSwitchCase="'none'">Aucune marque <strong>identique</strong> n'apparaît dans les bases officielles INPI (France), EUIPO (Europe) et OMPI (international). Bon signal — mais cela ne couvre pas les marques <em>similaires</em> (proches à l'oreille ou à l'œil). Prochaine étape&nbsp;: sécurisez le nom en <strong>déposant votre marque</strong> avant de communiquer.</span>
+              <span *ngSwitchCase="'exact'">Une marque <strong>identique</strong> est déjà déposée. Utiliser ce nom dans les mêmes classes de produits/services vous expose à une <strong>opposition</strong> ou à une action en <strong>contrefaçon</strong>. Regardez les classes ci-dessous&nbsp;: si elles ne recouvrent pas votre activité, un usage reste parfois possible — à faire valider par un conseil en propriété industrielle.</span>
+              <span *ngSwitchCase="'similar'">Des marques <strong>proches</strong> existent. Le risque dépend du degré de similarité et du recouvrement des classes. Avant tout dépôt, une recherche d'antériorité approfondie et l'avis d'un <strong>conseil en propriété industrielle</strong> sont recommandés.</span>
+              <span *ngSwitchDefault>La vérification automatique n'a pas pu aboutir pour ce nom (source indisponible). Lancez la <strong>recherche officielle INPI</strong> pour trancher.</span>
+            </p>
+
+            <ul *ngIf="report.trademark.hits.length" style="margin: 0.6rem 0 0.3rem; padding-left: 1.1rem; color: #4b5563; font-size: 0.84rem">
               <li *ngFor="let h of report.trademark.hits.slice(0, 8)" style="margin: 0.15rem 0">
                 {{ h.name }} <span style="color: #9ca3af">({{ h.collection }}<span *ngIf="h.classes.length"> · classes {{ h.classes.join(', ') }}</span><span *ngIf="h.status"> · {{ h.status }}</span>)</span>
                 <a *ngIf="h.noticeUrl" [href]="h.noticeUrl" target="_blank" rel="noopener noreferrer" class="check-link" style="font-size: 0.7rem; margin-left: 0.3rem">notice</a>
               </li>
             </ul>
-            <a [href]="report.trademark.deepLink" target="_blank" rel="noopener noreferrer" class="check-link" style="font-size: 0.78rem">{{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }} →</a>
+
+            <!-- Actions marque : déposer (si libre/proche) + recherche officielle (proéminente si indisponible) -->
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.7rem">
+              <a *ngIf="report.trademark.match === 'none' || report.trademark.match === 'similar'" [href]="INPI_DEPOSIT_URL" target="_blank" rel="noopener noreferrer" class="report-cta">
+                <i class="pi pi-shield" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_DEPOSIT' | translate }}
+              </a>
+              <a [href]="report.trademark.deepLink" target="_blank" rel="noopener noreferrer"
+                 [ngClass]="report.trademark.match === 'unknown' ? 'report-cta' : 'check-link'" style="font-size: 0.82rem">
+                <i class="pi pi-search" style="font-size: 0.75rem"></i> {{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }}
+              </a>
+            </div>
           </div>
         </div>
 

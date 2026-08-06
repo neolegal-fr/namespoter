@@ -456,9 +456,12 @@ export class WizardComponent implements OnInit {
     this.brandReportName.set(name);
     this.brandReportError.set(null);
     this.brandReport.set(null);
+    this.isSampleReport.set(false);
+    this.forceRegen.set(false);
     this.brandReportService.existing(name).subscribe({
       next: (res) => {
         if (res?.exists && res.report) {
+          this.markReported(name);
           this.brandReport.set(res.report);
           this.showReportDialog.set(true);
         } else {
@@ -492,28 +495,40 @@ export class WizardComponent implements OnInit {
     this.projectService.showCreditDialog.set(true);
   }
 
+  /** Régénérer un rapport en cache (redébite) : repasse par la confirmation. */
+  readonly forceRegen = signal(false);
+  regenerateBrandReport(): void {
+    this.forceRegen.set(true);
+    this.showReportDialog.set(false);
+    this.openReportConfirm();
+  }
+
   /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
   confirmBrandReport(): void {
     if (!this.hasEnoughReportCredits()) { this.openCreditPurchase(); return; }
     const emails = this.parseEmails(this.reportEmails());
+    const force = this.forceRegen();
     this.showReportConfirm.set(false);
     this.showReportDialog.set(true);
-    this.generateBrandReport(this.brandReportName(), emails);
+    this.generateBrandReport(this.brandReportName(), emails, force);
+    this.forceRegen.set(false);
   }
 
   private parseEmails(raw: string): string[] {
     return raw.split(/[,;\s]+/).map((e) => e.trim()).filter((e) => e.length > 0);
   }
 
-  private generateBrandReport(name: string, emails: string[]): void {
+  private generateBrandReport(name: string, emails: string[], force = false): void {
     if (this.brandReportLoading()) return;
     this.brandReportLoading.set(true);
     this.brandReportError.set(null);
     this.brandReport.set(null);
     this.analytics.track('brand_report_cta_clicked');
-    this.brandReportService.full(name, { emails }).subscribe({
+    this.brandReportService.full(name, { emails, force }).subscribe({
       next: (report) => {
+        this.isSampleReport.set(false);
         this.brandReport.set(report);
+        this.markReported(name);
         if (typeof report.remainingCredits === 'number') {
           this.userService.updateCredits(report.remainingCredits);
         }
@@ -547,6 +562,80 @@ export class WizardComponent implements OnInit {
   qualityCriteria(q: NameQuality): { label: string; value: number }[] {
     return Object.entries(q.scores).map(([k, v]) => ({ label: this.QUALITY_LABELS[k] ?? k, value: v }));
   }
+
+  /** Point d'entrée officiel pour déposer une marque à l'INPI. */
+  readonly INPI_DEPOSIT_URL = 'https://procedures.inpi.fr/?/marques/depot';
+
+  /** Meilleur domaine à réserver (action héro) : .com libre en priorité, sinon 1er libre. */
+  heroFreeDomain(report: BrandReport): { extension: string; domain: string } | null {
+    const free = report.domains.filter((d) => d.status === 'free');
+    return free.find((d) => d.extension === 'com') ?? free[0] ?? null;
+  }
+
+  /** Date de génération lisible. */
+  formatReportDate(iso: string): string {
+    try { return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }); }
+    catch { return ''; }
+  }
+
+  // ─── Suivi des noms déjà rapportés (lien « Voir le rapport » vs bouton) ────
+  readonly reportedNames = signal<Set<string>>(new Set());
+  private normName(name: string): string { return (name || '').trim().toLowerCase(); }
+  hasReport(name: string): boolean { return this.reportedNames().has(this.normName(name)); }
+  private markReported(name: string): void {
+    this.reportedNames.update((s) => new Set(s).add(this.normName(name)));
+  }
+  /** Charge la liste des noms déjà rapportés (silencieux si non authentifié). */
+  loadReportedNames(): void {
+    this.brandReportService.mine().subscribe({
+      next: (res) => this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n)))),
+      error: () => { /* anonyme ou indisponible : liste vide */ },
+    });
+  }
+
+  // ─── Rapport d'exemple (namorama) pour se faire une idée avant de payer ────
+  readonly isSampleReport = signal(false);
+  showSampleReport(): void {
+    this.showReportConfirm.set(false);
+    this.isSampleReport.set(true);
+    this.brandReportName.set('namorama');
+    this.brandReportError.set(null);
+    this.brandReport.set(this.SAMPLE_REPORT);
+    this.showReportDialog.set(true);
+  }
+  readonly SAMPLE_REPORT: BrandReport = {
+    name: 'namorama',
+    handle: 'namorama',
+    domains: [
+      { extension: 'com', domain: 'namorama.com', status: 'taken' },
+      { extension: 'fr', domain: 'namorama.fr', status: 'free' },
+      { extension: 'io', domain: 'namorama.io', status: 'free' },
+      { extension: 'net', domain: 'namorama.net', status: 'free' },
+      { extension: 'app', domain: 'namorama.app', status: 'unknown' },
+    ],
+    socials: [
+      { platform: 'GitHub', handle: 'namorama', url: 'https://github.com/namorama', status: 'free' },
+      { platform: 'LinkedIn', handle: 'namorama', url: 'https://www.linkedin.com/company/namorama', status: 'free' },
+      { platform: 'TikTok', handle: 'namorama', url: 'https://www.tiktok.com/@namorama', status: 'taken' },
+      { platform: 'Telegram', handle: 'namorama', url: 'https://t.me/namorama', status: 'free' },
+    ],
+    trademark: {
+      office: 'INPI',
+      match: 'none',
+      hits: [],
+      deepLink: 'https://data.inpi.fr/search?q=namorama&type=brands',
+    },
+    quality: {
+      score: 82,
+      scores: { memorability: 4, pronunciation: 4, international: 5, seo: 3, distinctiveness: 5 },
+      strengths: 'Court, sonore, international et très distinctif.',
+      watchout: 'Sens peu explicite : à soutenir par un logo et une accroche claire.',
+    },
+    score: 68,
+    generatedAt: new Date().toISOString(),
+    disclaimer:
+      "Signal indicatif de disponibilité. Ne remplace pas une recherche d'antériorité ni l'avis d'un conseil en propriété industrielle.",
+  };
 
   /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */
   reportStatusLabel(s: Availability): string {
@@ -613,6 +702,7 @@ export class WizardComponent implements OnInit {
 
   async ngOnInit() {
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
+    if (this.isLoggedIn()) this.loadReportedNames();
     // Afficher la landing uniquement aux visiteurs non connectés sur la page d'accueil
     if (!this.isLoggedIn() && !this.route.snapshot.params['id']) {
       this.showLanding.set(true);

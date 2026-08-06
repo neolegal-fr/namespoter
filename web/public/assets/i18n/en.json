@@ -224,7 +224,16 @@
       "REPORT_SOCIALS": "Social handles",
       "REPORT_TRADEMARK": "Registered trademark",
       "REPORT_STRENGTHS": "Strengths",
-      "REPORT_WATCHOUT": "Watch out"
+      "REPORT_WATCHOUT": "Watch out",
+      "REPORT_VIEW": "View report",
+      "REPORT_VIEW_HINT": "Report already generated — free to view.",
+      "REPORT_SAMPLE_LINK": "See a sample report",
+      "REPORT_SAMPLE_BANNER": "Sample report (for namorama) — this is what you will get.",
+      "REPORT_SAMPLE_CTA": "Generate my report",
+      "REPORT_GENERATED_ON": "Generated on",
+      "REPORT_REGENERATE": "Regenerate",
+      "REPORT_HERO_LABEL": "Recommended domain to register",
+      "REPORT_DEPOSIT": "Register my trademark (INPI)"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
