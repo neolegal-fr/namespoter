@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RdapService } from '../domain/rdap.service';
+import { DomainService } from '../domain/domain.service';
 import { AppLoggerService } from '../common/logging/app-logger.service';
 import { SocialCheckService } from './social/social-check.service';
 import { TrademarkService } from './trademark/trademark.service';
@@ -7,6 +8,7 @@ import type {
   Availability,
   BrandReport,
   DomainAvailability,
+  NameQuality,
   SocialAvailability,
 } from './dto/brand-report.types';
 
@@ -31,6 +33,10 @@ export interface BrandReportOptions {
   extensions?: string[];
   /** Version bridée pour la landing publique (US-055). */
   preview?: boolean;
+  /** Ajoute l'analyse de qualité du nom (IA) — rapport complet uniquement. */
+  withQuality?: boolean;
+  /** Locale pour l'analyse de qualité. */
+  locale?: string;
 }
 
 @Injectable()
@@ -39,6 +45,7 @@ export class BrandReportService {
     private readonly rdap: RdapService,
     private readonly social: SocialCheckService,
     private readonly trademark: TrademarkService,
+    private readonly domain: DomainService,
     private readonly events: AppLoggerService,
   ) {}
 
@@ -51,10 +58,12 @@ export class BrandReportService {
     const handle = this.toHandle(name);
     const extensions = options.extensions ?? (preview ? PREVIEW_EXTENSIONS : DEFAULT_EXTENSIONS);
 
-    const [domains, socialsAll, trademark] = await Promise.all([
+    const wantQuality = !!options.withQuality && !preview;
+    const [domains, socialsAll, trademark, quality] = await Promise.all([
       this.checkDomains(name, extensions),
       this.social.check(handle),
       preview ? this.trademark.check(name).then(() => null) : this.trademark.check(name),
+      wantQuality ? this.analyzeQuality(name, options.locale) : Promise.resolve(undefined),
     ]);
 
     // Aperçu public : on masque la marque et on limite les réseaux affichés.
@@ -70,6 +79,7 @@ export class BrandReportService {
       domains,
       socials,
       trademark: trademarkResult,
+      quality,
       score: this.score(domains, socials, preview ? null : trademarkResult.match),
       generatedAt: new Date().toISOString(),
       disclaimer: DISCLAIMER,
@@ -82,6 +92,30 @@ export class BrandReportService {
       score: report.score,
     });
     return report;
+  }
+
+  /**
+   * Qualité intrinsèque du nom via l'analyse IA existante (5 critères 1-5).
+   * Best-effort : en cas d'échec/parse invalide, le rapport n'a pas de section
+   * qualité plutôt que d'échouer.
+   */
+  private async analyzeQuality(name: string, locale?: string): Promise<NameQuality | undefined> {
+    try {
+      const raw = await this.domain.analyzeNameWithAI(name, locale ?? 'fr');
+      const json = JSON.parse(raw.replace(/^```json\s*|\s*```$/g, '').trim());
+      const scores: Record<string, number> = json.scores ?? {};
+      const values = Object.values(scores).filter((n): n is number => typeof n === 'number');
+      if (!values.length) return undefined;
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      return {
+        score: Math.round((avg / 5) * 100),
+        scores,
+        strengths: typeof json.strengths === 'string' ? json.strengths : undefined,
+        watchout: typeof json.watchout === 'string' ? json.watchout : undefined,
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   private async checkDomains(name: string, extensions: string[]): Promise<DomainAvailability[]> {

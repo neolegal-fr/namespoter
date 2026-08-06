@@ -47,6 +47,16 @@ export interface TrademarkHit {
   noticeUrl?: string;
 }
 
+/** Qualité intrinsèque du nom (analyse IA : 5 critères notés 1-5). */
+export interface NameQuality {
+  /** Score global 0-100 (moyenne des 5 critères). */
+  score: number;
+  /** Notes par critère (memorability, pronunciation, international, seo, distinctiveness). */
+  scores: Record<string, number>;
+  strengths?: string;
+  watchout?: string;
+}
+
 /** Rapport complet consommé par l'affichage, le PDF (US-053) et l'email. */
 export interface BrandReport {
   name: string;
@@ -54,6 +64,8 @@ export interface BrandReport {
   domains: DomainAvailability[];
   socials: SocialAvailability[];
   trademark: TrademarkResult;
+  /** Qualité du nom (présente sur le rapport complet, pas sur l'aperçu). */
+  quality?: NameQuality;
   /** Synthèse 0-100. Les items `unknown` n'améliorent jamais le score. */
   score: number;
   generatedAt: string; // ISO 8601

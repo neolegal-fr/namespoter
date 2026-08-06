@@ -14,14 +14,17 @@ describe('BrandReportController — crédits (US-052)', () => {
     // transaction(cb) exécute simplement le callback avec un manager factice.
     const dataSource = { transaction: (cb: any) => cb({}) } as any;
     const sendReport = jest.fn().mockResolvedValue(true);
+    const find = jest.fn().mockResolvedValue(null); // pas de rapport en cache par défaut
+    const save = jest.fn().mockResolvedValue(undefined);
     const ctrl = new BrandReportController(
       { generate } as any,
+      { find, save } as any,
       { sendReport } as any,
       { findOrCreate, decrementCredits } as any,
       dataSource,
       { event } as any,
     );
-    return { ctrl, generate, decrementCredits, event, sendReport };
+    return { ctrl, generate, decrementCredits, event, sendReport, find, save };
   }
 
   it('bloque et ne génère pas si crédits < coût', async () => {
@@ -31,10 +34,21 @@ describe('BrandReportController — crédits (US-052)', () => {
     expect(event).toHaveBeenCalledWith('brand_report_blocked_no_credits', expect.any(Object));
   });
 
-  it('génère puis débite le coût, et renvoie les crédits restants', async () => {
-    const { ctrl, generate, decrementCredits, event, sendReport } = make({ totalCredits: 500, newTotal: 200 });
+  it('ne débite pas et renvoie le rapport en cache s\'il existe déjà', async () => {
+    const { ctrl, generate, decrementCredits, find } = make({ totalCredits: 500 });
+    find.mockResolvedValue({ name: 'Qonto', score: 90 });
     const res: any = await ctrl.full(dto, user);
-    expect(generate).toHaveBeenCalledWith('Qonto', { extensions: undefined });
+    expect(res.cached).toBe(true);
+    expect(res.score).toBe(90);
+    expect(generate).not.toHaveBeenCalled();
+    expect(decrementCredits).not.toHaveBeenCalled();
+  });
+
+  it('génère puis débite le coût, et renvoie les crédits restants', async () => {
+    const { ctrl, generate, decrementCredits, event, sendReport, save } = make({ totalCredits: 500, newTotal: 200 });
+    const res: any = await ctrl.full(dto, user);
+    expect(generate).toHaveBeenCalledWith('Qonto', { extensions: undefined, withQuality: true });
+    expect(save).toHaveBeenCalled();
     expect(decrementCredits).toHaveBeenCalledWith('kc-123', BRAND_REPORT_COST, expect.anything());
     expect(res.remainingCredits).toBe(200);
     expect(res.score).toBe(80);

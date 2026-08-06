@@ -55,6 +55,26 @@ function trademarkBlock(report: BrandReport): string {
     <p style="font-size:12px"><a href="${esc(tm.deepLink)}" style="color:#6366f1">Recherche officielle INPI →</a></p>`;
 }
 
+const QUALITY_CRITERIA: Record<string, string> = {
+  memorability: 'Mémorabilité',
+  pronunciation: 'Prononciation',
+  international: 'International',
+  seo: 'SEO',
+  distinctiveness: 'Distinctivité',
+};
+
+function qualityBlock(report: BrandReport): string {
+  const q = report.quality;
+  if (!q) return '';
+  const rows = Object.entries(q.scores)
+    .map(([k, v]) => `<tr><td style="padding:4px 0">${esc(QUALITY_CRITERIA[k] ?? k)}</td><td style="text-align:right;color:#6b7280">${v}/5</td></tr>`)
+    .join('');
+  const strengths = q.strengths ? `<p style="margin:6px 0 0;font-size:13px"><strong style="color:#16a34a">Forces :</strong> ${esc(q.strengths)}</p>` : '';
+  const watchout = q.watchout ? `<p style="margin:4px 0 0;font-size:13px"><strong style="color:#d97706">Vigilance :</strong> ${esc(q.watchout)}</p>` : '';
+  return `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Qualité du nom <span style="color:#6b7280;font-weight:400">— ${q.score}/100</span></h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">${rows}</table>${strengths}${watchout}`;
+}
+
 function section(title: string, inner: string): string {
   return `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">${title}</h2><table style="width:100%;border-collapse:collapse;font-size:14px">${inner}</table>`;
 }
@@ -78,6 +98,7 @@ export function renderReportHtml(report: BrandReport): string {
     </div>
   </div>
 
+  ${qualityBlock(report)}
   ${section('Noms de domaine', domainsRows(report.domains))}
   ${section('Réseaux sociaux', socialsRows(report.socials))}
   <h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Marque déposée</h2>
