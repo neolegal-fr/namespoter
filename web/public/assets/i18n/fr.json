@@ -207,7 +207,15 @@
       "REPORT_NO_CREDITS": "Crédits insuffisants pour générer le rapport. Rechargez votre solde pour continuer.",
       "REPORT_ERROR": "La génération du rapport a échoué. Réessayez dans un instant.",
       "REPORT_OFFICIAL": "Recherche officielle INPI",
-      "REPORT_EMAILED": "Rapport envoyé par email."
+      "REPORT_EMAILED": "Rapport envoyé par email.",
+      "REPORT_SHORT": "Rapport",
+      "REPORT_CONFIRM_TITLE": "Générer le rapport de disponibilité",
+      "REPORT_COST_LABEL": "Coût de ce rapport",
+      "REPORT_CONFIRM_BTN": "Confirmer et générer",
+      "REPORT_EMAILS_LABEL": "Envoyer le rapport à",
+      "REPORT_EMAILS_PLACEHOLDER": "vous@exemple.com, associe@exemple.com",
+      "REPORT_EMAILS_HINT": "Séparez plusieurs adresses par une virgule.",
+      "REPORT_RESERVE": "Réserver"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
@@ -251,5 +259,8 @@
     "RATE_LIMIT": "Vous avez déjà soumis un avis dans les 30 derniers jours. Merci de votre participation !",
     "WIZARD_CTA_LINK": "Signalez un bug ou proposez une amélioration",
     "WIZARD_CTA_SUFFIX": ", et gagnez jusqu'à 500 crédits."
+  },
+  "COMMON": {
+    "CANCEL": "Annuler"
   }
 }

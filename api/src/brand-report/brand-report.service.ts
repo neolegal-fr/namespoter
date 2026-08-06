@@ -11,7 +11,7 @@ import type {
 } from './dto/brand-report.types';
 
 /** Coût d'un rapport complet, en crédits. Source unique (pas de nombre magique). */
-export const BRAND_REPORT_COST = 300;
+export const BRAND_REPORT_COST = 500;
 
 /** Extensions vérifiées par défaut (les plus signifiantes pour une marque). */
 const DEFAULT_EXTENSIONS = ['com', 'fr', 'io', 'net', 'app'];

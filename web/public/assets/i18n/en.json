@@ -207,7 +207,15 @@
       "REPORT_NO_CREDITS": "Not enough credits to generate the report. Top up your balance to continue.",
       "REPORT_ERROR": "Report generation failed. Please try again in a moment.",
       "REPORT_OFFICIAL": "Official INPI search",
-      "REPORT_EMAILED": "Report sent by email."
+      "REPORT_EMAILED": "Report sent by email.",
+      "REPORT_SHORT": "Report",
+      "REPORT_CONFIRM_TITLE": "Generate the availability report",
+      "REPORT_COST_LABEL": "Cost of this report",
+      "REPORT_CONFIRM_BTN": "Confirm and generate",
+      "REPORT_EMAILS_LABEL": "Send the report to",
+      "REPORT_EMAILS_PLACEHOLDER": "you@example.com, partner@example.com",
+      "REPORT_EMAILS_HINT": "Separate multiple addresses with a comma.",
+      "REPORT_RESERVE": "Register"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -251,5 +259,8 @@
     "RATE_LIMIT": "You already submitted feedback in the last 30 days. Thank you for your contribution!",
     "WIZARD_CTA_LINK": "Report a bug or suggest an improvement",
     "WIZARD_CTA_SUFFIX": ", and earn up to 500 credits."
+  },
+  "COMMON": {
+    "CANCEL": "Cancel"
   }
 }

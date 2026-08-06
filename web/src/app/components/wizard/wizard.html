@@ -420,27 +420,12 @@
                     <i *ngIf="result.allExtensions[ext] === null" class="pi pi-question-circle text-base" style="color: #9ca3af" title="Disponibilité non vérifiable pour cette extension"></i>
                     <i *ngIf="result.allExtensions[ext] === false" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
                   </td>
-                  <!-- US-022 : colonne achat registrar + rapport de marque (US-054) -->
+                  <!-- Rapport de disponibilité de marque (US-054) — remplace l'ancien bouton registrar -->
                   <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem; vertical-align: top; padding-top: 0.5rem">
-                    <div style="display: flex; align-items: center; gap: 0.35rem">
-                      <button type="button" class="report-mini" (click)="openBrandReport(result.name); $event.stopPropagation()"
-                              [pTooltip]="'WIZARD.STEP3.REPORT_CTA' | translate" tooltipPosition="left">
-                        <i class="pi pi-verified"></i>
-                      </button>
-                      <div class="reg-split" (click)="$event.stopPropagation()">
-                        <a [href]="REGISTRARS[0].url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__main">
-                          <i class="pi pi-shopping-cart"></i><span class="reg-label"> OVH</span>
-                        </a>
-                        <button type="button" class="reg-split__toggle" (click)="toggleReg(result.name, $event)">
-                          <i class="pi pi-chevron-down"></i>
-                        </button>
-                        <div *ngIf="openReg() === result.name" class="reg-split__menu">
-                          <a *ngFor="let r of REGISTRARS.slice(1)" [href]="r.url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__item">
-                            {{ r.label }}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
+                    <button type="button" class="report-btn" (click)="askBrandReport(result.name); $event.stopPropagation()"
+                            [pTooltip]="'WIZARD.STEP3.REPORT_HINT' | translate" tooltipPosition="left">
+                      <i class="pi pi-verified"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_SHORT' | translate }}</span>
+                    </button>
                   </td>
                 </tr>
                 <!-- Panneau d'analyse pleine largeur -->
@@ -654,7 +639,7 @@
 
         <!-- Rapport de disponibilité complet (ouvre le dialogue dédié) -->
         <div style="margin-top: 0.85rem; width: 100%; text-align: center">
-          <button type="button" (click)="openBrandReport(result.recommended)" class="report-cta">
+          <button type="button" (click)="askBrandReport(result.recommended)" class="report-cta">
             <i class="pi pi-verified" style="font-size: 0.8rem"></i>
             {{ 'WIZARD.STEP3.REPORT_CTA' | translate }} · {{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}
           </button>
@@ -707,14 +692,63 @@
     </div>
   </p-dialog>
 
-  <!-- ─── Dialog "Rapport de disponibilité de marque" (US-054) ─────────────── -->
+  <!-- ─── Dialog confirmation avant génération (crédits + destinataires) ───── -->
+  <p-dialog
+    [visible]="showReportConfirm()"
+    (visibleChange)="showReportConfirm.set($event)"
+    [header]="('WIZARD.STEP3.REPORT_CONFIRM_TITLE' | translate) + ' — ' + brandReportName()"
+    [modal]="true"
+    [style]="{ width: 'min(94vw, 30rem)' }"
+    [contentStyle]="{ padding: '1.25rem' }">
+
+    <div style="display: flex; flex-direction: column; gap: 1rem">
+      <p style="margin: 0; font-size: 0.9rem; color: #374151">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
+
+      <!-- Coût + solde -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem; background: #f3f4f6; border-radius: 8px; font-size: 0.9rem">
+        <span>{{ 'WIZARD.STEP3.REPORT_COST_LABEL' | translate }}</span>
+        <strong>{{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}</strong>
+      </div>
+
+      <!-- Crédits insuffisants -->
+      <div *ngIf="!hasEnoughReportCredits()" style="text-align: center">
+        <p style="color: #dc2626; font-size: 0.85rem; margin: 0 0 0.6rem">{{ 'WIZARD.STEP3.REPORT_NO_CREDITS' | translate }}</p>
+        <button type="button" class="report-cta" (click)="openCreditPurchase()">
+          <i class="pi pi-shopping-cart" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.BUY_CREDITS_BTN' | translate }}
+        </button>
+      </div>
+
+      <!-- Destinataires email -->
+      <div *ngIf="hasEnoughReportCredits()">
+        <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem">
+          {{ 'WIZARD.STEP3.REPORT_EMAILS_LABEL' | translate }}
+        </label>
+        <input type="text" pInputText [ngModel]="reportEmails()" (ngModelChange)="reportEmails.set($event)"
+               style="width: 100%" [placeholder]="'WIZARD.STEP3.REPORT_EMAILS_PLACEHOLDER' | translate" />
+        <small style="color: #9ca3af; font-size: 0.72rem">{{ 'WIZARD.STEP3.REPORT_EMAILS_HINT' | translate }}</small>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button type="button" class="p-button p-button-text" (click)="showReportConfirm.set(false)"
+              style="background: none; border: 0; color: #6b7280; cursor: pointer; padding: 0.5rem 0.9rem">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+      <button *ngIf="hasEnoughReportCredits()" type="button" class="report-cta" (click)="confirmBrandReport()">
+        <i class="pi pi-verified" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_CONFIRM_BTN' | translate }}
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- ─── Dialog "Rapport de disponibilité de marque" (plein écran) (US-054) ─ -->
   <p-dialog
     [visible]="showReportDialog()"
     (visibleChange)="showReportDialog.set($event)"
     [header]="('WIZARD.STEP3.REPORT_CTA' | translate) + ' — ' + brandReportName()"
     [modal]="true"
-    [style]="{ width: 'min(94vw, 40rem)' }"
-    [contentStyle]="{ padding: '1.25rem' }">
+    [draggable]="false"
+    [style]="{ width: '100vw', height: '100vh', maxHeight: '100vh' }"
+    [contentStyle]="{ padding: '1.5rem', maxWidth: '820px', margin: '0 auto' }">
 
     <!-- Chargement -->
     <div *ngIf="brandReportLoading()" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1.5rem 0">
@@ -730,9 +764,13 @@
       <div style="display: flex; gap: 1.5rem; flex-wrap: wrap">
         <div style="flex: 1 1 200px">
           <div style="font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.4rem">Domaines</div>
-          <div *ngFor="let d of report.domains" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid #f1f3f5">
+          <div *ngFor="let d of report.domains" style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid #f1f3f5">
             <span>{{ d.domain }}</span>
-            <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.7rem; font-weight: 600; padding: 1px 9px; border-radius: 9999px">{{ reportStatusLabel(d.status) }}</span>
+            <span style="display: flex; align-items: center; gap: 0.5rem">
+              <a *ngIf="d.status === 'free'" [href]="reserveDomainUrl(report.name, d.extension)" target="_blank" rel="noopener noreferrer"
+                 class="check-link" style="font-size: 0.72rem"><i class="pi pi-shopping-cart" style="font-size: 0.65rem"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}</a>
+              <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.7rem; font-weight: 600; padding: 1px 9px; border-radius: 9999px">{{ reportStatusLabel(d.status) }}</span>
+            </span>
           </div>
         </div>
         <div style="flex: 1 1 200px">

@@ -446,22 +446,56 @@ export class WizardComponent implements OnInit {
   readonly brandReportError = signal<string | null>(null);
   readonly showReportDialog = signal(false);
   readonly brandReportName = signal('');
+  // Écran de confirmation avant génération : crédits + destinataires email.
+  readonly showReportConfirm = signal(false);
+  readonly reportEmails = signal('');
+  readonly userEmail = signal('');
 
-  /** Ouvre le dialogue de rapport pour un nom (depuis une ligne ou la reco). */
-  openBrandReport(name: string): void {
+  /** Étape 1 : ouvre la confirmation (coût, solde, destinataires) pour un nom. */
+  async askBrandReport(name: string): Promise<void> {
     this.brandReportName.set(name);
-    this.showReportDialog.set(true);
-    this.generateBrandReport(name);
+    this.brandReportError.set(null);
+    if (!this.userEmail()) {
+      try {
+        const profile: any = await this.keycloak.loadUserProfile();
+        this.userEmail.set(profile?.email ?? '');
+      } catch { /* profil indisponible : champ email vide, l'utilisateur saisit */ }
+    }
+    this.reportEmails.set(this.userEmail());
+    this.showReportConfirm.set(true);
   }
 
-  /** Déclenche le rapport complet (300 crédits) pour le nom recommandé. */
-  generateBrandReport(name: string): void {
+  /** Solde suffisant pour générer le rapport ? */
+  hasEnoughReportCredits(): boolean {
+    return this.userService.creditsValue >= this.brandReportCost;
+  }
+
+  /** Renvoie vers l'achat de crédits (dialogue existant). */
+  openCreditPurchase(): void {
+    this.showReportConfirm.set(false);
+    this.projectService.showCreditDialog.set(true);
+  }
+
+  /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
+  confirmBrandReport(): void {
+    if (!this.hasEnoughReportCredits()) { this.openCreditPurchase(); return; }
+    const emails = this.parseEmails(this.reportEmails());
+    this.showReportConfirm.set(false);
+    this.showReportDialog.set(true);
+    this.generateBrandReport(this.brandReportName(), emails);
+  }
+
+  private parseEmails(raw: string): string[] {
+    return raw.split(/[,;\s]+/).map((e) => e.trim()).filter((e) => e.length > 0);
+  }
+
+  private generateBrandReport(name: string, emails: string[]): void {
     if (this.brandReportLoading()) return;
     this.brandReportLoading.set(true);
     this.brandReportError.set(null);
     this.brandReport.set(null);
     this.analytics.track('brand_report_cta_clicked');
-    this.brandReportService.full(name).subscribe({
+    this.brandReportService.full(name, { emails }).subscribe({
       next: (report) => {
         this.brandReport.set(report);
         if (typeof report.remainingCredits === 'number') {
@@ -479,6 +513,11 @@ export class WizardComponent implements OnInit {
         this.brandReportLoading.set(false);
       },
     });
+  }
+
+  /** URL de réservation d'un domaine chez le registrar principal (ancien bouton). */
+  reserveDomainUrl(name: string, extension: string): string {
+    return this.REGISTRARS[0].url(name, [extension]);
   }
 
   /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */

@@ -20,17 +20,22 @@ export class ReportMailService {
     private readonly events: AppLoggerService,
   ) {}
 
-  /** Envoie le rapport à `to`. Renvoie `true` si l'email est parti. */
-  async sendReport(to: string | undefined, report: BrandReport): Promise<boolean> {
-    if (!to) return false;
+  /** Envoie le rapport à un ou plusieurs destinataires. Renvoie `true` si l'email est parti. */
+  async sendReport(recipients: string | string[] | undefined, report: BrandReport): Promise<boolean> {
+    const list = (Array.isArray(recipients) ? recipients : [recipients])
+      .map((e) => (e ?? '').trim())
+      .filter((e) => e.length > 0);
+    const unique = [...new Set(list)];
+    if (!unique.length) return false;
+
     const html = renderReportHtml(report);
     const ok = await this.mail.send({
-      to,
+      to: unique.join(', '),
       subject: `Votre rapport de disponibilité — ${report.name}`,
       html,
       attachments: [{ filename: reportFileName(report), content: html, contentType: 'text/html; charset=utf-8' }],
     });
-    this.events.event('brand_report_emailed', { sent: ok });
+    this.events.event('brand_report_emailed', { sent: ok, recipients: unique.length });
     return ok;
   }
 }

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayMaxSize, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayMaxSize, MinLength, MaxLength, IsEmail } from 'class-validator';
 
 export class BrandReportRequestDto {
   @IsString()
@@ -13,4 +13,11 @@ export class BrandReportRequestDto {
   @ArrayMaxSize(15)
   @IsString({ each: true })
   extensions?: string[];
+
+  /** Destinataires de l'envoi du rapport (le compte + éventuels ajouts). Défaut : email du compte. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(5)
+  @IsEmail({}, { each: true, message: 'Adresse email invalide' })
+  emails?: string[];
 }

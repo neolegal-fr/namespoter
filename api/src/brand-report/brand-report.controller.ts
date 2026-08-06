@@ -64,8 +64,9 @@ export class BrandReportController {
       score: report.score,
     });
 
-    // Envoi du rapport par email (best-effort : n'échoue jamais la requête).
-    const emailed = await this.reportMail.sendReport(keycloakUser.email, report);
+    // Destinataires : la liste fournie, sinon l'email du compte. Best-effort.
+    const recipients = dto.emails?.length ? dto.emails : keycloakUser.email;
+    const emailed = await this.reportMail.sendReport(recipients, report);
     return { ...report, remainingCredits, emailed };
   }
 }

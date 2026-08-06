@@ -52,7 +52,7 @@ export interface BrandReport {
 }
 
 /** Coût affiché du rapport complet (aligné sur BRAND_REPORT_COST côté API). */
-export const BRAND_REPORT_COST = 300;
+export const BRAND_REPORT_COST = 500;
 
 @Injectable({ providedIn: 'root' })
 export class BrandReportService {
@@ -68,8 +68,12 @@ export class BrandReportService {
     return this.http.post<BrandReport>(`${this.apiUrl}/preview`, { name });
   }
 
-  /** Rapport complet (authentifié, 300 crédits ; le token est ajouté par l'intercepteur). */
-  full(name: string, extensions?: string[]): Observable<BrandReport> {
-    return this.http.post<BrandReport>(this.apiUrl, { name, ...(extensions ? { extensions } : {}) });
+  /** Rapport complet (authentifié, payant ; le token est ajouté par l'intercepteur). */
+  full(name: string, options?: { extensions?: string[]; emails?: string[] }): Observable<BrandReport> {
+    return this.http.post<BrandReport>(this.apiUrl, {
+      name,
+      ...(options?.extensions ? { extensions: options.extensions } : {}),
+      ...(options?.emails?.length ? { emails: options.emails } : {}),
+    });
   }
 }
