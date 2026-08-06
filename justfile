@@ -8,9 +8,11 @@ start:
     (cd api && npm run start:dev) & (cd web && npm start)
 
 # Arrêter tous les services (Docker et processus Node)
+# Le motif [n] évite que pkill ne se tue lui-même : sa propre ligne de commande
+# contient « [n]est »/« [n]g serve », qui ne correspond pas au motif « nest »/« ng serve ».
 stop:
     docker-compose -f infra/docker-compose.yml stop
-    @bash -c 'trap "" TERM; pkill -f "nest" 2>/dev/null; pkill -f "ng serve" 2>/dev/null; exit 0'
+    @bash -c 'pkill -f "[n]est" 2>/dev/null; pkill -f "[n]g serve" 2>/dev/null; true'
 
 # Redémarrer l'écosystème
 restart: stop start
