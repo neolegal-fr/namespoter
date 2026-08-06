@@ -420,19 +420,25 @@
                     <i *ngIf="result.allExtensions[ext] === null" class="pi pi-question-circle text-base" style="color: #9ca3af" title="Disponibilité non vérifiable pour cette extension"></i>
                     <i *ngIf="result.allExtensions[ext] === false" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
                   </td>
-                  <!-- US-022 : colonne achat registrar -->
+                  <!-- US-022 : colonne achat registrar + rapport de marque (US-054) -->
                   <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem; vertical-align: top; padding-top: 0.5rem">
-                    <div class="reg-split" (click)="$event.stopPropagation()">
-                      <a [href]="REGISTRARS[0].url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__main">
-                        <i class="pi pi-shopping-cart"></i><span class="reg-label"> OVH</span>
-                      </a>
-                      <button type="button" class="reg-split__toggle" (click)="toggleReg(result.name, $event)">
-                        <i class="pi pi-chevron-down"></i>
+                    <div style="display: flex; align-items: center; gap: 0.35rem">
+                      <button type="button" class="report-mini" (click)="openBrandReport(result.name); $event.stopPropagation()"
+                              [pTooltip]="'WIZARD.STEP3.REPORT_CTA' | translate" tooltipPosition="left">
+                        <i class="pi pi-verified"></i>
                       </button>
-                      <div *ngIf="openReg() === result.name" class="reg-split__menu">
-                        <a *ngFor="let r of REGISTRARS.slice(1)" [href]="r.url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__item">
-                          {{ r.label }}
+                      <div class="reg-split" (click)="$event.stopPropagation()">
+                        <a [href]="REGISTRARS[0].url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__main">
+                          <i class="pi pi-shopping-cart"></i><span class="reg-label"> OVH</span>
                         </a>
+                        <button type="button" class="reg-split__toggle" (click)="toggleReg(result.name, $event)">
+                          <i class="pi pi-chevron-down"></i>
+                        </button>
+                        <div *ngIf="openReg() === result.name" class="reg-split__menu">
+                          <a *ngFor="let r of REGISTRARS.slice(1)" [href]="r.url(result.name, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-split__item">
+                            {{ r.label }}
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -646,63 +652,13 @@
           </div>
         </ng-container>
 
-        <!-- Rapport de disponibilité complet (domaines + réseaux + marque INPI/EUIPO) -->
-        <div style="margin-top: 0.85rem; width: 100%">
-          <!-- CTA tant qu'aucun rapport n'a été généré -->
-          <div *ngIf="!brandReport() && !brandReportLoading()" style="text-align: center">
-            <button type="button" (click)="generateBrandReport(result.recommended)" class="report-cta">
-              <i class="pi pi-verified" style="font-size: 0.8rem"></i>
-              {{ 'WIZARD.STEP3.REPORT_CTA' | translate }} · {{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}
-            </button>
-            <p style="margin: 0.4rem 0 0; font-size: 0.72rem; color: #9ca3af">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
-          </div>
-
-          <!-- Chargement -->
-          <div *ngIf="brandReportLoading()" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; padding: 0.5rem 0; color: #6b7280; font-size: 0.85rem">
-            <p-progressSpinner [style]="{ width: '1.5rem', height: '1.5rem' }"></p-progressSpinner>
-            {{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}
-          </div>
-
-          <!-- Erreur -->
-          <p *ngIf="brandReportError()" style="text-align: center; color: #dc2626; font-size: 0.82rem; margin: 0.5rem 0 0">{{ brandReportError() }}</p>
-
-          <!-- Résultat -->
-          <div *ngIf="brandReport() as report" style="margin-top: 0.5rem; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.9rem 1rem">
-            <div style="display: flex; gap: 1.25rem; flex-wrap: wrap">
-              <div style="flex: 1 1 180px">
-                <div style="font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.35rem">Domaines</div>
-                <div *ngFor="let d of report.domains" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 0.15rem 0">
-                  <span>{{ d.domain }}</span>
-                  <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.68rem; font-weight: 600; padding: 1px 8px; border-radius: 9999px">{{ reportStatusLabel(d.status) }}</span>
-                </div>
-              </div>
-              <div style="flex: 1 1 180px">
-                <div style="font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.35rem">Réseaux</div>
-                <div *ngFor="let s of report.socials" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 0.15rem 0">
-                  <span>{{ s.platform }}</span>
-                  <span [style.background]="reportStatusColor(s.status)" style="color: #fff; font-size: 0.68rem; font-weight: 600; padding: 1px 8px; border-radius: 9999px">{{ reportStatusLabel(s.status) }}</span>
-                </div>
-              </div>
-            </div>
-            <!-- Marque -->
-            <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #e5e7eb; font-size: 0.82rem">
-              <span style="font-weight: 700; color: #6b7280">Marque : </span>
-              <span [ngSwitch]="report.trademark.match">
-                <span *ngSwitchCase="'none'" style="color: #16a34a; font-weight: 600">Aucun dépôt identique trouvé</span>
-                <span *ngSwitchCase="'exact'" style="color: #dc2626; font-weight: 600">Marque identique déjà déposée</span>
-                <span *ngSwitchCase="'similar'" style="color: #d97706; font-weight: 600">Marques proches existantes</span>
-                <span *ngSwitchDefault style="color: #9ca3af; font-weight: 600">Vérification indisponible</span>
-              </span>
-              <div *ngIf="report.trademark.hits.length" style="margin-top: 0.3rem; color: #4b5563; font-size: 0.78rem">
-                <span *ngFor="let h of report.trademark.hits.slice(0, 4); let last = last">
-                  {{ h.name }} ({{ h.collection }}<span *ngIf="h.classes.length"> · cl. {{ h.classes.join(', ') }}</span>){{ last ? '' : ' · ' }}
-                </span>
-              </div>
-              <a [href]="report.trademark.deepLink" target="_blank" rel="noopener noreferrer" class="check-link" style="font-size: 0.76rem">{{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }} →</a>
-            </div>
-            <p *ngIf="report.emailed" style="margin: 0.6rem 0 0; font-size: 0.74rem; color: #16a34a"><i class="pi pi-envelope" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}</p>
-            <p style="margin: 0.5rem 0 0; font-size: 0.68rem; color: #9ca3af">{{ report.disclaimer }}</p>
-          </div>
+        <!-- Rapport de disponibilité complet (ouvre le dialogue dédié) -->
+        <div style="margin-top: 0.85rem; width: 100%; text-align: center">
+          <button type="button" (click)="openBrandReport(result.recommended)" class="report-cta">
+            <i class="pi pi-verified" style="font-size: 0.8rem"></i>
+            {{ 'WIZARD.STEP3.REPORT_CTA' | translate }} · {{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}
+          </button>
+          <p style="margin: 0.4rem 0 0; font-size: 0.72rem; color: #9ca3af">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
         </div>
       </div>
 
@@ -748,6 +704,65 @@
         </div>
       </div>
 
+    </div>
+  </p-dialog>
+
+  <!-- ─── Dialog "Rapport de disponibilité de marque" (US-054) ─────────────── -->
+  <p-dialog
+    [visible]="showReportDialog()"
+    (visibleChange)="showReportDialog.set($event)"
+    [header]="('WIZARD.STEP3.REPORT_CTA' | translate) + ' — ' + brandReportName()"
+    [modal]="true"
+    [style]="{ width: 'min(94vw, 40rem)' }"
+    [contentStyle]="{ padding: '1.25rem' }">
+
+    <!-- Chargement -->
+    <div *ngIf="brandReportLoading()" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1.5rem 0">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }"></p-progressSpinner>
+      <p style="color: #6b7280; font-size: 0.9rem; margin: 0">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}</p>
+    </div>
+
+    <!-- Erreur -->
+    <p *ngIf="!brandReportLoading() && brandReportError()" style="text-align: center; color: #dc2626; font-size: 0.9rem; margin: 0.5rem 0">{{ brandReportError() }}</p>
+
+    <!-- Résultat -->
+    <div *ngIf="!brandReportLoading() && brandReport() as report">
+      <div style="display: flex; gap: 1.5rem; flex-wrap: wrap">
+        <div style="flex: 1 1 200px">
+          <div style="font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.4rem">Domaines</div>
+          <div *ngFor="let d of report.domains" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid #f1f3f5">
+            <span>{{ d.domain }}</span>
+            <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.7rem; font-weight: 600; padding: 1px 9px; border-radius: 9999px">{{ reportStatusLabel(d.status) }}</span>
+          </div>
+        </div>
+        <div style="flex: 1 1 200px">
+          <div style="font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 0.4rem">Réseaux sociaux</div>
+          <div *ngFor="let s of report.socials" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; border-bottom: 1px solid #f1f3f5">
+            <span>{{ s.platform }}<span *ngIf="s.planned" style="color: #9ca3af; font-size: 0.7rem"> (bientôt)</span></span>
+            <span [style.background]="reportStatusColor(s.status)" style="color: #fff; font-size: 0.7rem; font-weight: 600; padding: 1px 9px; border-radius: 9999px">{{ reportStatusLabel(s.status) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marque -->
+      <div style="margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; font-size: 0.88rem">
+        <span style="font-weight: 700; color: #6b7280">Marque déposée : </span>
+        <span [ngSwitch]="report.trademark.match">
+          <span *ngSwitchCase="'none'" style="color: #16a34a; font-weight: 600">Aucun dépôt identique trouvé</span>
+          <span *ngSwitchCase="'exact'" style="color: #dc2626; font-weight: 600">Marque identique déjà déposée</span>
+          <span *ngSwitchCase="'similar'" style="color: #d97706; font-weight: 600">Marques proches existantes</span>
+          <span *ngSwitchDefault style="color: #9ca3af; font-weight: 600">Vérification indisponible</span>
+        </span>
+        <ul *ngIf="report.trademark.hits.length" style="margin: 0.4rem 0 0.3rem; padding-left: 1.1rem; color: #4b5563; font-size: 0.82rem">
+          <li *ngFor="let h of report.trademark.hits.slice(0, 6)">
+            {{ h.name }} <span style="color: #9ca3af">({{ h.collection }}<span *ngIf="h.classes.length"> · classes {{ h.classes.join(', ') }}</span><span *ngIf="h.status"> · {{ h.status }}</span>)</span>
+          </li>
+        </ul>
+        <a [href]="report.trademark.deepLink" target="_blank" rel="noopener noreferrer" class="check-link" style="font-size: 0.78rem">{{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }} →</a>
+      </div>
+
+      <p *ngIf="report.emailed" style="margin: 0.75rem 0 0; font-size: 0.8rem; color: #16a34a"><i class="pi pi-envelope" style="font-size: 0.75rem"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}</p>
+      <p style="margin: 0.6rem 0 0; padding: 0.6rem 0.75rem; background: #f3f4f6; border-radius: 8px; font-size: 0.72rem; color: #6b7280">{{ report.disclaimer }}</p>
     </div>
   </p-dialog>
 

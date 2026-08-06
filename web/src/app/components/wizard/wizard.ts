@@ -444,6 +444,15 @@ export class WizardComponent implements OnInit {
   readonly brandReport = signal<BrandReport | null>(null);
   readonly brandReportLoading = signal(false);
   readonly brandReportError = signal<string | null>(null);
+  readonly showReportDialog = signal(false);
+  readonly brandReportName = signal('');
+
+  /** Ouvre le dialogue de rapport pour un nom (depuis une ligne ou la reco). */
+  openBrandReport(name: string): void {
+    this.brandReportName.set(name);
+    this.showReportDialog.set(true);
+    this.generateBrandReport(name);
+  }
 
   /** Déclenche le rapport complet (300 crédits) pour le nom recommandé. */
   generateBrandReport(name: string): void {
