@@ -25,6 +25,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'namorama-vs-namelix', renderMode: RenderMode.Prerender },
   { path: 'namorama-vs-looka', renderMode: RenderMode.Prerender },
   { path: 'verifier-disponibilite-nom-de-marque', renderMode: RenderMode.Prerender },
+  { path: 'rapport/:token', renderMode: RenderMode.Client },
   { path: 'legal', renderMode: RenderMode.Prerender },
   { path: 'privacy', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Client },

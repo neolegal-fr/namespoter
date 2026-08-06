@@ -54,6 +54,8 @@ export interface BrandReport {
   score: number;
   generatedAt: string;
   disclaimer: string;
+  /** Jeton de partage public (présent une fois le rapport mémorisé). */
+  shareToken?: string;
   /** Présents uniquement sur le rapport complet (authentifié). */
   remainingCredits?: number;
   emailed?: boolean;
@@ -86,6 +88,11 @@ export class BrandReportService {
   /** Noms déjà rapportés par l'utilisateur (pour afficher « Voir le rapport »). */
   mine(): Observable<{ names: string[] }> {
     return this.http.get<{ names: string[] }>(`${this.apiUrl}/mine`);
+  }
+
+  /** Rapport partagé en lecture seule (public, via jeton). */
+  shared(token: string): Observable<BrandReport> {
+    return this.http.get<BrandReport>(`${this.apiUrl}/shared/${token}`);
   }
 
   /** Rapport complet (authentifié, payant ; le token est ajouté par l'intercepteur). */

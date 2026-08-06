@@ -233,7 +233,9 @@
       "REPORT_GENERATED_ON": "Généré le",
       "REPORT_REGENERATE": "Régénérer",
       "REPORT_HERO_LABEL": "Domaine recommandé à réserver",
-      "REPORT_DEPOSIT": "Déposer ma marque à l'INPI"
+      "REPORT_DEPOSIT": "Déposer ma marque à l'INPI",
+      "REPORT_SHARE": "Partager le rapport",
+      "REPORT_SHARE_COPIED": "Lien copié"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

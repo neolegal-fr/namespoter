@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query, Logger, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Query, Logger, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
@@ -30,6 +30,15 @@ export class BrandReportController {
   @Post('preview')
   async preview(@Body() dto: BrandReportRequestDto) {
     return this.brandReport.generate(dto.name, { preview: true });
+  }
+
+  /** Rapport partagé en lecture seule (public, via jeton). */
+  @Public()
+  @Get('shared/:token')
+  async shared(@Param('token') token: string) {
+    const report = await this.store.findByToken(token);
+    if (!report) throw new NotFoundException('Rapport introuvable');
+    return report;
   }
 
   /** Noms pour lesquels ce compte a déjà un rapport (le front affiche « Voir le rapport »). */

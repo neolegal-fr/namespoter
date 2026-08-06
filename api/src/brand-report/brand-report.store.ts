@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
 import { BrandReportRecord } from './entities/brand-report-record.entity';
 import type { BrandReport } from './dto/brand-report.types';
 
@@ -28,16 +29,29 @@ export class BrandReportStore {
     return rows.map((r) => r.nameKey);
   }
 
-  /** Mémorise (ou met à jour) le rapport pour ce (compte, nom). */
+  /** Rapport partagé publiquement via son jeton, ou `null`. */
+  async findByToken(token: string): Promise<BrandReport | null> {
+    if (!token) return null;
+    const row = await this.repo.findOne({ where: { shareToken: token } });
+    return row?.report ?? null;
+  }
+
+  /**
+   * Mémorise (ou met à jour) le rapport pour ce (compte, nom). Garantit un jeton
+   * de partage stable, embarqué dans le rapport renvoyé.
+   */
   async save(keycloakId: string, name: string, report: BrandReport): Promise<void> {
     const nameKey = this.key(name);
     const existing = await this.repo.findOne({ where: { keycloakId, nameKey } });
+    const shareToken = existing?.shareToken ?? randomUUID();
+    report.shareToken = shareToken;
     if (existing) {
       existing.report = report;
       existing.name = name;
+      existing.shareToken = shareToken;
       await this.repo.save(existing);
     } else {
-      await this.repo.save(this.repo.create({ keycloakId, nameKey, name, report }));
+      await this.repo.save(this.repo.create({ keycloakId, nameKey, name, report, shareToken }));
     }
   }
 }

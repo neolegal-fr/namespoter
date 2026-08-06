@@ -546,9 +546,20 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  /** URL de réservation d'un domaine chez un registrar donné. */
+  /** URL de réservation d'un domaine chez un registrar donné (extension avec point). */
   reserveDomainUrl(name: string, extension: string, registrarIndex = 0): string {
-    return this.REGISTRARS[registrarIndex].url(name, [extension]);
+    return this.REGISTRARS[registrarIndex].url(name, [`.${extension}`]);
+  }
+
+  // ─── Partage du rapport (Sally #5) ─────────────────────────────────────────
+  readonly shareCopied = signal(false);
+  copyShareLink(report: BrandReport): void {
+    if (!report.shareToken || typeof window === 'undefined') return;
+    const url = `${window.location.origin}/rapport/${report.shareToken}`;
+    navigator.clipboard?.writeText(url).then(() => {
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 2500);
+    }).catch(() => { /* presse-papiers indisponible */ });
   }
 
   /** Libellés lisibles des critères de qualité (ordre stable). */

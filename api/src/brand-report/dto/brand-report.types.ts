@@ -71,4 +71,6 @@ export interface BrandReport {
   generatedAt: string; // ISO 8601
   /** Signal indicatif — jamais une recherche d'antériorité légale. */
   disclaimer: string;
+  /** Jeton de partage public (présent une fois le rapport mémorisé). */
+  shareToken?: string;
 }

@@ -27,6 +27,11 @@ export class BrandReportRecord {
   @Column({ type: 'json' })
   report: BrandReport;
 
+  /** Jeton de partage public (lecture seule via /brand-report/shared/:token). */
+  @Column({ nullable: true })
+  @Index({ unique: true })
+  shareToken: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

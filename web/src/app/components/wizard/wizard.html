@@ -913,6 +913,13 @@
         </div>
 
         <p *ngIf="report.emailed" style="margin: 0; font-size: 0.82rem; color: #16a34a"><i class="pi pi-envelope" style="font-size: 0.75rem"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}</p>
+
+        <!-- Partager le rapport (lien public en lecture seule) -->
+        <div *ngIf="report.shareToken && !isSampleReport()" style="display: flex; align-items: center; gap: 0.6rem">
+          <a class="report-link" (click)="copyShareLink(report)"><i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}</a>
+          <span *ngIf="shareCopied()" style="font-size: 0.78rem; color: #16a34a"><i class="pi pi-check" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_COPIED' | translate }}</span>
+        </div>
+
         <p style="margin: 0; padding: 0.7rem 0.85rem; background: #f1f5f9; border-radius: 8px; font-size: 0.74rem; color: #6b7280">{{ report.disclaimer }}</p>
 
         <!-- Retour à la liste (bas de page aussi, pour ne pas remonter) -->
