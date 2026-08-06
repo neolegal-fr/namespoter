@@ -215,7 +215,16 @@
       "REPORT_EMAILS_LABEL": "Send the report to",
       "REPORT_EMAILS_PLACEHOLDER": "you@example.com, partner@example.com",
       "REPORT_EMAILS_HINT": "Separate multiple addresses with a comma.",
-      "REPORT_RESERVE": "Register"
+      "REPORT_RESERVE": "Register",
+      "REPORT_BACK": "Back to names",
+      "REPORT_CACHED": "Already generated",
+      "REPORT_AVAILABILITY": "Availability",
+      "REPORT_QUALITY": "Name quality",
+      "REPORT_DOMAINS": "Domain names",
+      "REPORT_SOCIALS": "Social handles",
+      "REPORT_TRADEMARK": "Registered trademark",
+      "REPORT_STRENGTHS": "Strengths",
+      "REPORT_WATCHOUT": "Watch out"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

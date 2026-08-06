@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
-import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from '../../services/brand-report';
+import { BrandReportService, BrandReport, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
 import { KeycloakService } from 'keycloak-angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Steps } from 'primeng/steps';
@@ -451,10 +451,26 @@ export class WizardComponent implements OnInit {
   readonly reportEmails = signal('');
   readonly userEmail = signal('');
 
-  /** Étape 1 : ouvre la confirmation (coût, solde, destinataires) pour un nom. */
-  async askBrandReport(name: string): Promise<void> {
+  /** Point d'entrée : si le rapport existe déjà, on l'ouvre (sans débit) ; sinon on demande confirmation. */
+  askBrandReport(name: string): void {
     this.brandReportName.set(name);
     this.brandReportError.set(null);
+    this.brandReport.set(null);
+    this.brandReportService.existing(name).subscribe({
+      next: (res) => {
+        if (res?.exists && res.report) {
+          this.brandReport.set(res.report);
+          this.showReportDialog.set(true);
+        } else {
+          this.openReportConfirm();
+        }
+      },
+      error: () => this.openReportConfirm(),
+    });
+  }
+
+  /** Ouvre la confirmation (coût, solde, destinataires) après avoir chargé l'email du compte. */
+  private async openReportConfirm(): Promise<void> {
     if (!this.userEmail()) {
       try {
         const profile: any = await this.keycloak.loadUserProfile();
@@ -515,9 +531,21 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  /** URL de réservation d'un domaine chez le registrar principal (ancien bouton). */
-  reserveDomainUrl(name: string, extension: string): string {
-    return this.REGISTRARS[0].url(name, [extension]);
+  /** URL de réservation d'un domaine chez un registrar donné. */
+  reserveDomainUrl(name: string, extension: string, registrarIndex = 0): string {
+    return this.REGISTRARS[registrarIndex].url(name, [extension]);
+  }
+
+  /** Libellés lisibles des critères de qualité (ordre stable). */
+  readonly QUALITY_LABELS: Record<string, string> = {
+    memorability: 'Mémorabilité',
+    pronunciation: 'Prononciation',
+    international: 'International',
+    seo: 'SEO',
+    distinctiveness: 'Distinctivité',
+  };
+  qualityCriteria(q: NameQuality): { label: string; value: number }[] {
+    return Object.entries(q.scores).map(([k, v]) => ({ label: this.QUALITY_LABELS[k] ?? k, value: v }));
   }
 
   /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */

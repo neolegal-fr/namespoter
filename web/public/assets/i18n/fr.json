@@ -215,7 +215,16 @@
       "REPORT_EMAILS_LABEL": "Envoyer le rapport à",
       "REPORT_EMAILS_PLACEHOLDER": "vous@exemple.com, associe@exemple.com",
       "REPORT_EMAILS_HINT": "Séparez plusieurs adresses par une virgule.",
-      "REPORT_RESERVE": "Réserver"
+      "REPORT_RESERVE": "Réserver",
+      "REPORT_BACK": "Retour aux noms",
+      "REPORT_CACHED": "Déjà généré",
+      "REPORT_AVAILABILITY": "Disponibilité",
+      "REPORT_QUALITY": "Qualité du nom",
+      "REPORT_DOMAINS": "Noms de domaine",
+      "REPORT_SOCIALS": "Réseaux sociaux",
+      "REPORT_TRADEMARK": "Marque déposée",
+      "REPORT_STRENGTHS": "Forces",
+      "REPORT_WATCHOUT": "Point de vigilance"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
