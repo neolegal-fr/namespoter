@@ -45,6 +45,15 @@ describe('PLATFORM_ADAPTERS', () => {
       expect(await tt.check('x', mockHttp({ text: { 'tiktok.com/@x': '{}' } }))).toBe('unknown'));
   });
 
+  describe('X / YouTube (status 404=free / 200=taken)', () => {
+    const x = adapter('X');
+    const yt = adapter('YouTube');
+    it('X taken', async () => expect(await x.check('x', mockHttp({ status: { 'x.com/x': 200 } }))).toBe('taken'));
+    it('X free', async () => expect(await x.check('x', mockHttp({ status: { 'x.com/x': 404 } }))).toBe('free'));
+    it('YouTube taken', async () => expect(await yt.check('x', mockHttp({ status: { 'youtube.com/@x': 200 } }))).toBe('taken'));
+    it('YouTube free', async () => expect(await yt.check('x', mockHttp({ status: { 'youtube.com/@x': 404 } }))).toBe('free'));
+  });
+
   it('plateformes planifiées → toujours unknown', async () => {
     const planned = PLATFORM_ADAPTERS.filter((a) => a.planned);
     expect(planned.length).toBeGreaterThan(0);

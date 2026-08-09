@@ -76,10 +76,31 @@ export const PLATFORM_ADAPTERS: PlatformAdapter[] = [
     },
   },
 
-  // --- Phase 1.5 / 2 : non encore fiables sans parsing avancé ou session ---
+  {
+    // x.com renvoie 404 pour un pseudo inexistant, 200 sinon (redirection suivie).
+    platform: 'X',
+    profileUrl: (h) => `https://x.com/${h}`,
+    async check(h, http) {
+      const code = await http.status(`https://x.com/${h}`);
+      if (code === 404) return 'free';
+      if (code === 200) return 'taken';
+      return 'unknown';
+    },
+  },
+  {
+    // youtube.com/@handle : 404 si le handle est libre, 200 sinon.
+    platform: 'YouTube',
+    profileUrl: (h) => `https://www.youtube.com/@${h}`,
+    async check(h, http) {
+      const code = await http.status(`https://www.youtube.com/@${h}`);
+      if (code === 404) return 'free';
+      if (code === 200) return 'taken';
+      return 'unknown';
+    },
+  },
+
+  // --- Phase 2 : mur de connexion / anti-bot, pas de verdict fiable ---
   planned('Instagram', (h) => `https://www.instagram.com/${h}`),
-  planned('X', (h) => `https://x.com/${h}`),
-  planned('YouTube', (h) => `https://www.youtube.com/@${h}`),
   planned('Facebook', (h) => `https://www.facebook.com/${h}`),
 ];
 
