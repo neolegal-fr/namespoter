@@ -655,6 +655,16 @@ export class WizardComponent implements OnInit {
   reportStatusColor(s: Availability): string {
     return s === 'free' ? '#16a34a' : s === 'taken' ? '#dc2626' : '#9ca3af';
   }
+  /** Clés i18n pour uniformiser la langue du rapport (statuts + marque). */
+  statusKey(s: Availability): string {
+    return s === 'free' ? 'WIZARD.STEP3.STATUS_FREE' : s === 'taken' ? 'WIZARD.STEP3.STATUS_TAKEN' : 'WIZARD.STEP3.STATUS_UNKNOWN';
+  }
+  tmHeadKey(match: string): string {
+    return `WIZARD.STEP3.TM_${(match || 'unknown').toUpperCase()}_HEAD`;
+  }
+  tmExplainKey(match: string): string {
+    return `WIZARD.STEP3.TM_${(match || 'unknown').toUpperCase()}_EXPLAIN`;
+  }
 
   openReg = signal<string | null>(null);
 

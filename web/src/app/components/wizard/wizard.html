@@ -829,20 +829,15 @@
         <div class="report-card">
           <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK' | translate }}</h3>
           <div style="font-size: 0.9rem">
-            <span [ngSwitch]="report.trademark.match">
-              <span *ngSwitchCase="'none'" style="color: #16a34a; font-weight: 600"><i class="pi pi-check-circle"></i> Aucun dépôt identique trouvé (INPI / EUIPO / OMPI)</span>
-              <span *ngSwitchCase="'exact'" style="color: #dc2626; font-weight: 600"><i class="pi pi-times-circle"></i> Marque identique déjà déposée</span>
-              <span *ngSwitchCase="'similar'" style="color: #d97706; font-weight: 600"><i class="pi pi-exclamation-triangle"></i> Marques proches existantes</span>
-              <span *ngSwitchDefault style="color: #9ca3af; font-weight: 600"><i class="pi pi-question-circle"></i> Vérification automatique indisponible</span>
+            <span [ngSwitch]="report.trademark.match" style="font-weight: 600">
+              <span *ngSwitchCase="'none'" style="color: #16a34a"><i class="pi pi-check-circle"></i> {{ 'WIZARD.STEP3.TM_NONE_HEAD' | translate }}</span>
+              <span *ngSwitchCase="'exact'" style="color: #dc2626"><i class="pi pi-times-circle"></i> {{ 'WIZARD.STEP3.TM_EXACT_HEAD' | translate }}</span>
+              <span *ngSwitchCase="'similar'" style="color: #d97706"><i class="pi pi-exclamation-triangle"></i> {{ 'WIZARD.STEP3.TM_SIMILAR_HEAD' | translate }}</span>
+              <span *ngSwitchDefault style="color: #9ca3af"><i class="pi pi-question-circle"></i> {{ 'WIZARD.STEP3.TM_UNKNOWN_HEAD' | translate }}</span>
             </span>
 
             <!-- Explication concrète + prochaines actions -->
-            <p [ngSwitch]="report.trademark.match" style="margin: 0.5rem 0 0; color: #4b5563; font-size: 0.85rem; line-height: 1.55">
-              <span *ngSwitchCase="'none'">Aucune marque <strong>identique</strong> n'apparaît dans les bases officielles INPI (France), EUIPO (Europe) et OMPI (international). Bon signal — mais cela ne couvre pas les marques <em>similaires</em> (proches à l'oreille ou à l'œil). Prochaine étape&nbsp;: sécurisez le nom en <strong>déposant votre marque</strong> avant de communiquer.</span>
-              <span *ngSwitchCase="'exact'">Une marque <strong>identique</strong> est déjà déposée. Utiliser ce nom dans les mêmes classes de produits/services vous expose à une <strong>opposition</strong> ou à une action en <strong>contrefaçon</strong>. Regardez les classes ci-dessous&nbsp;: si elles ne recouvrent pas votre activité, un usage reste parfois possible — à faire valider par un conseil en propriété industrielle.</span>
-              <span *ngSwitchCase="'similar'">Des marques <strong>proches</strong> existent. Le risque dépend du degré de similarité et du recouvrement des classes. Avant tout dépôt, une recherche d'antériorité approfondie et l'avis d'un <strong>conseil en propriété industrielle</strong> sont recommandés.</span>
-              <span *ngSwitchDefault>La vérification automatique n'a pas pu aboutir pour ce nom (source indisponible). Lancez la <strong>recherche officielle INPI</strong> pour trancher.</span>
-            </p>
+            <p [innerHTML]="tmExplainKey(report.trademark.match) | translate" style="margin: 0.5rem 0 0; color: #4b5563; font-size: 0.85rem; line-height: 1.55"></p>
 
             <ul *ngIf="report.trademark.hits.length" style="margin: 0.6rem 0 0.3rem; padding-left: 1.1rem; color: #4b5563; font-size: 0.84rem">
               <li *ngFor="let h of report.trademark.hits.slice(0, 8)" style="margin: 0.15rem 0">
@@ -885,7 +880,7 @@
                     </a>
                   </div>
                 </div>
-                <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ reportStatusLabel(d.status) }}</span>
+                <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(d.status) | translate }}</span>
               </span>
             </div>
           </div>
@@ -893,8 +888,8 @@
           <div class="report-card" style="flex: 1 1 240px">
             <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
             <div *ngFor="let s of report.socials" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid #f1f3f5">
-              <a [href]="s.url" target="_blank" rel="noopener noreferrer" style="color: #374151; text-decoration: none">{{ s.platform }}<span *ngIf="s.planned" style="color: #9ca3af; font-size: 0.7rem"> (bientôt)</span></a>
-              <span [style.background]="reportStatusColor(s.status)" style="color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ reportStatusLabel(s.status) }}</span>
+              <a [href]="s.url" target="_blank" rel="noopener noreferrer" style="color: #374151; text-decoration: none">{{ s.platform }}<span *ngIf="s.planned" style="color: #9ca3af; font-size: 0.7rem"> ({{ 'WIZARD.STEP3.SOCIAL_SOON' | translate }})</span></a>
+              <span [style.background]="reportStatusColor(s.status)" style="color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(s.status) | translate }}</span>
             </div>
           </div>
         </div>

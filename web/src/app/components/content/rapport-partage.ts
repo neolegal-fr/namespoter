@@ -16,16 +16,16 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
     <div style="max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem">
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem">
         <a routerLink="/" style="font-weight: 800; font-size: 1.1rem; color: #4f46e5; text-decoration: none">Namorama</a>
-        <a routerLink="/app" class="rp-cta">Créez votre propre rapport →</a>
+        <a routerLink="/app" class="rp-cta">{{ 'SHARED_REPORT.CREATE_CTA' | translate }}</a>
       </div>
 
       @if (loading()) {
-        <p style="color: #6b7280">Chargement du rapport…</p>
+        <p style="color: #6b7280">{{ 'SHARED_REPORT.LOADING' | translate }}</p>
       } @else if (error()) {
-        <p style="color: #dc2626">Ce rapport n'existe pas ou n'est plus disponible.</p>
-        <a routerLink="/app" class="rp-cta">Générer un rapport</a>
+        <p style="color: #dc2626">{{ 'SHARED_REPORT.NOT_FOUND' | translate }}</p>
+        <a routerLink="/app" class="rp-cta">{{ 'SHARED_REPORT.GENERATE' | translate }}</a>
       } @else if (report(); as report) {
-        <div style="font-size: 0.72rem; color: #6b7280; text-transform: uppercase; letter-spacing: .05em">Rapport de disponibilité de marque</div>
+        <div style="font-size: 0.72rem; color: #6b7280; text-transform: uppercase; letter-spacing: .05em">{{ 'SHARED_REPORT.TITLE' | translate }}</div>
         <h1 style="font-family: monospace; margin: 0.15rem 0 1rem">{{ report.name }}</h1>
 
         <!-- Scores -->
@@ -48,7 +48,7 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
               <span style="font-family: monospace">{{ d.domain }}</span>
               <span style="display:flex;align-items:center;gap:.6rem">
                 <a *ngIf="d.status === 'free'" [href]="reserveUrl(report.name, d.extension)" target="_blank" rel="noopener noreferrer" class="rp-link">{{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}</a>
-                <span class="rp-badge" [style.background]="color(d.status)">{{ label(d.status) }}</span>
+                <span class="rp-badge" [style.background]="color(d.status)">{{ statusKey(d.status) | translate }}</span>
               </span>
             </div>
           </div>
@@ -56,7 +56,7 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
             <h3 class="rp-title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
             <div *ngFor="let s of report.socials" class="rp-row">
               <a [href]="s.url" target="_blank" rel="noopener noreferrer" style="color:#374151;text-decoration:none">{{ s.platform }}</a>
-              <span class="rp-badge" [style.background]="color(s.status)">{{ label(s.status) }}</span>
+              <span class="rp-badge" [style.background]="color(s.status)">{{ statusKey(s.status) | translate }}</span>
             </div>
           </div>
         </div>
@@ -65,10 +65,10 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
         <div class="rp-card" style="margin-top: 1rem">
           <h3 class="rp-title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK' | translate }}</h3>
           <div [ngSwitch]="report.trademark.match" style="font-weight: 600">
-            <span *ngSwitchCase="'none'" style="color:#16a34a">Aucun dépôt identique trouvé</span>
-            <span *ngSwitchCase="'exact'" style="color:#dc2626">Marque identique déjà déposée</span>
-            <span *ngSwitchCase="'similar'" style="color:#d97706">Marques proches existantes</span>
-            <span *ngSwitchDefault style="color:#9ca3af">Vérification indisponible</span>
+            <span *ngSwitchCase="'none'" style="color:#16a34a">{{ 'WIZARD.STEP3.TM_NONE_HEAD' | translate }}</span>
+            <span *ngSwitchCase="'exact'" style="color:#dc2626">{{ 'WIZARD.STEP3.TM_EXACT_HEAD' | translate }}</span>
+            <span *ngSwitchCase="'similar'" style="color:#d97706">{{ 'WIZARD.STEP3.TM_SIMILAR_HEAD' | translate }}</span>
+            <span *ngSwitchDefault style="color:#9ca3af">{{ 'WIZARD.STEP3.TM_UNKNOWN_HEAD' | translate }}</span>
           </div>
           <ul *ngIf="report.trademark.hits.length" style="margin:.5rem 0 0;padding-left:1.1rem;color:#4b5563;font-size:.84rem">
             <li *ngFor="let h of report.trademark.hits.slice(0,8)">{{ h.name }} <span style="color:#9ca3af">({{ h.collection }}<span *ngIf="h.classes.length"> · classes {{ h.classes.join(', ') }}</span>)</span></li>
@@ -89,7 +89,7 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
 
         <p style="margin:1rem 0 0;padding:.7rem .85rem;background:#f1f5f9;border-radius:8px;font-size:.74rem;color:#6b7280">{{ report.disclaimer }}</p>
         <div style="text-align:center;margin-top:1.5rem">
-          <a routerLink="/app" class="rp-cta">Vérifiez votre propre nom de marque →</a>
+          <a routerLink="/app" class="rp-cta">{{ 'SHARED_REPORT.OWN_CTA' | translate }}</a>
         </div>
       }
     </div>
@@ -123,7 +123,9 @@ export class RapportPartageComponent {
     });
   }
 
-  label(s: Availability): string { return s === 'free' ? 'Libre' : s === 'taken' ? 'Pris' : '?'; }
+  statusKey(s: Availability): string {
+    return s === 'free' ? 'WIZARD.STEP3.STATUS_FREE' : s === 'taken' ? 'WIZARD.STEP3.STATUS_TAKEN' : 'WIZARD.STEP3.STATUS_UNKNOWN';
+  }
   color(s: Availability): string { return s === 'free' ? '#16a34a' : s === 'taken' ? '#dc2626' : '#9ca3af'; }
   col(score: number): string { return score >= 66 ? '#16a34a' : score >= 33 ? '#d97706' : '#dc2626'; }
   reserveUrl(name: string, ext: string): string {

@@ -235,7 +235,19 @@
       "REPORT_HERO_LABEL": "Recommended domain to register",
       "REPORT_DEPOSIT": "Register my trademark (INPI)",
       "REPORT_SHARE": "Share report",
-      "REPORT_SHARE_COPIED": "Link copied"
+      "REPORT_SHARE_COPIED": "Link copied",
+      "STATUS_FREE": "Available",
+      "STATUS_TAKEN": "Taken",
+      "STATUS_UNKNOWN": "?",
+      "SOCIAL_SOON": "soon",
+      "TM_NONE_HEAD": "No identical trademark found (INPI / EUIPO / WIPO)",
+      "TM_EXACT_HEAD": "Identical trademark already registered",
+      "TM_SIMILAR_HEAD": "Similar trademarks exist",
+      "TM_UNKNOWN_HEAD": "Automatic check unavailable",
+      "TM_NONE_EXPLAIN": "No <strong>identical</strong> trademark appears in the official INPI (France), EUIPO (Europe) and WIPO (international) databases. Good sign — but this does not cover <em>similar</em> marks (close in sound or look). Next step: secure the name by <strong>registering your trademark</strong> before going public.",
+      "TM_EXACT_EXPLAIN": "An <strong>identical</strong> trademark is already registered. Using this name in the same classes of goods/services exposes you to an <strong>opposition</strong> or an <strong>infringement</strong> action. Check the classes below: if they don't overlap your activity, use may still be possible — have it validated by an IP attorney.",
+      "TM_SIMILAR_EXPLAIN": "<strong>Similar</strong> trademarks exist. The risk depends on the degree of similarity and class overlap. Before any filing, a thorough prior-art search and the advice of an <strong>IP attorney</strong> are recommended.",
+      "TM_UNKNOWN_EXPLAIN": "The automatic check could not complete for this name (source unavailable). Run the <strong>official INPI search</strong> to decide."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -282,5 +294,13 @@
   },
   "COMMON": {
     "CANCEL": "Cancel"
+  },
+  "SHARED_REPORT": {
+    "LOADING": "Loading report…",
+    "NOT_FOUND": "This report does not exist or is no longer available.",
+    "GENERATE": "Generate a report",
+    "TITLE": "Brand availability report",
+    "CREATE_CTA": "Create your own report →",
+    "OWN_CTA": "Check your own brand name →"
   }
 }
