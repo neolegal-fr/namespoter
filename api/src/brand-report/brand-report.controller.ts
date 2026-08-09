@@ -75,7 +75,14 @@ export class BrandReportController {
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
 
     // Déjà généré → on le renvoie tel quel, sans refacturer (sauf régénération forcée).
-    const cached = dto.force ? null : await this.store.find(keycloakUser.sub, dto.name);
+    // Protégé : un souci de cache ne doit jamais faire échouer la génération.
+    let cached: Awaited<ReturnType<typeof this.store.find>> = null;
+    if (!dto.force) {
+      cached = await this.store.find(keycloakUser.sub, dto.name).catch((e) => {
+        this.logger.error('Lecture du cache de rapport échouée', e);
+        return null;
+      });
+    }
     if (cached) {
       this.events.event('brand_report_cache_hit', { sub: keycloakUser.sub });
       return { ...cached, remainingCredits: user.totalCredits, emailed: false, cached: true };
@@ -110,9 +117,14 @@ export class BrandReportController {
       score: report.score,
     });
 
-    // Destinataires : la liste fournie, sinon l'email du compte. Best-effort.
+    // Destinataires : la liste fournie, sinon l'email du compte.
+    // Envoi en tâche de fond : ne bloque jamais la réponse (best-effort, borné
+    // par les timeouts SMTP). Le rapport s'affiche immédiatement.
     const recipients = dto.emails?.length ? dto.emails : keycloakUser.email;
-    const emailed = await this.reportMail.sendReport(recipients, report);
-    return { ...report, remainingCredits, emailed, cached: false };
+    void this.reportMail.sendReport(recipients, report).catch((e) =>
+      this.logger.error('Envoi email du rapport échoué', e),
+    );
+    const willEmail = Array.isArray(recipients) ? recipients.length > 0 : !!recipients;
+    return { ...report, remainingCredits, emailed: willEmail, cached: false };
   }
 }

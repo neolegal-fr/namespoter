@@ -1,6 +1,6 @@
 import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Subscription, firstValueFrom, of } from 'rxjs';
+import { Subscription, firstValueFrom, of, timeout } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -518,13 +518,26 @@ export class WizardComponent implements OnInit {
     return raw.split(/[,;\s]+/).map((e) => e.trim()).filter((e) => e.length > 0);
   }
 
+  // Derniers paramètres, pour permettre un « Réessayer » gratuit après erreur.
+  private lastReportName = '';
+  private lastReportEmails: string[] = [];
+
+  /** Relance la génération après une erreur — sans re-débit (idempotent côté API). */
+  retryBrandReport(): void {
+    this.generateBrandReport(this.lastReportName, this.lastReportEmails, false);
+  }
+
   private generateBrandReport(name: string, emails: string[], force = false): void {
     if (this.brandReportLoading()) return;
+    this.lastReportName = name;
+    this.lastReportEmails = emails;
     this.brandReportLoading.set(true);
     this.brandReportError.set(null);
     this.brandReport.set(null);
     this.analytics.track('brand_report_cta_clicked');
-    this.brandReportService.full(name, { emails, force }).subscribe({
+    // Timeout client : un traitement qui n'aboutit pas devient une erreur
+    // (réessayable) plutôt qu'un chargement infini.
+    this.brandReportService.full(name, { emails, force }).pipe(timeout(90000)).subscribe({
       next: (report) => {
         this.isSampleReport.set(false);
         this.brandReport.set(report);
@@ -535,7 +548,7 @@ export class WizardComponent implements OnInit {
         this.brandReportLoading.set(false);
       },
       error: (err) => {
-        // 403 = crédits insuffisants (même convention que la recherche de domaines).
+        // 403 = crédits insuffisants ; TimeoutError ou autre = erreur générique réessayable.
         this.brandReportError.set(
           err?.status === 403
             ? this.translate.instant('WIZARD.STEP3.REPORT_NO_CREDITS')

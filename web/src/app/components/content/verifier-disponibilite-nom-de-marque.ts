@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { KeycloakService } from 'keycloak-angular';
+import { timeout } from 'rxjs';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 import { BrandReportViewComponent } from '../brand-report/brand-report-view';
@@ -72,7 +73,10 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
             <button class="cta" (click)="getFullReport()" [disabled]="fullLoading()">
               {{ fullLoading() ? 'Génération du rapport…' : (isLoggedIn() ? 'Obtenir le rapport complet' : 'Se connecter pour le rapport complet') }}
             </button>
-            @if (fullError()) { <p class="checker-error">{{ fullError() }}</p> }
+            @if (fullError()) {
+              <p class="checker-error">{{ fullError() }}</p>
+              <button class="cta" (click)="getFullReport()" [disabled]="fullLoading()"><i class="pi pi-refresh"></i> Réessayer</button>
+            }
           </div>
         }
 
@@ -194,7 +198,7 @@ export class VerifierDisponibiliteMarqueComponent {
     this.fullLoading.set(true);
     this.fullError.set(null);
     this.fullReport.set(null);
-    this.reports.full(name).subscribe({
+    this.reports.full(name).pipe(timeout(90000)).subscribe({
       next: (r) => { this.fullReport.set(r); this.fullLoading.set(false); },
       error: (err) => {
         this.fullError.set(

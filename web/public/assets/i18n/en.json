@@ -247,7 +247,9 @@
       "TM_NONE_EXPLAIN": "No <strong>identical</strong> trademark appears in the official INPI (France), EUIPO (Europe) and WIPO (international) databases. Good sign — but this does not cover <em>similar</em> marks (close in sound or look). Next step: secure the name by <strong>registering your trademark</strong> before going public.",
       "TM_EXACT_EXPLAIN": "An <strong>identical</strong> trademark is already registered. Using this name in the same classes of goods/services exposes you to an <strong>opposition</strong> or an <strong>infringement</strong> action. Check the classes below: if they don't overlap your activity, use may still be possible — have it validated by an IP attorney.",
       "TM_SIMILAR_EXPLAIN": "<strong>Similar</strong> trademarks exist. The risk depends on the degree of similarity and class overlap. Before any filing, a thorough prior-art search and the advice of an <strong>IP attorney</strong> are recommended.",
-      "TM_UNKNOWN_EXPLAIN": "The automatic check could not complete for this name (source unavailable). Run the <strong>official INPI search</strong> to decide."
+      "TM_UNKNOWN_EXPLAIN": "The automatic check could not complete for this name (source unavailable). Run the <strong>official INPI search</strong> to decide.",
+      "REPORT_RETRY": "Try again",
+      "REPORT_LOADING_HINT": "This usually takes a few seconds."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

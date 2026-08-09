@@ -774,7 +774,7 @@
 
       <!-- Chargement : skeleton par section (perception de rapidité) -->
       <div *ngIf="brandReportLoading()" style="display: flex; flex-direction: column; gap: 1rem">
-        <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 0 0 0.5rem">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}</p>
+        <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 0 0 0.5rem">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}<br><span style="font-size: 0.78rem; color: #9ca3af">{{ 'WIZARD.STEP3.REPORT_LOADING_HINT' | translate }}</span></p>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap">
           <div class="sk-block" style="flex: 1 1 160px; height: 84px"></div>
           <div class="sk-block" style="flex: 1 1 160px; height: 84px"></div>
@@ -784,8 +784,13 @@
         <div class="sk-block" style="height: 110px"></div>
       </div>
 
-      <!-- Erreur -->
-      <p *ngIf="!brandReportLoading() && brandReportError()" style="text-align: center; color: #dc2626; font-size: 0.9rem; margin: 2rem 0">{{ brandReportError() }}</p>
+      <!-- Erreur + réessayer (gratuit) -->
+      <div *ngIf="!brandReportLoading() && brandReportError()" style="text-align: center; margin: 2rem 0">
+        <p style="color: #dc2626; font-size: 0.9rem; margin: 0 0 0.75rem">{{ brandReportError() }}</p>
+        <button type="button" class="report-cta" (click)="retryBrandReport()">
+          <i class="pi pi-refresh" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_RETRY' | translate }}
+        </button>
+      </div>
 
       <!-- Résultat -->
       <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem">

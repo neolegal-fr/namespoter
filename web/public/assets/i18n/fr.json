@@ -247,7 +247,9 @@
       "TM_NONE_EXPLAIN": "Aucune marque <strong>identique</strong> n'apparaît dans les bases officielles INPI (France), EUIPO (Europe) et OMPI (international). Bon signal — mais cela ne couvre pas les marques <em>similaires</em> (proches à l'oreille ou à l'œil). Prochaine étape&nbsp;: sécurisez le nom en <strong>déposant votre marque</strong> avant de communiquer.",
       "TM_EXACT_EXPLAIN": "Une marque <strong>identique</strong> est déjà déposée. Utiliser ce nom dans les mêmes classes de produits/services vous expose à une <strong>opposition</strong> ou à une action en <strong>contrefaçon</strong>. Regardez les classes ci-dessous&nbsp;: si elles ne recouvrent pas votre activité, un usage reste parfois possible — à faire valider par un conseil en propriété industrielle.",
       "TM_SIMILAR_EXPLAIN": "Des marques <strong>proches</strong> existent. Le risque dépend du degré de similarité et du recouvrement des classes. Avant tout dépôt, une recherche d'antériorité approfondie et l'avis d'un <strong>conseil en propriété industrielle</strong> sont recommandés.",
-      "TM_UNKNOWN_EXPLAIN": "La vérification automatique n'a pas pu aboutir pour ce nom (source indisponible). Lancez la <strong>recherche officielle INPI</strong> pour trancher."
+      "TM_UNKNOWN_EXPLAIN": "La vérification automatique n'a pas pu aboutir pour ce nom (source indisponible). Lancez la <strong>recherche officielle INPI</strong> pour trancher.",
+      "REPORT_RETRY": "Réessayer",
+      "REPORT_LOADING_HINT": "Cela prend généralement quelques secondes."
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

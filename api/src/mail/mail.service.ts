@@ -101,6 +101,11 @@ export class MailService {
         user: this.config.get<string>('SMTP_USER', 'support@namorama.com'),
         pass: this.config.get<string>('SMTP_PASS', ''),
       },
+      // Bornes de sécurité : un SMTP lent/injoignable ne doit jamais bloquer
+      // la requête appelante (ex. la génération d'un rapport).
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   }
 

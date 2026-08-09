@@ -4,7 +4,7 @@ import { BRAND_REPORT_COST } from './brand-report.service';
 
 describe('BrandReportController — crédits (US-052)', () => {
   const dto = { name: 'Qonto' } as any;
-  const user = { sub: 'kc-123' };
+  const user = { sub: 'kc-123', email: 'me@example.com' };
 
   function make(opts: { totalCredits: number; newTotal?: number }) {
     const generate = jest.fn().mockResolvedValue({ name: 'Qonto', score: 80 });
