@@ -1,8 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { KeycloakService } from 'keycloak-angular';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
+import { BrandReportViewComponent } from '../brand-report/brand-report-view';
 import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from '../../services/brand-report';
 
 /**
@@ -17,7 +20,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
 @Component({
   selector: 'app-verifier-disponibilite-nom-de-marque',
   standalone: true,
-  imports: [RouterModule, FormsModule, ArticleCtaComponent],
+  imports: [RouterModule, FormsModule, ArticleCtaComponent, BrandReportViewComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -66,7 +69,17 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
               tous les réseaux et la <strong>vérification de marque INPI + EUIPO</strong> (classes incluses),
               affiché et envoyé par email — {{ cost }} crédits.
             </p>
-            <a class="cta" routerLink="/app">Obtenir le rapport complet →</a>
+            <button class="cta" (click)="getFullReport()" [disabled]="fullLoading()">
+              {{ fullLoading() ? 'Génération du rapport…' : (isLoggedIn() ? 'Obtenir le rapport complet' : 'Se connecter pour le rapport complet') }}
+            </button>
+            @if (fullError()) { <p class="checker-error">{{ fullError() }}</p> }
+          </div>
+        }
+
+        <!-- Rapport complet (avec marque) -->
+        @if (fullReport(); as fr) {
+          <div style="margin-top: 1.5rem">
+            <app-brand-report-view [report]="fr"></app-brand-report-view>
           </div>
         }
       </div>
@@ -148,12 +161,49 @@ export class VerifierDisponibiliteMarqueComponent {
   readonly error = signal<string | null>(null);
   readonly cost = BRAND_REPORT_COST;
 
+  // Rapport complet (avec marque) pour un nom saisi — nécessite un compte + crédits.
+  private keycloak?: KeycloakService;
+  readonly isLoggedIn = signal(false);
+  readonly fullLoading = signal(false);
+  readonly fullReport = signal<BrandReport | null>(null);
+  readonly fullError = signal<string | null>(null);
+
   constructor() {
     applyContentSeo({
       title: 'Vérifier la disponibilité d’un nom de marque',
       description:
         'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu gratuit et rapport complet.',
       path: '/verifier-disponibilite-nom-de-marque',
+    });
+    // Uniquement côté navigateur : au prerender, Keycloak n'est pas initialisé.
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      this.keycloak = inject(KeycloakService);
+      try { this.isLoggedIn.set(this.keycloak.isLoggedIn()); } catch { this.isLoggedIn.set(false); }
+    }
+  }
+
+  /** Génère le rapport complet (avec marque) pour le nom saisi. */
+  getFullReport(): void {
+    const name = this.query().trim();
+    if (!name || this.fullLoading()) return;
+    // Non connecté : rediriger vers la connexion puis revenir sur cette page.
+    if (!this.isLoggedIn()) {
+      this.keycloak?.login({ redirectUri: typeof window !== 'undefined' ? window.location.href : undefined });
+      return;
+    }
+    this.fullLoading.set(true);
+    this.fullError.set(null);
+    this.fullReport.set(null);
+    this.reports.full(name).subscribe({
+      next: (r) => { this.fullReport.set(r); this.fullLoading.set(false); },
+      error: (err) => {
+        this.fullError.set(
+          err?.status === 403
+            ? `Crédits insuffisants (${this.cost} crédits requis). Rechargez votre solde pour générer le rapport complet.`
+            : 'La génération du rapport a échoué. Réessayez dans un instant.',
+        );
+        this.fullLoading.set(false);
+      },
     });
   }
 
