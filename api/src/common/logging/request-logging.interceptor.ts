@@ -29,7 +29,12 @@ export class RequestLoggingInterceptor implements NestInterceptor {
     const finish = (status: number) => {
       this.logger.write({
         kind: 'http',
-        level: status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info',
+        // Les 4xx restent en `info` : le filtre d'exceptions écrit déjà une
+        // ligne `warn` porteuse du message d'erreur, seule utile au diagnostic.
+        // Les compter deux fois doublait tous les totaux du mode `errors`.
+        // Les 5xx gardent le niveau `error` des deux côtés : une 5xx qui ne
+        // passerait pas par le filtre resterait ainsi visible.
+        level: status >= 500 ? 'error' : 'info',
         context: 'HTTP',
         requestId,
         method: req.method,

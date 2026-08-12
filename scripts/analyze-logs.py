@@ -17,11 +17,16 @@ Modes :
   raw      — dernières lignes, brutes
 """
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from glob import glob
 
 LOG_GLOB = "/var/snap/docker/common/namorama/logs/api/app-*.ndjson"
+
+# Message générique du routeur pour une route inexistante (« Cannot GET /1.php »).
+# Un 404 métier porte un message propre et n'est donc pas filtré.
+SCAN_MESSAGE = re.compile(r"^Cannot [A-Z]+ ")
 
 # Ordre du tunnel : chaque étape suppose la précédente franchie.
 FUNNEL = [
@@ -66,9 +71,23 @@ def load(pattern=LOG_GLOB):
     return rows
 
 
+def is_scan(row):
+    """Requête d'un scanner sur une route inexistante (« Cannot GET /1.php »)."""
+    return row.get("status") == 404 and SCAN_MESSAGE.match(str(row.get("message") or ""))
+
+
 def errors(rows):
     bad = [r for r in rows if r.get("level") in ("error", "warn")]
-    print(f"{len(bad)} erreurs / avertissements\n")
+    # Les logs antérieurs au correctif classaient ces lignes en `warn` : elles
+    # représentaient 98 % du volume et rendaient ce mode inutilisable. On les
+    # écarte ici aussi, mais on annonce le nombre — les taire silencieusement
+    # se lirait comme « il n'y avait rien ».
+    scans = [r for r in bad if is_scan(r)]
+    bad = [r for r in bad if not is_scan(r)]
+    print(f"{len(bad)} erreurs / avertissements")
+    if scans:
+        print(f"({len(scans)} balayages de routes inexistantes écartés — mode `http` pour les voir)")
+    print()
     grouped = Counter(
         (r.get("context"), str(r.get("message"))[:110], r.get("status")) for r in bad
     )

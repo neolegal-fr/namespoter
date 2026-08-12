@@ -35,15 +35,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const detail = Array.isArray(message) ? message.join(' | ') : String(message);
     const requestId = response.getHeader('X-Request-Id') as string | undefined;
 
+    // Route inexistante : le message est celui, générique, du routeur
+    // (« Cannot GET /1.php »). C'est du balayage automatisé, pas un blocage
+    // vécu — 98 % des err/warn de production en venaient, rendant le mode
+    // `errors` inutilisable. On garde la ligne (volumétrie, détection d'abus)
+    // mais en `info`. Un 404 métier — NotFoundException('Rapport introuvable')
+    // — porte un message propre et reste donc en `warn`.
+    const unmatchedRoute = status === HttpStatus.NOT_FOUND && /^Cannot [A-Z]+ /.test(detail);
+
     // Toutes les erreurs sont journalisées, y compris les 4xx : ce sont elles
     // qui révèlent les blocages vécus par les utilisateurs (crédits épuisés,
     // validation refusée, session expirée). La pile n'est utile que sur les 5xx.
     this.logger.write({
       kind: 'log',
-      level: status >= 500 ? 'error' : 'warn',
+      level: status >= 500 ? 'error' : unmatchedRoute ? 'info' : 'warn',
       context: 'HttpException',
       message: detail,
       status,
+      unmatchedRoute: unmatchedRoute || undefined,
       method: request.method,
       path: request.url,
       userId: request.user?.sub,
