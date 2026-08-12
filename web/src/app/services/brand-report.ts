@@ -64,7 +64,7 @@ export interface BrandReport {
 }
 
 /** Coût affiché du rapport complet (aligné sur BRAND_REPORT_COST côté API). */
-export const BRAND_REPORT_COST = 500;
+export const BRAND_REPORT_COST = 50;
 
 @Injectable({ providedIn: 'root' })
 export class BrandReportService {

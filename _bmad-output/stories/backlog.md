@@ -1919,7 +1919,7 @@ Les trois conditions doivent être réunies **ensemble**, sinon ne rien publier 
 **Positionnement marché** (étude du 05/08/2026) : le concurrent direct NameScore.io facture ce type de rapport 50 $/unité ; les checkers de pseudos (Namechk, KnowEm) sont gratuits ou en réservation ; la recherche d'antériorité juridique (LegalStart) va de 50 à 350 €. Le trou de marché est un **rapport automatisé, en français, entre le gratuit et le juridique**. Aucun générateur de noms francophone ne couvre les trois plans à la fois.
 
 **Décisions cadrées** :
-- **Modèle** : facturé en **crédits — 500 crédits par rapport** (≈ 9 € = un pack Découverte entier à 0,018 €/crédit ; évite le « quasi-gratuit » qu'auraient donné 20-30 crédits sur un quota mensuel de 100). *(Relevé de 300 à 500 le 06/08/2026.)*
+- **Modèle** : facturé en **crédits — 50 crédits par rapport** (≈ 0,90 € au tarif Découverte de 0,018 €/crédit). *(Relevé de 300 à 500 le 06/08/2026, puis ramené à 50 le 12/08/2026 — le prix précédent, un pack Découverte entier par rapport, a été jugé dissuasif.)*
 - **Périmètre marque** : **INPI (France) + EUIPO (Union européenne)**. Pas d'USPTO en phase 1.
 - **Deux surfaces, un seul moteur** : upsell dans le wizard (**US-054**) + landing SEO publique avec checker bridé (**US-055**).
 - **Livraison** : affichage immédiat **et** envoi par email (rétention + capture de lead), sous consentement RGPD explicite.
