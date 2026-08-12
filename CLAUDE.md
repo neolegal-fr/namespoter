@@ -67,7 +67,9 @@ La disponibilité a **trois états** : libre, pris, et **non vérifiable** (`nul
 
 ## Déploiement en production
 
-Le serveur de prod est accessible via SSH à `192.168.1.95` (user `nicolas`).
+Le serveur de prod est accessible via SSH à `192.168.1.95` (user `nicolas`) **depuis le LAN uniquement**.
+Depuis l'extérieur : `namorama.com` port `12345`. Un alias `namorama-prod` est défini dans `~/.ssh/config`
+et fonctionne dans les deux cas — préférer `ssh namorama-prod` à l'IP en dur.
 
 Les images Docker sont buildées automatiquement par **GitHub Actions** et poussées sur le registry `git.neolegal.fr/neolegal/`.
 
