@@ -136,6 +136,13 @@ export class BrandReportService {
    * Un item `taken` ou `unknown` compte 0 — donc `unknown` n'améliore JAMAIS le
    * score (règle du spike). Une catégorie sans item (ex. marque en aperçu) est
    * exclue et sa pondération redistribuée sur les catégories présentes.
+   *
+   * Exception : les plateformes `planned` (Instagram, Facebook — mur de
+   * connexion, aucun verdict fiable possible) sont retirées du dénominateur.
+   * La règle « unknown vaut 0 » vise un doute sur le NOM ; un `planned` est un
+   * doute sur notre capacité à mesurer, identique pour tous les noms — le
+   * compter plafonnait la composante réseaux à 6/8 pour tout le monde, soit
+   * ~7,5 points retirés à chaque rapport sans rien distinguer.
    */
   private score(
     domains: DomainAvailability[],
@@ -145,7 +152,10 @@ export class BrandReportService {
     const parts: { weight: number; value: number }[] = [];
 
     if (domains.length) parts.push({ weight: WEIGHTS.domains, value: freeFraction(domains) });
-    if (socials.length) parts.push({ weight: WEIGHTS.socials, value: freeFraction(socials) });
+    const measurableSocials = socials.filter((s) => !s.planned);
+    if (measurableSocials.length) {
+      parts.push({ weight: WEIGHTS.socials, value: freeFraction(measurableSocials) });
+    }
     if (trademarkMatch !== null) {
       // « none » = aucun dépôt trouvé (favorable) ; sinon 0 (dépôt existant ou doute).
       parts.push({ weight: WEIGHTS.trademark, value: trademarkMatch === 'none' ? 1 : 0 });
