@@ -143,6 +143,7 @@ export class AdminDashboardComponent implements OnInit {
       { label: 'Nouveaux inscrits', value: s.periodNewUsers },
       { label: 'Nouveaux projets', value: s.periodNewProjects },
       { label: 'Suggestions générées', value: s.periodSuggestions },
+      { label: 'Rapports de marque', value: s.periodBrandReports },
     ];
   }
 
@@ -151,6 +152,7 @@ export class AdminDashboardComponent implements OnInit {
       { label: 'Utilisateurs', value: s.totalUsers },
       { label: 'Projets', value: s.totalProjects },
       { label: 'Suggestions', value: s.totalSuggestions },
+      { label: 'Rapports de marque', value: s.totalBrandReports },
       { label: 'Moy. sugg./projet', value: s.avgSuggestionsPerProject },
       { label: 'Moy. favoris/projet', value: s.avgFavoritesPerProject },
       { label: 'Crédits gratuits', value: s.totalFreeCredits },

@@ -5,7 +5,7 @@ SaaS pour trouver des noms de marque et domaines disponibles à partir d'une des
 ## Stack
 
 - **Frontend** : Angular 21, PrimeNG 21 (Aura theme), Tailwind CSS 4
-- **Backend** : NestJS, TypeORM, PostgreSQL
+- **Backend** : NestJS, TypeORM, MariaDB 10.6
 - **Auth** : Keycloak SSO (realm `namorama`, auto-importé depuis `infra/keycloak/realm-export.json`)
 - **IA** : OpenAI GPT-3.5 Turbo
 - **Infra** : Docker Compose (`infra/docker-compose.yml`), orchestration via `justfile`
@@ -131,15 +131,18 @@ Le serveur n'a **pas** `jq`, mais il a python3. Un script d'analyse est fourni e
 
 ```bash
 # Tunnel de conversion : volumétrie par étape, taux d'aboutissement, abandons
-ssh nicolas@192.168.1.95 "python3 - funnel" < scripts/analyze-logs.py
+ssh namorama-prod "python3 - funnel" < scripts/analyze-logs.py
 
 # Erreurs et avertissements, regroupés par fréquence
-ssh nicolas@192.168.1.95 "python3 - errors" < scripts/analyze-logs.py
+ssh namorama-prod "python3 - errors" < scripts/analyze-logs.py
+
+# Rapports de marque : demandes, issues, et détail par compte (sub)
+ssh namorama-prod "python3 - rapports" < scripts/analyze-logs.py
 
 # Requêtes les plus lentes / codes de statut par route / lignes brutes
-ssh nicolas@192.168.1.95 "python3 - slow"   < scripts/analyze-logs.py
-ssh nicolas@192.168.1.95 "python3 - http"   < scripts/analyze-logs.py
-ssh nicolas@192.168.1.95 "python3 - raw"    < scripts/analyze-logs.py
+ssh namorama-prod "python3 - slow"   < scripts/analyze-logs.py
+ssh namorama-prod "python3 - http"   < scripts/analyze-logs.py
+ssh namorama-prod "python3 - raw"    < scripts/analyze-logs.py
 ```
 
 Les fichiers appartiennent à root (écrits par le conteneur) mais sont lisibles par tous : pas besoin de `sudo`, qui échouerait d'ailleurs en SSH non interactif.
@@ -154,3 +157,13 @@ Les fichiers appartiennent à root (écrits par le conteneur) mais sont lisibles
 - Projets : sauvegarde, historique, restauration via drawer
 - Persistence état wizard avant redirection login (localStorage)
 - Accès hybride : public pour le test, connexion requise pour les résultats
+- Rapport de marque complet (domaines + réseaux + INPI), facturé `BRAND_REPORT_COST` crédits
+
+### Suivi des rapports de marque
+
+Deux sources, volontairement distinctes — elles ne mesurent pas la même chose :
+
+- **Logs** (`python3 - rapports`) : toutes les **demandes**, y compris celles qui n'ont produit aucun rapport. `brand_report_requested` est émis avant tout traitement, puis exactement une issue : `brand_report_generated`, `brand_report_cache_hit`, `brand_report_blocked_no_credits` ou `brand_report_failed`. Détail par `sub`, crédits débités sommés depuis le `cost` porté par chaque événement — donc juste même après un changement de tarif.
+- **Admin de l'app** : les rapports **produits**, lus en base (`brand_report_record`). KPI période + total, et une colonne « Rapports » par utilisateur. Un compte supprimé ne compte plus (jointure sur le `sub`).
+
+> L'admin affichera toujours un chiffre ≤ celui des logs : un rapport bloqué faute de crédits est une demande, pas un rapport.

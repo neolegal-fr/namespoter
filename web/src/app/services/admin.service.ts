@@ -15,6 +15,8 @@ export interface AdminUser {
   createdAt: string;
   lastLogin: string | null;
   projectCount: number;
+  /** Rapports de marque produits (les demandes bloquées/en échec ne sont visibles que dans les logs). */
+  brandReportCount: number;
 }
 
 export interface FeedbackItem {
@@ -33,8 +35,10 @@ export interface AdminStats {
   periodNewUsers: number;
   periodNewProjects: number;
   periodSuggestions: number;
+  periodBrandReports: number;
   totalProjects: number;
   totalSuggestions: number;
+  totalBrandReports: number;
   avgSuggestionsPerProject: number;
   avgFavoritesPerProject: number;
   totalFreeCredits: number;

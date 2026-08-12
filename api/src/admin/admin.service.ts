@@ -5,6 +5,7 @@ import { User } from '../users/entities/user.entity';
 import { Project } from '../projects/entities/project.entity';
 import { DomainSuggestion } from '../projects/entities/domain-suggestion.entity';
 import { CreditAdjustment } from './entities/credit-adjustment.entity';
+import { BrandReportRecord } from '../brand-report/entities/brand-report-record.entity';
 
 export interface AdminUserRow {
   id: number;
@@ -18,6 +19,12 @@ export interface AdminUserRow {
   createdAt: Date;
   lastLogin: Date | null;
   projectCount: number;
+  /**
+   * Rapports de marque produits pour ce compte. Compte les rapports réellement
+   * générés (un par nom distinct) : une demande bloquée faute de crédits ou en
+   * échec n'y figure pas — seuls les logs les voient (`brand_report_requested`).
+   */
+  brandReportCount: number;
 }
 
 export interface AdminStats {
@@ -26,8 +33,10 @@ export interface AdminStats {
   periodNewUsers: number;
   periodNewProjects: number;
   periodSuggestions: number;
+  periodBrandReports: number;
   totalProjects: number;
   totalSuggestions: number;
+  totalBrandReports: number;
   avgSuggestionsPerProject: number;
   avgFavoritesPerProject: number;
   totalFreeCredits: number;
@@ -41,8 +50,27 @@ export class AdminService {
     @InjectRepository(Project) private projectRepo: Repository<Project>,
     @InjectRepository(DomainSuggestion) private suggestionRepo: Repository<DomainSuggestion>,
     @InjectRepository(CreditAdjustment) private adjustmentRepo: Repository<CreditAdjustment>,
+    @InjectRepository(BrandReportRecord) private brandReportRepo: Repository<BrandReportRecord>,
     private dataSource: DataSource,
   ) {}
+
+  /**
+   * Nombre de rapports de marque par compte, pour une page d'utilisateurs.
+   *
+   * `BrandReportRecord` n'a pas de relation TypeORM vers `User` (il ne porte que
+   * le `sub` Keycloak) : `loadRelationCountAndMap` ne s'applique donc pas, d'où
+   * cette agrégation en une requête pour toute la page — et non une par ligne.
+   */
+  private async brandReportCounts(keycloakIds: string[]): Promise<Map<string, number>> {
+    if (!keycloakIds.length) return new Map();
+    const rows = await this.brandReportRepo.createQueryBuilder('r')
+      .select('r.keycloakId', 'keycloakId')
+      .addSelect('COUNT(*)', 'cnt')
+      .where('r.keycloakId IN (:...ids)', { ids: keycloakIds })
+      .groupBy('r.keycloakId')
+      .getRawMany<{ keycloakId: string; cnt: string }>();
+    return new Map(rows.map((r) => [r.keycloakId, Number(r.cnt)]));
+  }
 
   async getUsers(page: number, limit: number, search: string): Promise<{ data: AdminUserRow[]; total: number }> {
     const qb = this.userRepo.createQueryBuilder('u')
@@ -56,6 +84,7 @@ export class AdminService {
     }
 
     const [users, total] = await qb.getManyAndCount();
+    const reportCounts = await this.brandReportCounts(users.map((u) => u.keycloakId));
 
     const data: AdminUserRow[] = users.map((u: any) => ({
       id: u.id,
@@ -69,6 +98,7 @@ export class AdminService {
       createdAt: u.createdAt,
       lastLogin: u.lastLogin,
       projectCount: u.projectCount ?? 0,
+      brandReportCount: reportCounts.get(u.keycloakId) ?? 0,
     }));
 
     return { data, total };
@@ -98,6 +128,7 @@ export class AdminService {
       createdAt: user.createdAt,
       lastLogin: user.lastLogin,
       projectCount: await this.projectRepo.count({ where: { user: { id: userId } } }),
+      brandReportCount: await this.brandReportRepo.count({ where: { keycloakId: user.keycloakId } }),
     };
   }
 
@@ -109,7 +140,7 @@ export class AdminService {
     // activité gonflerait chaque agrégat sans rien dire de l'usage réel. Ils
     // sont donc écartés de bout en bout — utilisateurs, projets, suggestions
     // et crédits — et pas seulement du décompte d'utilisateurs.
-    const [totalUsers, periodActiveUsers, periodNewUsers, periodNewProjects] = await Promise.all([
+    const [totalUsers, periodActiveUsers, periodNewUsers, periodNewProjects, periodBrandReports] = await Promise.all([
       this.userRepo.count({ where: { isAdmin: false } }),
       this.userRepo.createQueryBuilder('u')
         .where('u.lastLogin >= :from AND u.lastLogin <= :to', { from: periodStart, to: periodEnd })
@@ -124,6 +155,14 @@ export class AdminService {
         .where('p.createdAt >= :from AND p.createdAt <= :to', { from: periodStart, to: periodEnd })
         .andWhere('u.isAdmin = false')
         .getCount(),
+      // Jointure sur le `sub` Keycloak : BrandReportRecord ne référence pas
+      // `user.id`. L'`innerJoin` écarte au passage les rapports orphelins
+      // (compte supprimé), qu'il serait trompeur de compter dans l'usage.
+      this.brandReportRepo.createQueryBuilder('r')
+        .innerJoin(User, 'u', 'u.keycloakId = r.keycloakId')
+        .where('r.createdAt >= :from AND r.createdAt <= :to', { from: periodStart, to: periodEnd })
+        .andWhere('u.isAdmin = false')
+        .getCount(),
     ]);
 
     const periodSuggestionsResult = await this.dataSource.query(
@@ -135,7 +174,7 @@ export class AdminService {
     );
     const periodSuggestions = Number(periodSuggestionsResult[0]?.cnt ?? 0);
 
-    const [totalProjects, totalSuggestions] = await Promise.all([
+    const [totalProjects, totalSuggestions, totalBrandReports] = await Promise.all([
       this.projectRepo.createQueryBuilder('p')
         .innerJoin('p.user', 'u')
         .where('u.isAdmin = false')
@@ -143,6 +182,10 @@ export class AdminService {
       this.suggestionRepo.createQueryBuilder('ds')
         .innerJoin('ds.project', 'p')
         .innerJoin('p.user', 'u')
+        .where('u.isAdmin = false')
+        .getCount(),
+      this.brandReportRepo.createQueryBuilder('r')
+        .innerJoin(User, 'u', 'u.keycloakId = r.keycloakId')
         .where('u.isAdmin = false')
         .getCount(),
     ]);
@@ -174,8 +217,10 @@ export class AdminService {
       periodNewUsers,
       periodNewProjects,
       periodSuggestions,
+      periodBrandReports,
       totalProjects,
       totalSuggestions,
+      totalBrandReports,
       avgSuggestionsPerProject: Math.round((avgSuggestionsResult[0]?.avg ?? 0) * 10) / 10,
       avgFavoritesPerProject: Math.round((avgFavoritesResult[0]?.avg ?? 0) * 10) / 10,
       totalFreeCredits: creditsResult[0]?.free ?? 0,

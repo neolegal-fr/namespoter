@@ -49,7 +49,7 @@ export class BrandReportController {
 
   /**
    * Rapport déjà généré pour ce (compte, nom) — permet au front de proposer un
-   * lien « voir le rapport » plutôt que de refacturer 500 crédits.
+   * lien « voir le rapport » plutôt que de refacturer {@link BRAND_REPORT_COST} crédits.
    */
   @Get('existing')
   async existing(
@@ -72,6 +72,17 @@ export class BrandReportController {
     @Body() dto: BrandReportRequestDto,
     @AuthenticatedUser() keycloakUser: { sub: string; email?: string },
   ) {
+    // Émis AVANT tout traitement : c'est la demande qui est comptée, pas son
+    // issue. Sans cet événement, un rapport bloqué ou en échec n'apparaît nulle
+    // part, et le total par utilisateur sous-estime l'usage réel.
+    // Le nom demandé n'est pas journalisé (donnée saisie par l'utilisateur) :
+    // seul le `sub` permet d'agréger par compte.
+    this.events.event('brand_report_requested', {
+      sub: keycloakUser.sub,
+      cost: BRAND_REPORT_COST,
+      forced: !!dto.force,
+    });
+
     const user = await this.usersService.findOrCreate(keycloakUser.sub);
 
     // Déjà généré → on le renvoie tel quel, sans refacturer (sauf régénération forcée).
@@ -93,10 +104,22 @@ export class BrandReportController {
       throw new ForbiddenException('Crédits insuffisants');
     }
 
-    const report = await this.brandReport.generate(dto.name, {
-      extensions: dto.extensions,
-      withQuality: true,
-    });
+    // La génération précède le débit : un échec ne consomme aucun crédit. On le
+    // trace tout de même, sinon l'écart entre demandes et rapports produits
+    // reste inexpliqué dans les tableaux de bord.
+    let report: Awaited<ReturnType<typeof this.brandReport.generate>>;
+    try {
+      report = await this.brandReport.generate(dto.name, {
+        extensions: dto.extensions,
+        withQuality: true,
+      });
+    } catch (e) {
+      this.events.event('brand_report_failed', {
+        sub: keycloakUser.sub,
+        reason: String((e as Error)?.message ?? e).slice(0, 120),
+      });
+      throw e;
+    }
 
     let remainingCredits = user.totalCredits - BRAND_REPORT_COST;
     await this.dataSource.transaction(async (manager) => {

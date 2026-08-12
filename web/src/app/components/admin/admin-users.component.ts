@@ -42,6 +42,7 @@ import { KeycloakService } from 'keycloak-angular';
               <th style="background: var(--p-surface-50)">{{ 'ADMIN.COL_EMAIL' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_CREDITS' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_PROJECTS' | translate }}</th>
+              <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_REPORTS' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_CREATED' | translate }}</th>
               <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_LAST_LOGIN' | translate }}</th>
               <th style="background: var(--p-surface-50); width: 1px"></th>
@@ -60,6 +61,7 @@ import { KeycloakService } from 'keycloak-angular';
                 <span class="text-400 text-xs" style="margin-left: 0.25rem">({{ user.credits }}+{{ user.extraCredits }})</span>
               </td>
               <td class="text-center text-sm">{{ user.projectCount }}</td>
+              <td class="text-center text-sm" [class.text-400]="!user.brandReportCount">{{ user.brandReportCount }}</td>
               <td class="text-center text-xs text-500">{{ user.createdAt | date:'dd/MM/yy' }}</td>
               <td class="text-center text-xs text-500">{{ user.lastLogin ? (user.lastLogin | date:'dd/MM/yy') : '—' }}</td>
               <td style="white-space: nowrap; padding: 0.25rem 0.5rem">
@@ -96,7 +98,7 @@ import { KeycloakService } from 'keycloak-angular';
             </tr>
           </ng-template>
           <ng-template pTemplate="emptymessage">
-            <tr><td colspan="7" class="text-center text-500 py-4">{{ 'ADMIN.NO_USERS' | translate }}</td></tr>
+            <tr><td colspan="8" class="text-center text-500 py-4">{{ 'ADMIN.NO_USERS' | translate }}</td></tr>
           </ng-template>
         </p-table>
 

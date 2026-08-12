@@ -45,6 +45,7 @@
     "COL_EMAIL": "Email",
     "COL_CREDITS": "Credits",
     "COL_PROJECTS": "Projects",
+    "COL_REPORTS": "Reports",
     "COL_CREATED": "Created",
     "COL_LAST_LOGIN": "Last login",
     "ADJUST_CREDITS": "Adjust credits",

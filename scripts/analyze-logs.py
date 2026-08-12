@@ -4,16 +4,17 @@ Analyse des logs NDJSON de production.
 
 Conçu pour être exécuté sur le serveur, qui n'a pas `jq` mais bien python3 :
 
-    ssh nicolas@192.168.1.95 "sudo python3 - errors" < scripts/analyze-logs.py
-    ssh nicolas@192.168.1.95 "sudo python3 - funnel" < scripts/analyze-logs.py
-    ssh nicolas@192.168.1.95 "sudo python3 - slow" < scripts/analyze-logs.py
+    ssh namorama-prod "python3 - errors"   < scripts/analyze-logs.py
+    ssh namorama-prod "python3 - funnel"   < scripts/analyze-logs.py
+    ssh namorama-prod "python3 - rapports" < scripts/analyze-logs.py
 
 Modes :
-  errors  — erreurs et avertissements, les plus fréquents d'abord
-  funnel  — tunnel de conversion : volumétrie par événement et taux de chute
-  slow    — requêtes les plus lentes
-  http    — répartition des codes de statut par route
-  raw     — dernières lignes, brutes
+  errors   — erreurs et avertissements, les plus fréquents d'abord
+  funnel   — tunnel de conversion : volumétrie par événement et taux de chute
+  rapports — rapports de marque : demandes, issues, et détail par utilisateur
+  slow     — requêtes les plus lentes
+  http     — répartition des codes de statut par route
+  raw      — dernières lignes, brutes
 """
 import json
 import sys
@@ -33,7 +34,20 @@ FUNNEL = [
     ("search_cancelled_by_user", "Recherche interrompue"),
     ("search_failed", "Recherche en échec"),
     ("no_result_relax_clicked", "A assoupli la longueur"),
+    ("brand_report_requested", "Rapport de marque demandé"),
+    ("brand_report_generated", "Rapport de marque produit"),
+    ("brand_report_cache_hit", "Rapport déjà en cache (non refacturé)"),
+    ("brand_report_blocked_no_credits", "Rapport bloqué : crédits épuisés"),
+    ("brand_report_failed", "Rapport en échec"),
     ("client_error", "Erreur JavaScript subie"),
+]
+
+# Issues possibles d'une demande de rapport, dans l'ordre d'apparition.
+REPORT_OUTCOMES = [
+    ("brand_report_generated", "produits"),
+    ("brand_report_cache_hit", "déjà en cache"),
+    ("brand_report_blocked_no_credits", "bloqués (crédits)"),
+    ("brand_report_failed", "en échec"),
 ]
 
 
@@ -113,6 +127,77 @@ def funnel(rows):
               f"{perdus}/{len(vues)} ({100*perdus/len(vues):.0f} %)")
 
 
+def rapports(rows):
+    """Rapports de marque : volumétrie, issues, et détail par utilisateur."""
+    events = [r for r in rows if r.get("kind") == "event"]
+    demandes = [r for r in events if r.get("context") == "brand_report_requested"]
+    par_issue = Counter(r.get("context") for r in events)
+
+    total = len(demandes)
+    print(f"Rapports de marque — {total} demande(s)\n")
+
+    for name, label in REPORT_OUTCOMES:
+        n = par_issue.get(name, 0)
+        part = f"  ({100*n/total:.0f} %)" if total else ""
+        print(f"  {n:6}  {label}{part}")
+
+    # Crédits réellement débités : on somme le `cost` porté par chaque événement
+    # plutôt que de multiplier par le tarif courant. Le coût a changé au fil du
+    # temps (500 → 50 crédits) ; un tarif unique fausserait tout l'historique.
+    debites = sum(
+        r.get("cost", 0) for r in events
+        if r.get("context") == "brand_report_generated" and isinstance(r.get("cost"), int)
+    )
+    print(f"\n  Crédits débités au total : {debites}")
+
+    forces = sum(1 for r in demandes if r.get("forced"))
+    if forces:
+        print(f"  Régénérations forcées : {forces}/{total}")
+
+    # Détail par compte. La clé est le `sub` Keycloak — le seul identifiant
+    # journalisé (ni email ni nom, cf. règles de logs).
+    par_user = defaultdict(Counter)
+    credits_user = Counter()
+    for r in events:
+        sub, ctx = r.get("sub"), r.get("context")
+        if not sub or not str(ctx).startswith("brand_report_"):
+            continue
+        par_user[sub][ctx] += 1
+        if ctx == "brand_report_generated" and isinstance(r.get("cost"), int):
+            credits_user[sub] += r["cost"]
+
+    if not par_user:
+        print("\n  Aucune demande attribuée à un compte.")
+        return
+
+    print(f"\nDétail par utilisateur ({len(par_user)} compte(s))\n")
+    print(f"  {'compte (sub)':38} {'dem.':>5} {'prod.':>6} {'cache':>6} {'bloq.':>6} {'éch.':>5} {'crédits':>8}")
+    ordre = sorted(
+        par_user.items(),
+        key=lambda kv: (-kv[1].get("brand_report_requested", 0), -sum(kv[1].values())),
+    )
+    for sub, c in ordre:
+        print(
+            f"  {str(sub)[:38]:38} "
+            f"{c.get('brand_report_requested', 0):>5} "
+            f"{c.get('brand_report_generated', 0):>6} "
+            f"{c.get('brand_report_cache_hit', 0):>6} "
+            f"{c.get('brand_report_blocked_no_credits', 0):>6} "
+            f"{c.get('brand_report_failed', 0):>5} "
+            f"{credits_user.get(sub, 0):>8}"
+        )
+
+    # `brand_report_requested` n'existe que depuis l'ajout du traçage des
+    # demandes : sur les logs antérieurs, la colonne « dem. » reste à 0 alors
+    # que des rapports ont bien été produits. Le signaler évite de lire ça
+    # comme une anomalie.
+    issues = sum(par_issue.get(n, 0) for n, _ in REPORT_OUTCOMES)
+    if total < issues:
+        print(f"\n  Note : {issues} issue(s) pour {total} demande(s) tracée(s).")
+        print("  Les logs antérieurs au traçage des demandes n'ont pas d'événement")
+        print("  `brand_report_requested` — seule leur issue est comptée.")
+
+
 def slow(rows):
     http = [r for r in rows if r.get("kind") == "http" and isinstance(r.get("durationMs"), int)]
     http.sort(key=lambda r: -r["durationMs"])
@@ -137,7 +222,14 @@ def raw(rows):
         print(json.dumps(r, ensure_ascii=False)[:220])
 
 
-MODES = {"errors": errors, "funnel": funnel, "slow": slow, "http": http, "raw": raw}
+MODES = {
+    "errors": errors,
+    "funnel": funnel,
+    "rapports": rapports,
+    "slow": slow,
+    "http": http,
+    "raw": raw,
+}
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "funnel"
