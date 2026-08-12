@@ -101,7 +101,32 @@ export class MailService {
         user: this.config.get<string>('SMTP_USER', 'support@namorama.com'),
         pass: this.config.get<string>('SMTP_PASS', ''),
       },
+      // Bornes de sécurité : un SMTP lent/injoignable ne doit jamais bloquer
+      // la requête appelante (ex. la génération d'un rapport).
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
+  }
+
+  /**
+   * Envoi générique best-effort : ne lève jamais (un échec d'email ne doit pas
+   * casser la requête appelante), renvoie `true` si l'envoi a réussi.
+   */
+  async send(options: {
+    to: string;
+    subject: string;
+    html: string;
+    attachments?: { filename: string; content: string | Buffer; contentType?: string }[];
+  }): Promise<boolean> {
+    const from = this.config.get<string>('SMTP_FROM', 'support@namorama.com');
+    try {
+      await this.transporter.sendMail({ from, ...options });
+      return true;
+    } catch (err) {
+      this.logger.error('Failed to send email', err);
+      return false;
+    }
   }
 
   async sendFeedbackNotification(feedback: {

@@ -217,3 +217,169 @@
     color: var(--p-primary-700, #047857);
     background: var(--p-primary-50, #ecfdf5);
 }
+
+.report-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    border: 0;
+    border-radius: 9999px;
+    background: #4f46e5;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+.report-cta:hover {
+    background: #4338ca;
+}
+.report-cta:active {
+    transform: translateY(1px);
+}
+
+/* Bouton « Rapport » par ligne de résultat (remplace l'ancien bouton registrar) */
+.report-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid #4f46e5;
+    border-radius: 8px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+.report-btn:hover {
+    background: #4338ca;
+}
+.report-btn i {
+    font-size: 0.85rem;
+}
+/* Sur écran étroit, on garde l'icône seule */
+@media (max-width: 640px) {
+    .report-btn__label { display: none; }
+    .report-btn { padding: 0.4rem 0.55rem; }
+}
+
+/* Rapport plein écran — retour à la liste, badge, cartes, scores */
+.report-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    background: #fff;
+    color: #4f46e5;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.report-back:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+}
+.report-cached-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 9999px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+.report-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+}
+.report-card__title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 0 0 0.5rem;
+}
+.report-score-card {
+    flex: 1 1 160px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    text-align: center;
+}
+.report-score-num {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.report-score-lbl {
+    font-size: 0.72rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-top: 0.25rem;
+}
+
+/* Lien « Voir le rapport » / actions secondaires (au lieu d'un bouton) */
+.report-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #4f46e5;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.report-link:hover { text-decoration: underline; }
+
+/* Action héro : réserver le meilleur domaine libre */
+.report-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+}
+.report-hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 9999px;
+    background: #fff;
+    color: #4f46e5;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.report-hero__btn:hover { background: #eef2ff; }
+
+/* Skeleton de chargement */
+.sk-block {
+    border-radius: 12px;
+    background: linear-gradient(90deg, #eef1f4 25%, #e2e6ea 37%, #eef1f4 63%);
+    background-size: 400% 100%;
+    animation: sk-shimmer 1.4s ease infinite;
+}
+@keyframes sk-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}

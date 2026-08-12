@@ -1,10 +1,11 @@
 import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Subscription, firstValueFrom, of } from 'rxjs';
+import { Subscription, firstValueFrom, of, timeout } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
+import { BrandReportService, BrandReport, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
 import { KeycloakService } from 'keycloak-angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Steps } from 'primeng/steps';
@@ -431,21 +432,251 @@ export class WizardComponent implements OnInit {
     },
   ];
 
-  // Vérifications complémentaires (marque + réseaux sociaux) : liens profonds
-  // pré-remplis, dans le même esprit que les liens registrar (pas de scraping).
-  readonly SOCIAL_CHECKS = [
-    { label: 'X', url: (h: string) => `https://x.com/${h}` },
-    { label: 'Instagram', url: (h: string) => `https://www.instagram.com/${h}` },
-  ];
-
   /** Lien vers la recherche de marque INPI (base Marques) pour un nom donné. */
   inpiUrl(name: string): string {
     return `https://data.inpi.fr/search?q=${encodeURIComponent(name)}&type=brands`;
   }
 
-  /** Normalise un nom en pseudo réseau social (minuscules, alphanumérique). */
-  socialHandle(name: string): string {
-    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  // ─── Rapport de disponibilité de marque (US-054) ───────────────────────────
+  // Remplace les anciens liens profonds registrar/INPI/réseaux (qui laissaient
+  // l'utilisateur faire le travail à la main) par un rapport réel et payant.
+  readonly brandReportCost = BRAND_REPORT_COST;
+  readonly brandReport = signal<BrandReport | null>(null);
+  readonly brandReportLoading = signal(false);
+  readonly brandReportError = signal<string | null>(null);
+  readonly showReportDialog = signal(false);
+  readonly brandReportName = signal('');
+  // Écran de confirmation avant génération : crédits + destinataires email.
+  readonly showReportConfirm = signal(false);
+  readonly reportEmails = signal('');
+  readonly userEmail = signal('');
+
+  /** Point d'entrée : si le rapport existe déjà, on l'ouvre (sans débit) ; sinon on demande confirmation. */
+  askBrandReport(name: string): void {
+    this.brandReportName.set(name);
+    this.brandReportError.set(null);
+    this.brandReport.set(null);
+    this.isSampleReport.set(false);
+    this.forceRegen.set(false);
+    this.brandReportService.existing(name).subscribe({
+      next: (res) => {
+        if (res?.exists && res.report) {
+          this.markReported(name);
+          this.brandReport.set(res.report);
+          this.showReportDialog.set(true);
+        } else {
+          this.openReportConfirm();
+        }
+      },
+      error: () => this.openReportConfirm(),
+    });
+  }
+
+  /** Ouvre la confirmation (coût, solde, destinataires) après avoir chargé l'email du compte. */
+  private async openReportConfirm(): Promise<void> {
+    if (!this.userEmail()) {
+      try {
+        const profile: any = await this.keycloak.loadUserProfile();
+        this.userEmail.set(profile?.email ?? '');
+      } catch { /* profil indisponible : champ email vide, l'utilisateur saisit */ }
+    }
+    this.reportEmails.set(this.userEmail());
+    this.showReportConfirm.set(true);
+  }
+
+  /** Solde suffisant pour générer le rapport ? */
+  hasEnoughReportCredits(): boolean {
+    return this.userService.creditsValue >= this.brandReportCost;
+  }
+
+  /** Renvoie vers l'achat de crédits (dialogue existant). */
+  openCreditPurchase(): void {
+    this.showReportConfirm.set(false);
+    this.projectService.showCreditDialog.set(true);
+  }
+
+  /** Régénérer un rapport en cache (redébite) : repasse par la confirmation. */
+  readonly forceRegen = signal(false);
+  regenerateBrandReport(): void {
+    this.forceRegen.set(true);
+    this.showReportDialog.set(false);
+    this.openReportConfirm();
+  }
+
+  /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
+  confirmBrandReport(): void {
+    if (!this.hasEnoughReportCredits()) { this.openCreditPurchase(); return; }
+    const emails = this.parseEmails(this.reportEmails());
+    const force = this.forceRegen();
+    this.showReportConfirm.set(false);
+    this.showReportDialog.set(true);
+    this.generateBrandReport(this.brandReportName(), emails, force);
+    this.forceRegen.set(false);
+  }
+
+  private parseEmails(raw: string): string[] {
+    return raw.split(/[,;\s]+/).map((e) => e.trim()).filter((e) => e.length > 0);
+  }
+
+  // Derniers paramètres, pour permettre un « Réessayer » gratuit après erreur.
+  private lastReportName = '';
+  private lastReportEmails: string[] = [];
+
+  /** Relance la génération après une erreur — sans re-débit (idempotent côté API). */
+  retryBrandReport(): void {
+    this.generateBrandReport(this.lastReportName, this.lastReportEmails, false);
+  }
+
+  private generateBrandReport(name: string, emails: string[], force = false): void {
+    if (this.brandReportLoading()) return;
+    this.lastReportName = name;
+    this.lastReportEmails = emails;
+    this.brandReportLoading.set(true);
+    this.brandReportError.set(null);
+    this.brandReport.set(null);
+    this.analytics.track('brand_report_cta_clicked');
+    // Timeout client : un traitement qui n'aboutit pas devient une erreur
+    // (réessayable) plutôt qu'un chargement infini.
+    this.brandReportService.full(name, { emails, force }).pipe(timeout(90000)).subscribe({
+      next: (report) => {
+        this.isSampleReport.set(false);
+        this.brandReport.set(report);
+        this.markReported(name);
+        if (typeof report.remainingCredits === 'number') {
+          this.userService.updateCredits(report.remainingCredits);
+        }
+        this.brandReportLoading.set(false);
+      },
+      error: (err) => {
+        // 403 = crédits insuffisants ; TimeoutError ou autre = erreur générique réessayable.
+        this.brandReportError.set(
+          err?.status === 403
+            ? this.translate.instant('WIZARD.STEP3.REPORT_NO_CREDITS')
+            : this.translate.instant('WIZARD.STEP3.REPORT_ERROR'),
+        );
+        this.brandReportLoading.set(false);
+      },
+    });
+  }
+
+  /** URL de réservation d'un domaine chez un registrar donné (extension avec point). */
+  reserveDomainUrl(name: string, extension: string, registrarIndex = 0): string {
+    return this.REGISTRARS[registrarIndex].url(name, [`.${extension}`]);
+  }
+
+  // ─── Partage du rapport (Sally #5) ─────────────────────────────────────────
+  readonly shareCopied = signal(false);
+  copyShareLink(report: BrandReport): void {
+    if (!report.shareToken || typeof window === 'undefined') return;
+    const url = `${window.location.origin}/rapport/${report.shareToken}`;
+    navigator.clipboard?.writeText(url).then(() => {
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 2500);
+    }).catch(() => { /* presse-papiers indisponible */ });
+  }
+
+  /** Libellés lisibles des critères de qualité (ordre stable). */
+  readonly QUALITY_LABELS: Record<string, string> = {
+    memorability: 'Mémorabilité',
+    pronunciation: 'Prononciation',
+    international: 'International',
+    seo: 'SEO',
+    distinctiveness: 'Distinctivité',
+  };
+  qualityCriteria(q: NameQuality): { label: string; value: number }[] {
+    return Object.entries(q.scores).map(([k, v]) => ({ label: this.QUALITY_LABELS[k] ?? k, value: v }));
+  }
+
+  /** Point d'entrée officiel pour déposer une marque à l'INPI. */
+  readonly INPI_DEPOSIT_URL = 'https://procedures.inpi.fr/?/marques/depot';
+
+  /** Meilleur domaine à réserver (action héro) : .com libre en priorité, sinon 1er libre. */
+  heroFreeDomain(report: BrandReport): { extension: string; domain: string } | null {
+    const free = report.domains.filter((d) => d.status === 'free');
+    return free.find((d) => d.extension === 'com') ?? free[0] ?? null;
+  }
+
+  /** Date de génération lisible. */
+  formatReportDate(iso: string): string {
+    try { return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }); }
+    catch { return ''; }
+  }
+
+  // ─── Suivi des noms déjà rapportés (lien « Voir le rapport » vs bouton) ────
+  readonly reportedNames = signal<Set<string>>(new Set());
+  private normName(name: string): string { return (name || '').trim().toLowerCase(); }
+  hasReport(name: string): boolean { return this.reportedNames().has(this.normName(name)); }
+  private markReported(name: string): void {
+    this.reportedNames.update((s) => new Set(s).add(this.normName(name)));
+  }
+  /** Charge la liste des noms déjà rapportés (silencieux si non authentifié). */
+  loadReportedNames(): void {
+    this.brandReportService.mine().subscribe({
+      next: (res) => this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n)))),
+      error: () => { /* anonyme ou indisponible : liste vide */ },
+    });
+  }
+
+  // ─── Rapport d'exemple (namorama) pour se faire une idée avant de payer ────
+  readonly isSampleReport = signal(false);
+  showSampleReport(): void {
+    this.showReportConfirm.set(false);
+    this.isSampleReport.set(true);
+    this.brandReportName.set('namorama');
+    this.brandReportError.set(null);
+    this.brandReport.set(this.SAMPLE_REPORT);
+    this.showReportDialog.set(true);
+  }
+  readonly SAMPLE_REPORT: BrandReport = {
+    name: 'namorama',
+    handle: 'namorama',
+    domains: [
+      { extension: 'com', domain: 'namorama.com', status: 'taken' },
+      { extension: 'fr', domain: 'namorama.fr', status: 'free' },
+      { extension: 'io', domain: 'namorama.io', status: 'free' },
+      { extension: 'net', domain: 'namorama.net', status: 'free' },
+      { extension: 'app', domain: 'namorama.app', status: 'unknown' },
+    ],
+    socials: [
+      { platform: 'GitHub', handle: 'namorama', url: 'https://github.com/namorama', status: 'free' },
+      { platform: 'LinkedIn', handle: 'namorama', url: 'https://www.linkedin.com/company/namorama', status: 'free' },
+      { platform: 'TikTok', handle: 'namorama', url: 'https://www.tiktok.com/@namorama', status: 'taken' },
+      { platform: 'Telegram', handle: 'namorama', url: 'https://t.me/namorama', status: 'free' },
+    ],
+    trademark: {
+      office: 'INPI',
+      match: 'none',
+      hits: [],
+      deepLink: 'https://data.inpi.fr/search?q=namorama&type=brands',
+    },
+    quality: {
+      score: 82,
+      scores: { memorability: 4, pronunciation: 4, international: 5, seo: 3, distinctiveness: 5 },
+      strengths: 'Court, sonore, international et très distinctif.',
+      watchout: 'Sens peu explicite : à soutenir par un logo et une accroche claire.',
+    },
+    score: 68,
+    generatedAt: new Date().toISOString(),
+    disclaimer:
+      "Signal indicatif de disponibilité. Ne remplace pas une recherche d'antériorité ni l'avis d'un conseil en propriété industrielle.",
+  };
+
+  /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */
+  reportStatusLabel(s: Availability): string {
+    return s === 'free' ? 'Libre' : s === 'taken' ? 'Pris' : '?';
+  }
+  reportStatusColor(s: Availability): string {
+    return s === 'free' ? '#16a34a' : s === 'taken' ? '#dc2626' : '#9ca3af';
+  }
+  /** Clés i18n pour uniformiser la langue du rapport (statuts + marque). */
+  statusKey(s: Availability): string {
+    return s === 'free' ? 'WIZARD.STEP3.STATUS_FREE' : s === 'taken' ? 'WIZARD.STEP3.STATUS_TAKEN' : 'WIZARD.STEP3.STATUS_UNKNOWN';
+  }
+  tmHeadKey(match: string): string {
+    return `WIZARD.STEP3.TM_${(match || 'unknown').toUpperCase()}_HEAD`;
+  }
+  tmExplainKey(match: string): string {
+    return `WIZARD.STEP3.TM_${(match || 'unknown').toUpperCase()}_EXPLAIN`;
   }
 
   openReg = signal<string | null>(null);
@@ -496,6 +727,7 @@ export class WizardComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private feedbackService: FeedbackService,
     private analytics: AnalyticsService,
+    private brandReportService: BrandReportService,
   ) {}
 
   openFeedback() {
@@ -504,6 +736,7 @@ export class WizardComponent implements OnInit {
 
   async ngOnInit() {
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
+    if (this.isLoggedIn()) this.loadReportedNames();
     // Afficher la landing uniquement aux visiteurs non connectés sur la page d'accueil
     if (!this.isLoggedIn() && !this.route.snapshot.params['id']) {
       this.showLanding.set(true);

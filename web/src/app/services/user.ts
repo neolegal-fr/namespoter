@@ -18,6 +18,11 @@ export class UserService {
   private creditsSubject = new BehaviorSubject<number>(0);
   credits$ = this.creditsSubject.asObservable();
 
+  /** Solde de crédits courant (lecture synchrone, ex. pour vérifier avant génération). */
+  get creditsValue(): number {
+    return this.creditsSubject.value;
+  }
+
   private creditInfoSubject = new BehaviorSubject<CreditInfo>({
     freeCredits: 0,
     packCredits: 0,

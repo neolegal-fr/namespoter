@@ -22,6 +22,8 @@ import { GenerateurNomSaasComponent } from './components/content/generateur-nom-
 import { GenerateurNomProduitComponent } from './components/content/generateur-nom-produit';
 import { GenerateurNomMarqueCosmetiqueComponent } from './components/content/generateur-nom-marque-cosmetique';
 import { NomCourtInventeComponent } from './components/content/nom-court-invente';
+import { VerifierDisponibiliteMarqueComponent } from './components/content/verifier-disponibilite-nom-de-marque';
+import { RapportPartageComponent } from './components/content/rapport-partage';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -37,6 +39,8 @@ export const routes: Routes = [
   { path: 'generateur-nom-de-produit', component: GenerateurNomProduitComponent },
   { path: 'generateur-nom-marque-cosmetique', component: GenerateurNomMarqueCosmetiqueComponent },
   { path: 'nom-de-startup-court-invente', component: NomCourtInventeComponent },
+  { path: 'verifier-disponibilite-nom-de-marque', component: VerifierDisponibiliteMarqueComponent },
+  { path: 'rapport/:token', component: RapportPartageComponent },
   { path: 'comparatif-generateurs-de-noms', component: ComparatifGenerateursComponent },
   { path: 'namorama-vs-namelix', component: ComparatifNamelixComponent },
   { path: 'namorama-vs-looka', component: ComparatifLookaComponent },

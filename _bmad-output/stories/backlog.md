@@ -1842,7 +1842,7 @@ L'angle à défendre est unique et vérifiable : **Namorama est le seul de ces o
 
 ## US-048 · Vérification de disponibilité de marque (INPI) — fonctionnalité et page SEO
 
-**Status**: ❌ To do
+**Status**: 🔀 Absorbée par l'épic US-050→055 (Rapport de disponibilité de marque)
 
 **As a** utilisateur qui a trouvé un nom dont le domaine est libre,
 **I want to** savoir si ce nom est déjà déposé comme marque avant de m'engager,
@@ -1867,6 +1867,7 @@ C'est aussi un différenciateur de marché : les recherches du 01/08/2026 confir
 - Dépend de US-042 (lien de vérification de marque), déjà en place.
 - Attention au périmètre géographique : l'INPI ne couvre que la France. Pour une cible européenne, l'EUIPO est la base pertinente — à traiter comme une extension ultérieure, pas dans cette story.
 - Risque produit : afficher « marque disponible » à tort engage la responsabilité perçue du service. Préférer une formulation prudente (« aucun dépôt identique trouvé dans la base INPI ») à une affirmation de disponibilité.
+- **Absorbée** : la décision a été prise de ne pas livrer une simple vérif INPI isolée, mais un **rapport de disponibilité premium** groupant domaine + réseaux sociaux + marque (INPI **et** EUIPO), facturé en crédits et livré par email. Les acceptance criteria ci-dessus restent valides mais sont repris et étendus dans l'épic US-050→055.
 
 ---
 
@@ -1908,3 +1909,251 @@ Les trois conditions doivent être réunies **ensemble**, sinon ne rien publier 
 - Le trafic actuel est français et l'effort de contenu prioritaire reste l'étoffement des pages existantes (cf. audit du 01/08/2026 : plusieurs pages encore sous 500 mots). Localiser avant d'avoir des pages solides revient à dupliquer un contenu faible.
 - Alternative assumée et parfaitement valable : **ne pas localiser le contenu**, garder le site français pour Google, et traiter les 19 langues de l'interface comme un simple confort applicatif. C'est l'option recommandée tant que la traction française n'est pas installée.
 - Ne pas confondre avec la locale de génération des noms (`effectiveLocale`), qui influence l'IA et n'a aucun rapport avec l'indexation.
+
+---
+
+# Épic · Rapport de disponibilité de marque (offre premium)
+
+**Objectif** : transformer l'angle mort juridique/social du parcours en une offre premium monétisable. Aujourd'hui, la fin du wizard n'offre que des **liens profonds** vers l'INPI, X et Instagram (`wizard.ts:436-449`, `wizard.html:649-659`) — des liens qui ne rapportent rien et laissent l'utilisateur faire le travail à la main. On les remplace par un **Rapport de disponibilité de marque** : une vérification réelle et automatisée du nom sur trois plans — **domaine** (déjà en place, RDAP/WHOIS), **réseaux sociaux** (handles), et **marque déposée** (INPI + EUIPO) — synthétisée en un score, **affichée à l'écran et envoyée par email** (PDF).
+
+**Positionnement marché** (étude du 05/08/2026) : le concurrent direct NameScore.io facture ce type de rapport 50 $/unité ; les checkers de pseudos (Namechk, KnowEm) sont gratuits ou en réservation ; la recherche d'antériorité juridique (LegalStart) va de 50 à 350 €. Le trou de marché est un **rapport automatisé, en français, entre le gratuit et le juridique**. Aucun générateur de noms francophone ne couvre les trois plans à la fois.
+
+**Décisions cadrées** :
+- **Modèle** : facturé en **crédits — 500 crédits par rapport** (≈ 9 € = un pack Découverte entier à 0,018 €/crédit ; évite le « quasi-gratuit » qu'auraient donné 20-30 crédits sur un quota mensuel de 100). *(Relevé de 300 à 500 le 06/08/2026.)*
+- **Périmètre marque** : **INPI (France) + EUIPO (Union européenne)**. Pas d'USPTO en phase 1.
+- **Deux surfaces, un seul moteur** : upsell dans le wizard (**US-054**) + landing SEO publique avec checker bridé (**US-055**).
+- **Livraison** : affichage immédiat **et** envoi par email (rétention + capture de lead), sous consentement RGPD explicite.
+- **Garde-fou juridique** : signal **indicatif**, jamais présenté comme une recherche d'antériorité légale ; disclaimer + CTA « démarche officielle INPI / conseil en PI » systématiques. Tout doute reste `unknown`, jamais déguisé en « disponible » (cohérent avec la règle de disponibilité domaine).
+
+**Ordre de réalisation** : US-050 (spike, bloquant) → US-051 (moteur) → US-052 (crédits) → US-053 (livraison email) → US-054 (surface wizard) → US-055 (landing SEO).
+
+---
+
+## US-050 · Spike — faisabilité des intégrations (INPI, EUIPO, handles sociaux)
+
+**Status**: ✅ Fait (05/08/2026) — voir « Résultats du spike »
+
+**As a** équipe produit qui veut vendre un rapport de disponibilité fiable,
+**I want to** valider en amont l'accès et la fiabilité des trois sources de données,
+**So that** on ne s'engage pas sur une promesse premium que les APIs ne peuvent pas tenir.
+
+### Contexte
+
+Tout le reste de l'épic dépend de trois inconnues techniques. Un rapport payant qui affiche « inconnu » partout ne vaut rien : ce spike dérisque avant tout développement de surface. Il est time-boxé (~0,5 j) et produit une **décision documentée**, pas du code de production.
+
+### Acceptance Criteria
+- [ ] **INPI** : mode d'accès à la base Marques arbitré (API de données ouvertes, quotas, conditions d'utilisation, fraîcheur), avec un exemple de requête « à l'identique » réussie et la structure de réponse (nom, classes de Nice, statut, titulaire)
+- [ ] **EUIPO** : accès à l'API eSearch/TMview validé (authentification éventuelle, quotas), avec un exemple de recherche filtrée par classe et la structure de réponse
+- [ ] **Handles sociaux** : fiabilité mesurée du check 200/404 sur URL de profil pour Instagram, TikTok, X, YouTube, LinkedIn, GitHub — dont le **seuil de challenge/anti-bot par IP** (les recherches indiquent ~25-30 req/IP sur Instagram/TikTok) et la décision proxy/actor Apify vs statut `unknown` honnête
+- [ ] Estimation du **coût marginal** d'un rapport (appels API + éventuels proxies/actors) pour confirmer que 300 crédits couvrent la marge
+- [ ] Décision documentée dans ce backlog : plateformes retenues en phase 1, sources marque retenues, stratégie de repli par source
+
+### Notes
+- Bloquant pour US-051→055. Ne rien coder en surface avant sa clôture.
+- Si une source s'avère inexploitable (ex. EUIPO derrière une authentification lourde), la story consommatrice bascule sur un repli lien profond documenté, sans bloquer l'épic.
+
+### Résultats du spike (05/08/2026)
+
+**1. Handles sociaux — l'hypothèse « 200 = pris / 404 = libre » est FAUSSE en général.** La plupart des grands réseaux sont des SPA qui renvoient **200 même pour un pseudo inexistant** (le « introuvable » est rendu en JS). Mesuré depuis ce poste (une requête par pseudo, existant vs inexistant fabriqué) :
+
+| Plateforme | Existant | Inexistant | Verdict |
+|---|---|---|---|
+| GitHub | 200 | 404 | ✅ Fiable en direct (status) |
+| LinkedIn (`/company/`) | 200 | 404 | ✅ Fiable en direct (status) |
+| Telegram (`t.me`) | 200 | 302 | ✅ Fiable en direct (status, sans `-L`) |
+| TikTok | `"statusCode":0` + `userInfo` | `"statusCode":10221`, pas de `userInfo` | ✅ Fiable via **marqueur dans le corps** |
+| Pinterest | 301 | 200 | 🟡 Distinguable mais inversé — à valider (suivi de redirection) |
+| Reddit | 301 | 301 | 🟡 Indistinct en status — parsing après redirection |
+| Twitch | 200 | 200 | 🟡 SPA — nécessite l'API GraphQL ou le contenu |
+| YouTube (`/@`) | 302 | 302 | 🟡 Redirection consent — parsing après suivi |
+| Instagram | 200 (shell login) | 200 (shell login) | 🔴 Aucun marqueur exploitable sans session |
+| X / Twitter | 200 | 200 | 🔴 Nécessite authentification |
+| Facebook | 400 | 400 | 🔴 Bloque les requêtes non navigateur |
+
+→ **Conséquence de conception** : pas de vérificateur social uniforme. Il faut une **stratégie par plateforme** (status, marqueur de contenu, ou repli `unknown`). Découpage retenu :
+- **Phase 1 (fiable, gratuit, sans proxy)** : GitHub, LinkedIn, Telegram, TikTok.
+- **Phase 1.5 (parsing/redirection, à valider)** : Pinterest, Reddit, Twitch, YouTube.
+- **Phase 2 (session ou API tierce type Apify)** : Instagram, X, Facebook — sinon afficher `unknown` honnête plutôt qu'un faux « libre ».
+- Anti-bot : à l'unité tout passe ; à l'échelle, Instagram/TikTok challengent ~25-30 req/IP → prévoir proxies/actor **seulement si le volume l'exige**, sans jamais déguiser un blocage en « disponible ».
+
+**2. INPI** — API PI « diffusion » sur `api-gateway.inpi.fr/services/apidiffusion` : **401 sans authentification** (confirmé). Nécessite un **compte INPI** avec « Accès API PI » activé sur `data.inpi.fr/login` ; auth par cookie/XSRF (plus lourde en server-to-server). Données marques rafraîchies **hebdomadairement**. Gratuit (Licence Ouverte). **Découverte clé** : cette API couvre déjà **FR (INPI) + EU (EUIPO) + WO (WIPO)** — une seule intégration pourrait donc couvrir tout le périmètre marque demandé.
+
+**3. EUIPO** — API propre sur `dev.euipo.europa.eu` : **401 sans token** (confirmé). OAuth2 `client_credentials`, **1 000 requêtes/mois gratuites**, sandbox activée immédiatement, mais **la prod exige l'envoi de pièces d'identité**. Techniquement plus propre que l'INPI, mais quota faible et friction de mise en prod.
+
+**Arbitrage marque retenu** : partir sur **l'API INPI diffusion seule en phase 1** (une intégration couvre FR+EU+WO, cohérent avec le périmètre INPI+EUIPO choisi), et garder **l'API EUIPO propre comme repli/complément** si la fraîcheur hebdo ou l'auth cookie de l'INPI posent problème. Repli ultime commun : le lien profond `data.inpi.fr` déjà en place.
+
+**⚠️ Action requise (hors de ma portée — création de comptes)** : avant US-051, l'équipe doit créer les accès développeur :
+- **INPI** : `data.inpi.fr/login` → activer « Accès API PI » (obligatoire).
+- **EUIPO** (si repli retenu) : `dev.euipo.europa.eu` → créer une app + souscrire à « Trademark Search API ».
+Les secrets iront dans la config API (cf. `api/.env.example`), jamais journalisés.
+
+### Recette d'intégration INPI Marques (rétro-conçue le 05/08/2026)
+
+Passerelle `https://api-gateway.inpi.fr`, service `/services/apidiffusion` (JHipster + CSRF double-submit). Flux validé de bout en bout (script `scripts/inpi-marques-test.sh`) :
+
+1. **Cookie XSRF** : `GET /services/uaa/api/authenticate` avec un cookie-jar → pose `XSRF-TOKEN`.
+2. **Login** : `POST /auth/login`, corps `{"username","password"}`, en-tête `X-XSRF-TOKEN` = valeur du cookie → **HTTP 200**, session dans le jar. Le compte est le compte INPI principal (l'« Accès API PI » y a été activé), pas un compte technique distinct.
+3. **Recherche** : `POST /services/apidiffusion/api/marques/search`, `Content-Type: application/json`, en-tête `X-XSRF-TOKEN` **relu à chaque appel** (le token tourne à chaque requête — sinon 403 `Invalid CSRF Token`). Corps = objet **`TrademarkQuery`**.
+
+`TrademarkQuery` (spec `/services/apidiffusion/v2/api-docs`) : `query` (string, **DSL par champ** ex. `"[Mark=Jouve]"` — pas du texte libre), `collections` (array), `fields`, `size`, `position`, `sortList`, `facetsList`, `withFacets`, `withCTMRevendication`.
+
+**Collections réelles** (via `GET /api/marques/metadata`) : `FMARK` (FR national), `CTMARK` (EUIPO/UE), `TMINT` (WOInternational) → **une seule requête couvre FR + EU + WO**, exactement le périmètre INPI+EUIPO visé. Autres endpoints utiles : `/api/marques/notice/{numNat}`, `/image/…`, `/xml/…`, `/bopi/…`. Quota observé ~**100 requêtes/période** (en-têtes `X-Rate-Limit-Remaining`, `X-Size-Limit-Remaining`).
+
+**✅ Blocage résolu (05/08/2026) — ce n'était PAS un problème côté INPI.** La 500 « 500: [no body] » venait de **notre corps de requête** : le champ de recherche est **`Mark_Exp`**, pas `Mark`. L'exemple `[Mark=Jouve]` de la spec INPI est **trompeur** — `Mark` est un champ *retournable* mais non *cherchable*, d'où une 500 Solr en amont. Deux corrections :
+- **query** : `[Mark_Exp=<terme>]` (et non `[Mark=…]`) ;
+- **collections en entrée** : codes courts **`FR`/`EU`/`WO`** (l'API les mappe en interne vers `FMARK`/`CTMARK`/`TMINT`).
+
+Avec ça, `POST /api/marques/search` répond **HTTP 200** (ex. `qonto` → `count:9`, dépôts FR/EU/WO avec `ApplicationNumber`, `Mark`, `MarkCurrentStatusCode`). L'auth cookie-jar minimale suffit (pas besoin de `x-forwarded-for` ni de token explicite). Contrat réponse : `results[].fields` = liste `{name,value}` ; `ukey` porte le préfixe de collection. Les **classes de Nice** ne sont pas dans la recherche — elles nécessitent la notice (`/notice/{numNat}`), à traiter en itération ultérieure. Recette rejouable : `inpi_test.sh` (fourni par l'utilisateur) et `scripts/inpi-marques-test.sh`.
+
+---
+
+## US-051 · Moteur backend « Rapport de marque »
+
+**Status**: 🚧 En cours — moteur + social + marque INPI livrés et testés en réel (05/08/2026)
+
+**Livré** : module `api/src/brand-report/` (service orchestrateur, DTO `BrandReport`, score de synthèse où `unknown` n'améliore jamais le score, controller `/brand-report` + `/brand-report/preview`). `SocialCheckService` avec adaptateurs par plateforme, Phase 1 fiable et testée en réel (GitHub, LinkedIn, Telegram, TikTok) ; Instagram/X/YouTube/Facebook en `planned` → `unknown`. **`TrademarkService` : vraie recherche INPI opérationnelle** (auth XSRF cookie-jar + `[Mark_Exp=…]` sur collections FR/EU/WO), testée en réel (`Qonto` → match `exact`, 9 dépôts ; nom inventé → `none`) ; repli `unknown` + lien profond si INPI absent/erreur. Enrichissement des **classes de Nice** via la notice ST66 (`<ClassNumber>`), borné à 5 dépôts pertinents pour ménager le quota (ex. `Qonto` → classes 36 & 42). Config via `INPI_USERNAME`/`INPI_PASSWORD` (`.env.example`). Tests unitaires (adaptateurs sociaux + parsing/classification marque, 16/16). **Reste** : débit crédits (US-052), PDF+email (US-053).
+
+**As a** utilisateur qui a trouvé un nom,
+**I want to** obtenir en une fois l'état de disponibilité du nom sur le domaine, les réseaux sociaux et les registres de marques,
+**So that** je décide en connaissance de cause avant d'investir dans une identité.
+
+### Contexte
+
+Cœur de l'épic : un module `api/src/brand-report/` qui orchestre en parallèle les trois vérifications et renvoie un objet unifié. Il **réutilise le `RdapService` existant** pour le domaine et ajoute deux briques (social, marque). La vérification sociale et la vérification marque sont chacune dans leur service pour rester testables et remplaçables indépendamment.
+
+### Acceptance Criteria
+- [ ] Module `brand-report` avec un `BrandReportService` qui compose : domaines (RDAP/WHOIS réutilisés) + handles sociaux + marque, en parallèle
+- [ ] `SocialCheckService` avec **une stratégie par plateforme** (cf. résultats US-050, le 200/404 uniforme ne marche pas) : status pour GitHub/LinkedIn/Telegram, marqueur de contenu pour TikTok. Chaque plateforme a un adaptateur isolé et testable ; l'ajout d'une plateforme n'en casse pas une autre
+- [ ] Phase 1 sociale limitée aux 4 plateformes fiables (GitHub, LinkedIn, Telegram, TikTok) ; les autres (Instagram, X, Facebook, Pinterest, Reddit, Twitch, YouTube) renvoient explicitement `unknown` tant que leur adaptateur n'est pas livré — jamais un faux « libre »
+- [ ] `TrademarkService` fondé sur l'**API INPI diffusion** (couvre FR + EU + WO — cf. US-050), pré-check à l'identique + racine, restituant les dépôts trouvés avec leurs classes de Nice et statut ; repli lien profond `data.inpi.fr` si l'API échoue
+- [ ] Trois états stricts par item — `free` / `taken` / `unknown` — un échec de source ne se déguise jamais en « libre » (règle de disponibilité domaine étendue au social et à la marque)
+- [ ] Un **score de synthèse 0-100** documenté (pondération domaine / social / marque explicitée dans le code ; les items `unknown` n'améliorent jamais le score)
+- [ ] DTO `BrandReport` stable (contrat consommé par le PDF, l'affichage et l'email)
+- [ ] Endpoint interne testé unitairement avec sources mockées (chaque source en panne → `unknown`, pas d'échec de la requête globale)
+
+### Notes
+- Dépend de US-050 (fait) **et de la création des comptes API INPI/EUIPO** (action équipe signalée en US-050).
+- Best-effort par source : aucune source défaillante ne doit faire échouer le rapport entier.
+- Ne pas journaliser de PII : ni email, ni description de projet (cf. règles d'observabilité).
+- L'API EUIPO propre reste un repli/complément (US-050) si la fraîcheur hebdo ou l'auth cookie de l'INPI posent problème — pas une intégration séparée par défaut.
+- Les adaptateurs Phase 1.5/2 (Instagram, X, etc.) feront l'objet de sous-tâches ou d'une story de suivi dédiée, hors du périmètre livrable de US-051.
+
+---
+
+## US-052 · Débit crédits (300) et déclenchement du rapport
+
+**Status**: ✅ Fait (05/08/2026)
+
+**Livré** : `POST /brand-report` (authentifié) débite **`BRAND_REPORT_COST = 500`** crédits (constante centralisée). Génération AVANT débit → un échec ne consomme rien ; débit atomique via `dataSource.transaction` + `decrementCredits` (renvoie `-1` si insuffisant → rollback, sûr face à la concurrence). Crédits insuffisants → `ForbiddenException('Crédits insuffisants')` (même convention que la recherche de domaines, gérée par le front), sans génération. Réponse enrichie de `remainingCredits`. Événements `brand_report_blocked_no_credits` / `brand_report_generated` (sans PII au-delà du `sub`). Tests unitaires du controller : blocage, débit après génération, course au débit (19/19).
+
+**As a** exploitant du service,
+**I want to** que chaque rapport complet coûte 300 crédits, débités atomiquement,
+**So that** l'offre premium est monétisée sans faille de double génération gratuite.
+
+### Contexte
+
+Réutilise le système de crédits et Stripe existants (`users.service.ts`, `payments.service.ts`). Un rapport complet vaut nettement plus qu'une suggestion de domaine (1 crédit) : on le tarife à **300 crédits**, aligné sur ~9 € de valeur pack.
+
+### Acceptance Criteria
+- [ ] Endpoint `POST /brand-report` protégé (auth) débite **300 crédits** (free puis extra), de façon atomique, avant de lancer la génération
+- [ ] Crédits insuffisants → réponse claire (`402`/message dédié) proposant l'achat d'un pack, sans générer de rapport
+- [ ] Le débit n'est **pas** consommé si la génération échoue avant tout résultat exploitable (remboursement ou non-débit — comportement documenté)
+- [ ] Constante de coût centralisée (`BRAND_REPORT_COST = 300`), pas de nombre magique dispersé
+- [ ] Événement `brand_report_generated` journalisé (sans PII) pour le suivi du tunnel et de la marge
+- [ ] Test : un même nom généré deux fois débite deux fois (pas de cache silencieux qui offrirait le second)
+
+### Notes
+- Dépend de US-051.
+- Décision assumée : pas de crédit-rapport distinct du crédit-suggestion en phase 1 — un seul compteur, un coût élevé. À réévaluer si l'usage montre que le quota mensuel gratuit (100) finance trop de rapports (il n'en finance aucun à 300).
+
+---
+
+## US-053 · Livraison du rapport — affichage + envoi par email (PDF)
+
+**Status**: 🚧 Backend fait (05/08/2026) — livraison email OK ; vrai PDF reporté
+
+**Livré** : `report-renderer.ts` rend le `BrandReport` en **document HTML autonome** (score, domaines, réseaux, marque + classes, disclaimer, CTA INPI, échappement anti-injection). `ReportMailService` l'envoie via `MailService.send()` (méthode générique best-effort ajoutée), en corps d'email **et** en pièce jointe imprimable. Le controller l'appelle après débit, best-effort (`emailed` dans la réponse ; un échec email ne casse pas la requête ni ne rembourse en silence). RGPD : adresse = compte de l'utilisateur (livraison, pas prospection) ; consentement de capture sur landing → US-055. Tests renderer + email (22/22).
+
+**Décision — pas de vrai PDF pour l'instant** : `npm install pdfkit` échoue sur un conflit de peer-deps, et forcer le lockfile en autonomie est risqué pour le build/CI. Le livrable est un HTML autonome imprimable en PDF (« Imprimer → Enregistrer en PDF »). Vrai PDF (pdfkit avec `--legacy-peer-deps` validé, ou service de rendu) = amélioration ultérieure, contrat renderer inchangé.
+
+**Reste** : état UI « génération/envoi en cours » (relève des surfaces US-054/055).
+
+**As a** utilisateur qui a payé un rapport,
+**I want to** le voir immédiatement à l'écran et le recevoir par email en PDF,
+**So that** je peux l'archiver, le partager avec un associé ou un avocat, et y revenir.
+
+### Contexte
+
+Le livrable premium n'est pas qu'un panneau à l'écran : l'email en fait un actif (rétention, partage) et, sur la landing publique, un **lead magnet**. Nécessite une brique d'envoi d'email (à choisir/valider) et une génération PDF côté serveur à partir du `BrandReport`.
+
+### Acceptance Criteria
+- [ ] Rapport affiché immédiatement à l'écran après génération (domaines, réseaux, marque, score, disclaimer)
+- [ ] Génération d'un **PDF** lisible à partir du DTO `BrandReport`, avec le disclaimer juridique et un CTA « démarche officielle INPI / conseil en PI »
+- [ ] Envoi du PDF par email à l'adresse de l'utilisateur (ou à l'email saisi sur la landing)
+- [ ] **Consentement RGPD explicite** avant toute capture/utilisation de l'email à des fins de relance ; la simple livraison du rapport demandé est distinguée de l'opt-in marketing
+- [ ] État UI « rapport en cours de génération / d'envoi » explicite (la génération prend quelques secondes)
+- [ ] L'envoi email est best-effort : un échec d'email n'annule pas l'affichage ni ne redonne les crédits sans trace (comportement documenté + réessai ou message)
+- [ ] Aucune donnée personnelle au-delà du nécessaire journalisée ; l'email n'apparaît jamais en clair dans les logs
+
+### Notes
+- Dépend de US-051. Peut avancer en parallèle de US-052.
+- Choix de l'infra email (fournisseur, délivrabilité, SPF/DKIM) à trancher — le noter comme sous-tâche du spike si non couvert par US-050.
+
+---
+
+## US-054 · Surface A — Upsell « Rapport complet » dans le wizard
+
+**Status**: ✅ Fait (05/08/2026)
+
+**Livré** (refonte 06/08/2026) : sur **chaque ligne de résultat**, le bouton registrar (OVH, qui ne rapportait rien) est remplacé par un bouton **« Rapport »**. Le CTA de « Aide-moi à choisir » y renvoie aussi. Parcours : bouton → **écran de confirmation** (rappelle le coût 500 crédits + solde ; si insuffisant → propose l'achat via `showCreditDialog` ; confirme l'**email destinataire** pré-rempli depuis Keycloak + **ajout d'autres adresses** séparées par virgule) → génération → **rapport en plein écran** (domaines + réseaux + marque `match`/classes/lien INPI, « envoyé par email »). Chaque **domaine libre** propose « Réserver » (lien registrar déplacé dans le rapport). Backend : DTO `emails[]` validés (`IsEmail`), envoi multi-destinataires. Crédits rafraîchis (`updateCredits`). Clés i18n FR/EN. Builds OK.
+
+**As a** utilisateur en fin de wizard qui vient de trouver un nom,
+**I want to** lancer un rapport complet d'un clic au lieu de suivre des liens externes,
+**So that** j'obtiens la réponse sans quitter le site ni faire le travail à la main.
+
+### Contexte
+
+On remplace le bloc « Vérifier aussi » (liens INPI/X/Instagram, `wizard.html:649-659`) — qui ne rapporte rien et externalise l'effort — par un **CTA « Rapport complet »** qui déclenche US-052/053. C'est la monétisation de l'intention au pic du parcours.
+
+### Acceptance Criteria
+- [ ] Les liens profonds registrar/social/INPI actuels sont **retirés** du bloc de fin de wizard et remplacés par un CTA « Rapport complet (300 crédits) »
+- [ ] Le CTA affiche clairement le coût (300 crédits) et ce que le rapport contient avant l'achat
+- [ ] Au clic : débit (US-052) → génération (US-051) → affichage + email (US-053)
+- [ ] Crédits insuffisants → invite à l'achat de pack (dialogue Stripe existant), sans perte de contexte (nom conservé)
+- [ ] Le disclaimer juridique est visible sur le résultat affiché
+- [ ] Suivi analytique : impression du CTA, clic, conversion (sans PII)
+
+### Notes
+- Dépend de US-051, US-052, US-053.
+- Le lien profond INPI n'est pas perdu pour autant : il réapparaît dans le rapport comme CTA « démarche officielle », là où il a du sens.
+
+---
+
+## US-055 · Surface B — Landing SEO + checker public bridé
+
+**Status**: 🚧 Livré (05/08/2026) — anti-abus à durcir
+
+**Livré** : page `content/verifier-disponibilite-nom-de-marque` **prérendue** (route + `app.routes.server.ts` + `sitemap.xml`, priorité 0.9), avec `applyContentSeo` (titre/description/canonical), contenu > 500 mots et maillage interne (guides, générateurs, comparatifs). **Checker public bridé** : `BrandReportService.preview()` (domaine phare + réseaux, sans marque), exécuté côté navigateur au clic (prerender-safe), avec CTA vers le rapport complet (`/app`). Build : 18 routes prérendues, page vérifiée (title/canonical/H1/description présents). RGPD : l'aperçu ne capture pas d'email ; le rapport complet passe par `/app` (auth), donc pas de capture sur la landing pour l'instant.
+
+**Reste** : durcir l'anti-abus du checker public (quota par IP) côté API `preview` avant mise en avant publique ; option capture d'email + consentement sur la landing si l'on veut livrer le rapport complet sans passer par `/app`.
+
+**As a** internaute qui cherche « vérifier la disponibilité d'un nom de marque »,
+**I want to** tester gratuitement un nom sur une page dédiée puis obtenir le rapport complet,
+**So that** je découvre l'outil par un besoin précis, hors du parcours de génération.
+
+### Contexte
+
+Angle d'acquisition : les requêtes « vérifier disponibilité nom de marque », « nom de marque déjà pris », « antériorité marque » sont à forte intention, en français, mal couvertes par les acteurs US. Une landing prérendue (comme les pages SEO existantes) avec un **checker public bridé** capte ce trafic et le convertit vers le rapport payant. Reprend et étend la page `/verifier-disponibilite-nom-marque` prévue en US-048.
+
+### Acceptance Criteria
+- [ ] Nouveau composant de contenu `content/verifier-disponibilite-nom-de-marque`, **prérendu** et ajouté au `sitemap.xml`, avec `<head>` SEO (titre/description/canonical) via `applyContentSeo`
+- [ ] **Checker public gratuit bridé** : vérifie un aperçu (domaine principal + 3 réseaux) sans authentification, pour démontrer la valeur
+- [ ] CTA vers le **rapport complet** (domaine + ~12 réseaux + INPI + EUIPO) déclenchant le parcours crédits/email (US-052/053), avec capture d'email + consentement RGPD sur la landing publique
+- [ ] Maillage interne : liens depuis la home, les guides marque (`guide-nom-de-marque`) et les comparatifs
+- [ ] Contenu rédactionnel > 500 mots, cohérent avec la ligne éditoriale des pages existantes (pas de contenu mince)
+- [ ] Le checker public respecte les mêmes garde-fous (`unknown` honnête, disclaimer juridique)
+
+### Notes
+- Dépend de US-051 (moteur) ; le rapport complet dépend en plus de US-052/053.
+- Anti-abus : le checker public bridé doit être limité (débit/quota par IP) pour ne pas devenir un service gratuit exploité en masse.
+- Décision C (site autonome dédié) explicitement **hors périmètre** : à réévaluer seulement si cette verticale décolle.
