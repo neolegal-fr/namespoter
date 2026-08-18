@@ -36,7 +36,7 @@
     "@ngx-translate/http-loader": "^17.0.0",
     "@primeng/themes": "^21.0.4",
     "@primeuix/themes": "^2.0.3",
-    "keycloak-angular": "^21.0.0",
+    "keycloak-angular": "^22.0.0",
     "keycloak-js": "^26.2.4",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
