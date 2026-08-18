@@ -37,7 +37,7 @@
     "@primeng/themes": "^21.0.4",
     "@primeuix/themes": "^2.0.3",
     "keycloak-angular": "^21.0.0",
-    "keycloak-js": "^26.2.3",
+    "keycloak-js": "^26.2.4",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.1",
@@ -51,6 +51,6 @@
     "@angular/compiler-cli": "^21.1.0",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.1.10"
   }
 }
