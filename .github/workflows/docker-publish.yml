@@ -1,6 +1,9 @@
 name: Build and Push Docker Images
 
 # Sur `main` : build puis push au registry, c'est ce que la prod tire.
+# Chaque image est publiée sous deux tags, `latest` et le SHA du commit. Avec
+# `latest` seul, revenir à la version précédente imposait de rebuilder : il n'y
+# avait plus rien à tirer. Le tag par SHA rend le rollback possible.
 # Sur une PR : build seul, sans push ni login. Une PR non testée oblige à
 # découvrir la casse une fois sur `main`, image déjà publiée — et les PRs
 # Dependabot n'ont de toute façon pas accès aux secrets du dépôt.
@@ -39,7 +42,9 @@ jobs:
         with:
           context: ./api
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE_PREFIX }}-api:latest
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-api:latest
+            ${{ env.IMAGE_PREFIX }}-api:${{ github.sha }}
 
   build-web:
     name: Build Web image
@@ -64,4 +69,6 @@ jobs:
         with:
           context: ./web
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE_PREFIX }}-web:latest
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-web:latest
+            ${{ env.IMAGE_PREFIX }}-web:${{ github.sha }}
