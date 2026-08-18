@@ -43,8 +43,29 @@ updates:
       web-mineures:
         patterns: ["*"]
         update-types: [minor, patch]
+    # On reste en Angular 21 : passer en 22 impose PrimeNG 22, qui embarque
+    # `@primeui/license-manager` et affiche un bandeau dans l'application tant
+    # qu'aucune clé n'est fournie. C'est un arbitrage de licence commerciale,
+    # pas une montée de dépendance — et sans ces règles, Dependabot rouvre le
+    # lot chaque lundi.
+    #
+    # Seules les MAJEURES sont ignorées : les correctifs de la 21.x continuent
+    # d'arriver, et les alertes de sécurité passent outre ces règles.
+    #
+    # À lever ensemble le jour où la licence PrimeNG est tranchée.
+    ignore:
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "primeng"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "keycloak-angular"
+        update-types: ["version-update:semver-major"]
+      # Angular épingle la version de TypeScript qu'il accepte : ~5.9 en 21,
+      # ~6.0 en 22. TypeScript ne monte donc jamais seul.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
-  # ─── Images Docker (node:20-alpine, nginx:alpine) ─────────────────────────
+  # ─── Images Docker (node:26-alpine, nginx:alpine) ─────────────────────────
   - package-ecosystem: docker
     directories:
       - /api
