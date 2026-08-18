@@ -72,9 +72,27 @@ export class AdminService {
     return new Map(rows.map((r) => [r.keycloakId, Number(r.cnt)]));
   }
 
+  /**
+   * Nombre de projets par compte, pour une page d'utilisateurs.
+   *
+   * TypeORM 1.x a retiré `loadRelationCountAndMap`, qui portait ce décompte.
+   * Même agrégation groupée que {@link brandReportCounts} : une requête pour
+   * toute la page, et non une par ligne.
+   */
+  private async projectCounts(userIds: number[]): Promise<Map<number, number>> {
+    if (!userIds.length) return new Map();
+    const rows = await this.projectRepo.createQueryBuilder('p')
+      .select('u.id', 'userId')
+      .addSelect('COUNT(*)', 'cnt')
+      .innerJoin('p.user', 'u')
+      .where('u.id IN (:...ids)', { ids: userIds })
+      .groupBy('u.id')
+      .getRawMany<{ userId: number; cnt: string }>();
+    return new Map(rows.map((r) => [Number(r.userId), Number(r.cnt)]));
+  }
+
   async getUsers(page: number, limit: number, search: string): Promise<{ data: AdminUserRow[]; total: number }> {
     const qb = this.userRepo.createQueryBuilder('u')
-      .loadRelationCountAndMap('u.projectCount', 'u.projects')
       .orderBy('u.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
@@ -84,7 +102,10 @@ export class AdminService {
     }
 
     const [users, total] = await qb.getManyAndCount();
-    const reportCounts = await this.brandReportCounts(users.map((u) => u.keycloakId));
+    const [reportCounts, projCounts] = await Promise.all([
+      this.brandReportCounts(users.map((u) => u.keycloakId)),
+      this.projectCounts(users.map((u) => u.id)),
+    ]);
 
     const data: AdminUserRow[] = users.map((u: any) => ({
       id: u.id,
@@ -97,7 +118,7 @@ export class AdminService {
       totalCredits: u.credits + u.extraCredits,
       createdAt: u.createdAt,
       lastLogin: u.lastLogin,
-      projectCount: u.projectCount ?? 0,
+      projectCount: projCounts.get(u.id) ?? 0,
       brandReportCount: reportCounts.get(u.keycloakId) ?? 0,
     }));
 
