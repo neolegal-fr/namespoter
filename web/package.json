@@ -39,7 +39,7 @@
     "keycloak-angular": "^21.0.0",
     "keycloak-js": "^26.2.4",
     "primeflex": "^4.0.0",
-    "primeicons": "^7.0.0",
+    "primeicons": "^8.0.0",
     "primeng": "^21.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
