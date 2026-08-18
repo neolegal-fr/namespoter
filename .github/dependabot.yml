@@ -33,7 +33,10 @@ updates:
       day: monday
       time: "07:00"
       timezone: Europe/Paris
-    open-pull-requests-limit: 5
+    # Angular se décline en une douzaine de paquets qui doivent monter ensemble.
+    # À 5, la limite tronquait le lot et laissait croire que seuls trois d'entre
+    # eux étaient en retard — merger l'un d'eux seul désaligne @angular/core.
+    open-pull-requests-limit: 12
     commit-message:
       prefix: "chore(web)"
     groups:
