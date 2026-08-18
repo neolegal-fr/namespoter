@@ -1,0 +1,71 @@
+version: 2
+
+# Mises à jour de version. Les correctifs de sécurité, eux, sont activés dans
+# les réglages GitHub du dépôt et ne dépendent pas de ce fichier.
+#
+# Parti pris : une PR groupée par écosystème pour les mineures et correctifs,
+# et une PR isolée par majeure. Une majeure d'Angular ou de NestJS ne se relit
+# pas comme un bump de patch, et noyée dans un lot de vingt elle passerait sans
+# être lue.
+
+updates:
+  # ─── API (NestJS) ─────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(api)"
+    groups:
+      api-mineures:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # ─── Web (Angular) ────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(web)"
+    groups:
+      web-mineures:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # ─── Images Docker (node:20-alpine, nginx:alpine) ─────────────────────────
+  - package-ecosystem: docker
+    directories:
+      - /api
+      - /web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(docker)"
+
+  # ─── Actions GitHub ───────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      actions:
+        patterns: ["*"]
