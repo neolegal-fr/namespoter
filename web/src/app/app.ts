@@ -46,8 +46,12 @@ import { Drawer } from 'primeng/drawer';
     <main style="min-height: 100vh; display: flex; flex-direction: column">
       <p-menubar [styleClass]="'border-0 px-3 md:px-5 sticky top-0 ' + (isLanding() ? 'nm-menubar-dark' : 'border-b border-surface bg-surface-0')" style="height: 4rem; z-index: 100">
         <ng-template pTemplate="start">
+          <!-- La marque, pas l'icône PrimeIcons « pi-compass » qui lui ressemblait :
+               c'est le même SVG que le favicon et que le thème Keycloak — une
+               seule marque partout. Deux variantes selon le fond du menubar. -->
           <div class="flex align-items-center gap-2 cursor-pointer" (click)="goToHome()">
-            <i class="pi pi-compass text-2xl text-primary"></i>
+            <img [src]="isLanding() ? 'assets/brand/icon-dark.svg' : 'assets/brand/icon.svg'"
+                 alt="" width="24" height="24" aria-hidden="true" style="display:block">
             <span class="brand-wordmark text-xl font-bold text-900">Namorama</span>
           </div>
         </ng-template>

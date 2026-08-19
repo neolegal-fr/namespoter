@@ -497,10 +497,6 @@ body {
     color: var(--nm-text-dark) !important;
 }
 
-.nm-menubar-dark .pi-compass {
-    color: var(--nm-accent) !important;
-}
-
 .nm-menubar-dark .lang-toggle:hover {
     background: var(--nm-surface-dark) !important;
 }
