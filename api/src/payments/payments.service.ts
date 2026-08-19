@@ -33,7 +33,7 @@ export class PaymentsService {
     private readonly stripeEventRepo: Repository<StripeEvent>,
   ) {
     this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') ?? '', {
-      apiVersion: '2026-01-28.clover',
+      apiVersion: '2026-07-29.dahlia',
     });
   }
 

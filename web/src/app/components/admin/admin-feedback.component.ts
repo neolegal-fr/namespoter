@@ -1,6 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -11,7 +10,7 @@ import { AdminService, FeedbackItem } from '../../services/admin.service';
 @Component({
   selector: 'app-admin-feedback',
   standalone: true,
-  imports: [CommonModule, TranslateModule, TableModule, ButtonModule, ToastModule, Menu],
+  imports: [CommonModule, TableModule, ButtonModule, ToastModule, Menu],
   providers: [MessageService],
   template: `
     <p-toast></p-toast>

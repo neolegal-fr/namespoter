@@ -58,6 +58,12 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "primeng"
         update-types: ["version-update:semver-major"]
+      # `@primeuix/themes` suit la ligne de PrimeNG, pas la sienne : la 3.x
+      # dépend de `@primeuix/styled` ^1, quand PrimeNG 21 embarque ^0.7. Monter
+      # le thème seul installe deux copies de `styled` et désaligne les jetons
+      # de style des composants. Il montera avec PrimeNG 22, pas avant.
+      - dependency-name: "@primeuix/themes"
+        update-types: ["version-update:semver-major"]
       - dependency-name: "keycloak-angular"
         update-types: ["version-update:semver-major"]
       # Angular épingle la version de TypeScript qu'il accepte : ~5.9 en 21,

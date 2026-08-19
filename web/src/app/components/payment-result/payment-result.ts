@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { UserService } from '../../services/user';
 import { PaymentService } from '../../services/payment';
@@ -9,7 +9,7 @@ import { PaymentService } from '../../services/payment';
 @Component({
   selector: 'app-payment-result',
   standalone: true,
-  imports: [CommonModule, TranslateModule, ButtonModule],
+  imports: [CommonModule, TranslatePipe, ButtonModule],
   template: `
     <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; padding: 4rem 1rem">
       <ng-container *ngIf="isSuccess()">

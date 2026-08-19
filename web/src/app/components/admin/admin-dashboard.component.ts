@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -12,7 +12,7 @@ interface PeriodOption { label: string; days: number | null; }
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, ButtonModule, SelectButtonModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, TranslatePipe, ButtonModule, SelectButtonModule, DatePickerModule],
   template: `
     <div style="display: flex; flex-direction: column; gap: 1.5rem; padding-top: 1rem">
 

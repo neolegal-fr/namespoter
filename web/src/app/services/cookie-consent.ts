@@ -122,7 +122,7 @@ export class CookieConsentService {
   }
 
   private resolvedLang(): 'fr' | 'en' {
-    const l = this.translate.currentLang || this.translate.getBrowserLang() || 'fr';
+    const l = this.translate.currentLang() || this.translate.getBrowserLang() || 'fr';
     return l.startsWith('en') ? 'en' : 'fr';
   }
 
