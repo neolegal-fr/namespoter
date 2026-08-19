@@ -1,4 +1,11 @@
-<div class="w-full">
+<!--
+  Le wizard porte sa propre largeur, et elle change selon l'étape : ses étapes
+  ont des besoins opposés. Décrire un projet se lit mieux dans une colonne
+  étroite ; comparer neuf noms demande de la largeur. Enfermé dans le
+  conteneur commun à 44rem, l'écran de résultats n'affichait que deux colonnes
+  de cartes là où le design en prévoit quatre.
+-->
+<div class="w-full wizard-shell" [class.wizard-shell--wide]="!showLanding() && activeIndex() === 2">
 
   <!-- ─── Landing page (visiteurs non connectés) ─────────── -->
   <div *ngIf="showLanding()" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2rem; padding: 2rem 0">
@@ -14,7 +21,7 @@
     <!-- Bénéfices -->
     <div style="display: flex; flex-direction: column; gap: 0.875rem; max-width: 28rem; width: 100%; text-align: left">
       <div *ngFor="let b of landingBenefits" style="display: flex; align-items: flex-start; gap: 0.75rem">
-        <i [class]="b.icon" style="color: var(--p-primary-color); font-size: 1.1rem; margin-top: 0.15rem; flex-shrink: 0"></i>
+        <i [class]="b.icon" style="color: var(--nm-app-accent); font-size: 1.1rem; margin-top: 0.15rem; flex-shrink: 0"></i>
         <div>
           <span class="font-semibold text-900">{{ b.titleKey | translate }}</span>
           <span class="text-500"> — {{ b.descKey | translate }}</span>
@@ -98,16 +105,16 @@
           </p-button>
         </div>
 
-        <div *ngIf="refinedDescription()" class="mt-4 p-3 border-left-4 border-solid border-round" style="max-width: 48rem; width: 100%; text-align: left; background: #eff6ff; border-color: #3b82f6">
-          <h4 class="font-bold mb-2" style="color: #1d4ed8">{{ 'WIZARD.STEP1.SUGGESTION_TITLE' | translate }}</h4>
+        <div *ngIf="refinedDescription()" class="mt-4 p-3 border-left-4 border-solid border-round" style="max-width: 48rem; width: 100%; text-align: left; background: var(--nm-app-accent-surface); border-color: var(--nm-app-accent)">
+          <h4 class="font-bold mb-2" style="color: var(--nm-app-accent)">{{ 'WIZARD.STEP1.SUGGESTION_TITLE' | translate }}</h4>
           <p class="font-italic text-800" style="white-space: pre-line">{{ refinedDescription() }}</p>
           <div class="mt-2 text-right">
              <p-button [label]="'WIZARD.STEP1.USE_VERSION' | translate" severity="info" size="small" (onClick)="description.set(refinedDescription()); refinedDescription.set('')"></p-button>
           </div>
         </div>
 
-        <div *ngIf="isLoggedIn()" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--p-surface-50); border: 1px solid var(--p-surface-200); font-size: 0.8rem; color: var(--p-surface-500); text-align: center">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--p-primary-color); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
+        <div *ngIf="isLoggedIn()" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center">
+          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--nm-app-accent); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
         </div>
       </div>
 
@@ -124,28 +131,28 @@
 
           <!-- Liste du marché, notable ligne par ligne -->
           <div *ngIf="competitorsLoading() || competitors().length > 0"
-               style="background: var(--p-surface-50); border: 1px solid var(--p-surface-200); border-radius: 0.625rem; padding: 0.75rem 0.875rem">
+               style="background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); border-radius: 0.625rem; padding: 0.75rem 0.875rem">
             <button type="button"
                     (click)="showCompetitors.set(!showCompetitors())"
                     style="background: none; border: none; padding: 0; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; text-align: left">
-              <i class="pi pi-compass" style="font-size: 0.85rem; color: var(--p-primary-color); flex-shrink: 0"></i>
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--p-surface-700)">{{ 'WIZARD.STEP2.MARKET_TITLE' | translate }}</span>
-              <i *ngIf="competitorsLoading()" class="pi pi-spin pi-spinner" style="font-size: var(--nm-text-ui-sm); color: var(--p-surface-400)"></i>
-              <span *ngIf="!competitorsLoading()" style="font-size: var(--nm-text-ui-sm); color: var(--p-surface-400)">({{ competitors().length }})</span>
+              <i class="pi pi-compass" style="font-size: 0.85rem; color: var(--nm-app-accent); flex-shrink: 0"></i>
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--nm-app-text)">{{ 'WIZARD.STEP2.MARKET_TITLE' | translate }}</span>
+              <i *ngIf="competitorsLoading()" class="pi pi-spin pi-spinner" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)"></i>
+              <span *ngIf="!competitorsLoading()" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">({{ competitors().length }})</span>
               <span *ngIf="!competitorsLoading() && competitorsSource() === 'web'"
-                    style="font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--nm-app-verdict-free-bg); color: #15803d; white-space: nowrap">
+                    style="font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--nm-app-verdict-free-bg); color: var(--nm-app-verdict-free-fg); white-space: nowrap">
                 <i class="pi pi-globe" style="font-size: 0.6rem"></i> {{ 'WIZARD.STEP2.MARKET_LIVE_BADGE' | translate }}
               </span>
-              <i class="pi pi-chevron-down" style="font-size: var(--nm-text-ui-sm); color: var(--p-surface-400); margin-left: auto; transition: transform 0.2s ease"
+              <i class="pi pi-chevron-down" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); margin-left: auto; transition: transform 0.2s ease"
                  [style.transform]="showCompetitors() ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
             </button>
 
-            <p *ngIf="competitorsLoading()" style="margin: 0.5rem 0 0 0; font-size: var(--nm-text-ui-sm); color: var(--p-surface-400)">
+            <p *ngIf="competitorsLoading()" style="margin: 0.5rem 0 0 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">
               {{ 'WIZARD.STEP2.MARKET_LOADING' | translate }}
             </p>
 
             <div *ngIf="showCompetitors() && competitors().length > 0" style="margin-top: 0.625rem; display: flex; flex-direction: column; gap: 0.25rem">
-              <p style="margin: 0 0 0.25rem 0; font-size: var(--nm-text-ui-sm); color: var(--p-surface-500); line-height: 1.45">
+              <p style="margin: 0 0 0.25rem 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); line-height: 1.45">
                 {{ 'WIZARD.STEP2.MARKET_INSTRUCTION' | translate }}
               </p>
 
@@ -164,15 +171,15 @@
                         style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
                         [pTooltip]="'WIZARD.STEP2.MARKET_DISLIKE' | translate" tooltipPosition="top">
                   <i class="pi" [class.pi-thumbs-down-fill]="competitorRating(c.domain) === 'disliked'" [class.pi-thumbs-down]="competitorRating(c.domain) !== 'disliked'"
-                     [style.color]="competitorRating(c.domain) === 'disliked' ? '#ef4444' : 'var(--nm-app-border-strong)'"></i>
+                     [style.color]="competitorRating(c.domain) === 'disliked' ? 'var(--nm-app-verdict-taken-fg)' : 'var(--nm-app-border-strong)'"></i>
                 </button>
                 <a [href]="'https://' + c.domain" target="_blank" rel="noopener noreferrer"
-                   style="font-family: var(--nm-font-display); font-weight: 700; color: var(--p-primary-color); text-decoration: none; flex-shrink: 0"
+                   style="font-family: var(--nm-font-display); font-weight: 700; color: var(--nm-app-accent); text-decoration: none; flex-shrink: 0"
                    [style.text-decoration]="competitorRating(c.domain) === 'disliked' ? 'line-through' : 'none'">{{ c.domain }}</a>
-                <span style="color: var(--p-surface-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ c.note }}</span>
+                <span style="color: var(--nm-app-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ c.note }}</span>
               </div>
 
-              <p style="margin: 0.5rem 0 0 0; font-size: var(--nm-text-ui-sm); color: var(--p-surface-400); line-height: 1.45">
+              <p style="margin: 0.5rem 0 0 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); line-height: 1.45">
                 {{ (competitorsSource() === 'web' ? 'WIZARD.STEP2.MARKET_NOTE_WEB' : 'WIZARD.STEP2.MARKET_NOTE') | translate }}
               </p>
             </div>
@@ -187,7 +194,7 @@
                    style="flex: 1; min-width: 0; font-size: 0.9rem">
           </div>
           <div style="display: flex; align-items: center; gap: 0.5rem">
-            <i class="pi pi-thumbs-down" style="font-size: 0.85rem; color: #ef4444; flex-shrink: 0"></i>
+            <i class="pi pi-thumbs-down" style="font-size: 0.85rem; color: var(--nm-app-verdict-taken-fg); flex-shrink: 0"></i>
             <input pInputText
                    [(ngModel)]="dislikedExamplesInput"
                    [placeholder]="'WIZARD.STEP2.DISLIKED_EXAMPLES_PLACEHOLDER' | translate"
@@ -200,7 +207,7 @@
         <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
           <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem">
             <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
-            <span [style.color]="keywordsFull() ? '#ef4444' : ''" class="text-500" style="font-size: var(--nm-text-ui-sm); flex-shrink: 0">
+            <span [style.color]="keywordsFull() ? 'var(--nm-app-verdict-taken-fg)' : ''" class="text-500" style="font-size: var(--nm-text-ui-sm); flex-shrink: 0">
               {{ 'WIZARD.STEP2.KEYWORDS_COUNT' | translate:{ n: keywords().length, max: MAX_KEYWORDS } }}
             </span>
           </div>
@@ -243,12 +250,12 @@
           <h4 class="section-label">{{ 'WIZARD.STEP2.NAMING_STYLES_TITLE' | translate }}</h4>
           <label style="display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.9rem">
             <input type="checkbox" [checked]="descriptiveNames()" (change)="descriptiveNames.set($any($event.target).checked)"
-                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--p-primary-color); flex-shrink: 0">
+                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--nm-app-accent); flex-shrink: 0">
             {{ 'WIZARD.STEP2.DESCRIPTIVE_TOGGLE' | translate }}
           </label>
           <label style="display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.9rem">
             <input type="checkbox" [checked]="culturalNames()" (change)="culturalNames.set($any($event.target).checked)"
-                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--p-primary-color); flex-shrink: 0">
+                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--nm-app-accent); flex-shrink: 0">
             {{ 'WIZARD.STEP2.CULTURAL_TOGGLE' | translate }}
           </label>
         </div>
@@ -269,14 +276,14 @@
 
           <!-- Avertissement chiffré : part de .com déjà déposés à cette longueur -->
           <div *ngIf="isRiskyLength()"
-               style="display: flex; align-items: flex-start; gap: 0.5rem; background: var(--nm-app-verdict-unknown-bg); border: 1px solid #fde68a; border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.78rem; color: var(--nm-app-verdict-unknown-fg); line-height: 1.45">
+               style="display: flex; align-items: flex-start; gap: 0.5rem; background: var(--nm-app-verdict-unknown-bg); border: 1px solid var(--nm-app-verdict-unknown-bg); border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.78rem; color: var(--nm-app-verdict-unknown-fg); line-height: 1.45">
             <i class="pi pi-exclamation-triangle" style="font-size: 0.85rem; margin-top: 0.1rem; flex-shrink: 0"></i>
             <span>{{ 'WIZARD.STEP2.MIN_LENGTH_WARNING' | translate:{ n: minNameLength(), pct: takenRate() } }}</span>
           </div>
 
           <!-- Contraintes déduites de la description libre -->
           <div *ngIf="minLengthFromBrief() || briefAvoidWords().length > 0 || briefReferenceBrands().length > 0"
-               style="font-size: var(--nm-text-ui-sm); color: var(--p-surface-500); line-height: 1.5">
+               style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); line-height: 1.5">
             <i class="pi pi-sparkles" style="font-size: var(--nm-text-ui-sm); margin-right: 0.3rem"></i>
             <span>{{ 'WIZARD.STEP2.DETECTED_FROM_BRIEF' | translate }}</span>
             <span *ngIf="minLengthFromBrief()"> {{ 'WIZARD.STEP2.DETECTED_LENGTH' | translate:{ n: minLengthFromBrief() } }}</span>
@@ -295,8 +302,8 @@
           </p-button>
         </div>
 
-        <div *ngIf="isLoggedIn()" style="margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--p-surface-50); border: 1px solid var(--p-surface-200); font-size: 0.8rem; color: var(--p-surface-500); text-align: center">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--p-primary-color); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
+        <div *ngIf="isLoggedIn()" style="margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center">
+          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--nm-app-accent); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
         </div>
       </div>
 
@@ -304,7 +311,7 @@
       <div *ngIf="activeIndex() === 2" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem">
 
         <!-- Extensions -->
-        <div class="extensions-bar" style="width: 100%; max-width: 36rem">
+        <div class="extensions-bar wizard-row">
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
             <h4 class="section-label" style="margin: 0; white-space: nowrap">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
             <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1">
@@ -318,16 +325,16 @@
           <!-- Argument à énoncer ICI, près du sélecteur, et pas seulement dans
                les mentions de crédits : c'est ce qui lève l'autocensure qui
                pousse à ne vérifier que le .com. -->
-          <div style="margin-top: 0.5rem; font-size: 0.8125rem; color: var(--p-surface-500)">
+          <div style="margin-top: 0.5rem; font-size: 0.8125rem; color: var(--nm-app-text-2)">
             {{ 'WIZARD.STEP2.EXTENSIONS_FREE_NOTE' | translate }}
           </div>
           <div *ngIf="selectedExtensions().length > 1" style="margin-top: 0.625rem">
             <p-selectButton [options]="matchOptions()" [(ngModel)]="matchMode" styleClass="select-btn-full"></p-selectButton>
-            <div *ngIf="matchMode() === 'all'" style="margin-top: 0.375rem; font-size: var(--nm-text-ui-sm); color: var(--p-surface-500)">
+            <div *ngIf="matchMode() === 'all'" style="margin-top: 0.375rem; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">
               {{ 'WIZARD.STEP2.MATCH_ALL_HINT' | translate }}
             </div>
           </div>
-          <div *ngIf="recheckLoading()" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--p-surface-500)">
+          <div *ngIf="recheckLoading()" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--nm-app-text-2)">
             <i class="pi pi-spin pi-spinner" style="margin-right: 0.375rem"></i>{{ 'WIZARD.RECHECKING' | translate }}
           </div>
         </div>
@@ -337,11 +344,11 @@
           <h2 class="font-bold" style="font-size: 1.5rem; margin: 0; color: var(--nm-app-verdict-free-fg)">{{ 'WIZARD.STEP3.TITLE' | translate:{ extensions: selectedExtensions().join(', ') } }}</h2>
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP3.SUBTITLE' | translate }}</p>
 
-          <div *ngIf="totalChecked() > 0 && domains().length < 10" class="p-2 border-left-4 border-solid border-round text-sm font-italic" style="width: 100%; max-width: 36rem; background: var(--nm-app-verdict-unknown-bg); border-color: var(--nm-app-verdict-unknown-fg); color: var(--nm-app-verdict-unknown-fg); text-align: left">
+          <div *ngIf="totalChecked() > 0 && domains().length < 10" class="p-2 border-left-4 border-solid border-round text-sm font-italic wizard-row" style="background: var(--nm-app-verdict-unknown-bg); border-color: var(--nm-app-verdict-unknown-fg); color: var(--nm-app-verdict-unknown-fg); text-align: left">
             {{ 'WIZARD.STEP3.NOTE' | translate:{ total: totalChecked(), count: domains().length } }}
           </div>
 
-          <div style="width: 100%; max-width: 36rem; display: flex; justify-content: space-between; align-items: center">
+          <div class="wizard-row" style="display: flex; justify-content: space-between; align-items: center">
             <p-splitButton *ngIf="filteredDomains().length >= 2"
               [label]="'WIZARD.STEP3.PICK_BEST_BTN' | translate"
               icon="pi pi-lightbulb"
@@ -355,14 +362,14 @@
                  refonte remplace par des cartes. Sans lui, les noms rejetés
                  deviennent définitivement invisibles. -->
             <button type="button" (click)="showDisliked.set(!showDisliked())"
-              style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--p-surface-400); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem"
+              style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--nm-app-text-2); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem"
               [attr.aria-pressed]="showDisliked()"
               [pTooltip]="(showDisliked() ? ('WIZARD.STEP3.FILTER_HIDE_DISLIKED' | translate) : ('WIZARD.STEP3.FILTER_SHOW_ALL' | translate))"
               tooltipPosition="top">
               <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()" style="font-size: var(--nm-text-ui-sm)"></i>
               <span>{{ (showDisliked() ? 'WIZARD.STEP3.FILTER_HIDE_DISLIKED' : 'WIZARD.STEP3.FILTER_SHOW_ALL') | translate }}</span>
             </button>
-            <button type="button" (click)="copyTable()" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--p-surface-400); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0; transition: color 0.15s; margin-left: auto" class="copy-table-btn">
+            <button type="button" (click)="copyTable()" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--nm-app-text-2); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0; transition: color 0.15s; margin-left: auto" class="copy-table-btn">
               <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'" [style.color]="copiedDomain() === 'table' ? 'var(--nm-app-verdict-free-fg)' : null"></i>
               <span>{{ (copiedDomain() === 'table' ? 'WIZARD.STEP3.COPIED' : 'WIZARD.STEP3.COPY_RESULTS') | translate }}</span>
             </button>
@@ -371,7 +378,7 @@
           <!-- Grille de cartes (refonte, étape 3). Remplace la matrice
                noms × extensions. La logique reste dans le wizard : le
                composant ne reçoit que des données et remonte des événements. -->
-          <div style="width: 100%; max-width: 60rem">
+          <div class="wizard-row">
             <app-results-grid
               [domains]="filteredDomains()"
               [extensions]="selectedExtensions()"
@@ -391,21 +398,21 @@
         </ng-container>
 
         <!-- Progression du streaming -->
-        <div *ngIf="streamProgress()" style="width: 100%; max-width: 36rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 0.5rem; padding: 0.875rem 1rem; text-align: left">
+        <div *ngIf="streamProgress()" class="wizard-row" style="background: var(--nm-app-accent-surface); border: 1px solid var(--nm-app-accent-border); border-radius: 0.5rem; padding: 0.875rem 1rem; text-align: left">
           <div style="display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.375rem">
-            <i class="pi pi-spin pi-spinner" style="color: #0284c7; font-size: 0.9rem; flex-shrink: 0"></i>
-            <span style="font-size: 0.875rem; font-weight: 600; color: #0369a1">
+            <i class="pi pi-spin pi-spinner" style="color: var(--nm-app-accent); font-size: 0.9rem; flex-shrink: 0"></i>
+            <span style="font-size: 0.875rem; font-weight: 600; color: var(--nm-app-accent)">
               <ng-container *ngIf="streamProgress()!.phase === 'generating'">{{ 'WIZARD.STREAM.GENERATING' | translate }}</ng-container>
               <ng-container *ngIf="streamProgress()!.phase === 'checking'">{{ 'WIZARD.STREAM.CHECKING' | translate:{ name: streamProgress()!.name } }}</ng-container>
             </span>
           </div>
-          <p style="font-size: 0.78rem; color: #0369a1; margin: 0">
+          <p style="font-size: 0.78rem; color: var(--nm-app-accent); margin: 0">
             {{ 'WIZARD.STREAM.PROGRESS' | translate:{ checked: streamProgress()!.checked, found: streamProgress()!.found } }}
           </p>
         </div>
 
         <!-- Saisie manuelle d'un nom -->
-        <div *ngIf="domains().length > 0 && projectId()" style="width: 100%; max-width: 36rem; display: flex; gap: 0.5rem; align-items: center">
+        <div *ngIf="domains().length > 0 && projectId()" class="wizard-row" style="display: flex; gap: 0.5rem; align-items: center">
           <input pInputText
                  [(ngModel)]="newDomainName"
                  (keydown.enter)="addManualDomain()"
@@ -424,12 +431,12 @@
 
         <!-- #2 : rien trouvé — proposer d'assouplir la longueur ou de poursuivre -->
         <div *ngIf="domains().length === 0 && !loading() && (showNoResultHelp() || totalChecked() > 0)"
-             style="width: 100%; max-width: 36rem; text-align: left; background: var(--nm-app-verdict-unknown-bg); border: 1px solid #fde68a; border-radius: 0.625rem; padding: 1rem 1.125rem">
+             class="wizard-row" style="text-align: left; background: var(--nm-app-verdict-unknown-bg); border: 1px solid var(--nm-app-verdict-unknown-bg); border-radius: 0.625rem; padding: 1rem 1.125rem">
           <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem">
             <i class="pi pi-info-circle" style="color: var(--nm-app-verdict-unknown-fg); font-size: 0.9rem"></i>
             <span style="font-weight: 700; color: var(--nm-app-verdict-unknown-fg); font-size: 0.92rem">{{ 'WIZARD.STEP3.NO_RESULTS_TITLE' | translate }}</span>
           </div>
-          <p style="margin: 0 0 0.875rem 0; font-size: 0.82rem; color: #b45309; line-height: 1.5">
+          <p style="margin: 0 0 0.875rem 0; font-size: 0.82rem; color: var(--nm-app-verdict-unknown-fg); line-height: 1.5">
             {{ (isRiskyLength() ? 'WIZARD.STEP3.NO_RESULTS_SHORT' : 'WIZARD.STEP3.NO_RESULTS_EXPLAIN') | translate:{ n: minNameLength() } }}
           </p>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
@@ -450,7 +457,7 @@
         </div>
 
         <!-- Boutons de navigation -->
-        <div class="flex" style="width: 100%; max-width: 36rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
+        <div class="flex wizard-row" style="justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem">
             <!-- Boutons sur la même ligne -->
@@ -499,7 +506,7 @@
             <ng-container *ngIf="domains().length > 0">
               <ng-container *ngIf="(userService.credits$ | async) as totalCredits">
                 <span (click)="projectService.showCreditDialog.set(true)"
-                      style="font-size: var(--nm-text-ui-sm); color: var(--p-surface-400); cursor: pointer; text-decoration: underline; text-decoration-style: dotted">
+                      style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); cursor: pointer; text-decoration: underline; text-decoration-style: dotted">
                   {{ 'WIZARD.STEP3.CREDITS_LEFT' | translate : { n: totalCredits } }}
                 </span>
               </ng-container>
@@ -507,8 +514,8 @@
           </div>
         </div>
 
-        <div *ngIf="isLoggedIn() && domains().length > 0" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--p-surface-50); border: 1px solid var(--p-surface-200); font-size: 0.8rem; color: var(--p-surface-500); text-align: center; width: 100%">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--p-primary-color); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
+        <div *ngIf="isLoggedIn() && domains().length > 0" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center; width: 100%">
+          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--nm-app-accent); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
         </div>
       </div>
     </div>
@@ -525,7 +532,7 @@
            [pTooltip]="project.description" tooltipPosition="bottom" [appendTo]="'body'">
         <div style="flex: 1; overflow: hidden; min-width: 0">
           <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ project.name }}</div>
-          <div class="project-item-date" style="font-size: var(--nm-text-ui-sm); color: var(--p-surface-400); margin-top: 0.1rem">{{ project.updatedAt | date:'d MMM yyyy' }}</div>
+          <div class="project-item-date" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); margin-top: 0.1rem">{{ project.updatedAt | date:'d MMM yyyy' }}</div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.5rem">
@@ -567,7 +574,7 @@
           <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 0.375rem; flex-wrap: wrap">
             <span *ngFor="let ext of selectedExtensions()" style="font-size: var(--nm-text-ui-sm); padding: 0.1rem 0.5rem; border-radius: 9999px"
                   [style.background]="rec.allExtensions[ext] === true ? 'var(--nm-app-verdict-free-bg)' : rec.allExtensions[ext] === false ? 'var(--nm-app-verdict-taken-bg)' : 'var(--nm-bg-light)'"
-                  [style.color]="rec.allExtensions[ext] === true ? 'var(--nm-app-verdict-free-fg)' : rec.allExtensions[ext] === false ? '#ef4444' : 'var(--nm-app-text-2)'">
+                  [style.color]="rec.allExtensions[ext] === true ? 'var(--nm-app-verdict-free-fg)' : rec.allExtensions[ext] === false ? 'var(--nm-app-verdict-taken-fg)' : 'var(--nm-app-text-2)'">
               {{ ext }}
             </span>
           </div>
@@ -603,11 +610,11 @@
         </p-button>
 
         <!-- Urgence achat -->
-        <div style="width: 100%; background: var(--nm-app-verdict-unknown-bg); border: 1px solid #fde68a; border-radius: 0.625rem; padding: 0.875rem 1rem; text-align: center">
+        <div style="width: 100%; background: var(--nm-app-verdict-unknown-bg); border: 1px solid var(--nm-app-verdict-unknown-bg); border-radius: 0.625rem; padding: 0.875rem 1rem; text-align: center">
           <div style="font-weight: 700; font-size: 0.92rem; color: var(--nm-app-verdict-unknown-fg); margin-bottom: 0.25rem">
             {{ 'WIZARD.STEP3.PICK_URGENCY_TITLE' | translate }}
           </div>
-          <div style="font-size: 0.8rem; color: #b45309; margin-bottom: 0.75rem; line-height: 1.45">
+          <div style="font-size: 0.8rem; color: var(--nm-app-verdict-unknown-fg); margin-bottom: 0.75rem; line-height: 1.45">
             {{ 'WIZARD.STEP3.PICK_URGENCY_SUB' | translate }}
           </div>
           <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap">
@@ -619,12 +626,12 @@
       </div>
 
       <!-- Autres candidats -->
-      <div *ngIf="pickBestCandidates().length > 1" style="width: 100%; border-top: 1px solid var(--p-surface-200); padding-top: 1rem">
+      <div *ngIf="pickBestCandidates().length > 1" style="width: 100%; border-top: 1px solid var(--nm-app-border); padding-top: 1rem">
         <p style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em">{{ 'WIZARD.STEP3.PICK_OTHER' | translate }}</p>
         <div style="display: flex; flex-wrap: wrap; gap: 0.375rem">
           <ng-container *ngFor="let name of pickBestCandidates()">
             <span *ngIf="name !== result.recommended"
-                  style="font-family: var(--nm-font-display); font-size: 0.82rem; padding: 0.2rem 0.625rem; border-radius: 9999px; background: var(--p-surface-100); color: var(--nm-app-text-2)">
+                  style="font-family: var(--nm-font-display); font-size: 0.82rem; padding: 0.2rem 0.625rem; border-radius: 9999px; background: var(--nm-app-bg); color: var(--nm-app-text-2)">
               {{ name }}
             </span>
           </ng-container>
@@ -641,7 +648,7 @@
     [header]="'WIZARD.STEP3.VERIFY_TITLE' | translate:{ name: brandReportName() }"
     [modal]="true"
     [style]="{ width: 'min(94vw, 46rem)' }"
-    [contentStyle]="{ padding: '1.25rem', background: '#f4f6f5' }">
+    [contentStyle]="{ padding: '1.25rem', background: 'var(--nm-app-bg)' }">
 
     <div style="display: flex; flex-direction: column; gap: 1rem">
 
@@ -765,7 +772,7 @@
 
         <!-- Bannière exemple -->
         <div *ngIf="isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.7rem 1rem; background: var(--nm-app-accent-surface); border: 1px solid var(--nm-app-accent-border); border-radius: 10px">
-          <span style="font-size: 0.88rem; color: #3730a3"><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
+          <span style="font-size: 0.88rem; color: var(--nm-app-accent)"><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
           <button type="button" class="report-cta" (click)="showReportDialog.set(false)">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
         </div>
 
@@ -853,7 +860,7 @@
                     </a>
                   </div>
                 </div>
-                <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(d.status) | translate }}</span>
+                <span [style.background]="reportStatusColor(d.status)" style="color: var(--nm-app-surface); font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(d.status) | translate }}</span>
               </span>
             </div>
           </div>
@@ -862,7 +869,7 @@
             <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
             <div *ngFor="let s of report.socials" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid var(--nm-app-divider)">
               <a [href]="s.url" target="_blank" rel="noopener noreferrer" style="color: var(--nm-app-text); text-decoration: none">{{ s.platform }}<span *ngIf="s.planned" style="color: var(--nm-app-text-2); font-size: var(--nm-text-ui-sm)"> ({{ 'WIZARD.STEP3.SOCIAL_SOON' | translate }})</span></a>
-              <span [style.background]="reportStatusColor(s.status)" style="color: #fff; font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(s.status) | translate }}</span>
+              <span [style.background]="reportStatusColor(s.status)" style="color: var(--nm-app-surface); font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(s.status) | translate }}</span>
             </div>
           </div>
         </div>
@@ -907,7 +914,7 @@
   <div *ngIf="loading() && !streamProgress()" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 50; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px)">
      <div style="text-align: center">
         <p-progressSpinner></p-progressSpinner>
-        <p class="mt-3 font-semibold" style="color: #2563eb">{{ loadingKey() | translate }}</p>
+        <p class="mt-3 font-semibold" style="color: var(--nm-app-accent)">{{ loadingKey() | translate }}</p>
      </div>
   </div>
 </div>

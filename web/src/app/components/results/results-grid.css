@@ -502,3 +502,25 @@
   flex: none;
   min-height: var(--nm-touch-min);
 }
+
+/* ─── Pastilles de verdict de la grille ──────────────────────────────────
+   Classes PROPRES à la grille, et non celles de l'accueil.
+   `nm-verdict__state--*` est figé sur la palette sombre : c'est correct dans
+   la démo de l'accueil, qui est un aplat sombre par intention éditoriale.
+   La grille, elle, suit le mode : réutiliser ces classes lui donnait des
+   pastilles noires sur fond clair. */
+.rg-v--free {
+  background: var(--nm-app-verdict-free-bg);
+  color: var(--nm-app-verdict-free-fg);
+}
+
+.rg-v--taken {
+  background: var(--nm-app-verdict-taken-bg);
+  color: var(--nm-app-verdict-taken-fg);
+}
+
+.rg-v--unknown,
+.rg-v--watch {
+  background: var(--nm-app-verdict-unknown-bg);
+  color: var(--nm-app-verdict-unknown-fg);
+}

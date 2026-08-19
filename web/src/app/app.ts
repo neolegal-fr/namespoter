@@ -201,10 +201,9 @@ import { Drawer } from 'primeng/drawer';
            donc lui-même sa largeur maximale (1200px) et ses marges internes.
            Les autres routes gardent le conteneur centré. -->
       <div class="flex flex-column align-items-center w-full"
-           [class.nm-page-pad]="!isLanding()"
+           [class.nm-page-pad]="!isLanding() && !isApp()"
            style="flex: 1">
-        <div class="w-full"
-             [style.max-width]="isLanding() ? null : (router.url.startsWith('/admin') ? '72rem' : '44rem')">
+        <div class="w-full" [style.max-width]="containerMaxWidth()">
           <router-outlet></router-outlet>
         </div>
       </div>
@@ -725,6 +724,26 @@ export class AppComponent implements OnInit {
    * requête, et « / » suivi d'un `?utm_source=…` — le cas de figure de toute
    * campagne d'acquisition — ne serait sinon plus reconnu comme l'accueil.
    */
+  /**
+   * Le wizard porte lui-même sa largeur, comme l'accueil.
+   *
+   * Il était enfermé dans le conteneur commun à 44rem (704px) : sur un écran
+   * de 1440px, la grille de résultats n'en occupait donc que la moitié, et
+   * n'affichait que deux colonnes de cartes là où le design en prévoit
+   * quatre — d'où des cartes serrées et une page qui paraît étriquée. Ses
+   * étapes ont des besoins opposés : une colonne étroite se lit mieux pour
+   * décrire un projet, une grille large se compare mieux.
+   */
+  isApp(): boolean {
+    const path = this.router.url.split('?')[0].split('#')[0];
+    return path === '/app' || path.startsWith('/projects/');
+  }
+
+  containerMaxWidth(): string | null {
+    if (this.isLanding() || this.isApp()) return null;
+    return this.router.url.startsWith('/admin') ? '72rem' : '44rem';
+  }
+
   isLanding(): boolean {
     const path = this.router.url.split('?')[0].split('#')[0];
     return path === '/' || path === '/en';

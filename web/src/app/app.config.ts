@@ -195,6 +195,50 @@ function initializeApp(
  */
 const NamoramaPreset = definePreset(Aura, {
   semantic: {
+    /**
+     * Échelle de gris alignée sur celle du système.
+     *
+     * Aura est légèrement BLEUTÉE là où la palette du design est verdâtre :
+     * côte à côte — un `p-card` à côté d'une carte de résultat, un `p-chip` à
+     * côté d'une pilule — l'écart se voit. Comme `darkModeSelector` est
+     * désormais actif, ces gris pilotent aussi le mode sombre de tous les
+     * composants PrimeNG : sans cet alignement, le sombre de PrimeNG et le
+     * nôtre coexisteraient à l'écran.
+     */
+    colorScheme: {
+      light: {
+        surface: {
+          0:   '#ffffff',
+          50:  '#fbfcfb',
+          100: '#f4f6f5',
+          200: '#eef1f0',
+          300: '#e3e7e5',
+          400: '#dde2e0',
+          500: '#8a938f',
+          600: '#5c6663',
+          700: '#2c3532',
+          800: '#1b211f',
+          900: '#0b0e10',
+          950: '#070909',
+        },
+      },
+      dark: {
+        surface: {
+          0:   '#f2f5f3',
+          50:  '#c9d3ce',
+          100: '#9aa5a0',
+          200: '#6d7873',
+          300: '#3a4448',
+          400: '#2a3236',
+          500: '#263033',
+          600: '#232b2f',
+          700: '#1b2225',
+          800: '#12171a',
+          900: '#0e1315',
+          950: '#0b0e10',
+        },
+      },
+    },
     primary: {
       50:  '#eafaf2',
       100: '#c9f3de',

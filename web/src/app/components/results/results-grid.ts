@@ -135,7 +135,7 @@ interface ExtVerdict {
                     </span>
                   }
                   @default {
-                    <span class="rg-row__value" [class]="'nm-verdict__state--' + v.key">{{ stateLabel(v.key) | translate }}</span>
+                    <span class="rg-row__value" [class]="'rg-v--' + v.key">{{ stateLabel(v.key) | translate }}</span>
                   }
                 }
               </li>
@@ -177,7 +177,7 @@ interface ExtVerdict {
             <li class="rg-row">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_TM_INPI' | translate }}</span>
               @if (summaryOf(d); as sum) {
-                <span class="rg-row__value" [class]="'nm-verdict__state--' + tmTone(sum, 'inpi')">{{ tmKey(sum, 'inpi') | translate }}</span>
+                <span class="rg-row__value" [class]="'rg-v--' + tmTone(sum, 'inpi')">{{ tmKey(sum, 'inpi') | translate }}</span>
               } @else {
                 <span class="rg-row__value rg-row__value--locked"><i class="pi pi-lock"></i> {{ 'WIZARD.STEP3.GRID_UNVERIFIED' | translate }}</span>
               }
@@ -185,7 +185,7 @@ interface ExtVerdict {
             <li class="rg-row">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_TM_EUIPO' | translate }}</span>
               @if (summaryOf(d); as sum) {
-                <span class="rg-row__value" [class]="'nm-verdict__state--' + tmTone(sum, 'euipo')">{{ tmKey(sum, 'euipo') | translate }}</span>
+                <span class="rg-row__value" [class]="'rg-v--' + tmTone(sum, 'euipo')">{{ tmKey(sum, 'euipo') | translate }}</span>
               } @else {
                 <span class="rg-row__value rg-row__value--locked"><i class="pi pi-lock"></i> {{ 'WIZARD.STEP3.GRID_UNVERIFIED' | translate }}</span>
               }
