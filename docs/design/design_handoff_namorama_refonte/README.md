@@ -126,7 +126,7 @@ Ordre de travail recommandé (un commit par étape, tout dans la même branche) 
 - Chapô 18.5px `#9aa5a0`, max 47ch : « Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs de noms s'arrêtent au .com — Namorama vérifie aussi l'INPI et l'EUIPO, pour que vous choisissiez un nom que vous pourrez vraiment garder. »
 - CTA primaire : fond `#3ddc91`, texte `#062018`, Space Grotesk 16px/700, padding 16px/28px, rayon 10px, survol `#6ee7a8`. Libellé « Trouver mon nom ». Mène à la recherche.
 - CTA secondaire contouré `#2a3236`, survol bordure `#4a5459`. Libellé « Voir un rapport de marque ».
-- Trois mentions 13.5px `#6d7873` : « 100 crédits offerts chaque mois », « ≈ 50 noms libres + 1 rapport approfondi », « Sans abonnement ».
+- Trois mentions 13.5px `#6d7873` : « 100 crédits offerts chaque mois », « ≈ 50 suggestions vérifiées + 1 rapport », « Sans abonnement ».
 
 **Composants du héros (colonne droite — encart démo)** :
 
@@ -135,11 +135,11 @@ Cadre de navigateur factice : fond `#12171a`, bordure `#232b2f`, rayon 18px, pad
 C'est une **démonstration figée, pas un formulaire fonctionnel** — décision explicite du client. Elle contient :
 
 - Un fil d'étapes en 4 segments (`Décrire`, `Cadrer`, `Domaines`, `Rapport`), chacun = puce ronde 26px + libellé 13px + trait de liaison 1px `#232b2f`. Étape active : fond `#3ddc91`, texte `#062018`. Inactive : fond `#12171a`, texte `#6d7873`, bordure `#232b2f`. Les segments sont cliquables et changent le contenu du panneau. `flex-wrap: wrap` avec `row-gap: 10px`.
-- Un sur-titre qui reprend l'étape : « Étape 3 — domaines libres · 1 crédit chacun », « Étape 4 — rapport approfondi · 50 crédits », etc.
+- Un sur-titre qui reprend l'étape : « Étape 3 — suggestions retenues · 1 crédit chacune », « Étape 4 — rapport approfondi · 50 crédits », etc.
 - Une zone de contenu de `min-height: 300px` (évite tout saut de mise en page au changement d'étape) :
   - **Étape 1** : la phrase de projet dans un bloc `#12171a`, une explication, et 4 pilules de mots-clés dont une « + ajouter » en accent.
   - **Étape 2** : 5 pilules de critères (certaines en accent = sélectionnées), une ligne « Déjà pris dans votre secteur — l'IA les évite : … », puis une ligne « Classes INPI surveillées : 12 · 35 · 37 ».
-  - **Étape 3** (affichée par défaut) : 6 lignes `nom.tld` + puce de verdict + coût. Les domaines libres portent « 1 crédit », les pris et invérifiables « non facturé ». Mention finale : « Seuls les domaines libres consomment un crédit. Les autres sont offerts. »
+  - **Étape 3** (affichée par défaut) : 6 lignes `nom.tld` + puce de verdict. Mention finale : « 1 crédit par suggestion retenue, quel que soit le nombre d'extensions vérifiées. »
   - **Étape 4** : un bloc en accent avec le nom, le prix « 50 crédits », les 4 contrôles approfondis (INPI, EUIPO, réseaux, X) et la mention « Facturé une seule fois par nom. Le rapport reste dans votre projet, exportable en PDF. »
 
 **Sections sur fond clair** :
@@ -147,7 +147,7 @@ C'est une **démonstration figée, pas un formulaire fonctionnel** — décision
 1. **Les 4 contrôles** — H2 « Le .com est libre. La marque, elle, est déposée depuis 2019. » + chapô, puis 4 cartes blanches (`grid`, `minmax(230px, 1fr)`, gap 20px). Chaque carte : un sur-titre numéroté en `#0d9a63` (`01 — DOMAINE`, `02 — INPI`, `03 — RÉSEAUX`, `04 — EUROPE`), un H3, un paragraphe.
 2. **Tableau comparatif** — pilotable par la propriété `showCompare`. Grille `minmax(140px,1.6fr) repeat(3, minmax(72px,1fr))`. Colonnes : critère, Namorama (en `#0d9a63`, 600), Générateurs IA, Registrars. 6 lignes, dont « Antériorité de marque INPI / EUIPO », « Pseudos réseaux sociaux », « État "invérifiable" signalé ».
 3. **Guides de naming** — pilotable par `showGuides`. 10 liens en pilules blanches, hauteur minimale 44px. Ce sont les futures pages SEO ; chacune doit être une vraie route indexable.
-4. **CTA final** — bloc `#0b0e10`, rayon 18px, padding 52px/44px : H2 « Votre nom est encore libre » + « 100 crédits offerts chaque mois : environ 50 noms libres, et un rapport approfondi. » + bouton accent.
+4. **CTA final** — bloc `#0b0e10`, rayon 18px, padding 52px/44px : H2 « Votre nom est encore libre » + « 100 crédits offerts chaque mois : environ 50 suggestions vérifiées, et un rapport approfondi. » + bouton accent.
 
 ### 2. Résultats de recherche
 
@@ -157,12 +157,12 @@ C'est une **démonstration figée, pas un formulaire fonctionnel** — décision
 
 **Composants** :
 
-- En-tête : sur-titre « Recherche · vélos reconditionnés », H1 34px « 21 domaines libres sur 9 noms ». À droite : solde « 79 crédits restants », bouton « Exporter » contouré, bouton accent « Générer 12 de plus ».
-- **Bandeau de crédits** (élément clé du modèle économique) : `#12171a`, bordure `#232b2f`, rayon 12px, padding 14px/18px. Trois mentions séparées par des filets verticaux 1px×16px `#2a3236` : « **21 crédits** débités — 1 par domaine libre trouvé » (le chiffre en `#6ee7a8`), « Les domaines pris ou invérifiables ne sont jamais facturés », « Rapport approfondi : 50 crédits par nom ».
+- En-tête : sur-titre « Recherche · vélos reconditionnés », H1 34px « 9 suggestions retenues ». À droite : solde « 91 crédits restants », bouton « Exporter » contouré, bouton accent « Générer 12 de plus ».
+- **Bandeau de crédits** (élément clé du modèle économique) : `#12171a`, bordure `#232b2f`, rayon 12px, padding 14px/18px. Trois mentions séparées par des filets verticaux 1px×16px `#2a3236` : « **9 crédits** débités — 1 par suggestion retenue » (le chiffre en `#6ee7a8`), « Quel que soit le nombre d'extensions », « Rapport approfondi : 50 crédits par nom ».
 - Filtres : 4 pilules — `Tout libre`, `.com + .fr libres`, `Rapport acheté`, `Favoris`. Actif : fond `#0f1b1c`, texte `#6ee7a8`, bordure `#23474b`. **Ne pas proposer de filtre sur une donnée payante** (INPI, réseaux) : elle n'existe pas sur les résultats non achetés.
 - Grille de cartes : `repeat(auto-fill, minmax(280px, 1fr))`, gap 14px. Chaque carte (`#12171a`, rayon 14px, padding 20px, survol bordure `#3a4448`) contient :
   - Le nom (22px/700) et, en dessous, sa justification en 13px `#6d7873` (« roue + suffixe latin »).
-  - Un badge de coût en haut à droite (« 3 crédits »). Les noms à fort score ont un badge en accent et une bordure `#23474b`.
+  - Un badge de coût en haut à droite : toujours « 1 crédit ». Le badge et la bordure passent en accent uniquement quand TOUTES les extensions demandées sont libres (`.rg-card--strong` / `.rg-cost--accent`) ; sinon paire neutre.
   - **Uniquement les verdicts de domaines** (4 lignes `label` / `valeur` colorée) — jamais INPI ni réseaux.
   - Un séparateur `1px dashed #2a3236`, puis la ligne du palier payant : « 🔒 Réseaux + INPI — 50 crédits », ou « Rapport approfondi acheté » en accent si déjà payé.
   - Deux boutons : « Approfondir » (ou « Ouvrir le rapport ») et « Réserver » (fond `#1c2b26`, texte `#6ee7a8`).
@@ -179,7 +179,7 @@ Le sélecteur « Aperçu : Avant achat / Après achat » en haut de page est un 
 
 **État verrouillé (avant achat)** :
 
-- Carte blanche, rayon 18px. En-tête : sur-titre « Rapport approfondi · non débloqué », nom 46px, et un paragraphe qui rappelle ce qui est déjà payé : « Les 4 domaines ont déjà été vérifiés (3 crédits). Le rapport approfondi ajoute la recherche d'antériorité INPI et EUIPO, et les pseudos sur 4 réseaux. »
+- Carte blanche, rayon 18px. En-tête : sur-titre « Rapport approfondi · non débloqué », nom 46px, et un paragraphe qui rappelle ce qui est déjà payé : « Cette suggestion a déjà été retenue et vérifiée (1 crédit). Le rapport approfondi ajoute la recherche d'antériorité INPI et EUIPO, et les pseudos sur 4 réseaux. »
 - 4 lignes verrouillées. Chacune **nomme le contrôle en clair** (« Marques françaises — INPI », « X · @roulio »…) et affiche, à la place du verdict, une **barre grise de largeur variable** (11px de haut, rayon 6px, dégradé `#e8ebea` → `#dfe3e2`, largeurs 88 à 148px) suivie d'un cadenas. C'est le ressort de conversion : montrer la forme de la réponse, pas la réponse.
 
   🔒 **Impératif de sécurité.** Ces barres sont des **placeholders décoratifs générés côté client**. Ne jamais rendre le vrai verdict pour le masquer ensuite en CSS : un `filter: blur()`, un `user-select: none`, un texte en blanc sur blanc ou un `display: none` sont purement visuels — la donnée reste lisible dans le DOM, dans le code source et dans les devtools, et le paywall à 50 crédits devient contournable en deux clics. Seuls les **libellés** des contrôles viennent de l'API ; les verdicts n'atteignent le navigateur qu'après achat effectif. Les barres ne doivent pas non plus encoder d'information : leur largeur est arbitraire et fixe, elle ne reflète ni la longueur ni la nature du verdict, et elles portent `aria-hidden="true"`.
@@ -195,9 +195,9 @@ Le sélecteur « Aperçu : Avant achat / Après achat » en haut de page est un 
 
 Les cadres de téléphone du prototype sont un décor de présentation : seul leur contenu est à implémenter, en responsive.
 
-- **Accueil** : pilule d'accroche, H1 33px avec le mot qui alterne, chapô, CTA pleine largeur 52px, mention « 100 crédits / mois · 50 noms + 1 rapport », puis un encart « Exemple de verdict » à 3 lignes de domaines suivi d'une ligne verrouillée « 🔒 Réseaux + INPI — 50 crédits ».
+- **Accueil** : pilule d'accroche, H1 33px avec le mot qui alterne, chapô, CTA pleine largeur 52px, mention « 100 crédits / mois · 50 suggestions + 1 rapport », puis un encart « Exemple de verdict » à 3 lignes de domaines suivi d'une ligne verrouillée « 🔒 Réseaux + INPI — 50 crédits ».
 - **Recherche** : le fil d'étapes horizontal devient un sur-titre « Étape n sur 4 — <libellé> » + une barre de progression en 4 segments de 4px (segments franchis en `#3ddc91`). **Une seule étape visible à la fois**, zone de `min-height: 150px`, et un bouton d'action de 52px en bas dont le libellé change : « Continuer », « Chercher les domaines », « Approfondir un nom », « Recommencer ».
-- **Résultats** : titre « 21 domaines libres », sous-titre « 21 crédits débités · 79 restants », filtres en rangée (à rendre scrollable horizontalement en production), cartes empilées (nom, badge de coût, 3 verdicts de domaine en ligne, bouton « 🔒 Approfondir — 50 crédits » de 46px), et une barre d'onglets basse de 56px (Rechercher / Projets / Compte).
+- **Résultats** : titre « 9 suggestions retenues », sous-titre « 9 crédits débités · 91 restants », filtres en rangée (à rendre scrollable horizontalement en production), cartes empilées (nom, badge de coût, 3 verdicts de domaine en ligne, bouton « 🔒 Approfondir — 50 crédits » de 46px), et une barre d'onglets basse de 56px (Rechercher / Projets / Compte).
 
 ### 5. Notes & acquisition
 
@@ -218,14 +218,62 @@ Page interne de recommandations (positionnement, conversion, SEO, produit, moné
 
 ⚠️ **Ce n'est pas qu'un changement d'interface.** L'offre gratuite passe de « 100 crédits par mois » à « 100 crédits par mois **+ un rapport approfondi offert** ». Le rapport coûtant 50 crédits, l'offrir revient à doubler la valeur perçue du palier gratuit sans distribuer de crédits supplémentaires — il faut donc le compter séparément.
 
-### Règle métier
+### Règle métier — recherche
+
+Le coût de la recherche est de **1 crédit par suggestion retenue**, c'est-à-dire par nom qui remplit les critères de l'utilisateur. Le nombre d'extensions vérifiées n'entre jamais dans le calcul : qu'il ait demandé une extension ou cinq, en mode « au moins une libre » ou « toutes libres », une suggestion retenue coûte 1 crédit. Les candidats écartés parce qu'ils ne remplissent pas les critères ne sont pas facturés.
+
+Conséquence sur l'interface, à ne pas perdre : ajouter une extension ne coûte rien à l'utilisateur. C'est un argument à énoncer près du sélecteur d'extensions, pas seulement dans les mentions de crédits — il lève l'autocensure qui pousse à ne vérifier que le .com.
+
+### Règle métier — rapport approfondi
 
 - Chaque compte dispose de **un (1) rapport approfondi gratuit par mois calendaire**, indépendant du solde de crédits.
 - Le premier rapport débloqué dans le mois consomme ce droit et **ne débite aucun crédit**.
 - Les rapports suivants dans le même mois coûtent **50 crédits** chacun.
 - Le droit **n'est pas cumulable** : non utilisé, il est perdu à la fin du mois. *(Décidé côté produit.)*
 - Un rapport déjà payé reste consultable indéfiniment, sans nouveau débit. Ré-ouvrir un rapport n'a jamais de coût.
-- Question ouverte à trancher côté produit : le rafraîchissement d'un rapport ancien (les registres évoluent) est-il gratuit, ou est-ce un nouveau rapport payant ? Recommandation : gratuit pendant 30 jours, payant ensuite.
+- **Le rafraîchissement est gratuit, sans limite de temps.** *(Décidé côté produit.)* Les registres évoluent et une marque peut se déposer à tout moment : facturer la mise à jour aurait transformé le rapport en photo périmée que personne ne rouvre. Gratuit, il devient un document vivant qu'on garde dans son projet et qu'on rouvre avant de signer — et c'est ce qui rend le partage défendable : un lien qui reste juste vaut mieux qu'un PDF daté. Prévoir un bouton « Actualiser — gratuit » sur la carte vérifiée et dans le rapport, et une limite technique de fréquence (anti-abus) plutôt qu'un mur tarifaire.
+
+### Vérification à la demande depuis les cartes
+
+Parcours arrêté après revue (maquette : `Cartes — palier payant.dc.html`, option 2A). Il remplace l'affichage flouté sur la grille.
+
+**Sur une carte non vérifiée**, les trois contrôles payants apparaissent **comme lignes, au même endroit et dans le même ordre que les verdicts obtenus** : « Marque INPI », « Marque EUIPO », chacune avec la mention « 🔒 non vérifié » à droite, puis une ligne « Réseaux » qui **nomme les quatre plateformes** sous forme de pastilles compactes — `IG`, `in`, `X`, `TT`, avec le nom complet en infobulle. En dessous, **un seul bouton** : « Vérifier marque et réseaux » — court, parce que les trois lignes juste au-dessus nomment déjà les registres et les plateformes ; le bouton n'a pas à les répéter. Puis « Rapport complet » en action secondaire. **Aucune barre grise, aucun verdict simulé.**
+
+Le détail par réseau compte : un produit B2B se soucie de LinkedIn, une marque grand public de TikTok. L'utilisateur doit pouvoir arbitrer sur *le* réseau qui lui importe, pas sur un décompte agrégé. D'où le choix des pastilles plutôt que d'une ligne par plateforme : quatre lignes de plus × neuf cartes feraient un mur, alors qu'une ligne de pastilles donne la même information — chaque plateforme nommée, chaque état visible — et préserve la règle d'alignement entre les deux états.
+
+**Les étoiles d'analyse sont une ligne libellée, pas un ornement flottant.** Dans `results-grid.css`, `.rg-stars` est un bouton nu posé sous les verdicts : rien ne dit à quoi les étoiles se rapportent, et un utilisateur y lit spontanément une note de disponibilité ou un avis d'autres utilisateurs. Les remettre dans la grammaire des lignes — libellé « Analyse du nom » à gauche, `★★★★☆ ▾` à droite — les explique sans texte supplémentaire, et le chevron garde l'affordance de dépliage. Cible tactile portée à 44px. La maquette emploie des abréviations (`IG`, `in`, `X`, `TT`) : je ne redessine pas des marques déposées, et une approximation serait pire que rien. En production, prendre les **glyphes officiels monochromes** dans les ressources de marque de chaque plateforme, et les teinter avec la couleur du verdict. Ne jamais utiliser les logos en couleurs d'origine : le rose d'Instagram et le cyan de TikTok entreraient en conflit avec le code couleur libre/pris, qui est l'information utile.
+
+**Les logos des plateformes, oui — mais en glyphes monochromes.** La maquette emploie des abréviations (`IG`, `in`, `X`, `TT`) : je ne redessine pas des marques déposées, et une approximation serait pire que rien. En production, prendre les **glyphes officiels monochromes** dans les ressources de marque de chaque plateforme, et les teinter avec la couleur du verdict. Ne jamais utiliser les logos en couleurs d'origine : le rose d'Instagram et le cyan de TikTok entreraient en conflit avec le code couleur libre/pris, qui est l'information utile.
+
+Trois exigences d'accessibilité sur cette ligne, valables logos comme abréviations : la couleur ne porte jamais l'information seule — chaque pastille affiche aussi un symbole (`✓`, `✗`, `🔒`) ; le nom complet et l'état sont dans l'attribut `title` (« Instagram — libre ») ; le symbole est en `aria-hidden`, l'information passant par le `title` pour les lecteurs d'écran.
+
+⚠️ **Aucun prix sur le bouton.** Le libellé nomme ce qui sera vérifié, jamais le tarif : à ce stade l'utilisateur ne sait pas encore ce que la vérification lui apporte, donc un prix ne peut que l'arrêter. Le prix appartient à la popup, après le contexte — et c'est le même endroit où l'on met en avant la **vérification offerte chaque mois**, qui se perdrait totalement sur un bouton de carte. Le pied de popup annonce donc « Offert ce mois-ci — 50 crédits ensuite », et non l'inverse.
+
+C'est la règle d'alignement : les six lignes de la carte (trois domaines, INPI, EUIPO, réseaux) existent dans les deux états, dans le même ordre. Seule la colonne de droite change — de « non vérifié » au verdict réel. **Rien ne se déplace après l'achat**, ce qui rend la comparaison entre un nom vérifié et un nom qui ne l'est pas immédiatement lisible.
+
+Un seul bouton, pas un par ligne : un seul achat couvre les trois lignes verrouillées, donc trois boutons promettraient trois produits. Les boutons de notation (pouces) sont **à droite du nom**, dans l'en-tête de la carte, et non dans la barre d'action : ils portent sur le nom, pas sur le rapport — les placer près du bouton d'achat rendait leur objet ambigu.
+
+**La popup** porte la pédagogie que la carte ne peut pas porter : deux phrases sur le risque réel (« un domaine libre ne garantit rien : la marque peut être déposée depuis des années »), puis la liste exacte de ce qui est couvert — INPI avec les classes retenues, EUIPO et sa portée sur les 27 États, les 4 réseaux, et la gratuité des mises à jour. Pied de popup : prix, mention du rapport offert s'il est disponible, « Annuler » et « Vérifier maintenant ». Confirmation systématique dès que des crédits sont réellement débités.
+
+**Sur une carte vérifiée**, la colonne de droite passe aux verdicts réels et le bouton d'achat disparaît, remplacé par la date de vérification et « Actualiser — gratuit ». Un badge de synthèse (« aucun blocage » / « à surveiller » / « 2 obstacles ») s'ajoute en haut à droite.
+
+**C'est le gain principal** : plusieurs noms vérifiés côte à côte deviennent comparables dans la grille. Nommer, c'est arbitrer entre trois ou quatre candidats ; jusqu'ici l'arbitrage exigeait d'ouvrir des rapports séparément. Le badge de synthèse est ce qui rend la comparaison lisible d'un coup d'œil — ne pas le supprimer au profit des seules lignes.
+
+**Le rapport complet** devient l'agrégation des vérifications achetées, avec un appel à l'action pour celles qui manquent.
+
+### Deux règles de comportement de la grille
+
+**Vérifier vaut approbation.** Dépenser 50 crédits sur un nom est le signal d'intérêt le plus fort du produit — bien plus fiable qu'un clic sur un pouce. Le déclenchement d'une vérification **active donc implicitement le « j'aime »** sur ce nom, et l'IA en tient compte pour les suggestions suivantes. Le pouce reste cliquable pour se dédire. Sur une carte vérifiée, il s'affiche à l'état actif (`aria-pressed="true"`, fond `--nm-app-accent-surface`).
+
+**L'ordre d'affichage suit l'engagement**, et non l'ordre de génération :
+
+1. les noms dont la vérification a été faite ;
+2. les noms aimés (explicitement, ou par effet de la règle ci-dessus) ;
+3. les autres, dans l'ordre de génération.
+
+Les noms rejetés restent masqués tant que le filtre correspondant est actif (`showDisliked` dans `wizard.ts`). La grille remonte ainsi d'elle-même la liste courte : après deux vérifications, les finalistes sont les deux premières cartes, sans tri manuel. Ce tri doit être **stable** — deux noms de même rang gardent leur ordre de génération — sinon les cartes se réordonnent sous le curseur à chaque notation.
+
+⚠️ **Tension à arbitrer côté produit, non tranchée.** Comparer trois noms coûte 150 crédits, soit une fois et demie l'allocation mensuelle gratuite : le tarif décourage l'usage que cet écran encourage. Trois pistes — rapports suivants d'un même projet moins chers, vérification légère « réseaux seuls » à bas prix, ou lot de trois. C'est du modèle économique, pas du design, mais ça conditionne la valeur de tout ce parcours.
 
 ### Modèle de données
 
@@ -257,7 +305,7 @@ Le débloquage doit être une opération **serveur, idempotente et transactionne
   - droit consommé : « **50 crédits** » + « Votre rapport offert de <mois> a été utilisé. Prochain rapport offert le 1er <mois suivant>. »
 - **Solde insuffisant** (moins de 50 crédits et droit consommé) : le bouton devient « Recharger pour débloquer » et mène aux packs. Ne pas afficher un bouton qui échouera.
 - **Confirmation de débit** : quand 50 crédits sont réellement débités, une confirmation explicite est nécessaire (la moitié de la réserve mensuelle part en un clic). Quand le rapport est offert, **pas de confirmation** — la friction n'a aucune valeur là.
-- **Accueil** : la mention « ≈ 50 noms libres + 1 rapport approfondi » est le principal argument d'inscription. Elle doit rester visible dans le héros et dans le CTA final.
+- **Accueil** : la mention « ≈ 50 suggestions vérifiées + 1 rapport » est le principal argument d'inscription. Elle doit rester visible dans le héros et dans le CTA final.
 
 ## Keycloak : aligner l'authentification et les e-mails
 
@@ -410,6 +458,100 @@ Exigences d'implémentation qui en découlent :
 - Ne jamais laisser une traduction suggérer une couverture nationale locale. C'est le seul endroit du produit où une approximation de traduction crée un risque juridique pour l'utilisateur, pas seulement une gêne.
 - Les registres nationaux supplémentaires (DPMA, OEPM…) sont une évolution ultérieure possible, hors périmètre de cette refonte.
 
+## Thème clair / sombre suivant le système
+
+Demandé après l'implémentation : un thème qui suit la préférence de l'OS, avec bascule manuelle. Maquette de référence : `Thème — clair, sombre, système.dc.html`.
+
+### Conflit à résoudre d'abord
+
+`tokens.css` pose explicitement que « la refonte n'est pas un thème clair et un thème sombre » : les jetons sont nommés par **surface** (`-dark` / `-light`), et `darkModeSelector` est désactivé côté PrimeNG. Cette décision reste juste — un `.nm-hero` est sombre par intention éditoriale, pas parce qu'un mode est actif. **Ne pas renommer les jetons existants, ne pas les supprimer.**
+
+La solution est une **couche de rôles au-dessus de la palette** : des jetons `--nm-app-*` qui pointent, selon le mode actif, vers les valeurs claires ou sombres déjà définies. Les composants n'utilisent plus que les rôles ; la palette reste la source des valeurs.
+
+### Ce qui bascule, ce qui ne bascule pas
+
+C'est la décision de conception la plus importante, plus que le choix des couleurs.
+
+| Suit le mode | Reste sombre toujours | Reste clair toujours |
+| --- | --- | --- |
+| Wizard (3 étapes), champs | Héros de l'accueil | Rapport exporté en PDF |
+| Grille de résultats | Bloc d'appel à l'action final | E-mails transactionnels |
+| Tiroir des projets | Encart de démonstration produit | Écrans Keycloak |
+| Dialogues (choix assisté, achat, crédits) | | |
+| Rapport approfondi, verrouillé et complet | | |
+| Guides et contenu SEO | | |
+
+⚠️ **La grille de résultats demande un arbitrage explicite.** `results-grid.css` pose aujourd'hui `background: var(--nm-bg-dark)` sur son `:host`, avec ce commentaire assumé : « elle se présente comme un panneau de résultats plutôt que de dépendre d'un parent qu'il aurait fallu retourner en entier ». Le composant est donc **sombre en permanence**, y compris dans un wizard clair — c'est la rupture visuelle la plus forte de l'écran. Deux issues cohérentes, une seule à choisir :
+
+1. **La grille suit le mode** (recommandé) : elle abandonne son aplat propre et passe aux jetons de rôle. Les résultats sont du contenu applicatif, pas une signature de marque. C'est aussi ce qui règle l'incohérence signalée par l'utilisateur.
+2. **La grille reste sombre** : elle devient une exception documentée, et le reste du wizard doit alors passer en sombre avec elle — sinon le contraste noir/blanc au milieu du formulaire subsiste dans les deux modes.
+
+Le `brand-report-locked` est en revanche déjà sur les surfaces claires (`--nm-surface-light`), avec ce commentaire juste : « même surface claire que l'état débloqué : c'est la même carte, avant achat ». Il doit suivre le mode, mais **les deux états ensemble** — jamais l'un clair et l'autre sombre.
+
+Les surfaces sombres de l'accueil sont une signature de marque : un visiteur en préférence claire doit voir le même héros que les autres. Le PDF sombre est inimprimable ; les clients de messagerie ignorent les variables CSS ; Keycloak est servi hors de l'application et ne connaît ni le `localStorage` ni le choix de l'utilisateur.
+
+### Jetons de rôle à ajouter
+
+Une seule couche nouvelle, 20 jetons. Correspondances complètes dans la maquette ; les principaux :
+
+| Rôle | Clair | Sombre |
+| --- | --- | --- |
+| `--nm-app-bg` | `#f4f6f5` | `#0b0e10` |
+| `--nm-app-surface` | `#ffffff` | `#12171a` |
+| `--nm-app-surface-alt` | `#fbfcfb` | `#0e1315` |
+| `--nm-app-border` | `#e3e7e5` | `#232b2f` |
+| `--nm-app-border-strong` | `#dde2e0` | `#2a3236` |
+| `--nm-app-divider` | `#eef1f0` | `#1b2225` |
+| `--nm-app-text` | `#0b0e10` | `#f2f5f3` |
+| `--nm-app-text-2` | `#5c6663` | `#9aa5a0` |
+| `--nm-app-text-3` | `#8a938f` | `#6d7873` |
+| `--nm-app-accent` | `#0d9a63` | `#3ddc91` |
+| `--nm-app-accent-hover` | `#0b8355` | `#6ee7a8` |
+| `--nm-app-on-accent` | `#ffffff` | `#062018` |
+| `--nm-app-accent-surface` | `#e8f7ef` | `#0f1b1c` |
+| `--nm-app-accent-border` | `#c9e9d8` | `#23474b` |
+| `--nm-app-badge-bg` / `-fg` | `#eef1f0` / `#8a938f` | `#263033` / `#6d7873` |
+| `--nm-app-verdict-*-fg` / `-bg` | paires `*-light-*` | paires `*-dark-*` |
+
+⚠️ **Il manque un jeton de remplissage accentué pour le mode clair — et c'est le CTA payant qui en souffre.** `--nm-accent-on-light` (`#0d9a63`) est employé à la fois comme couleur de **texte** et comme **fond de bouton avec texte blanc** (voir `.rl-btn` dans `brand-report-locked.css`). Or blanc sur `#0d9a63` mesure **3,61:1** : tous les boutons primaires du mode clair échouent au AA, y compris « Débloquer le rapport » et « Vérifier maintenant ».
+
+La correction est dans la couche de jetons, pas dans les composants :
+
+| Usage | Valeur | Contraste |
+| --- | --- | --- |
+| Texte et bordures accentués sur fond clair | `#0d7a4e` | 4,85:1 sur blanc ✓ |
+| **Fond de bouton primaire**, texte blanc | `#0d7a4e` | 4,85:1 ✓ |
+| Survol du bouton primaire | `#0a6b44` | ✓ |
+| ~~Ancien fond de bouton~~ | ~~`#0d9a63`~~ | 3,61:1 ✗ |
+
+`#0d9a63` reste utilisable pour un aplat **sans texte** (barre de progression, point d'état). Dès qu'un libellé se pose dessus, c'est `#0d7a4e`.
+
+⚠️ **La paire ambre est limite.** `#9a6a12` sur `#fdf3e3` mesure **4,3:1** à 12px, juste sous le seuil. Utiliser `#8a5a12` pour les libellés de verdict « à surveiller ». Le pendant sombre (`#e0b96e` sur `#1c1810`) n'est pas concerné.
+
+⚠️ **L'ambre des étoiles d'analyse a besoin d'un pendant clair.** `results-grid.css` utilise `#f59e0b` pour `.rg-stars` — correct tant que la grille est sombre, où cet ambre passe confortablement. Sur une carte claire, le même ambre mesure **2,15:1**. Or ces étoiles portent le score d'analyse du nom : du contenu que l'utilisateur doit lire et comparer d'une carte à l'autre. Prévoir la même scission que pour l'accent : `#f59e0b` sur sombre, `#b45309` sur clair (≈4,9:1 sur blanc). L'étoile vide suit `--nm-app-text-2`.
+
+⚠️ **`--nm-app-text-3` ne porte jamais de texte informatif — sur aucune des deux surfaces.** Mesuré : `#8a938f` sur `#fbfcfb` donne **3,07:1** à 12px, et son pendant sombre `#6d7873` échoue aussi — **4,23:1** sur `#0b0e10`, **3,94:1** sur `#12171a`, donc pire sur la surface de carte que sur le fond. Le AA exige 4,5:1. Tout texte qu'un utilisateur doit lire passe à `--nm-app-text-2` : `#5c6663` sur clair (5,94:1), `#9aa5a0` sur sombre (7,62:1). `--nm-app-text-3` est réservé aux bordures, aux séparateurs et aux états désactivés. C'est une règle **symétrique** : ne pas la traiter comme un problème de mode clair.
+
+⚠️ **La bordure accentuée porte du sens, ce n'est pas un habillage.** `.rg-card--strong` et `.rg-cost--accent` signifient, dans `results-grid.css`, « nom dont TOUTES les extensions demandées sont libres » — le signal que l'utilisateur cherche du regard. Ne jamais appliquer `--nm-app-accent-border` à une carte aux verdicts mixtes : la carte ordinaire prend `--nm-app-border`, et le badge de coût prend la paire neutre `--nm-app-badge-*`.
+
+⚠️ **Un jeton manque à la palette actuelle** : la bordure d'une carte accentuée sur fond clair. `#c9e9d8` est employé dans les maquettes, dérivé de `--nm-verdict-free-light-bg`. À nommer (`--nm-accent-border-light`) plutôt qu'à recopier dans les composants.
+
+### Le sélecteur : trois états
+
+`Système` · `Clair` · `Sombre`, avec **Système par défaut**. Une bascule à deux états force un choix, puis cesse de suivre l'OS quand celui-ci passe en mode nuit. Emplacement : le menu du compte, à côté de la langue — ce n'est pas une action fréquente. L'état actif utilise l'accent du mode courant (`#0d9a63` sur clair, `#3ddc91` sur sombre) : deux jetons distincts, non interchangeables.
+
+### Les cinq pièges
+
+1. **Le flash blanc au chargement.** Si le mode est lu après le rendu, l'utilisateur en préférence sombre voit un éclair blanc à chaque navigation. Il faut un script **synchrone** minuscule dans le `<head>`, avant tout style : il lit le choix stocké, sinon `prefers-color-scheme`, et pose l'attribut sur `<html>`. Aucun framework ne peut le faire assez tôt, Angular compris.
+2. **Trois valeurs stockées, pas deux.** Ne stocker que `light`, `dark`, ou **rien** — « Système » est l'absence de valeur. Enregistrer le mode *résolu* au moment du choix ferait cesser le suivi de l'OS sans que l'utilisateur l'ait demandé. Écouter aussi les changements de `prefers-color-scheme` en direct : l'OS bascule le soir, la page ouverte doit suivre.
+3. **`color-scheme`, pas seulement les couleurs.** Déclarer la propriété CSS `color-scheme` sur la racine. Sans elle, champs de formulaire, barres de défilement et menus natifs restent clairs — des rectangles blancs dans une interface sombre, sur les écrans qui comptent le plus de champs.
+4. **PrimeNG doit basculer aussi.** `darkModeSelector` est désactivé dans `app.config.ts`. Sans lui, `p-select`, `p-dialog`, `p-drawer`, `p-chip` et les tooltips restent clairs quoi que fassent vos jetons : deux thèmes superposés. L'activer sur le **même attribut de racine** que le vôtre.
+5. **Impression et e-mails.** Forcer le rapport en surfaces claires dans une `@media print`, et n'utiliser aucun jeton de rôle dans les e-mails (styles en ligne, figés). Keycloak reste clair : un cookie partagé pour un gain nul n'en vaut pas le coût.
+
+### Ordre de travail
+
+Cette étape vient **après** la migration du wizard vers les jetons (étape 6 bis) : basculer un écran qui contient encore de l'indigo en dur et des `var(--p-surface-*)` ne produirait qu'un mode sombre à moitié cassé. Migrer d'abord, thématiser ensuite.
+
 ## State Management
 
 | État | Portée | Rôle |
@@ -420,7 +562,7 @@ Exigences d'implémentation qui en découlent :
 | `unlocked` | Rapport | Rapport approfondi acheté ou non. En production : dérivé des données serveur, pas d'un état local. |
 | `screen` | — | **Artefact du prototype uniquement** : sert la barre de navigation entre maquettes. À remplacer par le routeur Angular. |
 
-Données à récupérer côté API : suggestions de noms + justification, verdicts par domaine (libre / pris / non vérifiable) avec le coût en crédits, solde de crédits et rapport offert du mois, contenu du rapport approfondi (INPI, EUIPO, réseaux), horodatage d'interrogation des registres.
+Données à récupérer côté API : suggestions de noms + justification, verdicts par domaine (libre / pris / non vérifiable), et le coût de la recherche : 1 crédit par suggestion retenue, solde de crédits et rapport offert du mois, contenu du rapport approfondi (INPI, EUIPO, réseaux), horodatage d'interrogation des registres.
 
 ## Assets
 

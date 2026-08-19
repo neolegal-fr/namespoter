@@ -63,7 +63,7 @@
             <button onClick="{{ goReport }}" style="border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:15.5px; padding:16px 24px; cursor:pointer" style-hover="border-color:#4a5459">Voir un rapport de marque</button>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:22px; font-size:13.5px; color:#6d7873">
-            <span>100 crédits offerts chaque mois</span><span>≈ 50 noms libres + 1 rapport approfondi</span><span>Sans abonnement</span>
+            <span>100 crédits offerts chaque mois</span><span>≈ 50 suggestions vérifiées + 1 rapport</span><span>Sans abonnement</span>
           </div>
         </div>
 
@@ -122,7 +122,7 @@
                     </span>
                   </div>
                 </sc-for>
-                <p style="font-size:12.5px; color:#6d7873; margin:8px 0 0; line-height:1.5">Seuls les domaines libres consomment un crédit. Les autres sont offerts.</p>
+                <p style="font-size:12.5px; color:#6d7873; margin:8px 0 0; line-height:1.5">1 crédit par suggestion retenue, quel que soit le nombre d'extensions vérifiées.</p>
               </sc-if>
               <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
                 <div style="border:1px solid #23474b; background:#0f1b1c; border-radius:12px; padding:18px">
@@ -209,7 +209,7 @@
           <div style="background:#0b0e10; color:#f2f5f3; border-radius:18px; padding:52px 44px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:26px">
             <div>
               <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(26px,3.4vw,38px); line-height:1.06; letter-spacing:-0.03em; margin:0 0 10px">Votre nom est encore libre</h2>
-              <p style="margin:0; font-size:16px; color:#9aa5a0">100 crédits offerts chaque mois : environ 50 noms libres, et un rapport approfondi.</p>
+              <p style="margin:0; font-size:16px; color:#9aa5a0">100 crédits offerts chaque mois : environ 50 suggestions vérifiées, et un rapport approfondi.</p>
             </div>
             <button onClick="{{ goApp }}" style="border:none; border-radius:10px; background:#3ddc91; color:#062018; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; padding:17px 30px; cursor:pointer" style-hover="background:#6ee7a8">Lancer une recherche gratuite</button>
           </div>
@@ -227,16 +227,16 @@
             <h1 style="font-family:'Space Grotesk',sans-serif; font-size:34px; letter-spacing:-0.03em; margin:0">21 domaines libres sur 9 noms</h1>
           </div>
           <div style="display:flex; gap:10px; align-items:center">
-            <span style="font-size:13.5px; color:#6d7873">79 crédits restants</span>
+            <span style="font-size:13.5px; color:#6d7873">91 crédits restants</span>
             <button style="border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:9px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:11px 18px; cursor:pointer" style-hover="border-color:#4a5459">Exporter</button>
             <button style="border:none; background:#3ddc91; color:#062018; border-radius:9px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; padding:12px 20px; cursor:pointer" style-hover="background:#6ee7a8">Générer 12 de plus</button>
           </div>
         </div>
 
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; background:#12171a; border:1px solid #232b2f; border-radius:12px; padding:14px 18px; margin-bottom:20px">
-          <span style="font-size:13.5px; color:#c9d3ce"><strong style="color:#6ee7a8; font-weight:600">21 crédits</strong> débités — 1 par domaine libre trouvé</span>
+          <span style="font-size:13.5px; color:#c9d3ce"><strong style="color:#6ee7a8; font-weight:600">9 crédits</strong> débités — 1 par suggestion retenue</span>
           <span style="width:1px; height:16px; background:#2a3236"></span>
-          <span style="font-size:13.5px; color:#6d7873">Les domaines pris ou invérifiables ne sont jamais facturés</span>
+          <span style="font-size:13.5px; color:#6d7873">Une suggestion hors critères n'est jamais facturée</span>
           <span style="width:1px; height:16px; background:#2a3236"></span>
           <span style="font-size:13.5px; color:#6d7873">Rapport approfondi : 50 crédits par nom</span>
         </div>
@@ -303,7 +303,7 @@
             <div style="padding:34px 38px; border-bottom:1px solid #eef1f0">
               <p style="font-size:12px; letter-spacing:0.11em; text-transform:uppercase; color:#8a938f; margin:0 0 10px">Rapport approfondi · non débloqué</p>
               <h1 style="font-family:'Space Grotesk',sans-serif; font-size:46px; letter-spacing:-0.03em; margin:0 0 10px">Roulio</h1>
-              <p style="margin:0; font-size:16px; color:#5c6663; max-width:56ch; line-height:1.55">Les 4 domaines ont déjà été vérifiés (3 crédits). Le rapport approfondi ajoute la recherche d'antériorité INPI et EUIPO, et les pseudos sur 4 réseaux.</p>
+              <p style="margin:0; font-size:16px; color:#5c6663; max-width:56ch; line-height:1.55">Cette suggestion a déjà été retenue et vérifiée (1 crédit). Le rapport approfondi ajoute la recherche d'antériorité INPI et EUIPO, et les pseudos sur 4 réseaux.</p>
             </div>
             <div style="padding:26px 38px; border-bottom:1px solid #eef1f0">
               <sc-for list="{{ lockedRows }}" as="r" hint-placeholder-count="4">
@@ -394,7 +394,7 @@
               <h1 style="font-family:'Space Grotesk',sans-serif; font-size:33px; line-height:1.06; letter-spacing:-0.03em; margin:0 0 14px">Trouvez un nom de <span style="color:#3ddc91">{{ rotating }}</span> vraiment libre</h1>
               <p style="font-size:15.5px; line-height:1.55; color:#9aa5a0; margin:0 0 22px">Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs s'arrêtent au .com.</p>
               <button style="width:100%; min-height:52px; border:none; border-radius:12px; background:#3ddc91; color:#062018; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; cursor:pointer">Trouver mon nom</button>
-              <p style="font-size:12.5px; color:#6d7873; text-align:center; margin:12px 0 22px">100 crédits / mois · 50 noms + 1 rapport</p>
+              <p style="font-size:12.5px; color:#6d7873; text-align:center; margin:12px 0 22px">100 crédits / mois · 50 suggestions + 1 rapport</p>
               <div style="background:#12171a; border:1px solid #232b2f; border-radius:14px; padding:16px">
                 <p style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#6d7873; margin:0 0 12px">Exemple de verdict</p>
                 <div style="display:flex; flex-direction:column; gap:9px">
@@ -456,7 +456,7 @@
             </div>
             <div style="padding:8px 18px 18px">
               <h2 style="font-family:'Space Grotesk',sans-serif; font-size:22px; letter-spacing:-0.02em; margin:0 0 4px">21 domaines libres</h2>
-              <p style="font-size:13px; color:#6d7873; margin:0 0 16px">21 crédits débités · 79 restants</p>
+              <p style="font-size:13px; color:#6d7873; margin:0 0 16px">9 crédits débités · 91 restants</p>
               <div style="display:flex; gap:7px; overflow:hidden; margin-bottom:16px">
                 <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:12.5px; padding:9px 13px; white-space:nowrap">Tout libre</span>
                 <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:12.5px; padding:9px 13px; white-space:nowrap">.com</span>
@@ -560,7 +560,7 @@ class Component extends DCLogic {
       isMobile: sc === 'mobile', isNotes: sc === 'notes',
       goApp: set('app'), goReport: set('report'),
 
-      paneTitle: { 1: 'Étape 1 — votre projet en une phrase', 2: 'Étape 2 — style et extensions', 3: 'Étape 3 — domaines libres · 1 crédit chacun', 4: 'Étape 4 — rapport approfondi · 50 crédits' }[s],
+      paneTitle: { 1: 'Étape 1 — votre projet en une phrase', 2: 'Étape 2 — style et extensions', 3: 'Étape 3 — suggestions retenues · 1 crédit chacune', 4: 'Étape 4 — rapport approfondi · 50 crédits' }[s],
       isStep1: s === 1, isStep2: s === 2, isStep3: s === 3, isStep4: s === 4,
       steps: [1, 2, 3, 4].map(n => ({
         n, label: ['Décrire', 'Cadrer', 'Domaines', 'Rapport'][n - 1],
@@ -673,7 +673,7 @@ class Component extends DCLogic {
         { tag: 'Produit', bg: '#fdf3e3', fg: '#9a6a12', title: 'Un essai sans compte, sanctuarisé', body: 'La première recherche doit aboutir à des noms vérifiés sans inscription. Le compte se demande au moment de sauvegarder ou d\'exporter — pas avant d\'avoir prouvé la valeur.' },
         { tag: 'Acquisition', bg: '#fdf3e3', fg: '#9a6a12', title: 'Le rapport de marque est partageable', body: 'Un PDF ou un lien propre, avec votre marque dessus, circule entre associés et investisseurs. C\'est votre boucle virale la moins chère, à condition que le partage soit un bouton visible.' },
         { tag: 'Monétisation', bg: '#f0ecfb', fg: '#5b46a3', title: 'Le verrou doit montrer ce qu\'il cache', body: 'Sur l\'écran Rapport, basculez entre « Avant achat » et « Après achat ». Les lignes floutées nomment les contrôles sans livrer le verdict : c\'est ce qui fait dépenser les 50 crédits, bien plus qu\'un descriptif de fonctionnalité. À 50 crédits, le rapport engage la moitié de la réserve mensuelle : le verrou doit donc être très convaincant, et le premier rapport du mois annoncé comme offert.' },
-        { tag: 'Monétisation', bg: '#f0ecfb', fg: '#5b46a3', title: 'Dire ce qui n\'est pas facturé', body: 'Le bandeau de crédits affiche « les domaines pris ou invérifiables ne sont jamais facturés ». C\'est une phrase qui rassure plus qu\'une grille tarifaire — elle prouve que vous ne facturez que le résultat utile.' }
+        { tag: 'Monétisation', bg: '#f0ecfb', fg: '#5b46a3', title: 'Dire comment le crédit est compté', body: 'Le bandeau affiche « 1 crédit par suggestion retenue, quel que soit le nombre d\'extensions ». C\'est ce qui rassure vraiment : le prix ne dépend pas du nombre de vérifications lancées, donc ajouter une extension ne coûte rien. Une grille tarifaire ne dirait pas cela aussi bien.' }
       ]
     };
   }

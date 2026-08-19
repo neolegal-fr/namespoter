@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#f4f6f5; }
+  a { color:#0d7a4e; text-decoration:none; }
+  a:hover { color:#0b8355; }
+  * { box-sizing:border-box; }
+</style>
+</helmet>
+
+<div style="font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif; -webkit-font-smoothing:antialiased; background:#f4f6f5; min-height:100vh; color:#0b0e10">
+
+  <div style="position:sticky; top:0; z-index:60; display:flex; align-items:center; gap:8px; padding:12px 20px; background:rgba(11,14,16,.94); backdrop-filter:blur(12px); flex-wrap:wrap">
+    <span style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#9aa5a0; margin-right:8px">Écrans réels</span>
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+      <button onClick="{{ t.pick }}" style="border:1px solid {{ t.bd }}; background:{{ t.bg }}; color:{{ t.fg }}; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 15px; cursor:pointer" style-hover="border-color:#3ddc91">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ isWizard }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Wizard" style="max-width:1200px; margin:0 auto; padding:28px 24px 80px">
+
+      <div style="background:#fff; border:1px solid #e3e7e5; border-radius:18px; padding:32px 28px">
+
+        <div style="text-align:center; margin-bottom:28px">
+          <div style="display:inline-flex; align-items:center; gap:12px; max-width:100%">
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(24px,5vw,34px); font-weight:700; letter-spacing:-0.03em; margin:0; color:#0b0e10; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Vélos reconditionnés</h1>
+            <button style="border:none; background:transparent; color:#5c6663; cursor:pointer; font-size:15px; min-height:44px; min-width:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px" style-hover="color:#0d7a4e" aria-label="Renommer le projet">✎</button>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0; margin-bottom:30px">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.pick }}" style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; min-height:44px; background:none; border:0; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; padding:0">
+              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:999px; font-size:13px; font-weight:600; flex:none; background:{{ s.bg }}; color:{{ s.fg }}; border:1px solid {{ s.bd }}">{{ s.mark }}</span>
+              <span style="font-size:14px; color:{{ s.labelColor }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ s.label }}</span>
+              <span style="flex:1; height:1px; background:#e3e7e5; min-width:12px"></span>
+            </button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:768px; margin:0 auto; display:flex; flex-direction:column; gap:20px">
+            <div style="text-align:center">
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; letter-spacing:-0.02em; margin:0 0 6px">Votre projet</h2>
+              <p style="margin:0; font-size:15px; line-height:1.55; color:#5c6663">Décrivez votre solution, votre cible et vos valeurs.</p>
+            </div>
+
+            <div style="background:#fbfcfb; border:1px solid #dde2e0; border-radius:10px; padding:16px 18px; min-height:132px; font-size:16px; line-height:1.6; color:#2c3532; text-align:left">
+              une place de marché de vélos reconditionnés, livrés montés et garantis deux ans<span style="display:inline-block; width:1.5px; height:19px; background:#0d7a4e; margin-left:2px; vertical-align:-3px"></span>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap">
+              <button style="display:inline-flex; align-items:center; gap:8px; min-height:52px; padding:0 22px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:15px; cursor:pointer" style-hover="border-color:#0d7a4e; color:#0d7a4e">✦ Reformuler avec l'IA</button>
+              <button style="display:inline-flex; align-items:center; gap:8px; min-height:52px; padding:0 26px; border:none; background:#0d7a4e; color:#fff; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; cursor:pointer" style-hover="background:#0a6b44">Continuer vers les mots-clés →</button>
+            </div>
+
+            <div style="background:#e8f7ef; border:1px solid #c9e9d8; border-radius:12px; padding:18px 20px; text-align:left">
+              <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#0d7a4e; font-weight:600; margin:0 0 10px">Reformulation proposée</p>
+              <p style="margin:0 0 14px; font-size:15.5px; line-height:1.6; color:#2c3532">Marketplace de vélos reconditionnés garantis, livrés prêts à rouler, pour une mobilité urbaine accessible et durable.</p>
+              <div style="text-align:right">
+                <button style="min-height:44px; padding:0 18px; border:1px solid #0d7a4e; background:#fff; color:#0d7a4e; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="background:#0d7a4e; color:#fff">Utiliser cette version</button>
+              </div>
+            </div>
+
+            <div style="background:#fbfcfb; border:1px solid #e3e7e5; border-radius:10px; padding:14px 16px; text-align:center; font-size:13.5px; color:#5c6663">
+              <a href="#" style="color:#0d7a4e; font-weight:600; text-decoration:underline; text-decoration-style:dotted">Signalez un bug ou proposez une amélioration</a>, et gagnez jusqu'à 500 crédits.
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:26px">
+            <div style="text-align:center">
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; letter-spacing:-0.02em; margin:0 0 6px">Configuration</h2>
+              <p style="margin:0; font-size:15px; line-height:1.55; color:#5c6663">Ajustez vos mots-clés et définissez votre cible.</p>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px">
+              <h3 style="margin:0; padding-left:10px; border-left:3px solid #0d7a4e; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#5c6663">Inspirations</h3>
+
+              <div style="background:#fbfcfb; border:1px solid #e3e7e5; border-radius:12px; padding:14px 16px">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px">
+                  <span style="font-size:14px; font-weight:600; color:#2c3532">Ce qui existe déjà sur le marché</span>
+                  <span style="font-size:12.5px; color:#5c6663">(6)</span>
+                  <span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:4px 9px; border-radius:999px; background:#e8f7ef; color:#0d7a4e; white-space:nowrap">⬤ analyse en direct</span>
+                  <span style="margin-left:auto; font-size:12px; color:#5c6663">▾</span>
+                </div>
+                <p style="margin:0 0 10px; font-size:13px; line-height:1.5; color:#5c6663">Notez ce qui vous plaît : l'IA s'en sert pour orienter les propositions.</p>
+                <div style="display:flex; flex-direction:column; gap:4px">
+                  <sc-for list="{{ competitors }}" as="c" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; gap:6px; font-size:13.5px; padding:2px 0; opacity:{{ c.opacity }}">
+                      <button style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:none; border-radius:8px; background:transparent; cursor:pointer; color:{{ c.upColor }}" style-hover="background:#eef1f0" title="J'aime ce style de nom" aria-label="J'aime">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></svg>
+                      </button>
+                      <button style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:none; border-radius:8px; background:transparent; cursor:pointer; color:{{ c.downColor }}" style-hover="background:#eef1f0" title="Je n'aime pas ce style" aria-label="Je n'aime pas">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><g transform="rotate(180 12 12)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></g></svg>
+                      </button>
+                      <a href="#" style="font-family:'Space Grotesk',sans-serif; font-weight:600; color:#0d7a4e; flex:none; text-decoration:{{ c.strike }}">{{ c.domain }}</a>
+                      <span style="color:#5c6663; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ c.note }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <p style="margin:10px 0 0; font-size:12px; line-height:1.5; color:#5c6663">Relevé sur le web au moment de votre recherche.</p>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:10px">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="#0d7a4e" aria-hidden="true" style="flex:none"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></svg>
+                <input placeholder="Des noms que vous aimez : Stripe, Notion…" style="flex:1; min-width:0; min-height:44px; padding:0 14px; border:1px solid #dde2e0; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; color:#2c3532; background:#fff">
+              </div>
+              <div style="display:flex; align-items:center; gap:10px">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="#a33b3b" aria-hidden="true" style="flex:none"><g transform="rotate(180 12 12)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></g></svg>
+                <input placeholder="Des noms à éviter" style="flex:1; min-width:0; min-height:44px; padding:0 14px; border:1px solid #dde2e0; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; color:#2c3532; background:#fff">
+              </div>
+              <span style="font-size:13px; color:#5c6663">Séparez par des virgules. Utilisé uniquement pour calibrer le style.</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px">
+                <h3 style="margin:0; padding-left:10px; border-left:3px solid #0d7a4e; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#5c6663">Mots-clés</h3>
+                <span style="font-size:13px; color:#5c6663; flex:none">6 / 10 mots-clés</span>
+              </div>
+              <div style="display:flex; gap:10px">
+                <input placeholder="Ajouter un mot-clé…" style="flex:1; min-width:0; min-height:44px; padding:0 14px; border:1px solid #dde2e0; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; color:#2c3532; background:#fff">
+                <button style="min-height:44px; min-width:44px; padding:0 16px; border:none; background:#0d7a4e; color:#fff; border-radius:8px; font-size:16px; cursor:pointer" style-hover="background:#0a6b44" aria-label="Ajouter">+</button>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; padding:12px; background:#fbfcfb; border:1px solid #e3e7e5; border-radius:10px; min-height:56px; align-content:flex-start">
+                <sc-for list="{{ keywords }}" as="k" hint-placeholder-count="6">
+                  <span style="display:inline-flex; align-items:center; gap:8px; padding:7px 10px 7px 13px; border:1px solid #c9e9d8; border-radius:999px; background:#e8f7ef; color:#0d7a4e; font-size:13.5px">
+                    {{ k }}
+                    <button style="border:none; background:transparent; color:#0d7a4e; cursor:pointer; font-size:15px; padding:0 2px; line-height:1" aria-label="Retirer">×</button>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px">
+              <h3 style="margin:0; padding-left:10px; border-left:3px solid #0d7a4e; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#5c6663">Cible</h3>
+              <div style="display:flex; border:1px solid #dde2e0; border-radius:10px; overflow:hidden; background:#fff">
+                <button style="flex:1; min-height:44px; border:none; background:#fff; color:#5c6663; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="color:#0b0e10">International</button>
+                <button style="flex:1; min-height:44px; border:none; background:#0d7a4e; color:#fff; font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer">Local / régional</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+                <span style="font-size:14px; color:#5c6663">Langue :</span>
+                <span style="display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border:1px solid #dde2e0; border-radius:8px; background:#fff; font-size:14.5px; color:#2c3532">Français (détecté) ▾</span>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px">
+              <h3 style="margin:0; padding-left:10px; border-left:3px solid #0d7a4e; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#5c6663">Styles de noms</h3>
+              <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:14.5px; color:#2c3532; min-height:44px">
+                <input type="checkbox" style="width:18px; height:18px; accent-color:#0d7a4e; cursor:pointer; flex:none">
+                Noms descriptifs — ex. : velos-lyon.fr
+              </label>
+              <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-size:14.5px; color:#2c3532; min-height:44px">
+                <input type="checkbox" style="width:18px; height:18px; accent-color:#0d7a4e; cursor:pointer; flex:none">
+                Références culturelles — ex. : petitreine.fr
+              </label>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px">
+              <h3 style="margin:0; padding-left:10px; border-left:3px solid #0d7a4e; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#5c6663">Longueur minimale</h3>
+              <div style="display:flex; border:1px solid #dde2e0; border-radius:10px; overflow:hidden; background:#fff">
+                <sc-for list="{{ lengths }}" as="l" hint-placeholder-count="4">
+                  <button style="flex:1; min-height:44px; border:none; background:{{ l.bg }}; color:{{ l.fg }}; font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:{{ l.weight }}; cursor:pointer">{{ l.label }}</button>
+                </sc-for>
+              </div>
+              <span style="font-size:13px; color:#5c6663">Par défaut 6 caractères : en dessous, presque tout est déjà pris.</span>
+              <div style="display:flex; align-items:flex-start; gap:10px; background:#fdf3e3; border:1px solid #f0e2c4; border-radius:10px; padding:12px 14px; font-size:13.5px; color:#9a6a12; line-height:1.5">
+                <span style="flex:none">⚠</span>
+                <span>À 4 caractères, 99,7 % des .com sont déjà déposés. La recherche risque de ne rien rendre.</span>
+              </div>
+              <p style="margin:0; font-size:13px; line-height:1.55; color:#5c6663">✦ Déduit de votre description : longueur min. 5 · éviter « bike », « eco » · références citées : Upway</p>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-top:6px">
+              <button style="min-height:52px; padding:0 22px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:15px; cursor:pointer" style-hover="border-color:#5c6663">← Retour</button>
+              <button style="min-height:52px; padding:0 26px; border:none; background:#0d7a4e; color:#fff; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; cursor:pointer" style-hover="background:#0a6b44">Continuer vers les extensions →</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; flex-direction:column; gap:22px; align-items:center">
+
+            <div style="width:100%; max-width:640px; background:#fbfcfb; border:1px solid #e3e7e5; border-radius:12px; padding:14px 16px">
+              <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+                <h3 style="margin:0; padding-left:10px; border-left:3px solid #0d7a4e; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#5c6663; white-space:nowrap">Extensions</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:7px; flex:1">
+                  <sc-for list="{{ extensions }}" as="e" hint-placeholder-count="4">
+                    <span style="display:inline-flex; align-items:center; gap:7px; padding:6px 9px 6px 12px; border:1px solid #c9e9d8; border-radius:999px; background:#e8f7ef; color:#0d7a4e; font-family:'Space Grotesk',sans-serif; font-size:13.5px">
+                      {{ e }}
+                      <button style="border:none; background:transparent; color:#0d7a4e; cursor:pointer; font-size:14px; padding:0 2px; line-height:1" aria-label="Retirer">×</button>
+                    </span>
+                  </sc-for>
+                </div>
+                <div style="display:flex; gap:7px; align-items:center; flex:none">
+                  <input placeholder=".io .fr net" style="width:126px; min-height:44px; padding:0 12px; border:1px solid #dde2e0; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; color:#2c3532; background:#fff">
+                  <button style="min-height:44px; min-width:44px; padding:0 14px; border:none; background:#0d7a4e; color:#fff; border-radius:8px; font-size:16px; cursor:pointer" style-hover="background:#0a6b44" aria-label="Ajouter">+</button>
+                </div>
+              </div>
+              <div style="display:flex; border:1px solid #dde2e0; border-radius:10px; overflow:hidden; background:#fff; margin-top:12px">
+                <button style="flex:1; min-height:44px; border:none; background:#0d7a4e; color:#fff; font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer">Au moins une libre</button>
+                <button style="flex:1; min-height:44px; border:none; background:#fff; color:#5c6663; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="color:#0b0e10">Toutes libres</button>
+              </div>
+              <p style="margin:10px 0 0; font-size:13px; line-height:1.5; color:#5c6663">Ajouter une extension ne coûte rien : une suggestion retenue vaut 1 crédit, qu'on en vérifie une ou cinq.</p>
+            </div>
+
+            <sc-if value="{{ streaming }}" hint-placeholder-val="{{ false }}">
+              <div style="width:100%; max-width:640px; background:#e8f7ef; border:1px solid #c9e9d8; border-radius:12px; padding:14px 16px; text-align:left">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+                  <span style="width:7px; height:7px; border-radius:999px; background:#0d7a4e; flex:none"></span>
+                  <span style="font-size:14.5px; font-weight:600; color:#0d7a4e">Vérification de <span style="font-family:'Space Grotesk',sans-serif">bikara.fr</span> au registre…</span>
+                </div>
+                <p style="margin:0; font-size:13px; color:#0d7a4e">37 candidats évalués — 21 libres pour l'instant</p>
+              </div>
+            </sc-if>
+
+            <div style="text-align:center">
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; letter-spacing:-0.025em; margin:0 0 6px; color:#0b0e10">9 suggestions retenues en .com, .fr, .eu</h2>
+              <p style="margin:0; font-size:15px; color:#5c6663">Voici nos propositions pour votre projet.</p>
+            </div>
+
+            <div style="width:100%; max-width:640px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#fff; border:1px solid #e3e7e5; border-radius:12px; padding:14px 16px">
+              <span style="font-size:13.5px; color:#2c3532"><strong style="color:#0d7a4e; font-weight:600">9 crédits</strong> débités — 1 par suggestion retenue</span>
+              <span style="width:1px; height:16px; background:#e3e7e5"></span>
+              <span style="font-size:13.5px; color:#5c6663">Quel que soit le nombre d'extensions</span>
+              <span style="width:1px; height:16px; background:#e3e7e5"></span>
+              <span style="font-size:13.5px; color:#5c6663">Rapport : 50 crédits</span>
+            </div>
+
+            <div style="width:100%; max-width:640px; display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+              <button style="display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="border-color:#0d7a4e; color:#0d7a4e">💡 Aide-moi à choisir ▾</button>
+              <button style="display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:0 12px; border:none; background:transparent; color:#5c6663; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; cursor:pointer" style-hover="color:#0b0e10">⊘ Masquer les noms rejetés</button>
+              <button style="display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:0 12px; margin-left:auto; border:none; background:transparent; color:#5c6663; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; cursor:pointer" style-hover="color:#0d7a4e">⧉ Copier les résultats</button>
+            </div>
+
+            <div style="width:100%; max-width:640px; display:flex; align-items:flex-start; gap:10px; background:#e8f7ef; border:1px solid #c9e9d8; border-radius:12px; padding:13px 16px; text-align:left">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="#0d7a4e" aria-hidden="true" style="flex:none; margin-top:1px"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></svg>
+              <p style="margin:0; font-size:13.5px; line-height:1.55; color:#0d7a4e">Notez les noms que vous aimez ou rejetez : les 10 suggestions suivantes s'aligneront sur vos goûts. C'est gratuit et ça change beaucoup les résultats. Vos favoris et les noms vérifiés remontent en haut de la grille.</p>
+            </div>
+
+            <div style="width:100%; max-width:960px; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px">
+              <sc-for list="{{ cards }}" as="c" hint-placeholder-count="9">
+                <div style="background:#fff; border:1px solid {{ c.border }}; border-radius:14px; padding:20px; text-align:left" style-hover="border-color:#0d7a4e">
+                  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px">
+                    <div style="min-width:0">
+                      <div style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.02em; color:#0b0e10; overflow-wrap:anywhere">{{ c.name }}</div>
+                      <div style="font-size:13px; color:#5c6663; margin-top:4px">{{ c.why }}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:7px">
+                    <sc-for list="{{ c.checks }}" as="k" hint-placeholder-count="3">
+                      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13.5px">
+                        <span style="font-family:'Space Grotesk',sans-serif; color:#5c6663; overflow-wrap:anywhere">{{ k.label }}</span>
+                        <span style="padding:3px 8px; border-radius:6px; font-size:12px; background:{{ k.bg }}; color:{{ k.fg }}; white-space:nowrap">{{ k.value }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <button style="display:flex; align-items:center; gap:3px; margin-top:12px; padding:0; background:none; border:0; cursor:pointer; font-size:13px; color:#b45309" style-hover="color:#d98806">★★★★<span style="color:#5c6663">★</span><span style="margin-left:4px; font-size:11px; color:#5c6663">▾</span></button>
+                  <div style="margin-top:10px; padding-top:12px; border-top:1px dashed #dde2e0; display:flex; align-items:center; gap:8px">
+                    <sc-if value="{{ c.locked }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px; color:#5c6663">🔒</span></sc-if>
+                    <span style="font-size:13px; color:{{ c.deepFg }}">{{ c.deepLabel }}</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; margin-top:12px">
+                    <button style="flex:1; min-height:46px; padding:10px 14px; border:1px solid {{ c.deepBd }}; background:{{ c.deepBg }}; color:{{ c.deepBtnFg }}; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer" style-hover="border-color:#0d7a4e; color:#0d7a4e">{{ c.cta }}</button>
+                    <span style="display:flex; gap:4px; flex:none">
+                      <button style="display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border:1px solid {{ c.upBd }}; border-radius:8px; background:transparent; color:{{ c.upColor }}; cursor:pointer" title="J'aime ce nom — l'IA en proposera de proches" aria-label="J'aime ce nom">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></svg>
+                      </button>
+                      <button style="display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border:1px solid #dde2e0; border-radius:8px; background:transparent; color:#5c6663; cursor:pointer" style-hover="color:#a33b3b; border-color:#e8c9c9" title="Je n'aime pas — l'IA évitera ce style" aria-label="Je n'aime pas ce nom">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><g transform="rotate(180 12 12)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></g></svg>
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="width:100%; max-width:640px; display:flex; gap:10px; align-items:center">
+              <input placeholder="ex. : florizon, bloomly, verdana" style="flex:1; min-width:0; min-height:44px; padding:0 14px; border:1px solid #dde2e0; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; color:#2c3532; background:#fff">
+              <button style="min-height:44px; padding:0 18px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer; white-space:nowrap" style-hover="border-color:#0d7a4e; color:#0d7a4e">+ Vérifier</button>
+            </div>
+
+            <div style="width:100%; max-width:640px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-top:8px; border-top:1px solid #eef1f0">
+              <button style="min-height:52px; padding:0 22px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:15px; cursor:pointer" style-hover="border-color:#5c6663">← Retour</button>
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px">
+                <div style="display:flex; gap:10px; align-items:stretch; flex-wrap:wrap; justify-content:flex-end">
+                  <button style="min-height:52px; padding:0 20px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:15px; cursor:pointer" style-hover="border-color:#0d7a4e; color:#0d7a4e">💡 Aide-moi à choisir ▾</button>
+                  <button style="min-height:52px; padding:0 24px; border:none; background:#0d7a4e; color:#fff; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; cursor:pointer" style-hover="background:#0a6b44">+ 10 suggestions</button>
+                </div>
+                <a href="#" style="font-size:13px; color:#5c6663; text-decoration:underline; text-decoration-style:dotted">91 crédits restants</a>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDrawer }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Tiroir projets" style="min-height:100vh; display:flex; align-items:stretch; background:#f4f6f5">
+      <div style="width:min(400px,90vw); background:#fff; border-right:1px solid #e3e7e5; box-shadow:0 0 60px -20px rgba(11,14,16,.18); display:flex; flex-direction:column">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px 22px; border-bottom:1px solid #eef1f0">
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.02em; margin:0">Mes projets</h2>
+          <button style="border:none; background:transparent; color:#5c6663; cursor:pointer; font-size:18px; min-height:44px; min-width:44px; border-radius:8px" style-hover="color:#0b0e10" aria-label="Fermer">×</button>
+        </div>
+        <div style="padding:18px 22px 22px; overflow:auto">
+          <p style="font-size:14px; line-height:1.55; color:#5c6663; margin:0 0 18px">Reprenez vos recherches là où vous les avez laissées.</p>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <sc-for list="{{ projects }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border:1px solid #e3e7e5; border-radius:12px; background:#fff; cursor:pointer" style-hover="border-color:#0d7a4e; background:#fbfcfb">
+                <div style="flex:1; min-width:0">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+                    <span style="font-family:'Space Grotesk',sans-serif; font-size:15.5px; font-weight:600; color:#0b0e10; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ p.name }}</span>
+                    <sc-if value="{{ p.hasReport }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:11px; padding:3px 8px; border-radius:6px; background:#e8f7ef; color:#0d7a4e; white-space:nowrap">rapport</span>
+                    </sc-if>
+                  </div>
+                  <div style="font-size:12.5px; color:#5c6663; margin-top:3px">{{ p.meta }}</div>
+                </div>
+                <button style="border:none; background:transparent; color:#c9cfcc; cursor:pointer; font-size:14px; min-height:44px; min-width:44px; border-radius:8px" style-hover="color:#a33b3b" aria-label="Supprimer">🗑</button>
+                <span style="font-size:12px; color:#c9cfcc; flex:none">›</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1; padding:40px; color:#5c6663; font-size:14px">Le tiroir se superpose au wizard, sans le masquer (<code style="font-family:'Space Grotesk',monospace">modal: false</code>).</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPick }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Dialogue aide-moi à choisir" style="min-height:100vh; background:rgba(11,14,16,.55); padding:40px 24px; display:flex; justify-content:center; align-items:flex-start">
+      <div style="width:min(92vw,576px); background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 40px 80px -40px rgba(0,0,0,.5)">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px 24px; border-bottom:1px solid #eef1f0">
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; letter-spacing:-0.015em; margin:0">Recommandation de l'IA</h2>
+          <button style="border:none; background:transparent; color:#5c6663; cursor:pointer; font-size:18px; min-height:44px; min-width:44px; border-radius:8px" style-hover="color:#0b0e10" aria-label="Fermer">×</button>
+        </div>
+
+        <div style="padding:26px 24px; display:flex; flex-direction:column; align-items:center; gap:20px">
+          <div style="text-align:center">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:700; letter-spacing:-0.03em; color:#0b0e10">Roulio</div>
+            <div style="display:flex; justify-content:center; gap:7px; flex-wrap:wrap; margin-top:12px">
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:12.5px; padding:4px 10px; border-radius:999px; background:#e8f7ef; color:#0d7a4e">.com</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:12.5px; padding:4px 10px; border-radius:999px; background:#e8f7ef; color:#0d7a4e">.fr</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:12.5px; padding:4px 10px; border-radius:999px; background:#e8f7ef; color:#0d7a4e">.eu</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:12.5px; padding:4px 10px; border-radius:999px; background:#fdf3e3; color:#9a6a12">.ch</span>
+            </div>
+            <div style="margin-top:12px; font-size:16px; color:#0d7a4e; letter-spacing:2px">★★★★<span style="color:#dde2e0">★</span></div>
+          </div>
+
+          <p style="margin:0; text-align:center; font-size:15px; line-height:1.65; color:#2c3532">Court, prononçable en français comme à l'international, et le seul candidat dont les trois extensions européennes sont libres simultanément.</p>
+
+          <button style="display:inline-flex; align-items:center; gap:9px; min-height:52px; padding:0 26px; border:none; border-radius:10px; background:#0d7a4e; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; cursor:pointer" style-hover="background:#0a6b44">✓ Rapport approfondi · 50 crédits</button>
+          <p style="margin:-8px 0 0; font-size:13px; color:#5c6663; text-align:center">Marques INPI et EUIPO, et pseudos sur 4 réseaux.</p>
+
+          <button style="min-height:44px; padding:0 18px; border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="border-color:#0d7a4e; color:#0d7a4e">⧉ Copier le nom</button>
+
+          <div style="width:100%; background:#fdf3e3; border:1px solid #f0e2c4; border-radius:12px; padding:18px; text-align:center">
+            <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px; color:#9a6a12; margin-bottom:6px">Les bons noms partent vite.</div>
+            <div style="font-size:13.5px; line-height:1.5; color:#9a6a12; margin-bottom:14px">Celui-ci est libre maintenant. Peut-être plus demain.</div>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+              <a href="#" style="display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:0 16px; border:1px solid #e4cfa4; border-radius:8px; background:#fff; color:#9a6a12; font-size:13.5px; font-weight:600" style-hover="border-color:#9a6a12">OVH</a>
+              <a href="#" style="display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:0 16px; border:1px solid #e4cfa4; border-radius:8px; background:#fff; color:#9a6a12; font-size:13.5px; font-weight:600" style-hover="border-color:#9a6a12">Gandi</a>
+              <a href="#" style="display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:0 16px; border:1px solid #e4cfa4; border-radius:8px; background:#fff; color:#9a6a12; font-size:13.5px; font-weight:600" style-hover="border-color:#9a6a12">Namecheap</a>
+            </div>
+          </div>
+
+          <div style="width:100%; border-top:1px solid #eef1f0; padding-top:16px">
+            <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#5c6663; margin:0 0 10px; font-weight:600">Autres candidats</p>
+            <div style="display:flex; flex-wrap:wrap; gap:7px">
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:13.5px; padding:6px 12px; border-radius:999px; background:#f4f6f5; color:#5c6663">bikara</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:13.5px; padding:6px 12px; border-radius:999px; background:#f4f6f5; color:#5c6663">nervio</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:13.5px; padding:6px 12px; border-radius:999px; background:#f4f6f5; color:#5c6663">ourvo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDiff }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Écarts" style="background:#f4f6f5; min-height:100vh">
+      <div style="max-width:920px; margin:0 auto; padding:40px 28px 90px">
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:34px; letter-spacing:-0.03em; margin:0 0 10px">Ce qui casse la cohérence</h1>
+        <p style="font-size:16.5px; line-height:1.6; color:#5c6663; margin:0 0 16px; max-width:64ch">Relevé dans <code style="font-family:'Space Grotesk',monospace">wizard.html</code>, <code style="font-family:'Space Grotesk',monospace">wizard.css</code> et <code style="font-family:'Space Grotesk',monospace">app.html</code> sur la branche <code style="font-family:'Space Grotesk',monospace">feat/refonte-landing</code>.</p>
+        <p style="font-size:15px; line-height:1.6; color:#5c6663; margin:0 0 30px; max-width:64ch; padding:14px 16px; background:#e8f7ef; border:1px solid #c9e9d8; border-radius:12px">La structure, elle, n'est pas en cause : le wizard à 3 étapes, le tiroir projets, la grille de cartes et le rapport verrouillé sont bien construits. Tout ce qui suit est de l'habillage.</p>
+
+        <sc-for list="{{ gaps }}" as="g" hint-placeholder-count="8">
+          <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:22px 24px; margin-bottom:14px">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px">
+              <span style="font-size:11.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:5px 10px; border-radius:6px; background:{{ g.bg }}; color:{{ g.fg }}">{{ g.tag }}</span>
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:18px; letter-spacing:-0.015em; margin:0">{{ g.title }}</h2>
+            </div>
+            <p style="margin:0 0 12px; font-size:15px; line-height:1.6; color:#5c6663">{{ g.body }}</p>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:13px; font-family:'Space Grotesk',monospace">
+              <span style="padding:6px 11px; border-radius:6px; background:#fbecec; color:#a33b3b">{{ g.from }}</span>
+              <span style="color:#5c6663">→</span>
+              <span style="padding:6px 11px; border-radius:6px; background:#e8f7ef; color:#0d7a4e">{{ g.to }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:940},&quot;streaming&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Wizard&quot;}}">
+class Component extends DCLogic {
+  state = { screen: 'wizard', step: 3 };
+
+  renderVals() {
+    const sc = this.state.screen;
+    const s = this.state.step;
+    const set = k => () => this.setState({ screen: k });
+
+    const free = { bg: '#e8f7ef', fg: '#0d7a4e' };
+    const taken = { bg: '#fbecec', fg: '#a33b3b' };
+    const unk = { bg: '#fdf3e3', fg: '#9a6a12' };
+    const chk = (label, value, kind) => ({ label, value, ...kind });
+
+    const mk = (name, why, high, checks, unlocked, liked) => ({
+      name, why,
+      allFree: high,
+      border: high ? '#c9e9d8' : '#e3e7e5',
+      upColor: liked ? '#0d7a4e' : '#8a938f',
+      upBd: liked ? '#c9e9d8' : '#dde2e0',
+      checks,
+      locked: !unlocked,
+      deepLabel: unlocked ? 'Marque et réseaux vérifiés' : 'INPI, EUIPO et 4 réseaux — 50 crédits',
+      deepFg: unlocked ? '#0d7a4e' : '#5c6663',
+      deepBg: unlocked ? '#e8f7ef' : '#fff',
+      deepBd: unlocked ? '#c9e9d8' : '#dde2e0',
+      deepBtnFg: unlocked ? '#0d7a4e' : '#2c3532',
+      cta: unlocked ? 'Voir le rapport' : 'Vérifier la marque'
+    });
+
+    const stepLabels = ['Description', 'Mots-clés', 'Extensions'];
+
+    return {
+      tabs: [['wizard', 'Wizard'], ['drawer', 'Tiroir projets'], ['pick', 'Aide-moi à choisir'], ['diff', 'Écarts relevés']].map(([k, label]) => ({
+        label, pick: set(k),
+        bg: sc === k ? '#3ddc91' : 'transparent',
+        fg: sc === k ? '#062018' : '#9aa5a0',
+        bd: sc === k ? '#3ddc91' : '#2a3236'
+      })),
+      isWizard: sc === 'wizard', isDrawer: sc === 'drawer',
+      isPick: sc === 'pick', isDiff: sc === 'diff',
+
+      isStep1: s === 1, isStep2: s === 2, isStep3: s === 3,
+      steps: [1, 2, 3].map(n => ({
+        n, label: stepLabels[n - 1],
+        mark: n < s ? '✓' : String(n),
+        bg: n === s ? '#0d7a4e' : (n < s ? '#e8f7ef' : '#fff'),
+        fg: n === s ? '#fff' : (n < s ? '#0d7a4e' : '#8a938f'),
+        bd: n === s ? '#0d7a4e' : (n < s ? '#c9e9d8' : '#dde2e0'),
+        labelColor: n === s ? '#0b0e10' : '#8a938f',
+        pick: () => this.setState({ step: n })
+      })),
+
+      streaming: this.props.streaming ?? false,
+      keywords: ['reconditionné', 'mobilité douce', 'seconde main', 'garantie', 'vélo', 'urbain'],
+      extensions: ['.com', '.fr', '.eu'],
+      lengths: [4, 5, 6, 7].map(n => ({
+        label: n + ' car.',
+        bg: n === 6 ? '#0d7a4e' : '#fff',
+        fg: n === 6 ? '#fff' : '#5c6663',
+        weight: n === 6 ? '700' : '400'
+      })),
+      competitors: [
+        { domain: 'upway.fr', note: 'leader du vélo reconditionné', opacity: '1', upColor: '#0d7a4e', downColor: '#c9cfcc', strike: 'none' },
+        { domain: 'loewi.fr', note: 'réparation et reconditionnement', opacity: '1', upColor: '#c9cfcc', downColor: '#c9cfcc', strike: 'none' },
+        { domain: 'cyclofix.fr', note: 'réparation à domicile', opacity: '0.5', upColor: '#c9cfcc', downColor: '#a33b3b', strike: 'line-through' },
+        { domain: 'decathlon-occasions.fr', note: 'seconde main généraliste', opacity: '1', upColor: '#c9cfcc', downColor: '#c9cfcc', strike: 'none' }
+      ],
+
+      cards: [
+        mk('Roulio', 'roue + suffixe latin', true, [chk('roulio.com', 'libre', free), chk('roulio.fr', 'libre', free), chk('roulio.eu', 'libre', free)], true, true),
+        mk('Bikara', 'bike + sonorité douce', true, [chk('bikara.com', 'libre', free), chk('bikara.fr', 'libre', free), chk('bikara.eu', 'libre', free)], false, true),
+        mk('Nervio', 'nerf, réactivité', true, [chk('nervio.com', 'libre', free), chk('nervio.fr', 'libre', free), chk('nervio.eu', 'libre', free)]),
+        mk('Sprocco', 'sprocket, italianisé', false, [chk('sprocco.com', 'libre', free), chk('sprocco.fr', 'libre', free), chk('sprocco.eu', 'pris', taken)]),
+        mk('Vélorama', 'vélo + panorama', false, [chk('velorama.com', 'pris', taken), chk('velorama.fr', 'libre', free), chk('velorama.eu', 'libre', free)]),
+        mk('Moyeu', 'le cœur de la roue', false, [chk('moyeu.com', 'pris', taken), chk('moyeu.fr', 'libre', free), chk('moyeu.eu', 'non vérifiable', unk)]),
+        mk('Ourvo', 'court, sans référent', true, [chk('ourvo.com', 'libre', free), chk('ourvo.fr', 'libre', free), chk('ourvo.eu', 'libre', free)]),
+        mk('Cyclique', 'le cycle, la circularité', false, [chk('cyclique.com', 'pris', taken), chk('cyclique.fr', 'libre', free), chk('cyclique.eu', 'pris', taken)]),
+        mk('Kabano', 'sonorité ouverte', false, [chk('kabano.com', 'libre', free), chk('kabano.fr', 'libre', free), chk('kabano.eu', 'pris', taken)])
+      ],
+
+      projects: [
+        { name: 'Vélos reconditionnés', meta: '9 suggestions · 9 crédits · il y a 2 min', free: '9', countColor: '#0d7a4e', hasReport: true },
+        { name: 'Cosmétiques solides', meta: '12 suggestions · 12 crédits · 12 août', free: '12', countColor: '#0d7a4e', hasReport: false },
+        { name: 'CRM pour artisans', meta: '8 suggestions · 8 crédits · 4 août', free: '8', countColor: '#5c6663', hasReport: false },
+        { name: 'Sans titre', meta: 'recherche non lancée · 2 août', free: '0', countColor: '#c9cfcc', hasReport: false }
+      ],
+
+      gaps: [
+        { tag: 'Bloquant', bg: '#fbecec', fg: '#a33b3b', title: 'app.html est encore le gabarit de démarrage Angular', body: 'Le fichier contient toujours le logo Angular, un « Hello, {{ title() }} », « Congratulations! Your app is running 🎉 » et six pastilles vers angular.dev — dans des violets et roses en oklch, en police Inter. Le tout est placé AVANT le router-outlet, donc rendu au-dessus de chaque route. C\'est à traiter en premier : aucun réglage de palette ne compensera ça.', from: 'app.html : placeholder + <router-outlet />', to: '<router-outlet /> seul' },
+        { tag: 'Couleur', bg: '#fbecec', fg: '#a33b3b', title: 'Un accent indigo sur les actions monétisées', body: 'Le bouton du rapport, le bouton par ligne, le lien de retour et le bandeau héros du rapport utilisent un indigo absent de la palette — dont un dégradé indigo → violet sur le seul appel à l\'action payant. Aucun dégradé n\'existe dans le système.', from: '#4f46e5 · #7c3aed · #4338ca · #eef2ff', to: 'var(--nm-accent-on-light) · aplat' },
+        { tag: 'Couleur', bg: '#fbecec', fg: '#a33b3b', title: 'Quatre palettes d\'alerte concurrentes', body: 'La reformulation IA est en bleu #eff6ff/#1d4ed8, le streaming en #f0f9ff/#0284c7, les avertissements en #fffbeb/#92400e, les titres de résultats en #16a34a, les erreurs en #dc2626. Le système en définit déjà trois paires, cohérentes avec les verdicts. Aucune de celles employées n\'en fait partie.', from: '#eff6ff · #f0f9ff · #fffbeb · #16a34a', to: 'jetons --nm-verdict-*-light-*' },
+        { tag: 'Couleur', bg: '#fbecec', fg: '#a33b3b', title: 'Les gris PrimeNG au lieu des surfaces', body: 'Les cartes, les libellés et les fonds passent par var(--p-surface-*) et par des hex en dur (#9ca3af, #6b7280, #374151, #e5e7eb, #f8fafc). Ces gris sont légèrement bleutés là où ceux du système sont verdâtres : côte à côte, l\'écart se voit.', from: 'var(--p-surface-400) · #9ca3af · #f8fafc', to: 'var(--nm-text-light-3) · var(--nm-bg-light)' },
+        { tag: 'Typo', bg: '#fdf3e3', fg: '#9a6a12', title: 'monospace pour les noms de marque', body: 'Les noms recommandés, les domaines des concurrents et le titre du rapport sont en font-family: monospace — donc en Courier ou Menlo selon la machine. Le système réserve Space Grotesk aux noms et aux chiffres : c\'est précisément ce que ces éléments sont.', from: 'font-family: monospace', to: 'var(--nm-font-display)' },
+        { tag: 'Typo', bg: '#fdf3e3', fg: '#9a6a12', title: 'Des tailles en rem sous le plancher lisible', body: 'On trouve 0.68rem, 0.7rem, 0.72rem et 0.75rem pour du texte courant — soit environ 11px, là où le système réserve 11px aux seuls sur-titres en majuscules et fixe le texte d\'interface à 13px minimum.', from: '0.68rem — 0.75rem', to: 'var(--nm-text-ui-sm) : 13px' },
+        { tag: 'Cibles', bg: '#fdf3e3', fg: '#9a6a12', title: 'Des boutons à 0,2rem de padding', body: 'Le bouton registrar, son chevron, les pouces de notation des concurrents et le lien « copier le tableau » n\'ont ni hauteur minimale ni padding suffisant : plusieurs tombent sous 30px de haut. Le plancher du système est à 44px, et ce sont les commandes les plus cliquées de l\'écran.', from: 'padding: 0.2rem 0.35rem', to: 'min-height: var(--nm-touch-min)' },
+        { tag: 'Rayons', bg: '#fdf3e3', fg: '#9a6a12', title: 'Des rayons de 4px contre 8 à 18px', body: 'Le bouton registrar et son menu déroulant sont à 0.25rem. À côté de cartes à 14px et de dialogues à 18px, ces angles presque vifs se lisent immédiatement comme un autre composant, d\'une autre époque du produit.', from: 'border-radius: 0.25rem', to: 'var(--nm-radius-sm) — var(--nm-radius-3xl)' },
+        { tag: 'Structure', bg: '#eef2fb', fg: '#3b5aa3', title: 'Deux boutons « Aide-moi à choisir » sur le même écran', body: 'Le splitButton apparaît une fois au-dessus de la grille et une seconde fois dans la barre de navigation du bas, avec les mêmes libellé, icône et action. Ce n\'est pas un problème de thème, mais ça se voit autant.', from: 'p-splitButton × 2', to: 'un seul, au-dessus de la grille' },
+        { tag: 'Copie', bg: '#eef2fb', fg: '#3b5aa3', title: 'Des libellés qui parlent encore du tableau', body: 'La grille de cartes a remplacé la matrice noms × extensions, mais les libellés n\'ont pas suivi : la clé i18n WIZARD.STEP3.COPY_TABLE dit « Copier le tableau » dans les 19 langues. « Copier les résultats » est juste quel que soit l\'affichage — et préférable à « Copier pour Excel », qui nomme un tableur parmi d\'autres et vieillit mal en traduction. Renommer la clé, pas seulement sa valeur française.', from: 'COPY_TABLE : « Copier le tableau »', to: 'COPY_RESULTS : « Copier les résultats »' },
+        { tag: 'Dette', bg: '#f0ecfb', fg: '#5b46a3', title: 'Le bouton registrar est orphelin', body: 'Les règles .reg-split, .reg-split__main, .reg-split__toggle et .reg-split__menu (commentées « US-022 ») vivent toujours dans wizard.css, mais la grille de cartes qui a remplacé le tableau n\'expose plus ce bouton : results-grid.css ne déclare qu\'un bouton principal et deux boutons de notation. Soit le lien vers le registrar a disparu du parcours — et c\'est une perte de fonction à rétablir dans la carte —, soit il est bien parti volontairement, et ces 60 lignes de CSS doivent l\'être aussi. À trancher, mais pas à laisser en l\'état.', from: '.reg-split* dans wizard.css', to: 'rétabli dans la carte, ou supprimé' },
+        { tag: 'Décision', bg: '#eef2fb', fg: '#3b5aa3', title: 'La grille est un panneau sombre dans un wizard clair', body: 'results-grid.css pose background: var(--nm-bg-dark) sur son :host, avec ce commentaire assumé : « elle se présente comme un panneau de résultats plutôt que de dépendre d\'un parent qu\'il aurait fallu retourner en entier ». C\'est cohérent en soi, mais c\'est la rupture visuelle la plus forte de l\'écran — un aplat noir au milieu d\'un formulaire blanc. À arbitrer avec le thème clair/sombre : soit la grille suit le mode, soit tout le wizard passe en sombre.', from: ':host { background: var(--nm-bg-dark) }', to: 'jetons de rôle --nm-app-*' },
+        { tag: 'Dette', bg: '#f0ecfb', fg: '#5b46a3', title: 'Le héros de la landing est déclaré deux fois', body: 'Hors wizard : les règles .nm-landing, .nm-hero, .nm-hero__inner et .nm-hero__col existent à l\'identique dans components.css et dans landing.css, commentaires compris. Deux sources pour une même règle finiront par diverger.', from: 'components.css + landing.css', to: 'landing.css seul' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
