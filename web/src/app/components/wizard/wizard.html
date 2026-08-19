@@ -345,104 +345,39 @@
               (onClick)="helpMePick('all')"
               appendTo="body">
             </p-splitButton>
+            <!-- Rétabli ici : ce bouton vivait dans l'en-tête du tableau, que la
+                 refonte remplace par des cartes. Sans lui, les noms rejetés
+                 deviennent définitivement invisibles. -->
+            <button type="button" (click)="showDisliked.set(!showDisliked())"
+              style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--p-surface-400); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem"
+              [attr.aria-pressed]="showDisliked()"
+              [pTooltip]="(showDisliked() ? ('WIZARD.STEP3.FILTER_HIDE_DISLIKED' | translate) : ('WIZARD.STEP3.FILTER_SHOW_ALL' | translate))"
+              tooltipPosition="top">
+              <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()" style="font-size: 0.75rem"></i>
+              <span>{{ (showDisliked() ? 'WIZARD.STEP3.FILTER_HIDE_DISLIKED' : 'WIZARD.STEP3.FILTER_SHOW_ALL') | translate }}</span>
+            </button>
             <button type="button" (click)="copyTable()" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--p-surface-400); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0; transition: color 0.15s; margin-left: auto" class="copy-table-btn">
               <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'" [style.color]="copiedDomain() === 'table' ? '#16a34a' : null"></i>
               <span>{{ (copiedDomain() === 'table' ? 'WIZARD.STEP3.COPIED' : 'WIZARD.STEP3.COPY_TABLE') | translate }}</span>
             </button>
           </div>
 
-          <div class="border-1 border-solid border-round-lg shadow-1 overflow-x-auto" style="width: 100%; max-width: 36rem; background: white">
-            <p-table [value]="filteredDomains()" styleClass="p-datatable-sm" [tableStyle]="{'width': '100%'}">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th style="background: var(--p-surface-50); min-width: 100px">
-                    Nom de domaine
-                    <button type="button"
-                      (click)="showDisliked.set(!showDisliked()); $event.stopPropagation()"
-                      style="background: none; border: none; cursor: pointer; margin-left: 0.4rem; padding: 0; vertical-align: middle; opacity: 0.55"
-                      [pTooltip]="(showDisliked() ? ('WIZARD.STEP3.FILTER_HIDE_DISLIKED' | translate) : ('WIZARD.STEP3.FILTER_SHOW_ALL' | translate))"
-                      tooltipPosition="top">
-                      <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()" style="font-size: 0.75rem"></i>
-                    </button>
-                  </th>
-                  <th *ngFor="let ext of selectedExtensions()" class="text-center px-1" style="background: var(--p-surface-50)">{{ ext }}</th>
-                  <th class="text-center" style="background: var(--p-surface-50); width: 1px; white-space: nowrap; padding: 0.5rem 0.75rem">
-                    <i class="pi pi-shopping-cart" style="font-size: 0.8rem; color: var(--p-surface-400)" [pTooltip]="'WIZARD.STEP3.BUY_COL_HEADER' | translate" tooltipPosition="top"></i>
-                  </th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-result>
-                <tr class="domain-row">
-                  <td class="font-bold text-sm py-2 px-2" style="font-family: monospace">
-                    <div style="display: flex; align-items: center; gap: 0.75rem">
-                      <button type="button"
-                        (click)="setRating(result, result.rating === 'liked' ? 'neutral' : 'liked'); $event.stopPropagation()"
-                        style="background: none; border: none; cursor: pointer; font-size: 1.1rem; flex-shrink: 0; padding: 0"
-                        [pTooltip]="'WIZARD.STEP3.RATE_LIKED' | translate" tooltipPosition="top">
-                        <i class="pi" [class.pi-thumbs-up-fill]="result.rating === 'liked'" [class.pi-thumbs-up]="result.rating !== 'liked'"
-                           style="color: #d1d5db"></i>
-                      </button>
-                      <button type="button"
-                        (click)="setRating(result, result.rating === 'disliked' ? 'neutral' : 'disliked'); $event.stopPropagation()"
-                        style="background: none; border: none; cursor: pointer; font-size: 1.1rem; flex-shrink: 0; padding: 0"
-                        [pTooltip]="'WIZARD.STEP3.RATE_DISLIKED' | translate" tooltipPosition="top">
-                        <i class="pi" [class.pi-thumbs-down-fill]="result.rating === 'disliked'" [class.pi-thumbs-down]="result.rating !== 'disliked'"
-                           style="color: #d1d5db"></i>
-                      </button>
-                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
-                      <span *ngIf="isLocal() && result.style && result.style !== 'standard'"
-                            style="font-size: 0.68rem; padding: 0.1rem 0.4rem; border-radius: 999px; font-family: sans-serif; font-weight: 500; white-space: nowrap; flex-shrink: 0; line-height: 1.5"
-                            [style.background]="result.style === 'descriptive' ? '#dbeafe' : '#fef3c7'"
-                            [style.color]="result.style === 'descriptive' ? '#1e40af' : '#92400e'">
-                        {{ (result.style === 'descriptive' ? 'WIZARD.STYLE.DESCRIPTIVE' : 'WIZARD.STYLE.CULTURAL') | translate }}
-                      </span>
-                      <i *ngIf="result.isManual" class="pi pi-pencil" style="font-size: 0.7rem; color: #9ca3af; flex-shrink: 0" [pTooltip]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate" tooltipPosition="top"></i>
-                      <!-- US-005 — note en étoiles (spinner pendant le calcul, étoiles une fois dispo) -->
-                      <i *ngIf="result.analysisPending" class="pi pi-spin pi-spinner" style="font-size: 0.75rem; color: #f59e0b; flex-shrink: 0" [pTooltip]="'WIZARD.STEP3.ANALYSIS_PENDING' | translate" tooltipPosition="top"></i>
-                      <button *ngIf="result.rating === 'liked' && result.analysis && !result.analysisPending" type="button"
-                              (click)="toggleAnalysis(result.id); $event.stopPropagation()"
-                              style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; display: flex; align-items: center; gap: 3px"
-                              [pTooltip]="'WIZARD.STEP3.ANALYSIS_TOGGLE' | translate" tooltipPosition="top">
-                        <i *ngFor="let filled of getStarArray(parseAnalysisScore(result.analysis))"
-                           class="pi"
-                           [class.pi-star-fill]="filled"
-                           [class.pi-star]="!filled"
-                           [style.color]="filled ? '#f59e0b' : '#d1d5db'"
-                           style="font-size: 0.8rem"></i>
-                        <i class="pi pi-chevron-down" style="font-size: 0.65rem; color: #9ca3af; margin-left: 2px; transition: transform 0.2s ease"
-                           [style.transform]="expandedAnalysisId() === result.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
-                      </button>
-                    </div>
-                  </td>
-                  <td *ngFor="let ext of selectedExtensions()" class="text-center px-1" style="vertical-align: top; padding-top: 0.6rem">
-                    <i *ngIf="result.allExtensions[ext] === true" class="pi pi-check text-lg font-bold" [style.color]="isFullyAvailable(result) ? '#16a34a' : '#22c55e'" title="Disponible"></i>
-                    <i *ngIf="result.allExtensions[ext] === undefined" class="pi pi-spin pi-spinner text-base" style="color: #9ca3af" title="Vérification..."></i>
-                    <i *ngIf="result.allExtensions[ext] === null" class="pi pi-question-circle text-base" style="color: #9ca3af" title="Disponibilité non vérifiable pour cette extension"></i>
-                    <i *ngIf="result.allExtensions[ext] === false" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
-                  </td>
-                  <!-- Rapport de disponibilité de marque (US-054) — remplace l'ancien bouton registrar -->
-                  <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem; vertical-align: top; padding-top: 0.5rem">
-                    <!-- Déjà généré : un lien explicite, pas un bouton payant -->
-                    <a *ngIf="hasReport(result.name)" class="report-link" (click)="askBrandReport(result.name); $event.stopPropagation()"
-                       [pTooltip]="'WIZARD.STEP3.REPORT_VIEW_HINT' | translate" tooltipPosition="left">
-                      <i class="pi pi-file-check"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_VIEW' | translate }}</span>
-                    </a>
-                    <button *ngIf="!hasReport(result.name)" type="button" class="report-btn" (click)="askBrandReport(result.name); $event.stopPropagation()"
-                            [pTooltip]="'WIZARD.STEP3.REPORT_HINT' | translate" tooltipPosition="left">
-                      <i class="pi pi-verified"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_SHORT' | translate }}</span>
-                    </button>
-                  </td>
-                </tr>
-                <!-- Panneau d'analyse pleine largeur -->
-                <tr *ngIf="result.analysis && expandedAnalysisId() === result.id" class="analysis-row">
-                  <td [attr.colspan]="selectedExtensions().length + 2"
-                      style="padding: 0 0.5rem 0.75rem 0.5rem; border-top: none">
-                    <div style="padding: 0.875rem 1rem; background: white; font-family: sans-serif;"
-                         [innerHTML]="parseAnalysisHtml(result.analysis)"></div>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
+          <!-- Grille de cartes (refonte, étape 3). Remplace la matrice
+               noms × extensions. La logique reste dans le wizard : le
+               composant ne reçoit que des données et remonte des événements. -->
+          <div style="width: 100%; max-width: 60rem">
+            <app-results-grid
+              [domains]="filteredDomains()"
+              [extensions]="selectedExtensions()"
+              [reportedNames]="reportedNames()"
+              [reportCost]="brandReportCost"
+              [isLocal]="isLocal()"
+              [expandedAnalysisId]="expandedAnalysisId()"
+              [analysisRenderer]="analysisRenderer"
+              (rate)="setRating($event.result, $event.rating)"
+              (openReport)="askBrandReport($event)"
+              (toggleAnalysis)="toggleAnalysis($event)">
+            </app-results-grid>
           </div>
 
         </ng-container>

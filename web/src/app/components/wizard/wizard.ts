@@ -30,6 +30,7 @@ import { ProjectService } from '../../services/project';
 import { FeedbackService } from '../../services/feedback';
 import { AnalyticsService } from '../../services/analytics';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ResultsGridComponent } from '../results/results-grid';
 
 @Component({
   selector: 'app-wizard',
@@ -53,7 +54,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     Dialog,
     SplitButton,
     Toast,
-    TranslatePipe
+    TranslatePipe,
+    ResultsGridComponent
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
@@ -1174,6 +1176,9 @@ export class WizardComponent implements OnInit {
     return Array.from({ length: 5 }, (_, i) => i < full);
   }
 
+  /** Passé tel quel à la grille de résultats, qui n'a pas de sanitizer. */
+  readonly analysisRenderer = (a: string | null): SafeHtml => this.parseAnalysisHtml(a);
+
   parseAnalysisHtml(analysis: string | null): SafeHtml {
     if (!analysis) return this.sanitizer.bypassSecurityTrustHtml('');
     try {
@@ -1349,9 +1354,6 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  isFullyAvailable(result: any): boolean {
-    return this.selectedExtensions().every(ext => result.allExtensions[ext]);
-  }
 
   private startSearchTimeout() {
     this.clearSearchTimeout();
