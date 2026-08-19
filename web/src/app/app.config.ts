@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import { definePreset } from '@primeuix/themes';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { KeycloakService, KeycloakBearerInterceptor } from 'keycloak-angular';
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
@@ -101,6 +102,40 @@ function initializeApp(
   };
 }
 
+/**
+ * Préréglage PrimeNG aligné sur les tokens de la refonte.
+ *
+ * Sans cela, les tokens `--nm-*` ne toucheraient que le code écrit à la main :
+ * les boutons, champs et badges PrimeNG resteraient sur l'émeraude `#10b981`
+ * de l'ancienne marque, et deux verts cohabiteraient à l'écran.
+ *
+ * Les valeurs sont écrites en dur plutôt qu'en `var(--nm-…)` : PrimeNG dérive
+ * ses propres jetons de cette palette (survols, états désactivés, halos de
+ * focus) par des calculs de couleur, et ne sait pas le faire depuis une
+ * référence CSS non résolue.
+ *
+ * L'échelle est construite autour des deux accents du design — `#3ddc91` pour
+ * les surfaces sombres, `#0d9a63` pour les surfaces claires — placés
+ * respectivement en 400 et 600, et non l'un des deux étiré sur dix nuances.
+ */
+const NamoramaPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50:  '#eafaf2',
+      100: '#c9f3de',
+      200: '#a3ebc8',
+      300: '#6ee7a8',  // --nm-accent-hover
+      400: '#3ddc91',  // --nm-accent — surfaces sombres
+      500: '#16c47a',
+      600: '#0d9a63',  // --nm-accent-on-light — surfaces claires (AA sur blanc)
+      700: '#0b8355',  // --nm-accent-on-light-hover
+      800: '#0a6b46',
+      900: '#075437',
+      950: '#062018',  // --nm-on-accent
+    },
+  },
+});
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -120,8 +155,13 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     providePrimeNG({
         theme: {
-            preset: Aura,
+            preset: NamoramaPreset,
             options: {
+                // La refonte n'est pas « un mode sombre » : l'accueil et les
+                // résultats sont sombres, le rapport est clair, dans la même
+                // session. Les surfaces sont donc portées par les jetons
+                // `--nm-*`, pas par une bascule globale de thème — qui
+                // inverserait aussi le rapport, à tort.
                 darkModeSelector: false
             }
         }

@@ -2,6 +2,11 @@
 @import "primeicons/primeicons.css";
 @import "vanilla-cookieconsent/dist/cookieconsent.css";
 
+/* Refonte — étape 1. Les @import doivent précéder toute règle : garder ces
+   deux lignes ici, et non plus bas dans le fichier. */
+@import "./styles/fonts.css";
+@import "./styles/tokens.css";
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -9,7 +14,8 @@
 
 body {
     margin: 0;
-    font-family: var(--font-family, sans-serif);
+    /* Police du corps : IBM Plex Sans, avec sa pile de repli. */
+    font-family: var(--nm-font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--p-surface-100, #f3f4f6);
