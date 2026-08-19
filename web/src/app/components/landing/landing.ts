@@ -1,277 +1,366 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
 
 /**
- * Landing page de contenu, prérendue en HTML statique (SSG).
+ * Accueil — étape 2 de la refonte.
  *
- * Objectif SEO : fournir à Google un HTML riche en texte dès le chargement,
- * indépendamment du JavaScript. Le contenu est volontairement écrit en dur
- * (français — marché cible principal) plutôt que via ngx-translate, pour
- * garantir qu'il figure dans le HTML prérendu sans dépendre d'un chargement
- * de traductions asynchrone.
+ * Prérendue en HTML statique (SSG). Le contenu reste écrit en dur en français
+ * plutôt que via ngx-translate : au prerender, `CustomTranslateLoader` renvoie
+ * un dictionnaire vide côté serveur, donc tout texte passé par le pipe
+ * `translate` sortirait en clé brute dans le HTML indexé.
  *
- * Aucune API navigateur ici : le composant doit rester rendu côté serveur.
+ * Aucune API navigateur : le composant doit rester rendu côté serveur.
+ *
+ * Ce qui est CONSERVÉ de la version précédente, volontairement : la FAQ, le
+ * paragraphe « pour quels projets », les liens sectoriels et les liens de
+ * guides. La maquette ne les montre pas, mais ce sont les seuls contenus
+ * indexables du site — et la FAQ est adossée au bloc JSON-LD `FAQPage` de
+ * `index.html`, qui exige que les questions soient visibles sur la page. Les
+ * retirer aurait cassé le balisage en plus de vider la page de son texte.
+ *
+ * `p-button` n'est pas utilisé ici : les CTA de la maquette ont leurs propres
+ * aplats, rayons et survols, et PrimeNG impose les siens sur ses composants.
+ * Des `<a>` stylés donnent le rendu exact et restent des liens réels — donc
+ * suivis par Google et ouvrables dans un nouvel onglet.
  */
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [RouterModule, ButtonModule],
+  imports: [RouterModule],
   template: `
-    <article class="landing">
-      <!-- Hero -->
-      <header style="text-align: center; padding: 2rem 0 1rem">
-        <!--
-          Les trois variantes sont présentes dans le HTML prérendu (aucune n'est
-          injectée en JS) : Google et les lecteurs d'écran lisent la phrase
-          complète « nom de produit / marque / société », tandis que le CSS n'en
-          montre qu'une à la fois. Les séparateurs sont masqués visuellement mais
-          conservés dans le texte, pour que la phrase reste lisible à l'extraction.
-        -->
-        <h1 style="font-size: clamp(1.9rem, 5vw, 2.9rem); font-weight: 800; line-height: 1.15; margin: 0 0 1rem; color: var(--p-surface-900)">
-          Trouvez un nom de <span class="word-rotator"><span class="word-rotator__item word-rotator__item--1">produit</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--2">marque</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--3">société</span></span><span class="sr-only">&nbsp;</span><br />dont le domaine est disponible
-        </h1>
-        <p style="font-size: 1.15rem; max-width: 42rem; margin: 0 auto 1.75rem; color: var(--p-surface-600); line-height: 1.6">
-          Décrivez votre projet : l'intelligence artificielle repère les solutions déjà
-          présentes sur votre marché, génère des noms de produit, de marque ou de société
-          originaux, et <strong>vérifie en temps réel la disponibilité du nom de domaine</strong>
-          via une requête Whois réelle.
-        </p>
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem">
-          <a routerLink="/app">
-            <p-button label="Trouver mon nom" icon="pi pi-compass" size="large" [rounded]="true"></p-button>
-          </a>
-          <span style="font-size: 0.9rem; color: var(--p-surface-500)">
-            100 crédits offerts &middot; sans abonnement &middot; testez sans inscription
-          </span>
-        </div>
-      </header>
+    <article class="nm-landing">
 
-      <!-- Comment ça marche -->
-      <section style="margin-top: 3.5rem">
-        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; color: var(--p-surface-900)">
-          Comment trouver un nom de produit ou de marque disponible ?
-        </h2>
-        <p style="text-align: center; color: var(--p-surface-500); margin: 0 auto 2rem; max-width: 38rem">
-          Trois étapes pour passer de l'idée au nom de domaine réservable.
-        </p>
-        <div class="landing-grid">
-          <div class="landing-card">
-            <div class="landing-step">1</div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0.75rem 0 0.5rem">Décrivez votre projet</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Expliquez en une phrase votre produit, votre activité ou votre cible.
-              L'IA reformule et comprend votre univers de marque.
-            </p>
-          </div>
-          <div class="landing-card">
-            <div class="landing-step">2</div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0.75rem 0 0.5rem">Cadrez et générez</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Vous voyez les noms déjà utilisés dans votre secteur, dites ceux qui vous
-              plaisent, ajustez mots-clés et longueur : l'IA génère en conséquence.
-            </p>
-          </div>
-          <div class="landing-card">
-            <div class="landing-step">3</div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0.75rem 0 0.5rem">Vérifiez la disponibilité</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Chaque nom est testé en direct sur les extensions (.com, .fr, .io…)
-              grâce à une vérification Whois réelle. Vous voyez immédiatement ce qui est libre.
-            </p>
-          </div>
-        </div>
-      </section>
+      <!-- ═══ Héros — aplat sombre, pleine largeur ═══════════════════════ -->
+      <section class="nm-hero">
+        <div class="nm-hero__inner">
 
-      <!-- Pourquoi -->
-      <section style="margin-top: 3.5rem">
-        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 2rem; color: var(--p-surface-900)">
-          Pourquoi utiliser Namorama
-        </h2>
-        <div class="landing-grid">
-          <div class="landing-feature">
-            <i class="pi pi-bolt" style="font-size: 1.5rem; color: var(--p-primary-color)"></i>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0.5rem 0 0.35rem">Disponibilité réelle, pas une estimation</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              Vérification Whois en direct : un domaine affiché comme libre est réellement réservable.
+          <div class="nm-hero__col">
+            <p class="nm-pill">
+              <span class="nm-pill__dot" aria-hidden="true"></span>
+              Registres, INPI et réseaux interrogés en direct
             </p>
-          </div>
-          <div class="landing-feature">
-            <i class="pi pi-sparkles" style="font-size: 1.5rem; color: var(--p-primary-color)"></i>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0.5rem 0 0.35rem">Des idées vraiment originales</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              L'IA explore des combinaisons que vous n'auriez pas imaginées, au-delà des noms déjà pris.
-            </p>
-          </div>
-          <div class="landing-feature">
-            <i class="pi pi-wallet" style="font-size: 1.5rem; color: var(--p-primary-color)"></i>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0.5rem 0 0.35rem">Sans abonnement</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              100 crédits gratuits chaque mois, puis des packs simples. Vous ne payez que ce que vous utilisez.
-            </p>
-          </div>
-          <div class="landing-feature">
-            <i class="pi pi-table" style="font-size: 1.5rem; color: var(--p-primary-color)"></i>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0.5rem 0 0.35rem">Vue par extension</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              Un tableau clair compare chaque nom sur toutes les extensions de domaine d'un coup d'œil.
-            </p>
-          </div>
-        </div>
-      </section>
 
-      <!-- Pour qui -->
-      <section style="margin-top: 3.5rem; text-align: center">
-        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem; color: var(--p-surface-900)">
-          Pour quels projets ?
-        </h2>
-        <p style="max-width: 44rem; margin: 0 auto; color: var(--p-surface-600); line-height: 1.65">
-          Que vous lanciez une <strong>startup</strong>, une <strong>boutique e-commerce</strong>,
-          un <strong>restaurant</strong>, une <strong>application mobile</strong>, un cabinet de
-          <strong>conseil</strong> ou une marque de <strong>cosmétiques</strong>, Namorama vous aide
-          à trouver un nom mémorable dont le nom de domaine est encore libre. Idéal pour
-          choisir un nom de startup, nommer un nouveau produit ou rebrander une activité existante.
-        </p>
-      </section>
+            <!--
+              Les trois variantes sont dans le HTML prérendu (aucune injectée en
+              JS) : Google et les lecteurs d'écran lisent la phrase complète
+              « nom de produit / marque / société », le CSS n'en montre qu'une à
+              la fois. Les séparateurs restent dans le texte, masqués à l'œil.
+            -->
+            <h1 class="nm-h1">
+              Trouvez un nom de <span class="word-rotator"><span class="word-rotator__item word-rotator__item--1">produit</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--2">marque</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--3">société</span></span><span class="sr-only">&nbsp;</span> vraiment libre
+            </h1>
 
-      <!-- FAQ -->
-      <section style="margin-top: 3.5rem">
-        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 2rem; color: var(--p-surface-900)">
-          Questions fréquentes
-        </h2>
-        <div style="max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem">
-          <div>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem">Comment trouver un nom de domaine disponible ?</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Décrivez votre projet sur Namorama : l'IA propose des noms de produit, de marque
-              ou de société, et teste automatiquement leur disponibilité en domaine via une requête
-              Whois. Les noms libres sont affichés instantanément, prêts à être réservés chez votre registrar.
+            <p class="nm-lead">
+              Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs de
+              noms s'arrêtent au .com — Namorama vérifie aussi l'INPI et l'EUIPO,
+              pour que vous choisissiez un nom que vous pourrez vraiment garder.
             </p>
+
+            <div class="nm-cta-row">
+              <a routerLink="/app" class="nm-btn nm-btn--accent">Trouver mon nom</a>
+              <a routerLink="/verifier-disponibilite-nom-de-marque" class="nm-btn nm-btn--ghost">Voir un rapport de marque</a>
+            </div>
+
+            <ul class="nm-mentions">
+              <li>100 crédits offerts chaque mois</li>
+              <li>≈ 50 noms libres + 1 rapport approfondi</li>
+              <li>Sans abonnement</li>
+            </ul>
           </div>
-          <div>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem">Le service est-il gratuit ?</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Oui pour démarrer : vous disposez de 100 crédits gratuits chaque mois, sans abonnement.
-              Une suggestion de domaine coûte 1 crédit. Des packs sans engagement sont disponibles ensuite.
-            </p>
+
+          <!--
+            Démonstration FIGÉE, pas un formulaire : décision explicite du
+            handoff. Les segments changent le volet affiché, rien de plus —
+            aucune saisie, aucun appel réseau. Les boutons portent donc
+            « type="button" » et un « aria-controls » vers le panneau.
+          -->
+          <div class="nm-hero__col">
+            <div class="nm-browser" role="group" aria-label="Aperçu de l'application">
+              <div class="nm-browser__bar" aria-hidden="true">
+                <span class="nm-browser__dot"></span>
+                <span class="nm-browser__dot"></span>
+                <span class="nm-browser__dot"></span>
+                <span class="nm-browser__url">namorama.com/app</span>
+              </div>
+
+              <div class="nm-panel">
+                <div class="nm-steps">
+                  @for (s of steps; track s.n) {
+                    <button type="button"
+                            class="nm-step"
+                            [class.nm-step--on]="step() === s.n"
+                            [attr.aria-pressed]="step() === s.n"
+                            aria-controls="nm-demo-panel"
+                            (click)="step.set(s.n)">
+                      <span class="nm-step__num">{{ s.n }}</span>
+                      <span class="nm-step__label">{{ s.label }}</span>
+                    </button>
+                  }
+                </div>
+
+                <p class="nm-overline">{{ current().overline }}</p>
+
+                <!-- Hauteur plancher : sans elle, la page saute à chaque
+                     changement d'étape, les volets n'ayant pas la même taille. -->
+                <div id="nm-demo-panel" class="nm-panel__body">
+
+                  @switch (step()) {
+                    @case (1) {
+                      <p class="nm-quote">« Des vélos reconditionnés, vendus en ligne, livrés montés. »</p>
+                      <p class="nm-note">L'IA reformule votre projet, puis en extrait les mots qui portent le nom.</p>
+                      <div class="nm-chips">
+                        <span class="nm-chip">vélo</span>
+                        <span class="nm-chip">reconditionné</span>
+                        <span class="nm-chip">roue</span>
+                        <span class="nm-chip nm-chip--accent">+ ajouter</span>
+                      </div>
+                    }
+                    @case (2) {
+                      <div class="nm-chips">
+                        <span class="nm-chip nm-chip--accent">court</span>
+                        <span class="nm-chip nm-chip--accent">inventé</span>
+                        <span class="nm-chip">prononçable en français</span>
+                        <span class="nm-chip">5 à 8 lettres</span>
+                        <span class="nm-chip">évite « bike »</span>
+                      </div>
+                      <p class="nm-note">Déjà pris dans votre secteur — l'IA les évite : Upway, Loewi, Cyclofix.</p>
+                      <p class="nm-note">Classes INPI surveillées : 12 · 35 · 37</p>
+                    }
+                    @case (3) {
+                      <ul class="nm-verdicts">
+                        @for (d of demoDomains; track d.name) {
+                          <li class="nm-verdict">
+                            <span class="nm-verdict__name">{{ d.name }}</span>
+                            <span class="nm-verdict__state" [class]="'nm-verdict__state--' + d.state">{{ d.label }}</span>
+                            <span class="nm-verdict__cost">{{ d.cost }}</span>
+                          </li>
+                        }
+                      </ul>
+                      <p class="nm-note">Seuls les domaines libres consomment un crédit. Les autres sont offerts.</p>
+                    }
+                    @case (4) {
+                      <div class="nm-report-teaser">
+                        <p class="nm-report-teaser__name">roulio</p>
+                        <p class="nm-report-teaser__price">50 crédits</p>
+                        <ul class="nm-report-teaser__list">
+                          <li>Marques françaises — INPI</li>
+                          <li>Marques européennes — EUIPO</li>
+                          <li>Pseudos sur 4 réseaux</li>
+                          <li>X · &#64;roulio</li>
+                        </ul>
+                        <p class="nm-note">Facturé une seule fois par nom. Le rapport reste dans votre projet, exportable en PDF.</p>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem">La disponibilité affichée est-elle fiable ?</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Oui. Contrairement aux générateurs qui se contentent d'estimer, Namorama interroge
-              le registre Whois en temps réel. Un domaine indiqué comme disponible l'est réellement
-              au moment de la recherche.
-            </p>
-          </div>
-          <div>
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem">Quelles extensions de domaine sont vérifiées ?</h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.55">
-              Les extensions les plus courantes comme .com, .fr, .io, .co ou .net, ainsi que d'autres
-              que vous pouvez ajouter selon votre projet. Le résultat s'affiche sous forme de tableau comparatif.
-            </p>
-          </div>
+
         </div>
       </section>
 
-      <!-- Générateurs par secteur : la home est la page la plus forte du site,
-           elle doit transmettre son autorité aux pages commerciales. -->
-      <section style="margin-top: 3.5rem; text-align: center">
-        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--p-surface-900)">
-          Un générateur adapté à votre secteur
-        </h2>
-        <p style="color: var(--p-surface-500); margin: 0 auto 1.5rem; max-width: 38rem">
-          Les codes du naming changent d'un marché à l'autre. Choisissez le vôtre.
-        </p>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center">
-          <a routerLink="/generateur-nom-de-produit" class="sector-link">Nom de produit</a>
-          <a routerLink="/generateur-nom-saas" class="sector-link">SaaS / logiciel B2B</a>
-          <a routerLink="/generateur-nom-startup-ia" class="sector-link">Startup IA</a>
-          <a routerLink="/generateur-nom-ecommerce" class="sector-link">Boutique en ligne</a>
-          <a routerLink="/generateur-nom-marque-cosmetique" class="sector-link">Cosmétique &amp; beauté</a>
-          <a routerLink="/nom-de-startup-court-invente" class="sector-link">Nom court et inventé</a>
-        </div>
-      </section>
+      <!-- ═══ Sections claires ═══════════════════════════════════════════ -->
+      <div class="nm-light">
 
-      <!-- Ressources / liens internes SEO -->
-      <section style="margin-top: 3.5rem">
-        <h2 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; color: var(--p-surface-900)">
-          Guides : trouver un nom et son domaine
-        </h2>
-        <p style="text-align: center; color: var(--p-surface-500); margin: 0 auto 2rem; max-width: 38rem">
-          Marque, entreprise, produit, startup — la méthode pour chaque projet.
-          <a routerLink="/guides" style="color: var(--p-primary-600)">Voir tous les guides</a>.
-        </p>
-        <div class="landing-grid" style="max-width: 44rem; margin: 0 auto">
-          <a routerLink="/guides/trouver-nom-de-marque" class="landing-card" style="text-decoration: none; color: inherit; display: block">
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
-              Trouver un nom de marque
-            </h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              La méthode en 5 étapes pour un nom mémorable dont le domaine est encore libre.
-            </p>
-          </a>
-          <a routerLink="/guides/trouver-nom-entreprise" class="landing-card" style="text-decoration: none; color: inherit; display: block">
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
-              Trouver un nom d'entreprise
-            </h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              Un nom solide, libre au registre (INPI/RCS) et disponible en domaine.
-            </p>
-          </a>
-          <a routerLink="/guides/trouver-nom-de-produit" class="landing-card" style="text-decoration: none; color: inherit; display: block">
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
-              Trouver un nom de produit
-            </h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              Descriptif, évocateur ou inventé : nommer un produit qui marque les esprits.
-            </p>
-          </a>
-          <a routerLink="/guides/trouver-nom-de-startup" class="landing-card" style="text-decoration: none; color: inherit; display: block">
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--p-surface-900)">
-              Trouver un nom de startup
-            </h3>
-            <p style="margin: 0; color: var(--p-surface-600); line-height: 1.5">
-              Court, brandable, disponible en .com / .io / .ai dès le premier jour.
-            </p>
-          </a>
-        </div>
-      </section>
+        <!-- Les 4 contrôles -->
+        <section class="nm-section">
+          <h2 class="nm-h2">Le .com est libre. La marque, elle, est déposée depuis 2019.</h2>
+          <p class="nm-section__lead">
+            C'est la mauvaise surprise que Namorama vous évite. Chaque nom passe
+            quatre contrôles, pas un.
+          </p>
+          <div class="nm-grid-4">
+            @for (c of controls; track c.overline) {
+              <div class="nm-card">
+                <p class="nm-card__overline">{{ c.overline }}</p>
+                <h3 class="nm-card__title">{{ c.title }}</h3>
+                <p class="nm-card__text">{{ c.text }}</p>
+              </div>
+            }
+          </div>
+        </section>
 
-      <!-- CTA final -->
-      <section style="margin: 4rem 0 2rem; text-align: center">
-        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--p-surface-900)">
-          Prêt à trouver votre nom ?
-        </h2>
-        <a routerLink="/app">
-          <p-button label="Lancer une recherche gratuite" icon="pi pi-arrow-right" iconPos="right" size="large" [rounded]="true"></p-button>
-        </a>
-      </section>
+        <!-- Comparatif -->
+        <section class="nm-section">
+          <div class="nm-table-scroll" tabindex="0" role="region" aria-label="Comparatif des générateurs de noms">
+          <div class="nm-table" role="table">
+            <div class="nm-table__row nm-table__row--head" role="row">
+              <span role="columnheader">Ce que vous obtenez</span>
+              <span role="columnheader" class="nm-table__us">Namorama</span>
+              <span role="columnheader">Générateurs IA</span>
+              <span role="columnheader">Registrars</span>
+            </div>
+            @for (r of compare; track r.critere) {
+              <div class="nm-table__row" role="row">
+                <span role="cell">{{ r.critere }}</span>
+                <span role="cell" class="nm-table__us">{{ r.nous }}</span>
+                <span role="cell">{{ r.ia }}</span>
+                <span role="cell">{{ r.reg }}</span>
+              </div>
+            }
+          </div>
+          </div>
+        </section>
+
+        <!-- Pour qui — texte SEO conservé -->
+        <section class="nm-section nm-section--narrow">
+          <h2 class="nm-h2 nm-h2--alt">Pour quels projets ?</h2>
+          <p class="nm-prose">
+            Que vous lanciez une <strong>startup</strong>, une <strong>boutique e-commerce</strong>,
+            un <strong>restaurant</strong>, une <strong>application mobile</strong>, un cabinet de
+            <strong>conseil</strong> ou une marque de <strong>cosmétiques</strong>, Namorama vous aide
+            à trouver un nom mémorable dont le nom de domaine est encore libre. Idéal pour
+            choisir un nom de startup, nommer un nouveau produit ou rebrander une activité existante.
+          </p>
+        </section>
+
+        <!-- FAQ — adossée au JSON-LD FAQPage d'index.html : les questions
+             doivent rester visibles sur la page, sinon le balisage devient
+             non conforme. -->
+        <section class="nm-section nm-section--narrow">
+          <h2 class="nm-h2 nm-h2--alt">Questions fréquentes</h2>
+          <div class="nm-faq">
+            @for (f of faq; track f.q) {
+              <div class="nm-faq__item">
+                <h3 class="nm-faq__q">{{ f.q }}</h3>
+                <p class="nm-faq__a">{{ f.a }}</p>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Guides et générateurs sectoriels — maillage interne conservé.
+             Hauteur minimale de 44px : ce sont des cibles tactiles. -->
+        <section class="nm-section">
+          <h2 class="nm-h2 nm-h2--alt">Guides de naming par secteur</h2>
+          <p class="nm-section__lead">
+            Les pages que Google indexe, et par lesquelles vos futurs clients arrivent.
+          </p>
+          <div class="nm-links">
+            @for (l of guides; track l.path) {
+              <a [routerLink]="l.path" class="nm-link-pill">{{ l.label }}</a>
+            }
+          </div>
+        </section>
+
+        <!-- CTA final -->
+        <section class="nm-section">
+          <div class="nm-final">
+            <div>
+              <h2 class="nm-final__title">Votre nom est encore libre</h2>
+              <p class="nm-final__text">
+                100 crédits offerts chaque mois : environ 50 noms libres, et un rapport approfondi.
+              </p>
+            </div>
+            <a routerLink="/app" class="nm-btn nm-btn--accent">Lancer une recherche gratuite</a>
+          </div>
+        </section>
+
+      </div>
     </article>
   `,
-  styles: [`
-    .landing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
-    }
-    .landing-card,
-    .landing-feature {
-      background: var(--p-surface-0, #fff);
-      border: 1px solid var(--p-surface-200);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-    }
-    .landing-step {
-      width: 2.25rem;
-      height: 2.25rem;
-      border-radius: 999px;
-      background: var(--p-primary-color);
-      color: var(--p-primary-contrast-color, #fff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-    }
-  `],
+  styleUrl: './landing.css',
 })
-export class LandingComponent {}
+export class LandingComponent {
+  /** Volet affiché dans la démonstration figée du héros. */
+  readonly step = signal(3);
+
+  readonly steps = [
+    { n: 1, label: 'Décrire' },
+    { n: 2, label: 'Cadrer' },
+    { n: 3, label: 'Domaines' },
+    { n: 4, label: 'Rapport' },
+  ];
+
+  private readonly overlines: Record<number, string> = {
+    1: 'Étape 1 — votre projet en une phrase',
+    2: 'Étape 2 — cadrer le style et les contraintes',
+    3: 'Étape 3 — domaines libres · 1 crédit chacun',
+    4: 'Étape 4 — rapport approfondi · 50 crédits',
+  };
+
+  current() {
+    return { overline: this.overlines[this.step()] };
+  }
+
+  /**
+   * Trois états, jamais deux. « non vérifiable » a sa propre couleur parce
+   * qu'il ne doit se confondre ni avec « libre » ni avec « pris » — et il
+   * n'est jamais facturé, au même titre que « pris ».
+   */
+  readonly demoDomains = [
+    { name: 'roulio.com',  state: 'free',    label: 'libre',          cost: '1 crédit' },
+    { name: 'bikara.com',  state: 'free',    label: 'libre',          cost: '1 crédit' },
+    { name: 'sprocco.com', state: 'free',    label: 'libre',          cost: '1 crédit' },
+    { name: 'cyclique.fr', state: 'free',    label: 'libre',          cost: '1 crédit' },
+    { name: 'pedalo.com',  state: 'taken',   label: 'pris',           cost: 'non facturé' },
+    { name: 'moyeu.ch',    state: 'unknown', label: 'non vérifiable', cost: 'non facturé' },
+  ];
+
+  readonly controls = [
+    {
+      overline: '01 — DOMAINE',
+      title: 'Trois états, pas deux',
+      text: "Libre, pris, ou invérifiable. Un registre en panne ne se déguise jamais en bonne nouvelle.",
+    },
+    {
+      overline: '02 — INPI',
+      title: 'Marques françaises et UE',
+      text: "Recherche d'antériorité à l'INPI et à l'EUIPO, sur les classes de Nice qui vous concernent. La marque UE couvre les 27 États membres.",
+    },
+    {
+      overline: '03 — RÉSEAUX',
+      title: 'Le pseudo suit le nom',
+      text: 'Instagram, LinkedIn, X, TikTok : un nom dont le handle est pris coûte cher en notoriété.',
+    },
+    {
+      overline: '04 — EUROPE',
+      title: 'Pensé pour le .fr',
+      text: 'Noms prononçables en français, extensions européennes en premier, données hébergées en UE.',
+    },
+  ];
+
+  readonly compare = [
+    { critere: 'Noms générés par IA',              nous: 'oui',               ia: 'oui',      reg: '—' },
+    { critere: 'Disponibilité du domaine',         nous: 'registre en direct', ia: 'estimée',  reg: 'oui' },
+    { critere: 'Antériorité de marque INPI / EUIPO', nous: 'incluse',          ia: '—',        reg: '—' },
+    { critere: 'Pseudos réseaux sociaux',          nous: 'inclus',            ia: '—',        reg: '—' },
+    { critere: 'État « invérifiable » signalé',    nous: 'oui',               ia: '—',        reg: '—' },
+    { critere: 'Sans abonnement',                  nous: 'oui',               ia: 'rarement', reg: 'oui' },
+  ];
+
+  readonly faq = [
+    {
+      q: 'Comment trouver un nom de domaine disponible ?',
+      a: "Décrivez votre projet sur Namorama : l'IA propose des noms de produit, de marque ou de société, et teste automatiquement leur disponibilité en domaine via une requête aux registres. Les noms libres sont affichés instantanément, prêts à être réservés chez votre registrar.",
+    },
+    {
+      q: 'Le service est-il gratuit ?',
+      a: 'Oui pour démarrer : vous disposez de 100 crédits gratuits chaque mois, sans abonnement. Une suggestion de domaine coûte 1 crédit. Des packs sans engagement sont disponibles ensuite.',
+    },
+    {
+      q: 'La disponibilité affichée est-elle fiable ?',
+      a: "Oui. Contrairement aux générateurs qui se contentent d'estimer, Namorama interroge le registre en temps réel (RDAP, avec WHOIS en repli). Un domaine indiqué comme disponible l'est réellement au moment de la recherche, et un registre injoignable est signalé comme tel plutôt que deviné.",
+    },
+    {
+      q: 'Quelles extensions de domaine sont vérifiées ?',
+      a: 'Les extensions les plus courantes comme .com, .fr, .io, .co ou .net, ainsi que d\'autres que vous pouvez ajouter selon votre projet. Le résultat s\'affiche sous forme de tableau comparatif.',
+    },
+  ];
+
+  readonly guides = [
+    { path: '/generateur-nom-saas',                    label: 'Nom de startup SaaS' },
+    { path: '/generateur-nom-marque-cosmetique',       label: 'Nom de marque cosmétique' },
+    { path: '/generateur-nom-ecommerce',               label: 'Nom de boutique en ligne' },
+    { path: '/nom-de-startup-court-invente',           label: 'Nom court inventé' },
+    { path: '/generateur-nom-startup-ia',              label: 'Nom de startup IA' },
+    { path: '/generateur-nom-de-produit',              label: 'Nom de produit' },
+    { path: '/guides/trouver-nom-de-marque',           label: 'Trouver un nom de marque' },
+    { path: '/guides/trouver-nom-entreprise',          label: "Trouver un nom d'entreprise" },
+    { path: '/guides/trouver-nom-de-startup',          label: 'Trouver un nom de startup' },
+    { path: '/verifier-disponibilite-nom-de-marque',   label: 'Vérifier une marque avant de déposer' },
+    { path: '/comparatif-generateurs-de-noms',         label: 'Comparatif des générateurs' },
+    { path: '/guides',                                 label: 'Tous les guides' },
+  ];
+}

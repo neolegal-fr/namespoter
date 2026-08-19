@@ -44,7 +44,7 @@ import { Drawer } from 'primeng/drawer';
   ],
   template: `
     <main style="min-height: 100vh; display: flex; flex-direction: column">
-      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-3 md:px-5 sticky top-0" style="height: 4rem; z-index: 100">
+      <p-menubar [styleClass]="'border-0 px-3 md:px-5 sticky top-0 ' + (isLanding() ? 'nm-menubar-dark' : 'border-b border-surface bg-surface-0')" style="height: 4rem; z-index: 100">
         <ng-template pTemplate="start">
           <div class="flex align-items-center gap-2 cursor-pointer" (click)="goToHome()">
             <i class="pi pi-compass text-2xl text-primary"></i>
@@ -174,8 +174,15 @@ import { Drawer } from 'primeng/drawer';
         </nav>
       </p-drawer>
 
-      <div class="flex flex-column align-items-center w-full px-3 py-3 md:py-5" style="flex: 1">
-        <div class="w-full" [style.max-width]="router.url.startsWith('/admin') ? '72rem' : (router.url === '/' ? '64rem' : '44rem')">
+      <!-- L'accueil sort du gabarit commun : son héros est un aplat sombre
+           pleine largeur, et ses sections claires vont de bord à bord. Il porte
+           donc lui-même sa largeur maximale (1200px) et ses marges internes.
+           Les autres routes gardent le conteneur centré. -->
+      <div class="flex flex-column align-items-center w-full"
+           [class.nm-page-pad]="!isLanding()"
+           style="flex: 1">
+        <div class="w-full"
+             [style.max-width]="isLanding() ? null : (router.url.startsWith('/admin') ? '72rem' : '44rem')">
           <router-outlet></router-outlet>
         </div>
       </div>
@@ -675,6 +682,19 @@ export class AppComponent implements OnInit {
 
   goToHome() {
     this.router.navigate(['/']);
+  }
+
+  /**
+   * L'accueil est le seul écran à sortir du gabarit commun : héros sombre
+   * pleine largeur, sections claires de bord à bord, largeur maximale portée
+   * par le composant lui-même.
+   *
+   * Comparaison sur le chemin seul : `router.url` porte les paramètres de
+   * requête, et « / » suivi d'un `?utm_source=…` — le cas de figure de toute
+   * campagne d'acquisition — ne serait sinon plus reconnu comme l'accueil.
+   */
+  isLanding(): boolean {
+    return this.router.url.split('?')[0].split('#')[0] === '/';
   }
 
   reload() {

@@ -1,0 +1,189 @@
+/* Primitives visuelles de la refonte, partagées entre écrans.
+ *
+ * Boutons, pilules, puces, badges de verdict : l'accueil, les résultats et le
+ * rapport les emploient tous. Les laisser dans le CSS de l'accueil aurait
+ * imposé de les recopier — donc de les faire diverger — dans les écrans
+ * suivants. Fichier global et non style de composant : ces classes doivent
+ * traverser l'encapsulation.
+ *
+ * Toutes les valeurs viennent des jetons `--nm-*`.
+ */
+
+.nm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Plancher tactile : un CTA ne descend jamais sous 52px sur mobile. */
+  min-height: var(--nm-touch-cta);
+  padding: 16px 28px;
+  border-radius: var(--nm-radius-md);
+  font-family: var(--nm-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.nm-btn--accent {
+  background: var(--nm-accent);
+  color: var(--nm-on-accent);
+  border: 1px solid var(--nm-accent);
+}
+
+.nm-btn--accent:hover {
+  background: var(--nm-accent-hover);
+  border-color: var(--nm-accent-hover);
+}
+
+.nm-btn--ghost {
+  background: transparent;
+  color: var(--nm-text-dark);
+  border: 1px solid var(--nm-border-dark-interactive);
+}
+
+.nm-btn--ghost:hover {
+  border-color: var(--nm-border-dark-hover);
+}
+
+/* Accueil — styles de la refonte.
+ *
+ * Tout passe par les jetons `--nm-*` posés à l'étape 1 : aucune couleur, aucun
+ * rayon et aucune ombre n'est écrit en dur ici. Un changement de palette se
+ * fait donc dans `tokens.css`, pas en parcourant les composants.
+ *
+ * Feuille séparée plutôt que `styles: []` en ligne : le fichier dépasse la
+ * taille où un tableau de gabarits reste lisible, et l'éditeur y garde la
+ * coloration syntaxique et le repli de blocs.
+ */
+
+.nm-landing {
+  font-family: var(--nm-font-body);
+}
+
+/* ═══ Héros ══════════════════════════════════════════════════════════════ */
+
+.nm-hero {
+  background: var(--nm-bg-dark);
+  color: var(--nm-text-dark);
+  /* Le composant est rendu dans un conteneur centré : le fond doit déborder
+     jusqu'aux bords de la fenêtre, d'où la marge négative compensée. */
+  padding: 56px var(--nm-section-padding-x) var(--nm-section-padding-y-lg);
+}
+
+.nm-hero__inner {
+  max-width: var(--nm-content-max);
+  margin: 0 auto;
+  display: grid;
+  /* Une seule colonne par défaut, deux à partir de 900px. Le handoff décrit un
+     `auto-fit / minmax(420px, 1fr)` ; un point de rupture explicite est retenu
+     ici pour que le repli soit prévisible et testable à 390px et 900px. */
+  grid-template-columns: 1fr;
+  gap: var(--nm-gap-hero);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .nm-hero__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nm-hero__col {
+  min-width: 0; /* sans quoi le contenu large empêche la colonne de rétrécir */
+}
+
+/* Pilule d'accroche */
+.nm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 7px 14px;
+  border: 1px solid var(--nm-accent-border-dark);
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-accent-surface-dark);
+  color: var(--nm-accent-hover);
+  font-size: var(--nm-text-overline);
+  line-height: 1;
+}
+
+.nm-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-accent);
+  flex: none;
+}
+
+.nm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.nm-chip {
+  padding: 7px 12px;
+  border: 1px solid var(--nm-border-dark);
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-surface-dark);
+  color: var(--nm-text-dark-2);
+  font-size: var(--nm-text-ui-sm);
+}
+
+.nm-chip--accent {
+  border-color: var(--nm-accent-border-dark);
+  background: var(--nm-accent-surface-dark);
+  color: var(--nm-accent-hover);
+}
+
+.nm-overline {
+  margin: 0 0 14px;
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline-wide);
+  text-transform: uppercase;
+  color: var(--nm-text-dark-3);
+}
+
+.nm-link-pill {
+  display: inline-flex;
+  align-items: center;
+  /* Cible tactile : 44px de haut au minimum. */
+  min-height: var(--nm-touch-min);
+  padding: 10px 18px;
+  background: var(--nm-surface-light);
+  border: 1px solid var(--nm-border-light-2);
+  border-radius: var(--nm-radius-pill);
+  color: var(--nm-text-on-card);
+  font-size: var(--nm-text-ui);
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.nm-link-pill:hover {
+  border-color: var(--nm-accent-on-light);
+  color: var(--nm-accent-on-light);
+}
+
+.nm-verdict__state {
+  padding: 3px 8px;
+  border-radius: var(--nm-radius-xs);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.nm-verdict__state--free {
+  color: var(--nm-verdict-free-dark-fg);
+  background: var(--nm-verdict-free-dark-bg);
+}
+
+.nm-verdict__state--taken {
+  color: var(--nm-verdict-taken-dark-fg);
+  background: var(--nm-verdict-taken-dark-bg);
+}
+
+.nm-verdict__state--unknown {
+  color: var(--nm-verdict-unknown-dark-fg);
+  background: var(--nm-verdict-unknown-dark-bg);
+}

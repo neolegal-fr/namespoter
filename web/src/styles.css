@@ -6,6 +6,7 @@
    deux lignes ici, et non plus bas dans le fichier. */
 @import "./styles/fonts.css";
 @import "./styles/tokens.css";
+@import "./styles/components.css";
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -444,3 +445,41 @@ body {
 }
 .article .compare .yes { color: var(--p-primary-600, #059669); font-weight: 600; }
 .article .compare .no { color: var(--p-surface-400); }
+
+/* Marges du conteneur de page, hors accueil. L'accueil s'en dispense : son
+   héros est un aplat pleine largeur et ses sections vont de bord à bord.
+   Une classe plutôt qu'un binding `[class]` : « md:py-5 » contient un
+   deux-points, que la syntaxe `[class.x]` d'Angular ne peut pas porter. */
+.nm-page-pad {
+    padding: 0.75rem 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .nm-page-pad {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+/* ─── Menubar sur l'accueil ──────────────────────────────────────────────
+   Le héros est un aplat sombre : une barre claire posée dessus coupe la page
+   en deux. Elle passe donc en sombre sur cette seule route, sans bordure
+   basse, pour se fondre dans le héros.
+   `!important` : PrimeNG applique ses propres fonds sur `.p-menubar`, et une
+   simple classe utilitaire ne les emporte pas. */
+.nm-menubar-dark.p-menubar {
+    background: var(--nm-bg-dark) !important;
+    border: 0 !important;
+}
+
+.nm-menubar-dark .brand-wordmark,
+.nm-menubar-dark .p-menubar-item-link {
+    color: var(--nm-text-dark) !important;
+}
+
+.nm-menubar-dark .pi-compass {
+    color: var(--nm-accent) !important;
+}
+
+.nm-menubar-dark .lang-toggle:hover {
+    background: var(--nm-surface-dark) !important;
+}
