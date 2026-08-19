@@ -1,3 +1,104 @@
+/* Polices du site, auto-hébergées.
+ *
+ * Jamais un appel à Google Fonts depuis une page d'authentification : requête
+ * tierce sur l'écran le plus sensible du parcours, dépendance externe, et la
+ * CSP par défaut de Keycloak la bloque de toute façon.
+ *
+ * `font-display: swap` et une pile de repli complète : si la police tarde ou
+ * échoue, le formulaire reste lisible immédiatement.
+ *
+ * Espace de noms `../fonts/` — les CSS vivent dans `resources/css/`.
+ */
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-400-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-500-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-500-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-600-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/space-grotesk-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/space-grotesk-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ================================================
    Namorama — Keycloak Account Console Theme
    Keycloak 26 / keycloak.v3 / PatternFly v5
@@ -5,51 +106,51 @@
 
 /* === Écrase les tokens globaux sombres ========= */
 :root {
-    --ns-primary:      #10b981;
-    --ns-primary-dark: #059669;
-    --ns-primary-light: rgba(16, 185, 129, 0.12);
+    --ns-primary:      #0d9a63;
+    --ns-primary-dark: #0b8355;
+    --ns-primary-light: rgba(13, 154, 99, 0.12);
 
     /* Remplace le fond sombre utilisé par masthead et sidebar */
     --pf-v5-global--BackgroundColor--dark-100: #ffffff;
-    --pf-v5-global--BackgroundColor--dark-200: #f3f4f6;
-    --pf-v5-global--BackgroundColor--dark-300: #e5e7eb;
-    --pf-v5-global--BackgroundColor--dark-400: #d1d5db;
+    --pf-v5-global--BackgroundColor--dark-200: #f4f6f5;
+    --pf-v5-global--BackgroundColor--dark-300: #e3e7e5;
+    --pf-v5-global--BackgroundColor--dark-400: #dde2e0;
 
     /* Couleur du texte dans les zones sombres → on les rend claires */
-    --pf-v5-global--Color--light-100: #111827;
-    --pf-v5-global--Color--light-200: #374151;
+    --pf-v5-global--Color--light-100: #0b0e10;
+    --pf-v5-global--Color--light-200: #2c3532;
 
     /* Couleurs primaires */
-    --pf-v5-global--primary-color--100: #10b981;
-    --pf-v5-global--primary-color--200: #059669;
-    --pf-v5-global--link--Color:        #10b981;
-    --pf-v5-global--link--Color--hover: #059669;
-    --pf-v5-global--active-color--100:  #10b981;
+    --pf-v5-global--primary-color--100: #0d9a63;
+    --pf-v5-global--primary-color--200: #0b8355;
+    --pf-v5-global--link--Color:        #0d9a63;
+    --pf-v5-global--link--Color--hover: #0b8355;
+    --pf-v5-global--active-color--100:  #0d9a63;
 }
 
 /* === Masthead (barre du haut) ================== */
 .pf-v5-c-masthead {
     background-color: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: 1px solid #e3e7e5 !important;
     --pf-v5-c-masthead--BackgroundColor: #ffffff;
 }
 
 .pf-v5-c-masthead__brand a,
 .pf-v5-c-masthead__brand {
-    color: #111827 !important;
+    color: #0b0e10 !important;
     text-decoration: none !important;
 }
 
 /* === Sidebar (navigation gauche) ============== */
 .pf-v5-c-page__sidebar {
-    background-color: #f9fafb !important;
-    border-right: 1px solid #e5e7eb !important;
-    --pf-v5-c-page__sidebar--BackgroundColor: #f9fafb;
+    background-color: #fbfcfb !important;
+    border-right: 1px solid #e3e7e5 !important;
+    --pf-v5-c-page__sidebar--BackgroundColor: #fbfcfb;
 }
 
 /* === Navigation ================================ */
 .pf-v5-c-nav__link {
-    color: #374151 !important;
+    color: #2c3532 !important;
 }
 
 .pf-v5-c-nav__link:hover {
@@ -132,7 +233,7 @@ a:hover {
 /* === Fond de page ============================== */
 .pf-v5-c-page,
 .pf-v5-c-page__main-section {
-    background-color: #f3f4f6 !important;
+    background-color: #f4f6f5 !important;
 }
 
 /* === Logo : remplace le logo Keycloak par Namorama ===
@@ -152,10 +253,20 @@ a:hover {
 
 .pf-v5-c-masthead__brand::after {
     content: "Namorama";
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-size: 1.4rem;
     font-weight: 700;
-    color: #10b981;
+    color: #0d9a63;
     letter-spacing: -0.02em;
     display: block;
+}
+
+/* Titres en Space Grotesk, comme sur le site : c'est la police qui porte
+   l'identité, et le visiteur vient d'y quitter une page sombre. */
+#kc-page-title,
+#kc-header-wrapper,
+.pf-c-title,
+h1, h2 {
+    font-family: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    letter-spacing: -0.02em;
 }

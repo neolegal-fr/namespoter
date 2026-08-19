@@ -1,3 +1,104 @@
+/* Polices du site, auto-hébergées.
+ *
+ * Jamais un appel à Google Fonts depuis une page d'authentification : requête
+ * tierce sur l'écran le plus sensible du parcours, dépendance externe, et la
+ * CSP par défaut de Keycloak la bloque de toute façon.
+ *
+ * `font-display: swap` et une pile de repli complète : si la police tarde ou
+ * échoue, le formulaire reste lisible immédiatement.
+ *
+ * Espace de noms `../fonts/` — les CSS vivent dans `resources/css/`.
+ */
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-400-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-500-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-500-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-600-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/space-grotesk-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/space-grotesk-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ================================================
    NameSpotter — Keycloak Login Theme
    Sélecteurs vérifiés sur le HTML réel de KC 22
@@ -5,14 +106,14 @@
 
 /* === Variables PatternFly 4 ==================== */
 :root {
-    --pf-global--primary-color--100: #10b981;
-    --pf-global--primary-color--200: #059669;
-    --pf-global--primary-color--300: #047857;
-    --pf-global--BackgroundColor--100: #f3f4f6;
+    --pf-global--primary-color--100: #0d9a63;
+    --pf-global--primary-color--200: #0b8355;
+    --pf-global--primary-color--300: #0b8355;
+    --pf-global--BackgroundColor--100: #f4f6f5;
     --pf-global--BackgroundColor--200: #ffffff;
-    --pf-global--Color--100: #111827;
-    --pf-global--Color--200: #374151;
-    --pf-global--BorderColor--100: #d1d5db;
+    --pf-global--Color--100: #0b0e10;
+    --pf-global--Color--200: #2c3532;
+    --pf-global--BorderColor--100: #dde2e0;
     --pf-global--BorderRadius--sm: 0.5rem;
     --pf-global--FontFamily--sans-serif: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --pf-global--FontSize--md: 0.875rem;
@@ -28,16 +129,16 @@ body,
 .login-pf-page {
     margin: 0 !important;
     padding: 0 !important;
-    background: #f3f4f6 !important;
+    background: #f4f6f5 !important;
     background-image: none !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
 /* === Header / logo bar ========================= */
 #kc-header {
     background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: 1px solid #e3e7e5 !important;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
     padding: 0 1.5rem !important;
     margin: 0 !important;
@@ -53,7 +154,7 @@ body,
     margin: 0 !important;
     font-size: 1.25rem !important;
     font-weight: 700 !important;
-    color: #111827 !important;
+    color: #0b0e10 !important;
     text-shadow: none !important;
     letter-spacing: -0.01em !important;
     display: flex !important;
@@ -68,7 +169,7 @@ body,
     width: 1.5rem;
     height: 1.5rem;
     flex-shrink: 0;
-    background-color: #10b981;
+    background-color: #0d9a63;
     border-radius: 50%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13l-3 7 7-3 3-7-7 3z'/%3E%3C/svg%3E");
     background-size: 1rem;
@@ -89,8 +190,8 @@ body,
     width: 100% !important;
     margin: 2rem auto !important;
     background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 0.75rem !important;
+    border: 1px solid #e3e7e5 !important;
+    border-radius: 1rem !important;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
                 0 2px 4px -1px rgba(0, 0, 0, 0.04) !important;
     padding: 2rem !important;
@@ -108,7 +209,7 @@ body,
 #kc-page-title {
     font-size: 1.25rem !important;
     font-weight: 600 !important;
-    color: #111827 !important;
+    color: #0b0e10 !important;
     margin: 0 !important;
     text-align: center !important;
 }
@@ -118,17 +219,17 @@ body,
 .pf-c-form__label-text {
     font-size: 0.875rem !important;
     font-weight: 500 !important;
-    color: #374151 !important;
+    color: #2c3532 !important;
 }
 
 /* === Inputs (classe réelle : pf-c-form-control) = */
 .pf-c-form-control,
 input.pf-c-form-control {
-    border: 1px solid #d1d5db !important;
+    border: 1px solid #dde2e0 !important;
     border-radius: 0.5rem !important;
     padding: 0.625rem 0.875rem !important;
     font-size: 0.875rem !important;
-    color: #111827 !important;
+    color: #0b0e10 !important;
     background-color: #ffffff !important;
     box-shadow: none !important;
     height: auto !important;
@@ -137,8 +238,8 @@ input.pf-c-form-control {
 
 .pf-c-form-control:focus,
 input.pf-c-form-control:focus {
-    border-color: #10b981 !important;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+    border-color: #0d9a63 !important;
+    box-shadow: 0 0 0 3px rgba(13, 154, 99, 0.15) !important;
     outline: none !important;
     background-color: #ffffff !important;
 }
@@ -149,7 +250,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-    -webkit-text-fill-color: #111827 !important;
+    -webkit-text-fill-color: #0b0e10 !important;
 }
 
 /* === Zone "Remember me" + "Forgot password"
@@ -169,8 +270,8 @@ input:-webkit-autofill:active {
    Classe réelle : pf-c-button pf-m-primary        */
 .pf-c-button.pf-m-primary,
 #kc-login {
-    background-color: #10b981 !important;
-    border-color: #10b981 !important;
+    background-color: #0d9a63 !important;
+    border-color: #0d9a63 !important;
     border-radius: 0.5rem !important;
     font-weight: 500 !important;
     font-size: 0.875rem !important;
@@ -183,13 +284,13 @@ input:-webkit-autofill:active {
 
 .pf-c-button.pf-m-primary:hover,
 #kc-login:hover {
-    background-color: #059669 !important;
-    border-color: #059669 !important;
+    background-color: #0b8355 !important;
+    border-color: #0b8355 !important;
 }
 
 .pf-c-button.pf-m-primary:focus,
 #kc-login:focus {
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+    box-shadow: 0 0 0 3px rgba(13, 154, 99, 0.25) !important;
     outline: none !important;
 }
 
@@ -208,28 +309,28 @@ input:-webkit-autofill:active {
 
 #kc-info,
 .login-pf-signup {
-    border-top: 1px solid #e5e7eb !important;
+    border-top: 1px solid #e3e7e5 !important;
     margin-top: 1.25rem !important;
     padding-top: 1.25rem !important;
     text-align: center !important;
     font-size: 0.875rem !important;
-    color: #6b7280 !important;
+    color: #5c6663 !important;
 }
 
 /* === Liens =================================== */
 a {
-    color: #10b981 !important;
+    color: #0d9a63 !important;
     text-decoration: none !important;
 }
 
 a:hover {
-    color: #059669 !important;
+    color: #0b8355 !important;
     text-decoration: underline !important;
 }
 
 /* === Checkbox ================================ */
 #rememberMe {
-    accent-color: #10b981;
+    accent-color: #0d9a63;
 }
 
 /* === Espacement form groups ================== */
@@ -254,15 +355,15 @@ a:hover {
 
 .alert-error,
 .pf-m-danger {
-    background-color: #fef2f2 !important;
+    background-color: #fbecec !important;
     border-color: #fecaca !important;
-    color: #dc2626 !important;
+    color: #a33b3b !important;
 }
 
 .alert-warning {
-    background-color: #fffbeb !important;
+    background-color: #fdf3e3 !important;
     border-color: #fde68a !important;
-    color: #d97706 !important;
+    color: #9a6a12 !important;
 }
 
 .alert-success {
@@ -279,7 +380,7 @@ a:hover {
 
 .instruction {
     font-size: 0.9375rem !important;
-    color: #374151 !important;
+    color: #2c3532 !important;
     line-height: 1.6 !important;
     margin-bottom: 1.25rem !important;
 }
@@ -288,7 +389,7 @@ a:hover {
     display: inline-block !important;
     margin-top: 0.5rem !important;
     padding: 0.625rem 1.25rem !important;
-    background-color: #10b981 !important;
+    background-color: #0d9a63 !important;
     color: #ffffff !important;
     border-radius: 0.5rem !important;
     font-weight: 500 !important;
@@ -298,7 +399,7 @@ a:hover {
 }
 
 #backToApplication:hover {
-    background-color: #059669 !important;
+    background-color: #0b8355 !important;
     color: #ffffff !important;
     text-decoration: none !important;
 }
@@ -342,13 +443,21 @@ a:hover {
 #kc-form {
     order: 0 !important;
     position: relative !important;
-    border-top: 1px solid #e5e7eb !important;
+}
+
+/* Le filet et la pastille « ou » ne séparent le formulaire des fournisseurs
+   SSO que s'il y en a. Keycloak n'insère `#kc-social-providers` dans le DOM
+   que lorsqu'au moins un fournisseur est configuré : sans cette condition, le
+   trait et le mot « ou » flottaient seuls au-dessus du champ e-mail, séparant
+   le formulaire de rien. Constaté sur le realm local, qui n'en déclare aucun. */
+#kc-content-wrapper:has(#kc-social-providers) #kc-form {
+    border-top: 1px solid #e3e7e5 !important;
     margin-top: 1rem !important;
     padding-top: 1.5rem !important;
 }
 
 /* Pastille "ou" centrée sur le séparateur */
-#kc-form::before {
+#kc-content-wrapper:has(#kc-social-providers) #kc-form::before {
     content: 'ou' !important;
     position: absolute !important;
     top: -0.65rem !important;
@@ -357,10 +466,10 @@ a:hover {
     background: #ffffff !important;
     padding: 0 0.625rem !important;
     font-size: 0.75rem !important;
-    color: #9ca3af !important;
+    color: #8a938f !important;
     font-weight: 400 !important;
     letter-spacing: 0.05em !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif !important;
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 /* Masquer le hr dans la section SSO */
@@ -373,13 +482,13 @@ a:hover {
 #kc-social-providers > h2 {
     font-size: 0.75rem !important;
     font-weight: 500 !important;
-    color: #6b7280 !important;
+    color: #5c6663 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.07em !important;
     text-align: center !important;
     margin: 0 0 0.875rem 0 !important;
     padding: 0 !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif !important;
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: none !important;
     border: none !important;
     line-height: 1 !important;
@@ -398,13 +507,13 @@ a:hover {
     justify-content: center !important;
     gap: 0.625rem !important;
     min-height: 2.75rem !important;
-    border: 1px solid #d1d5db !important;
+    border: 1px solid #dde2e0 !important;
     border-radius: 0.5rem !important;
     background: #ffffff !important;
-    color: #111827 !important;
+    color: #0b0e10 !important;
     font-size: 0.875rem !important;
     font-weight: 500 !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif !important;
+    font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     text-decoration: none !important;
     transition: background-color 0.15s ease, border-color 0.15s ease !important;
     padding: 0.5rem 1rem !important;
@@ -414,9 +523,9 @@ a:hover {
 }
 
 .kc-social-item:hover {
-    background-color: #f9fafb !important;
-    border-color: #9ca3af !important;
-    color: #111827 !important;
+    background-color: #fbfcfb !important;
+    border-color: #8a938f !important;
+    color: #0b0e10 !important;
     text-decoration: none !important;
 }
 
@@ -456,6 +565,11 @@ a:hover {
 @media (max-width: 480px) {
     .card-pf {
         margin: 1rem !important;
+        /* `width: auto` indispensable : la règle de base impose
+           `width: 100% !important`, qui s'ajoutait ici à la marge de 1rem —
+           la carte débordait donc de 16px et la page défilait latéralement.
+           Mesuré à 390px. */
+        width: auto !important;
         padding: 1.5rem !important;
         border-radius: 0.5rem !important;
     }
@@ -463,4 +577,14 @@ a:hover {
     #kc-header {
         padding: 0 1rem !important;
     }
+}
+
+/* Titres en Space Grotesk, comme sur le site : c'est la police qui porte
+   l'identité, et le visiteur vient d'y quitter une page sombre. */
+#kc-page-title,
+#kc-header-wrapper,
+.pf-c-title,
+h1, h2 {
+    font-family: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    letter-spacing: -0.02em;
 }
