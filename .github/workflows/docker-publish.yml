@@ -45,12 +45,15 @@ jobs:
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      # `--legacy-peer-deps` comme dans `api/Dockerfile` : nest-keycloak-connect
-      # exige `@nestjs/common <11` alors que le projet est en 11.x. Sans le
-      # drapeau, `npm ci` refuse d'installer et le job ne démarre jamais.
+      # Mêmes drapeaux que `api/Dockerfile`, pour tester ce qui est réellement
+      # livré. `--legacy-peer-deps` : nest-keycloak-connect exige
+      # `@nestjs/common <11` alors que le projet est en 11.x, et sans lui
+      # `npm ci` refuse d'installer. `--omit=optional` : écarte le
+      # `chromedriver` optionnel de keycloak-connect, que rien n'importe et
+      # dont le script d'installation télécharge un binaire de navigateur.
       - name: Install dependencies
         working-directory: ./api
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps --omit=optional
 
       - name: Typecheck
         working-directory: ./api
