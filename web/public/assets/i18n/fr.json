@@ -172,7 +172,6 @@
       "BUY_CREDITS_BTN": "Acheter des crédits",
       "BUY_COL_HEADER": "Acheter chez un registrar",
       "NEW_PROJECT_BTN": "Nouveau projet",
-      "COPY_TABLE": "Copier le tableau",
       "COPIED": "Copié !",
       "CHECK_ALSO": "Vérifier aussi :",
       "CHECK_TRADEMARK": "Marque (INPI)",
@@ -319,7 +318,8 @@
       "VERIFY_FREE_FOOT": "Offert ce mois-ci",
       "VERIFY_PAID_FOOT": "{{n}} crédits ensuite",
       "VERIFY_PRICE": "{{n}} crédits",
-      "VERIFY_GO": "Vérifier maintenant"
+      "VERIFY_GO": "Vérifier maintenant",
+      "COPY_RESULTS": "Copier les résultats"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

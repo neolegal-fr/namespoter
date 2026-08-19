@@ -172,7 +172,6 @@
       "BUY_CREDITS_BTN": "Buy credits",
       "BUY_COL_HEADER": "Buy at a registrar",
       "NEW_PROJECT_BTN": "New project",
-      "COPY_TABLE": "Copy table",
       "COPIED": "Copied!",
       "CHECK_ALSO": "Also check:",
       "CHECK_TRADEMARK": "Trademark (INPI)",
@@ -319,7 +318,8 @@
       "VERIFY_FREE_FOOT": "Free this month",
       "VERIFY_PAID_FOOT": "{{n}} credits afterwards",
       "VERIFY_PRICE": "{{n}} credits",
-      "VERIFY_GO": "Check now"
+      "VERIFY_GO": "Check now",
+      "COPY_RESULTS": "Copy the results"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

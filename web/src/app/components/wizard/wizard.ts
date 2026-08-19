@@ -457,6 +457,44 @@ export class WizardComponent implements OnInit {
   readonly userEmail = signal('');
 
   /** Point d'entrée : si le rapport existe déjà, on l'ouvre (sans débit) ; sinon on demande confirmation. */
+  /**
+   * « Rapport complet » depuis une carte : ouvre le rapport s'il est acquis,
+   * sinon le rapport VERROUILLÉ — pas la popup d'achat. Le handoff distingue
+   * les deux gestes : vérifier (popup courte) et consulter le rapport (écran
+   * qui montre ce qu'on achète).
+   */
+  openFullReport(name: string): void {
+    this.brandReportName.set(name);
+    this.brandReportError.set(null);
+    this.isSampleReport.set(false);
+    this.forceRegen.set(false);
+    this.brandReport.set(null);
+    void this.loadReportOffer(name);
+    this.brandReportService.existing(name).subscribe({
+      next: (res) => {
+        if (res?.exists && res.report) {
+          this.markReported(name);
+          this.brandReport.set(res.report);
+        }
+        this.showReportDialog.set(true);
+      },
+      error: () => this.showReportDialog.set(true),
+    });
+  }
+
+  /** Charge l'offre du serveur pour ce nom (prix, droit gratuit, solde). */
+  private loadReportOffer(name: string): void {
+    this.reportOffer.set(null);
+    this.brandReportService.offer(name).subscribe({
+      next: (o) => this.reportOffer.set({
+        freeThisMonth: o.deepReport.freeThisMonth,
+        priceCredits: o.deepReport.priceCredits,
+        credits: o.account.credits,
+      }),
+      error: () => this.reportOffer.set(null),
+    });
+  }
+
   askBrandReport(name: string): void {
     this.brandReportName.set(name);
     this.brandReportError.set(null);
@@ -493,16 +531,8 @@ export class WizardComponent implements OnInit {
 
   /** Ouvre la confirmation (coût, solde, destinataires) après avoir chargé l'email du compte. */
   private async openReportConfirm(): Promise<void> {
-    this.reportOffer.set(null);
-    this.brandReportService.offer(this.brandReportName()).subscribe({
-      next: (o) => this.reportOffer.set({
-        freeThisMonth: o.deepReport.freeThisMonth,
-        priceCredits: o.deepReport.priceCredits,
-        credits: o.account.credits,
-      }),
-      // Offre indisponible : on reste sur le tarif plein, c'est le défaut sûr.
-      error: () => this.reportOffer.set(null),
-    });
+    // Offre indisponible : on reste sur le tarif plein, c'est le défaut sûr.
+    this.loadReportOffer(this.brandReportName());
     if (!this.userEmail()) {
       try {
         const profile: any = await this.keycloak.loadUserProfile();

@@ -52,6 +52,13 @@
 
   --nm-accent-surface-dark: #0f1b1c;
   --nm-accent-border-dark: #23474b;
+
+  /* Pendants CLAIRS des deux précédents. Le handoff signalait qu'il manquait
+     une bordure de carte accentuée sur fond clair : elle était recopiée en dur
+     (#c9e9d8) dans les maquettes. La surface reprend celle du verdict
+     « libre », dont elle est dérivée. */
+  --nm-accent-surface-light: #e8f7ef;
+  --nm-accent-border-light: #c9e9d8;
   --nm-accent-ghost-bg: #1c2b26;
   --nm-accent-ghost-bg-hover: #24382f;
 
