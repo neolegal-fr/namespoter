@@ -3,6 +3,15 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
 import { BrandReportService, BRAND_REPORT_COST } from './brand-report.service';
+
+/**
+ * Fréquence minimale entre deux rafraîchissements d'un même rapport.
+ *
+ * Le rafraîchissement est gratuit et illimité dans le temps : la garde est
+ * technique, pas tarifaire. 6 h suffisent — les registres ne bougent pas plus
+ * vite, et cela empêche une boucle d'appeler l'INPI et l'EUIPO sans fin.
+ */
+const REFRESH_MIN_INTERVAL_MS = 6 * 60 * 60 * 1000;
 import { BrandReportStore } from './brand-report.store';
 import { ReportMailService } from './report-mail.service';
 import { BrandReportRequestDto } from './dto/brand-report.dto';
@@ -45,6 +54,18 @@ export class BrandReportController {
   @Get('mine')
   async mine(@AuthenticatedUser() keycloakUser: { sub: string }) {
     return { names: await this.store.listNames(keycloakUser.sub) };
+  }
+
+  /**
+   * Synthèses des noms vérifiés par ce compte, pour afficher les verdicts
+   * directement sur les cartes de résultats — c'est ce qui rend plusieurs noms
+   * comparables côte à côte sans ouvrir un rapport à la fois.
+   *
+   * Uniquement des données acquises : un nom sans rapport n'a pas de synthèse.
+   */
+  @Get('summaries')
+  async summaries(@AuthenticatedUser() keycloakUser: { sub: string }) {
+    return { summaries: await this.store.listSummaries(keycloakUser.sub) };
   }
 
   /**
@@ -115,6 +136,26 @@ export class BrandReportController {
 
     // Déjà généré → on le renvoie tel quel, sans refacturer (sauf régénération forcée).
     // Protégé : un souci de cache ne doit jamais faire échouer la génération.
+    // Rafraîchissement : gratuit et sans limite de temps (décision produit).
+    // Les registres évoluent et une marque peut se déposer à tout moment ;
+    // facturer la mise à jour transformerait le rapport en photo périmée que
+    // personne ne rouvre. La garde est technique — une fréquence minimale —
+    // et non tarifaire.
+    let isRefresh = false;
+    if (dto.force) {
+      const existing = await this.store.find(keycloakUser.sub, dto.name).catch(() => null);
+      if (existing) {
+        isRefresh = true;
+        const last = Date.parse(String(existing.generatedAt ?? ''));
+        if (Number.isFinite(last) && Date.now() - last < REFRESH_MIN_INTERVAL_MS) {
+          this.events.event('brand_report_refresh_throttled', { sub: keycloakUser.sub });
+          // On rend le rapport en cache plutôt qu'une erreur : l'utilisateur a
+          // demandé « à jour », il obtient ce qui l'est déjà.
+          return { ...existing, remainingCredits: user.totalCredits, emailed: false, cached: true };
+        }
+      }
+    }
+
     let cached: Awaited<ReturnType<typeof this.store.find>> = null;
     if (!dto.force) {
       cached = await this.store.find(keycloakUser.sub, dto.name).catch((e) => {
@@ -131,7 +172,7 @@ export class BrandReportController {
     // crédits que s'il est déjà consommé ce mois-ci. Lecture indicative ici ;
     // la décision définitive se prend sous verrou, dans la transaction.
     const freeLikely = this.usersService.isFreeReportAvailable(user);
-    if (!freeLikely && user.totalCredits < BRAND_REPORT_COST) {
+    if (!isRefresh && !freeLikely && user.totalCredits < BRAND_REPORT_COST) {
       this.events.event('brand_report_blocked_no_credits', { sub: keycloakUser.sub, cost: BRAND_REPORT_COST });
       throw new ForbiddenException('Crédits insuffisants');
     }
@@ -159,6 +200,10 @@ export class BrandReportController {
     // peuvent pas obtenir chacune le rapport offert.
     let remainingCredits = user.totalCredits;
     let costCharged = BRAND_REPORT_COST;
+    if (isRefresh) {
+      // Déjà payé une fois : ni crédit débité, ni droit gratuit consommé.
+      costCharged = 0;
+    } else
     await this.dataSource.transaction(async (manager) => {
       const free = await this.usersService.consumeFreeReport(keycloakUser.sub, manager);
       if (free) {
@@ -173,7 +218,10 @@ export class BrandReportController {
 
     // Mémoriser, avec le coût RÉELLEMENT débité, pour éviter tout re-débit
     // ultérieur et garder un historique juste même si le tarif change.
-    await this.store.save(keycloakUser.sub, dto.name, report, costCharged).catch((e) =>
+    // `undefined` sur un rafraîchissement : le coût d'origine reste en base,
+    // sinon un rapport payé 50 crédits serait réécrit à 0 à la première mise
+    // à jour, et les totaux par compte deviendraient faux.
+    await this.store.save(keycloakUser.sub, dto.name, report, isRefresh ? undefined : costCharged).catch((e) =>
       this.logger.error('Échec de la mémorisation du rapport', e),
     );
 
@@ -184,6 +232,7 @@ export class BrandReportController {
       sub: keycloakUser.sub,
       cost: costCharged,
       free: costCharged === 0,
+      refresh: isRefresh,
       score: report.score,
     });
 

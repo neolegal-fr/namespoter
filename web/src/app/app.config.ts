@@ -1,5 +1,11 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, PLATFORM_ID, InjectionToken } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, PLATFORM_ID, InjectionToken, LOCALE_ID } from '@angular/core';
+import { isPlatformBrowser, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+// Sans cet enregistrement, `DatePipe` formate en en-US : « 19 Aug » au lieu de
+// « 19 août » sur les cartes vérifiées. Les deux langues du site sont fr et en ;
+// `en` est le défaut d'Angular, seul `fr` doit être ajouté.
+registerLocaleData(localeFr);
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http';
 import { of, firstValueFrom } from 'rxjs';
@@ -208,6 +214,8 @@ const NamoramaPreset = definePreset(Aura, {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    // La langue d'affichage des dates suit l'URL, comme le reste du site.
+    { provide: LOCALE_ID, useFactory: () => (typeof window !== 'undefined' && window.location.pathname.split('/')[1] === 'en' ? 'en' : 'fr') },
     // Par défaut, Angular conserve la position de défilement d'une route à
     // l'autre : un lien situé en bas de la page d'accueil ouvrait donc la page
     // suivante à la même hauteur, c'est-à-dire au milieu ou en bas de l'article.

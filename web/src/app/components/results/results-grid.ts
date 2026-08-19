@@ -1,7 +1,8 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SafeHtml } from '@angular/platform-browser';
+import { BrandReportSummary } from '../../services/brand-report';
 
 /** Une extension et son verdict, tels qu'affichés sur une carte. */
 interface ExtVerdict {
@@ -79,70 +80,22 @@ interface ExtVerdict {
                 </span>
               }
               @if (d.isManual) {
-                <i class="pi pi-pencil rg-card__manual"
-                   [attr.aria-label]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate"></i>
+                <i class="pi pi-pencil rg-card__manual" [attr.aria-label]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate"></i>
               }
             </div>
+
             <!--
-              Le badge porte le coût RÉEL de la suggestion : 1 crédit, toujours.
-              L'API facture « results.length » (domain.controller.ts) — soit une
-              suggestion retenue, quel que soit le nombre d'extensions vérifiées.
-              Afficher le nombre de domaines libres annonçait un prix faux.
-
-              L'accent ne signale donc plus le prix mais le SIGNAL que
-              l'utilisateur cherche : toutes les extensions demandées libres.
-              Même condition que « .rg-card--strong », jamais sur des verdicts mixtes.
+              Les pouces vivent DANS l'en-tête, à droite du nom : ils portent
+              sur le nom, pas sur le rapport. Près du bouton d'achat, leur objet
+              devenait ambigu.
             -->
-            <span class="rg-cost" [class.rg-cost--accent]="allFree(d)">
-              {{ 'WIZARD.STEP3.GRID_CREDIT_ONE' | translate }}
-            </span>
-          </header>
-
-          <!-- Uniquement les verdicts de DOMAINE. Jamais INPI ni réseaux :
-               ces données ne sont pas payées sur cet écran. -->
-          <ul class="rg-verdicts">
-            @for (v of verdicts(d); track v.ext) {
-              <li class="rg-verdict">
-                <span class="rg-verdict__label">{{ v.domain }}</span>
-                @switch (v.key) {
-                  @case ('pending') {
-                    <span class="rg-verdict__value rg-verdict__value--pending">
-                      <i class="pi pi-spin pi-spinner"></i> {{ 'WIZARD.STEP3.GRID_CHECKING' | translate }}
-                    </span>
-                  }
-                  @default {
-                    <span class="rg-verdict__value" [class]="'nm-verdict__state--' + v.key">{{ stateLabel(v.key) | translate }}</span>
-                  }
-                }
-              </li>
-            }
-          </ul>
-
-          <div class="rg-sep" aria-hidden="true"></div>
-
-          <!-- Palier payant -->
-          @if (hasReport(d.name)) {
-            <p class="rg-paid rg-paid--done">
-              <i class="pi pi-check-circle"></i> {{ 'WIZARD.STEP3.GRID_REPORT_OWNED' | translate }}
-            </p>
-          } @else {
-            <p class="rg-paid">
-              <i class="pi pi-lock"></i> {{ 'WIZARD.STEP3.GRID_LOCKED' | translate:{ n: reportCost() } }}
-            </p>
-          }
-
-          <div class="rg-actions">
-            <button type="button" class="rg-btn rg-btn--main" (click)="openReport.emit(d.name)">
-              {{ (hasReport(d.name) ? 'WIZARD.STEP3.REPORT_VIEW' : 'WIZARD.STEP3.GRID_DEEPEN') | translate }}
-            </button>
-
             <div class="rg-rate">
               <button type="button" class="rg-icon"
-                      [class.rg-icon--on]="d.rating === 'liked'"
+                      [class.rg-icon--on]="isLiked(d)"
                       [attr.aria-label]="'WIZARD.STEP3.RATE_LIKED' | translate"
-                      [attr.aria-pressed]="d.rating === 'liked'"
-                      (click)="rate.emit({ result: d, rating: d.rating === 'liked' ? 'neutral' : 'liked' })">
-                <i class="pi" [class.pi-thumbs-up-fill]="d.rating === 'liked'" [class.pi-thumbs-up]="d.rating !== 'liked'"></i>
+                      [attr.aria-pressed]="isLiked(d)"
+                      (click)="rate.emit({ result: d, rating: isLiked(d) ? 'neutral' : 'liked' })">
+                <i class="pi" [class.pi-thumbs-up-fill]="isLiked(d)" [class.pi-thumbs-up]="!isLiked(d)"></i>
               </button>
               <button type="button" class="rg-icon"
                       [class.rg-icon--off]="d.rating === 'disliked'"
@@ -152,28 +105,139 @@ interface ExtVerdict {
                 <i class="pi" [class.pi-thumbs-down-fill]="d.rating === 'disliked'" [class.pi-thumbs-down]="d.rating !== 'disliked'"></i>
               </button>
             </div>
-          </div>
+          </header>
 
-          <!-- Analyse IA : conservée, la maquette l'ignore mais c'est une
-               fonction du produit. -->
-          @if (d.analysisPending) {
-            <p class="rg-analysis-pending">
-              <i class="pi pi-spin pi-spinner"></i> {{ 'WIZARD.STEP3.ANALYSIS_PENDING' | translate }}
-            </p>
-          } @else if (d.analysis && d.rating === 'liked') {
-            <button type="button" class="rg-stars" (click)="toggleAnalysis.emit(d.id)"
-                    [attr.aria-expanded]="expandedAnalysisId() === d.id"
-                    [attr.aria-label]="'WIZARD.STEP3.ANALYSIS_TOGGLE' | translate">
-              @for (filled of stars(d.analysis); track $index) {
-                <i class="pi" [class.pi-star-fill]="filled" [class.pi-star]="!filled"></i>
-              }
-              <i class="pi pi-chevron-down rg-stars__chev"
-                 [style.transform]="expandedAnalysisId() === d.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
-            </button>
-            @if (expandedAnalysisId() === d.id) {
-              <div class="rg-analysis" [innerHTML]="analysisHtml(d.analysis)"></div>
-            }
+          <!-- Badge de synthèse : ce qui rend plusieurs noms vérifiés
+               comparables d'un coup d'œil dans la grille. -->
+          @if (summaryOf(d); as sum) {
+            <p class="rg-synth" [class]="'rg-synth--' + synthTone(sum)">{{ synthKey(sum) | translate }}</p>
+          } @else {
+            <span class="rg-cost" [class.rg-cost--accent]="allFree(d)">
+              {{ 'WIZARD.STEP3.GRID_CREDIT_ONE' | translate }}
+            </span>
           }
+
+          <!--
+            Règle d'alignement : les six lignes existent dans LES DEUX états, au
+            même endroit et dans le même ordre. Seule la colonne de droite
+            change — de « non vérifié » au verdict réel. Rien ne se déplace après
+            l'achat, ce qui rend comparables un nom vérifié et un nom qui ne
+            l'est pas.
+          -->
+          <ul class="rg-rows">
+            @for (v of verdicts(d); track v.ext) {
+              <li class="rg-row">
+                <span class="rg-row__label">{{ v.domain }}</span>
+                @switch (v.key) {
+                  @case ('pending') {
+                    <span class="rg-row__value rg-row__value--pending">
+                      <i class="pi pi-spin pi-spinner"></i> {{ 'WIZARD.STEP3.GRID_CHECKING' | translate }}
+                    </span>
+                  }
+                  @default {
+                    <span class="rg-row__value" [class]="'nm-verdict__state--' + v.key">{{ stateLabel(v.key) | translate }}</span>
+                  }
+                }
+              </li>
+            }
+
+            <!-- L'analyse est une LIGNE LIBELLÉE, pas un ornement flottant :
+                 sans libellé, on y lit une note de disponibilité ou un avis. -->
+            @if (d.analysisPending) {
+              <li class="rg-row">
+                <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
+                <span class="rg-row__value rg-row__value--pending"><i class="pi pi-spin pi-spinner"></i></span>
+              </li>
+            } @else if (d.analysis) {
+              <li class="rg-row">
+                <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
+                <button type="button" class="rg-stars" (click)="toggleAnalysis.emit(d.id)"
+                        [attr.aria-expanded]="expandedAnalysisId() === d.id"
+                        [attr.aria-label]="'WIZARD.STEP3.ANALYSIS_TOGGLE' | translate">
+                  @for (filled of stars(d.analysis); track $index) {
+                    <i class="pi" [class.pi-star-fill]="filled" [class.pi-star]="!filled"></i>
+                  }
+                  <i class="pi pi-chevron-down rg-stars__chev"
+                     [style.transform]="expandedAnalysisId() === d.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
+                </button>
+              </li>
+            }
+          </ul>
+
+          @if (expandedAnalysisId() === d.id && d.analysis) {
+            <div class="rg-analysis" [innerHTML]="analysisHtml(d.analysis)"></div>
+          }
+
+          <div class="rg-sep" aria-hidden="true"></div>
+
+          <!-- Palier payant : trois lignes, jamais une seule mention. Elles
+               nomment les registres et les plateformes, ce qui dispense le
+               bouton de les répéter. -->
+          <ul class="rg-rows">
+            <li class="rg-row">
+              <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_TM_INPI' | translate }}</span>
+              @if (summaryOf(d); as sum) {
+                <span class="rg-row__value" [class]="'nm-verdict__state--' + tmTone(sum, 'inpi')">{{ tmKey(sum, 'inpi') | translate }}</span>
+              } @else {
+                <span class="rg-row__value rg-row__value--locked"><i class="pi pi-lock"></i> {{ 'WIZARD.STEP3.GRID_UNVERIFIED' | translate }}</span>
+              }
+            </li>
+            <li class="rg-row">
+              <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_TM_EUIPO' | translate }}</span>
+              @if (summaryOf(d); as sum) {
+                <span class="rg-row__value" [class]="'nm-verdict__state--' + tmTone(sum, 'euipo')">{{ tmKey(sum, 'euipo') | translate }}</span>
+              } @else {
+                <span class="rg-row__value rg-row__value--locked"><i class="pi pi-lock"></i> {{ 'WIZARD.STEP3.GRID_UNVERIFIED' | translate }}</span>
+              }
+            </li>
+
+            <!--
+              Une ligne de pastilles plutôt qu'une ligne par plateforme : quatre
+              lignes de plus par carte feraient un mur sur neuf cartes, alors que
+              les pastilles nomment chaque réseau et montrent chaque état.
+              Le détail compte — un produit B2B se soucie de LinkedIn, une marque
+              grand public de TikTok.
+              Accessibilité : la couleur ne porte jamais l'information seule, un
+              symbole l'accompagne ; le nom complet et l'état sont dans « title »,
+              et le symbole est aria-hidden.
+            -->
+            <li class="rg-row">
+              <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_SOCIALS' | translate }}</span>
+              <span class="rg-socials">
+                @for (s of socialsOf(d); track s.code) {
+                  <span class="rg-social" [class]="'rg-social--' + s.tone" [attr.title]="s.title">
+                    <span class="rg-social__code">{{ s.code }}</span>
+                    <span class="rg-social__mark" aria-hidden="true">{{ s.mark }}</span>
+                  </span>
+                }
+              </span>
+            </li>
+          </ul>
+
+          <div class="rg-actions">
+            @if (summaryOf(d); as sum) {
+              <p class="rg-verified">
+                {{ 'WIZARD.STEP3.GRID_VERIFIED_ON' | translate:{ date: (sum.verifiedAt | date: 'd MMM') } }}
+                <button type="button" class="rg-refresh" (click)="refresh.emit(d.name)">
+                  {{ 'WIZARD.STEP3.GRID_REFRESH' | translate }}
+                </button>
+              </p>
+              <button type="button" class="rg-btn rg-btn--ghost" (click)="openReport.emit(d.name)">
+                {{ 'WIZARD.STEP3.GRID_FULL_REPORT' | translate }}
+              </button>
+            } @else {
+              <!-- AUCUN PRIX sur ce bouton : à ce stade l'utilisateur ne sait pas
+                   encore ce que la vérification lui apporte, un tarif ne peut que
+                   l'arrêter. Le prix — et la mention « offert ce mois-ci » —
+                   appartiennent à la popup, après le contexte. -->
+              <button type="button" class="rg-btn rg-btn--buy" (click)="verify.emit(d.name)">
+                {{ 'WIZARD.STEP3.GRID_VERIFY' | translate }}
+              </button>
+              <button type="button" class="rg-btn rg-btn--ghost" (click)="openReport.emit(d.name)">
+                {{ 'WIZARD.STEP3.GRID_FULL_REPORT' | translate }}
+              </button>
+            }
+          </div>
         </article>
       }
     </div>
@@ -181,6 +245,7 @@ interface ExtVerdict {
   styleUrl: './results-grid.css',
 })
 export class ResultsGridComponent {
+  private readonly translate = inject(TranslateService);
   /**
    * Entrées SIGNAL et non `@Input` classiques : `visible()` et `debited()` sont
    * des `computed`, qui ne suivent que des signaux. Avec des entrées ordinaires
@@ -189,22 +254,23 @@ export class ResultsGridComponent {
    */
   readonly domains = input.required<any[]>();
   readonly extensions = input.required<string[]>();
-  /** Noms déjà pourvus d'un rapport, normalisés par le wizard. */
-  readonly reportedNames = input<Set<string>>(new Set());
+  /** Synthèses des noms vérifiés, indexées par nom normalisé. */
+  readonly summaries = input<BrandReportSummary[]>([]);
   readonly reportCost = input(50);
   readonly isLocal = input(false);
   readonly expandedAnalysisId = input<string | null>(null);
-  /** Rendu du markdown d'analyse : le wizard possède déjà le sanitizer. */
   readonly analysisRenderer = input<(a: string | null) => SafeHtml>(() => '' as unknown as SafeHtml);
   /**
    * Normalisation des noms. Doit rester identique à `normName()` du wizard,
-   * qui alimente `reportedNames` — sans quoi un rapport acheté ne serait pas
-   * reconnu sur la carte correspondante.
+   * qui alimente les synthèses — sans quoi un nom vérifié ne serait pas
+   * reconnu sur sa carte.
    */
   readonly normalize = input<(n: string) => string>((n) => (n || '').trim().toLowerCase());
 
   readonly rate = output<{ result: any; rating: 'liked' | 'disliked' | 'neutral' }>();
   readonly openReport = output<string>();
+  readonly verify = output<string>();
+  readonly refresh = output<string>();
   readonly toggleAnalysis = output<string>();
 
   readonly filter = signal<'all' | 'free' | 'report' | 'fav'>('all');
@@ -216,18 +282,47 @@ export class ResultsGridComponent {
     { key: 'fav' as const,    label: 'WIZARD.STEP3.GRID_FILTER_FAV' },
   ];
 
+  private readonly byName = computed(() => {
+    const m = new Map<string, BrandReportSummary>();
+    for (const s of this.summaries()) m.set(s.nameKey, s);
+    return m;
+  });
+
+  summaryOf(d: any): BrandReportSummary | undefined {
+    return this.byName().get(this.normalize()(d.name));
+  }
+
   /**
-   * Filtrage LOCAL à l'affichage. Le wizard applique déjà les siens
-   * (extensions, noms rejetés) ; celui-ci s'y ajoute sans toucher à sa logique.
+   * Vérifier vaut approbation : dépenser 50 crédits sur un nom est le signal
+   * d'intérêt le plus fort du produit, bien plus fiable qu'un clic sur un
+   * pouce. Le pouce s'affiche donc actif sur une carte vérifiée — et reste
+   * cliquable pour se dédire.
+   */
+  isLiked(d: any): boolean {
+    return d.rating === 'liked' || (!!this.summaryOf(d) && d.rating !== 'disliked');
+  }
+
+  /**
+   * Filtrage LOCAL à l'affichage, puis tri par ENGAGEMENT — vérifiés, aimés,
+   * puis ordre de génération. La grille remonte ainsi d'elle-même la liste
+   * courte : après deux vérifications, les finalistes sont les deux premières
+   * cartes, sans tri manuel.
+   *
+   * Tri STABLE, obligatoire : deux noms de même rang gardent leur ordre de
+   * génération. Sans cela les cartes se réordonnent sous le curseur à chaque
+   * notation. `Array.prototype.sort` est stable depuis ES2019, mais on trie
+   * une copie — trier `domains()` en place muterait l'entrée du parent.
    */
   readonly visible = computed(() => {
     const f = this.filter();
-    return this.domains().filter((d) => {
+    const kept = this.domains().filter((d) => {
       if (f === 'free') return this.allFree(d);
-      if (f === 'report') return this.hasReport(d.name);
-      if (f === 'fav') return d.rating === 'liked';
+      if (f === 'report') return !!this.summaryOf(d);
+      if (f === 'fav') return this.isLiked(d);
       return true;
     });
+    const rank = (d: any) => (this.summaryOf(d) ? 0 : this.isLiked(d) ? 1 : 2);
+    return [...kept].sort((a, b) => rank(a) - rank(b));
   });
 
   /**
@@ -247,16 +342,11 @@ export class ResultsGridComponent {
     return this.extensions().filter((e) => d.allExtensions?.[e] === true).length;
   }
 
-  hasReport(name: string): boolean {
-    return this.reportedNames().has(this.normalize()(name));
-  }
-
   verdicts(d: any): ExtVerdict[] {
     return this.extensions().map((ext) => {
       const state = d.allExtensions?.[ext];
       const key: ExtVerdict['key'] =
         state === true ? 'free' : state === false ? 'taken' : state === null ? 'unknown' : 'pending';
-      // L'extension est stockée avec ou sans point selon l'origine de la donnée.
       const suffix = ext.startsWith('.') ? ext : '.' + ext;
       return { ext, domain: d.name.toLowerCase() + suffix, state, key };
     });
@@ -272,6 +362,74 @@ export class ResultsGridComponent {
       : key === 'taken'
         ? 'WIZARD.STEP3.GRID_TAKEN'
         : 'WIZARD.STEP3.GRID_UNKNOWN';
+  }
+
+  /**
+   * Verdict de marque par office. L'API n'expose qu'un `match` couvrant les
+   * deux : on ne l'éclate pas en deux verdicts inventés — chaque office reprend
+   * le verdict global, et la présence de dépôts dans sa collection le nuance.
+   * Sur une question juridique, mieux vaut répéter que deviner.
+   */
+  tmTone(sum: BrandReportSummary, office: 'inpi' | 'euipo'): string {
+    const hits = office === 'inpi' ? sum.inpiHits : sum.euipoHits;
+    if (sum.trademark === 'exact' && hits) return 'taken';
+    if (sum.trademark === 'unknown') return 'unknown';
+    if (sum.trademark === 'similar' && hits) return 'watch';
+    return 'free';
+  }
+
+  tmKey(sum: BrandReportSummary, office: 'inpi' | 'euipo'): string {
+    const t = this.tmTone(sum, office);
+    return t === 'taken'
+      ? 'WIZARD.STEP3.GRID_TM_FILED'
+      : t === 'watch'
+        ? 'WIZARD.STEP3.GRID_TM_CLOSE'
+        : t === 'unknown'
+          ? 'WIZARD.STEP3.GRID_UNKNOWN'
+          : 'WIZARD.STEP3.GRID_TM_NONE';
+  }
+
+  /**
+   * Pastilles de réseaux. Abréviations en attendant les glyphes officiels
+   * monochromes : redessiner une marque déposée serait pire que rien. Ne
+   * jamais employer les logos EN COULEURS — le rose d'Instagram et le cyan de
+   * TikTok entreraient en conflit avec le code libre/pris, qui est
+   * l'information utile.
+   */
+  private readonly PLATFORMS = [
+    { code: 'IG', name: 'Instagram' },
+    { code: 'in', name: 'LinkedIn' },
+    { code: 'X',  name: 'X' },
+    { code: 'TT', name: 'TikTok' },
+  ];
+
+  socialsOf(d: any): { code: string; tone: string; mark: string; title: string }[] {
+    const sum = this.summaryOf(d);
+    const t = (k: string) => this.translate.instant(k) as string;
+    return this.PLATFORMS.map((p) => {
+      const found = sum?.socials.find((s) => s.platform.toLowerCase() === p.name.toLowerCase());
+      if (!sum || !found) {
+        return { code: p.code, tone: 'locked', mark: '🔒', title: `${p.name} — ${t('WIZARD.STEP3.GRID_UNVERIFIED')}` };
+      }
+      const tone = found.status === 'free' ? 'free' : found.status === 'taken' ? 'taken' : 'unknown';
+      const mark = tone === 'free' ? '✓' : tone === 'taken' ? '✗' : '?';
+      const label = t(tone === 'free' ? 'WIZARD.STEP3.GRID_FREE' : tone === 'taken' ? 'WIZARD.STEP3.GRID_TAKEN' : 'WIZARD.STEP3.GRID_UNKNOWN');
+      return { code: p.code, tone, mark, title: `${p.name} — ${label}` };
+    });
+  }
+
+  /** Synthèse : le pire signal l'emporte, jamais adouci. */
+  synthTone(sum: BrandReportSummary): 'ok' | 'watch' | 'risk' {
+    const blockers = [this.tmTone(sum, 'inpi'), this.tmTone(sum, 'euipo')].filter((t) => t === 'taken').length
+      + sum.socials.filter((s) => s.status === 'taken').length;
+    if (blockers >= 2) return 'risk';
+    if (blockers === 1 || sum.trademark === 'similar' || sum.trademark === 'unknown') return 'watch';
+    return 'ok';
+  }
+
+  synthKey(sum: BrandReportSummary): string {
+    const t = this.synthTone(sum);
+    return t === 'ok' ? 'WIZARD.STEP3.GRID_SYNTH_OK' : t === 'watch' ? 'WIZARD.STEP3.GRID_SYNTH_WATCH' : 'WIZARD.STEP3.GRID_SYNTH_RISK';
   }
 
   /** Note sur 5, extraite du texte d'analyse par le wizard puis convertie. */

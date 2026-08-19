@@ -375,12 +375,14 @@
             <app-results-grid
               [domains]="filteredDomains()"
               [extensions]="selectedExtensions()"
-              [reportedNames]="reportedNames()"
+              [summaries]="reportSummaries()"
               [reportCost]="brandReportCost"
               [isLocal]="isLocal()"
               [expandedAnalysisId]="expandedAnalysisId()"
               [analysisRenderer]="analysisRenderer"
               (rate)="setRating($event.result, $event.rating)"
+              (verify)="askBrandReport($event)"
+              (refresh)="refreshBrandReport($event)"
               (openReport)="askBrandReport($event)"
               (toggleAnalysis)="toggleAnalysis($event)">
             </app-results-grid>
@@ -642,26 +644,44 @@
   <p-dialog
     [visible]="showReportConfirm()"
     (visibleChange)="showReportConfirm.set($event)"
-    [header]="('WIZARD.STEP3.REPORT_CONFIRM_TITLE' | translate) + ' — ' + brandReportName()"
+    [header]="'WIZARD.STEP3.VERIFY_TITLE' | translate:{ name: brandReportName() }"
     [modal]="true"
     [style]="{ width: 'min(94vw, 46rem)' }"
     [contentStyle]="{ padding: '1.25rem', background: '#f4f6f5' }">
 
     <div style="display: flex; flex-direction: column; gap: 1rem">
 
-      <!-- Écran verrouillé de la refonte (étape 4), branché sur le parcours
-           d'achat existant : il porte le prix ET l'action, la confirmation ne
-           garde qu'« Annuler ». `freeThisMonth` vient du serveur (GET /offer) :
-           tant que la réponse n'est pas là, la carte affiche le tarif plein. -->
-      <app-brand-report-locked
-        [name]="brandReportName()"
-        [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
-        [domainsChecked]="selectedExtensions().length"
-        [canAfford]="hasEnoughReportCredits()"
-        [freeThisMonth]="reportIsFree()"
-        (unlock)="confirmBrandReport()"
-        (topUp)="openCreditPurchase()">
-      </app-brand-report-locked>
+      <!--
+        Popup de vérification (maquette « Cartes — palier payant », option 2A).
+        Elle porte la pédagogie que la carte ne peut pas porter : le risque
+        réel d'abord, puis la liste exacte de ce qui est couvert. Le prix
+        n'apparaît qu'ICI, en pied — jamais sur le bouton de la carte, où il
+        arrêterait un utilisateur qui ne sait pas encore ce qu'il achète.
+      -->
+      <p class="vd-risk">{{ 'WIZARD.STEP3.VERIFY_RISK' | translate }}</p>
+
+      <p class="vd-what">{{ 'WIZARD.STEP3.VERIFY_WHAT' | translate }}</p>
+      <ul class="vd-list">
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_INPI' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_INPI_D' | translate }}</span></li>
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_EUIPO' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_EUIPO_D' | translate }}</span></li>
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_SOCIALS' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_SOCIALS_D' | translate }}</span></li>
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_REFRESH' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_REFRESH_D' | translate }}</span></li>
+      </ul>
+
+      <!-- « Offert ce mois-ci » d'abord, le tarif ensuite : c'est l'argument
+           qui se perdrait totalement sur un bouton de carte. -->
+      <div class="vd-foot">
+        @if (reportIsFree()) {
+          <p class="vd-price"><strong>{{ 'WIZARD.STEP3.VERIFY_FREE_FOOT' | translate }}</strong> — {{ 'WIZARD.STEP3.VERIFY_PAID_FOOT' | translate:{ n: brandReportCost } }}</p>
+        } @else {
+          <p class="vd-price"><strong>{{ 'WIZARD.STEP3.VERIFY_PRICE' | translate:{ n: brandReportCost } }}</strong></p>
+        }
+        @if (hasEnoughReportCredits()) {
+          <button type="button" class="vd-go" (click)="confirmBrandReport()">{{ 'WIZARD.STEP3.VERIFY_GO' | translate }}</button>
+        } @else {
+          <button type="button" class="vd-go vd-go--topup" (click)="openCreditPurchase()">{{ 'WIZARD.STEP3.LOCKED_TOPUP' | translate }}</button>
+        }
+      </div>
 
       <a class="report-link" style="align-self: flex-start" (click)="showSampleReport()">
         <i class="pi pi-eye"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_LINK' | translate }}

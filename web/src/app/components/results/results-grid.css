@@ -194,8 +194,12 @@
   color: var(--nm-text-dark-3);
 }
 
+/* Compact et aligné à gauche, comme le badge de synthèse qui le remplace une
+   fois le nom vérifié : les deux occupent la même place, rien ne se déplace. */
 .rg-cost {
+  align-self: flex-start;
   flex: none;
+  margin-bottom: 12px;
   padding: 4px 10px;
   border-radius: var(--nm-radius-xs);
   background: var(--nm-divider-dark-3);
@@ -211,7 +215,7 @@
 
 /* ─── Verdicts ───────────────────────────────────────────────────────────── */
 
-.rg-verdicts {
+.rg-rows {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -220,21 +224,21 @@
   gap: 7px;
 }
 
-.rg-verdict {
+.rg-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
 
-.rg-verdict__label {
+.rg-row__label {
   min-width: 0;
   font-size: var(--nm-text-ui-sm);
   color: var(--nm-text-dark-2);
   overflow-wrap: anywhere;
 }
 
-.rg-verdict__value {
+.rg-row__value {
   flex: none;
   padding: 2px 8px;
   border-radius: var(--nm-radius-xs);
@@ -242,7 +246,7 @@
   white-space: nowrap;
 }
 
-.rg-verdict__value--pending {
+.rg-row__value--pending {
   color: var(--nm-text-dark-3);
 }
 
@@ -381,4 +385,123 @@
   font-size: var(--nm-text-ui-sm);
   line-height: var(--nm-leading-body);
   color: var(--nm-text-dark-2);
+}
+
+
+/* ─── Palier payant et état vérifié ──────────────────────────────────────── */
+
+/* Les lignes verrouillées ont exactement la même hauteur et le même alignement
+   que les lignes de verdict : rien ne se déplace après l'achat. C'est ce qui
+   rend comparables un nom vérifié et un nom qui ne l'est pas. */
+.rg-row__value--locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nm-text-dark-2);
+}
+
+.rg-rows + .rg-rows {
+  margin-top: 0;
+}
+
+/* Pastilles de réseaux. La couleur ne porte jamais l'information seule : un
+   symbole l'accompagne, et le nom complet est dans `title`. */
+.rg-socials {
+  display: inline-flex;
+  gap: 5px;
+  flex: none;
+}
+
+.rg-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: var(--nm-radius-xs);
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: default;
+}
+
+.rg-social__code { font-weight: 600; }
+.rg-social__mark { font-size: 9px; }
+
+.rg-social--locked { background: var(--nm-divider-dark-3); color: var(--nm-text-dark-2); }
+.rg-social--free   { background: var(--nm-verdict-free-dark-bg);    color: var(--nm-verdict-free-dark-fg); }
+.rg-social--taken  { background: var(--nm-verdict-taken-dark-bg);   color: var(--nm-verdict-taken-dark-fg); }
+.rg-social--unknown{ background: var(--nm-verdict-unknown-dark-bg); color: var(--nm-verdict-unknown-dark-fg); }
+
+/* Badge de synthèse : ce qui rend la comparaison lisible d'un coup d'œil.
+   Il remplace le badge de coût une fois le nom vérifié. */
+.rg-synth {
+  align-self: flex-start;
+  margin: 0 0 12px;
+  padding: 3px 10px;
+  border-radius: var(--nm-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rg-synth--ok    { background: var(--nm-verdict-free-dark-bg);    color: var(--nm-verdict-free-dark-fg); }
+.rg-synth--watch { background: var(--nm-verdict-unknown-dark-bg); color: var(--nm-verdict-unknown-dark-fg); }
+.rg-synth--risk  { background: var(--nm-verdict-taken-dark-bg);   color: var(--nm-verdict-taken-dark-fg); }
+
+.rg-verified {
+  flex: 1;
+  margin: 0;
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-text-dark-2);
+}
+
+.rg-refresh {
+  display: block;
+  min-height: var(--nm-touch-min);
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--nm-accent-hover);
+  font-family: inherit;
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Le bouton d'achat est l'action principale de la carte : aplat accentué. */
+.rg-btn--buy {
+  flex: 1 1 100%;
+  background: var(--nm-accent);
+  border: 1px solid var(--nm-accent);
+  color: var(--nm-on-accent);
+}
+
+.rg-btn--buy:hover {
+  background: var(--nm-accent-hover);
+  border-color: var(--nm-accent-hover);
+}
+
+.rg-btn--ghost {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--nm-border-dark-interactive);
+  color: var(--nm-text-dark);
+}
+
+.rg-btn--ghost:hover { border-color: var(--nm-border-dark-hover); }
+
+/* Les actions passent à la ligne : le bouton d'achat occupe toute la largeur,
+   les secondaires en dessous. */
+.rg-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Les pouces vivent dans l'en-tête : ils ne s'étirent pas. */
+.rg-card__head .rg-rate { flex: none; }
+
+/* L'analyse est une ligne : les étoiles s'alignent à droite comme un verdict. */
+.rg-stars {
+  margin-top: 0;
+  flex: none;
+  min-height: var(--nm-touch-min);
 }

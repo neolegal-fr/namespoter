@@ -74,3 +74,23 @@ export interface BrandReport {
   /** Jeton de partage public (présent une fois le rapport mémorisé). */
   shareToken?: string;
 }
+
+/**
+ * Synthèse d'un nom déjà vérifié, pour la grille de résultats.
+ *
+ * Ne contient que des données ACQUISES : un nom non vérifié n'a pas de
+ * synthèse, donc rien ne fuit avant achat. C'est la relecture d'un rapport
+ * payé, pas un aperçu gratuit.
+ */
+export interface BrandReportSummary {
+  /** Nom normalisé (minuscules, sans espaces autour) — clé de rapprochement. */
+  nameKey: string;
+  verifiedAt: string | null;
+  /** Verdict de marque, commun aux deux offices (l'API n'en produit qu'un). */
+  trademark: 'none' | 'exact' | 'similar' | 'unknown';
+  /** Des dépôts trouvés relèvent-ils de cet office ? */
+  inpiHits: boolean;
+  euipoHits: boolean;
+  socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
+  score: number | null;
+}

@@ -79,6 +79,21 @@ export interface BrandReportOffer {
   account: { credits: number };
 }
 
+
+/**
+ * Synthèse d'un nom déjà vérifié, affichée sur sa carte de résultat.
+ * N'existe que pour les noms dont le rapport est acquis.
+ */
+export interface BrandReportSummary {
+  nameKey: string;
+  verifiedAt: string | null;
+  trademark: 'none' | 'exact' | 'similar' | 'unknown';
+  inpiHits: boolean;
+  euipoHits: boolean;
+  socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
+  score: number | null;
+}
+
 /** Coût affiché du rapport complet (aligné sur BRAND_REPORT_COST côté API). */
 export const BRAND_REPORT_COST = 50;
 
@@ -97,6 +112,11 @@ export class BrandReportService {
   }
 
   /** Rapport déjà généré pour ce nom (authentifié) — pour éviter un re-débit. */
+  /** Synthèses des noms vérifiés — verdicts déjà payés, pour la grille. */
+  summaries(): Observable<{ summaries: BrandReportSummary[] }> {
+    return this.http.get<{ summaries: BrandReportSummary[] }>(`${this.apiUrl}/summaries`);
+  }
+
   /** État de l'offre pour un nom : acheté, prix, droit gratuit, solde. Sans verdict. */
   offer(name: string): Observable<BrandReportOffer> {
     return this.http.get<BrandReportOffer>(`${this.apiUrl}/offer`, { params: { name } });

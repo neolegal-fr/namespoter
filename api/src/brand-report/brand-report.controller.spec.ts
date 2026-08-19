@@ -246,3 +246,68 @@ describe('BrandReportController — rapport offert mensuel', () => {
     }
   });
 });
+
+/**
+ * Rafraîchissement gratuit et sans limite de temps (décision produit).
+ *
+ * Ces tests protègent les deux sens : ne jamais refacturer une mise à jour,
+ * et ne jamais laisser un rafraîchissement écraser le coût d'origine — sinon
+ * un rapport payé 50 crédits deviendrait un rapport à 0 dans l'historique.
+ */
+describe('BrandReportController — rafraîchissement gratuit', () => {
+  const user = { sub: 'kc-123', email: 'me@example.com' };
+  const vieux = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+  const recent = new Date(Date.now() - 60 * 1000).toISOString();
+
+  function make(opts: { generatedAt: string; credits?: number; freeAvailable?: boolean }) {
+    const generate = jest.fn().mockResolvedValue({ name: 'Qonto', score: 80 });
+    const decrementCredits = jest.fn().mockResolvedValue(0);
+    const consumeFreeReport = jest.fn().mockResolvedValue(!!opts.freeAvailable);
+    const save = jest.fn().mockResolvedValue(undefined);
+    const find = jest.fn().mockResolvedValue({ name: 'Qonto', score: 70, generatedAt: opts.generatedAt });
+    const event = jest.fn();
+    const ctrl = new BrandReportController(
+      { generate } as any,
+      { find, save } as any,
+      { sendReport: jest.fn().mockResolvedValue(true) } as any,
+      {
+        findOrCreate: jest.fn().mockResolvedValue({ totalCredits: opts.credits ?? 0 }),
+        decrementCredits,
+        isFreeReportAvailable: jest.fn().mockReturnValue(!!opts.freeAvailable),
+        consumeFreeReport,
+      } as any,
+      { transaction: (cb: any) => cb({}) } as any,
+      { event } as any,
+    );
+    return { ctrl, generate, decrementCredits, consumeFreeReport, save, event };
+  }
+
+  it('ne débite rien et ne consomme pas le droit gratuit', async () => {
+    const { ctrl, decrementCredits, consumeFreeReport, event } = make({ generatedAt: vieux });
+    const res: any = await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    expect(decrementCredits).not.toHaveBeenCalled();
+    expect(consumeFreeReport).not.toHaveBeenCalled();
+    expect(event).toHaveBeenCalledWith('brand_report_generated', expect.objectContaining({ cost: 0, refresh: true }));
+    expect(res.cached).toBe(false);
+  });
+
+  it('fonctionne à 0 crédit : un rapport payé reste maintenable', async () => {
+    const { ctrl, generate } = make({ generatedAt: vieux, credits: 0 });
+    await expect(ctrl.full({ name: 'Qonto', force: true } as any, user)).resolves.toBeDefined();
+    expect(generate).toHaveBeenCalled();
+  });
+
+  it("n'écrase pas le coût d'origine en base", async () => {
+    const { ctrl, save } = make({ generatedAt: vieux });
+    await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    expect(save).toHaveBeenCalledWith('kc-123', 'Qonto', expect.any(Object), undefined);
+  });
+
+  it('rend le rapport en cache si le précédent date de moins de 6 h, sans réinterroger', async () => {
+    const { ctrl, generate, event } = make({ generatedAt: recent });
+    const res: any = await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    expect(generate).not.toHaveBeenCalled();
+    expect(res.cached).toBe(true);
+    expect(event).toHaveBeenCalledWith('brand_report_refresh_throttled', expect.any(Object));
+  });
+});

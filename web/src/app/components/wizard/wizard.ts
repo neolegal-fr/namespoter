@@ -31,6 +31,7 @@ import { FeedbackService } from '../../services/feedback';
 import { AnalyticsService } from '../../services/analytics';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ResultsGridComponent } from '../results/results-grid';
+import type { BrandReportSummary } from '../../services/brand-report';
 import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
 
 @Component({
@@ -555,6 +556,13 @@ export class WizardComponent implements OnInit {
   }
 
   private launchBrandReport(): void {
+    // Vérifier vaut approbation : dépenser des crédits sur un nom est le signal
+    // d'intérêt le plus fort du produit, bien plus fiable qu'un clic sur un
+    // pouce. On l'active donc implicitement, et l'IA en tient compte pour les
+    // suggestions suivantes. Le pouce reste cliquable pour se dédire.
+    const target = this.domains().find((d) => this.normName(d.name) === this.normName(this.brandReportName()));
+    if (target && target.rating !== 'liked') this.setRating(target, 'liked');
+
     const emails = this.parseEmails(this.reportEmails());
     const force = this.forceRegen();
     this.showReportConfirm.set(false);
@@ -593,6 +601,7 @@ export class WizardComponent implements OnInit {
         this.markReported(name);
         if (typeof report.remainingCredits === 'number') {
           this.userService.updateCredits(report.remainingCredits);
+          this.loadReportSummaries();
         }
         this.brandReportLoading.set(false);
       },
@@ -653,6 +662,37 @@ export class WizardComponent implements OnInit {
 
   // ─── Suivi des noms déjà rapportés (lien « Voir le rapport » vs bouton) ────
   readonly reportedNames = signal<Set<string>>(new Set());
+
+  /**
+   * Synthèses des noms vérifiés — verdicts déjà payés, affichés sur les cartes.
+   * C'est ce qui rend plusieurs noms comparables côte à côte dans la grille,
+   * là où l'arbitrage exigeait jusqu'ici d'ouvrir un rapport à la fois.
+   */
+  readonly reportSummaries = signal<BrandReportSummary[]>([]);
+
+  private loadReportSummaries(): void {
+    this.brandReportService.summaries().subscribe({
+      next: (res) => this.reportSummaries.set(res.summaries ?? []),
+      // Sans synthèse, les cartes restent à l'état non vérifié : dégradation
+      // lisible, jamais un verdict inventé.
+      error: () => this.reportSummaries.set([]),
+    });
+  }
+
+  /**
+   * Rafraîchissement : gratuit et sans confirmation — rien n'est débité.
+   * Le serveur borne la fréquence et renvoie le rapport en cache s'il est
+   * déjà à jour.
+   */
+  refreshBrandReport(name: string): void {
+    this.brandReportService.full(name, { force: true }).subscribe({
+      next: () => this.loadReportSummaries(),
+      error: () => this.messageService.add({
+        severity: 'error',
+        summary: this.translate.instant('WIZARD.STEP3.REPORT_ERROR'),
+      }),
+    });
+  }
   private normName(name: string): string { return (name || '').trim().toLowerCase(); }
   hasReport(name: string): boolean { return this.reportedNames().has(this.normName(name)); }
   private markReported(name: string): void {
@@ -661,7 +701,10 @@ export class WizardComponent implements OnInit {
   /** Charge la liste des noms déjà rapportés (silencieux si non authentifié). */
   loadReportedNames(): void {
     this.brandReportService.mine().subscribe({
-      next: (res) => this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n)))),
+      next: (res) => {
+        this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n))));
+        this.loadReportSummaries();
+      },
       error: () => { /* anonyme ou indisponible : liste vide */ },
     });
   }

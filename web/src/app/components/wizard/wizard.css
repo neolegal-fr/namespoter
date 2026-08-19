@@ -383,3 +383,71 @@
     0% { background-position: 100% 50%; }
     100% { background-position: 0 50%; }
 }
+
+/* ─── Popup de vérification (option 2A) ───────────────────────────────────
+   Elle porte la pédagogie que la carte ne peut pas porter. Le prix n'apparaît
+   qu'en pied, après le contexte. */
+.vd-risk {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--nm-text-light-2);
+}
+
+.vd-what {
+    margin: 0 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nm-text-light-3);
+}
+
+.vd-list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.vd-list li {
+    display: flex;
+    gap: 0.625rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--nm-text-light-2);
+}
+
+.vd-list strong { color: var(--nm-text-light); font-weight: 600; }
+.vd-list .pi-check { color: var(--nm-accent-on-light); font-size: 0.8rem; margin-top: 0.2rem; flex: none; }
+
+.vd-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--nm-divider-light-1);
+}
+
+.vd-price { margin: 0; font-size: 0.9rem; color: var(--nm-text-light-2); }
+.vd-price strong { color: var(--nm-accent-on-light); font-family: var(--nm-font-display); }
+
+.vd-go {
+    min-height: var(--nm-touch-cta);
+    padding: 0.875rem 1.5rem;
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-accent-on-light);
+    color: #fff;
+    font-family: var(--nm-font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vd-go:hover { background: var(--nm-accent-on-light-hover); }
+.vd-go--topup { background: var(--nm-text-light); }
