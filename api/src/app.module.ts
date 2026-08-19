@@ -34,7 +34,18 @@ import { EventsController } from './events/events.controller';
         type: 'mariadb',
         url: config.get('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: true, // Désactiver en production
+        // `synchronize` laisse TypeORM réécrire le schéma pour le faire
+        // correspondre aux entités à chaque démarrage. Sur une base de
+        // production — comptes, projets, paiements — c'est une opération
+        // destructrice lancée sans relecture : le défaut est donc « non », et
+        // l'activation demande un geste explicite.
+        //
+        // `NODE_ENV` ne peut pas servir de garde : il n'est défini nulle part
+        // dans ce projet (ni Dockerfile, ni compose, ni `.env`), donc un test
+        // `NODE_ENV !== 'production'` laisserait la synchronisation ACTIVE en
+        // production. L'opt-in explicite est le seul défaut qui échoue du bon
+        // côté.
+        synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
       }),
       inject: [ConfigService],
     }),

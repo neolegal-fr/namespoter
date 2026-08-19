@@ -49,6 +49,21 @@ api/src/
 - i18n : FR/EN via `@ngx-translate`, fichiers dans `web/public/assets/i18n/`
 - Auth Keycloak avec bearer token via interceptor HTTP
 
+### Schéma de base de données
+
+`synchronize` est un **opt-in explicite** (`DB_SYNCHRONIZE=true`), pas un défaut. Non
+définie, la variable vaut « non » : la production ne synchronise donc jamais.
+
+Le garde ne peut pas reposer sur `NODE_ENV` — il n'est défini nulle part dans ce projet,
+donc un test `NODE_ENV !== 'production'` laisserait la synchronisation active en prod,
+c'est-à-dire précisément là où elle est dangereuse.
+
+> Conséquence : **un changement d'entité ne se propage plus tout seul en production.**
+> Toute colonne ajoutée ou retypée demande un `ALTER` appliqué à la main, ou une
+> migration TypeORM. Ne jamais « débloquer » un déploiement en activant
+> `DB_SYNCHRONIZE` sur le serveur : la base y porte des comptes et des paiements, et la
+> synchronisation supprime ou retype des colonnes sans relecture.
+
 ### Système de crédits
 - 1 suggestion de domaine = 1 crédit
 - Crédits initiaux : 100
