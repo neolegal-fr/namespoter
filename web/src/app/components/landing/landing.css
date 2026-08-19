@@ -140,6 +140,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  /* La puce reste à 26px, comme la maquette, mais la zone cliquable atteint le
+     plancher tactile de 44px : on agrandit la cible, pas le dessin. */
+  min-height: var(--nm-touch-min);
   padding: 0;
   background: none;
   border: 0;

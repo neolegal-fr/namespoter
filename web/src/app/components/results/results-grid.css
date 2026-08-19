@@ -150,8 +150,16 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  /* Le badge passe à la ligne plutôt que d'écraser le nom : un nom long, ou un
+     libellé de coût long dans une autre langue, coupait « Roulio » en
+     « Rouli / o ». Constaté à 390px. */
+  flex-wrap: wrap;
+  gap: 6px 10px;
   margin-bottom: 14px;
+}
+
+.rg-card__id {
+  flex: 1 1 auto;
 }
 
 .rg-card__id {
