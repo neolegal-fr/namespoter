@@ -638,28 +638,29 @@
     (visibleChange)="showReportConfirm.set($event)"
     [header]="('WIZARD.STEP3.REPORT_CONFIRM_TITLE' | translate) + ' — ' + brandReportName()"
     [modal]="true"
-    [style]="{ width: 'min(94vw, 30rem)' }"
-    [contentStyle]="{ padding: '1.25rem' }">
+    [style]="{ width: 'min(94vw, 46rem)' }"
+    [contentStyle]="{ padding: '1.25rem', background: '#f4f6f5' }">
 
     <div style="display: flex; flex-direction: column; gap: 1rem">
-      <p style="margin: 0; font-size: 0.9rem; color: #374151">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
+
+      <!-- Écran verrouillé de la refonte (étape 4), branché sur le parcours
+           d'achat existant : il porte le prix ET l'action, la confirmation ne
+           garde qu'« Annuler ». `freeThisMonth` reste à false — l'API n'expose
+           pas encore le droit au rapport offert, et on ne promet pas une
+           gratuité qu'on ne sait pas vérifier. -->
+      <app-brand-report-locked
+        [name]="brandReportName()"
+        [priceCredits]="brandReportCost"
+        [domainsChecked]="selectedExtensions().length"
+        [canAfford]="hasEnoughReportCredits()"
+        [freeThisMonth]="false"
+        (unlock)="confirmBrandReport()"
+        (topUp)="openCreditPurchase()">
+      </app-brand-report-locked>
+
       <a class="report-link" style="align-self: flex-start" (click)="showSampleReport()">
         <i class="pi pi-eye"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_LINK' | translate }}
       </a>
-
-      <!-- Coût + solde -->
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem; background: #f3f4f6; border-radius: 8px; font-size: 0.9rem">
-        <span>{{ 'WIZARD.STEP3.REPORT_COST_LABEL' | translate }}</span>
-        <strong>{{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}</strong>
-      </div>
-
-      <!-- Crédits insuffisants -->
-      <div *ngIf="!hasEnoughReportCredits()" style="text-align: center">
-        <p style="color: #dc2626; font-size: 0.85rem; margin: 0 0 0.6rem">{{ 'WIZARD.STEP3.REPORT_NO_CREDITS' | translate }}</p>
-        <button type="button" class="report-cta" (click)="openCreditPurchase()">
-          <i class="pi pi-shopping-cart" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.BUY_CREDITS_BTN' | translate }}
-        </button>
-      </div>
 
       <!-- Destinataires email -->
       <div *ngIf="hasEnoughReportCredits()">
@@ -676,9 +677,6 @@
       <button type="button" class="p-button p-button-text" (click)="showReportConfirm.set(false)"
               style="background: none; border: 0; color: #6b7280; cursor: pointer; padding: 0.5rem 0.9rem">
         {{ 'COMMON.CANCEL' | translate }}
-      </button>
-      <button *ngIf="hasEnoughReportCredits()" type="button" class="report-cta" (click)="confirmBrandReport()">
-        <i class="pi pi-verified" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_CONFIRM_BTN' | translate }}
       </button>
     </ng-template>
   </p-dialog>

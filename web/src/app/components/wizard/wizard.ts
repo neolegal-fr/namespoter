@@ -31,6 +31,7 @@ import { FeedbackService } from '../../services/feedback';
 import { AnalyticsService } from '../../services/analytics';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ResultsGridComponent } from '../results/results-grid';
+import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
 
 @Component({
   selector: 'app-wizard',
@@ -55,7 +56,8 @@ import { ResultsGridComponent } from '../results/results-grid';
     SplitButton,
     Toast,
     TranslatePipe,
-    ResultsGridComponent
+    ResultsGridComponent,
+    BrandReportLockedComponent
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
