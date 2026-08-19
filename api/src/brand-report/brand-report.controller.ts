@@ -61,7 +61,35 @@ export class BrandReportController {
   }
 
   /**
-   * Rapport complet (authentifié), facturé {@link BRAND_REPORT_COST} crédits.
+   * Ce qu'il faut pour afficher le bon libellé avant achat, SANS que le front
+   * devine : acheté ou non, prix, droit gratuit disponible, solde.
+   *
+   * Ne renvoie JAMAIS de verdict. Avant achat, la réponse se limite au prix et
+   * à l'état du droit ; le rapport lui-même n'atteint le navigateur que via
+   * `POST /brand-report`, après débit ou consommation du droit. Un simple
+   * compteur « 3 contrôles favorables » suffirait à déduire l'essentiel : il
+   * n'est pas exposé non plus.
+   */
+  @Get('offer')
+  async offer(
+    @Query('name') name: string,
+    @AuthenticatedUser() keycloakUser: { sub: string },
+  ) {
+    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const purchased = name ? !!(await this.store.find(keycloakUser.sub, name)) : false;
+    return {
+      deepReport: {
+        purchased,
+        priceCredits: BRAND_REPORT_COST,
+        freeThisMonth: this.usersService.isFreeReportAvailable(user),
+      },
+      account: { credits: user.totalCredits },
+    };
+  }
+
+  /**
+   * Rapport complet (authentifié), facturé {@link BRAND_REPORT_COST} crédits —
+   * ou OFFERT s'il s'agit du premier rapport du mois calendaire.
    *
    * Idempotent : si un rapport existe déjà pour ce (compte, nom), il est renvoyé
    * SANS débit (`cached: true`). Sinon, la génération (I/O externe) se fait AVANT
@@ -99,7 +127,11 @@ export class BrandReportController {
       return { ...cached, remainingCredits: user.totalCredits, emailed: false, cached: true };
     }
 
-    if (user.totalCredits < BRAND_REPORT_COST) {
+    // Le droit au rapport offert dispense du solde : on ne bloque faute de
+    // crédits que s'il est déjà consommé ce mois-ci. Lecture indicative ici ;
+    // la décision définitive se prend sous verrou, dans la transaction.
+    const freeLikely = this.usersService.isFreeReportAvailable(user);
+    if (!freeLikely && user.totalCredits < BRAND_REPORT_COST) {
       this.events.event('brand_report_blocked_no_credits', { sub: keycloakUser.sub, cost: BRAND_REPORT_COST });
       throw new ForbiddenException('Crédits insuffisants');
     }
@@ -121,22 +153,37 @@ export class BrandReportController {
       throw e;
     }
 
-    let remainingCredits = user.totalCredits - BRAND_REPORT_COST;
+    // Consommer le droit gratuit OU débiter le tarif plein — jamais les deux,
+    // et la décision se prend sous verrou : `consumeFreeReport` pose un verrou
+    // pessimiste sur la ligne utilisateur, donc deux requêtes simultanées ne
+    // peuvent pas obtenir chacune le rapport offert.
+    let remainingCredits = user.totalCredits;
+    let costCharged = BRAND_REPORT_COST;
     await this.dataSource.transaction(async (manager) => {
+      const free = await this.usersService.consumeFreeReport(keycloakUser.sub, manager);
+      if (free) {
+        costCharged = 0;
+        return;
+      }
       const newTotal = await this.usersService.decrementCredits(keycloakUser.sub, BRAND_REPORT_COST, manager);
       // -1 = crédits devenus insuffisants entre-temps : on annule (rollback).
       if (newTotal < 0) throw new ForbiddenException('Crédits insuffisants');
       remainingCredits = newTotal;
     });
 
-    // Mémoriser pour éviter tout re-débit ultérieur (best-effort).
-    await this.store.save(keycloakUser.sub, dto.name, report).catch((e) =>
+    // Mémoriser, avec le coût RÉELLEMENT débité, pour éviter tout re-débit
+    // ultérieur et garder un historique juste même si le tarif change.
+    await this.store.save(keycloakUser.sub, dto.name, report, costCharged).catch((e) =>
       this.logger.error('Échec de la mémorisation du rapport', e),
     );
 
+    // `cost` porte le débit réel (0 si offert) : les totaux par compte dans
+    // `analyze-logs.py rapports` restent justes, et `free` permet de compter
+    // les rapports offerts séparément.
     this.events.event('brand_report_generated', {
       sub: keycloakUser.sub,
-      cost: BRAND_REPORT_COST,
+      cost: costCharged,
+      free: costCharged === 0,
       score: report.score,
     });
 
@@ -148,6 +195,6 @@ export class BrandReportController {
       this.logger.error('Envoi email du rapport échoué', e),
     );
     const willEmail = Array.isArray(recipients) ? recipients.length > 0 : !!recipients;
-    return { ...report, remainingCredits, emailed: willEmail, cached: false };
+    return { ...report, remainingCredits, emailed: willEmail, cached: false, costCredits: costCharged };
   }
 }

@@ -287,7 +287,8 @@
       "LOCKED_TOPUP": "Top up to unlock",
       "LOCKED_FREE_THIS_MONTH": "free this month",
       "LOCKED_FREE_NOTE": "One in-depth report free every month. After that, {{n}} credits per name.",
-      "LOCKED_PAID_NOTE": "{{n}} credits per name. The report stays available indefinitely, with no further charge."
+      "LOCKED_PAID_NOTE": "{{n}} credits per name. The report stays available indefinitely, with no further charge.",
+      "REPORT_DEBIT_CONFIRM": "This report will be charged {{n}} credits from your balance. Confirm?"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

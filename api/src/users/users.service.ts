@@ -8,6 +8,11 @@ import { Project } from '../projects/entities/project.entity';
 /** Quota mensuel de crédits gratuits */
 const FREE_MONTHLY_QUOTA = 100;
 
+/** Mois calendaire courant au format « AAAA-MM » — clé du rapport offert. */
+export function currentPeriod(now: Date = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
 /** Champs recopiés du token Keycloak à chaque appel authentifié. */
 export interface UserProfile {
   email?: string;
@@ -123,6 +128,40 @@ export class UsersService {
 
     await repo.save(user);
     return user.totalCredits;
+  }
+
+  /**
+   * Le rapport approfondi offert du mois est-il encore disponible ?
+   *
+   * Calculé à la lecture : disponible si aucun rapport n'a été consommé dans
+   * la période courante. Un droit d'un mois passé ne compte pas — il est perdu,
+   * conformément à la règle « non cumulable ».
+   */
+  isFreeReportAvailable(user: Pick<User, 'freeReportPeriod' | 'freeReportUsedAt'>, now: Date = new Date()): boolean {
+    return user.freeReportPeriod !== currentPeriod(now) || user.freeReportUsedAt == null;
+  }
+
+  /**
+   * Consomme le rapport offert du mois. À appeler DANS une transaction, avec
+   * le `manager` de celle-ci, pour que le débit ou la consommation et la
+   * production du rapport tiennent ensemble.
+   *
+   * Retourne `true` si le droit a été consommé, `false` s'il ne l'était plus —
+   * auquel cas l'appelant doit débiter le tarif plein. Ce double contrôle
+   * (lecture puis réécriture sous verrou) empêche deux requêtes simultanées de
+   * consommer chacune le même droit gratuit.
+   */
+  async consumeFreeReport(keycloakId: string, manager: EntityManager, now: Date = new Date()): Promise<boolean> {
+    const repo = manager.getRepository(User);
+    // Verrou pessimiste : la lecture bloque une seconde transaction concurrente
+    // jusqu'au commit. Sans lui, deux appels quasi simultanés liraient tous
+    // deux « disponible » et obtiendraient deux rapports gratuits.
+    const user = await repo.findOne({ where: { keycloakId }, lock: { mode: 'pessimistic_write' } });
+    if (!user || !this.isFreeReportAvailable(user, now)) return false;
+    user.freeReportPeriod = currentPeriod(now);
+    user.freeReportUsedAt = now;
+    await repo.save(user);
+    return true;
   }
 
   /** Ajoute des crédits pack (achat ponctuel, permanents). Retourne le User mis à jour. */

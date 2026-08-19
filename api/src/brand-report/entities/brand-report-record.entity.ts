@@ -32,6 +32,16 @@ export class BrandReportRecord {
   @Index({ unique: true })
   shareToken: string;
 
+  /**
+   * Crédits RÉELLEMENT débités pour ce rapport : 0 s'il a consommé le rapport
+   * offert du mois, sinon le tarif en vigueur au moment de l'achat. Stocké sur
+   * l'enregistrement, pas déduit du tarif courant : un changement de prix ne
+   * doit pas réécrire l'historique. Nullable pour les rapports antérieurs à
+   * cette colonne, dont le coût n'a pas été conservé.
+   */
+  @Column({ type: 'int', nullable: true })
+  costCredits: number | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

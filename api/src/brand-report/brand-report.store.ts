@@ -40,7 +40,7 @@ export class BrandReportStore {
    * Mémorise (ou met à jour) le rapport pour ce (compte, nom). Garantit un jeton
    * de partage stable, embarqué dans le rapport renvoyé.
    */
-  async save(keycloakId: string, name: string, report: BrandReport): Promise<void> {
+  async save(keycloakId: string, name: string, report: BrandReport, costCredits?: number): Promise<void> {
     const nameKey = this.key(name);
     const existing = await this.repo.findOne({ where: { keycloakId, nameKey } });
     const shareToken = existing?.shareToken ?? randomUUID();
@@ -49,9 +49,12 @@ export class BrandReportStore {
       existing.report = report;
       existing.name = name;
       existing.shareToken = shareToken;
+      // Le coût n'est réécrit que s'il est fourni : une régénération forcée
+      // redébite et le porte ; une simple mise à jour le laisse intact.
+      if (costCredits !== undefined) existing.costCredits = costCredits;
       await this.repo.save(existing);
     } else {
-      await this.repo.save(this.repo.create({ keycloakId, nameKey, name, report, shareToken }));
+      await this.repo.save(this.repo.create({ keycloakId, nameKey, name, report, shareToken, costCredits: costCredits ?? null }));
     }
   }
 }

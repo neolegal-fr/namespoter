@@ -61,6 +61,22 @@ export interface BrandReport {
   emailed?: boolean;
   /** true = rapport déjà généré, renvoyé sans nouveau débit. */
   cached?: boolean;
+  /** Crédits réellement débités : 0 si le rapport offert du mois a été consommé. */
+  costCredits?: number;
+}
+
+/**
+ * Ce que le serveur dit de l'offre pour un nom, AVANT achat. Aucun verdict :
+ * seulement de quoi afficher le bon libellé et le bon bouton.
+ */
+export interface BrandReportOffer {
+  deepReport: {
+    purchased: boolean;
+    priceCredits: number;
+    /** Le rapport offert du mois calendaire est-il encore disponible ? */
+    freeThisMonth: boolean;
+  };
+  account: { credits: number };
 }
 
 /** Coût affiché du rapport complet (aligné sur BRAND_REPORT_COST côté API). */
@@ -81,6 +97,11 @@ export class BrandReportService {
   }
 
   /** Rapport déjà généré pour ce nom (authentifié) — pour éviter un re-débit. */
+  /** État de l'offre pour un nom : acheté, prix, droit gratuit, solde. Sans verdict. */
+  offer(name: string): Observable<BrandReportOffer> {
+    return this.http.get<BrandReportOffer>(`${this.apiUrl}/offer`, { params: { name } });
+  }
+
   existing(name: string): Observable<{ exists: boolean; report?: BrandReport }> {
     return this.http.get<{ exists: boolean; report?: BrandReport }>(`${this.apiUrl}/existing`, { params: { name } });
   }

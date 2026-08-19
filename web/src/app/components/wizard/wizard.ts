@@ -476,8 +476,32 @@ export class WizardComponent implements OnInit {
     });
   }
 
+  /**
+   * Offre du serveur pour le nom courant : acheté, prix, droit gratuit, solde.
+   * Chargée à chaque ouverture de la confirmation — le droit au rapport offert
+   * peut avoir été consommé dans un autre onglet, ou le mois avoir changé.
+   * `null` tant que la réponse n'est pas arrivée : la carte affiche alors le
+   * tarif plein, jamais une gratuité qu'on ne sait pas encore confirmer.
+   */
+  readonly reportOffer = signal<{ freeThisMonth: boolean; priceCredits: number; credits: number } | null>(null);
+
+  /** Le rapport est-il offert pour ce nom, d'après le serveur ? */
+  reportIsFree(): boolean {
+    return this.reportOffer()?.freeThisMonth === true;
+  }
+
   /** Ouvre la confirmation (coût, solde, destinataires) après avoir chargé l'email du compte. */
   private async openReportConfirm(): Promise<void> {
+    this.reportOffer.set(null);
+    this.brandReportService.offer(this.brandReportName()).subscribe({
+      next: (o) => this.reportOffer.set({
+        freeThisMonth: o.deepReport.freeThisMonth,
+        priceCredits: o.deepReport.priceCredits,
+        credits: o.account.credits,
+      }),
+      // Offre indisponible : on reste sur le tarif plein, c'est le défaut sûr.
+      error: () => this.reportOffer.set(null),
+    });
     if (!this.userEmail()) {
       try {
         const profile: any = await this.keycloak.loadUserProfile();
@@ -488,9 +512,13 @@ export class WizardComponent implements OnInit {
     this.showReportConfirm.set(true);
   }
 
-  /** Solde suffisant pour générer le rapport ? */
+  /**
+   * Peut-on lancer le rapport : droit gratuit disponible, OU solde suffisant.
+   * La décision définitive reste au serveur, sous verrou ; ceci ne sert qu'à
+   * ne pas proposer un bouton qui échouera.
+   */
   hasEnoughReportCredits(): boolean {
-    return this.userService.creditsValue >= this.brandReportCost;
+    return this.reportIsFree() || this.userService.creditsValue >= this.brandReportCost;
   }
 
   /** Renvoie vers l'achat de crédits (dialogue existant). */
@@ -510,6 +538,23 @@ export class WizardComponent implements OnInit {
   /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
   confirmBrandReport(): void {
     if (!this.hasEnoughReportCredits()) { this.openCreditPurchase(); return; }
+    // Quand 50 crédits sont réellement débités — la moitié de la réserve
+    // mensuelle en un clic — on demande une confirmation explicite. Quand le
+    // rapport est offert, aucune : la friction n'y a aucune valeur.
+    if (!this.reportIsFree() && !this.forceRegen()) {
+      this.confirmationService.confirm({
+        header: this.translate.instant('WIZARD.STEP3.REPORT_CONFIRM_TITLE'),
+        message: this.translate.instant('WIZARD.STEP3.REPORT_DEBIT_CONFIRM', { n: this.brandReportCost }),
+        acceptLabel: this.translate.instant('WIZARD.STEP3.REPORT_CONFIRM_BTN'),
+        rejectLabel: this.translate.instant('COMMON.CANCEL'),
+        accept: () => this.launchBrandReport(),
+      });
+      return;
+    }
+    this.launchBrandReport();
+  }
+
+  private launchBrandReport(): void {
     const emails = this.parseEmails(this.reportEmails());
     const force = this.forceRegen();
     this.showReportConfirm.set(false);

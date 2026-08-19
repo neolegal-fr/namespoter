@@ -64,6 +64,29 @@ c'est-à-dire précisément là où elle est dangereuse.
 > `DB_SYNCHRONIZE` sur le serveur : la base y porte des comptes et des paiements, et la
 > synchronisation supprime ou retype des colonnes sans relecture.
 
+Les scripts SQL à appliquer vivent dans `api/migrations/`, datés, idempotents
+(`ADD COLUMN IF NOT EXISTS`), avec la commande d'application et le retour arrière en
+en-tête. **Ordre impératif : appliquer le SQL avant de déployer l'image qui en dépend.**
+
+### Rapport approfondi offert mensuel
+
+Chaque compte a droit à **un rapport approfondi gratuit par mois calendaire**,
+indépendamment du solde. Le premier rapport du mois ne débite rien ; les suivants coûtent
+`BRAND_REPORT_COST`. Non cumulable : un droit non utilisé est perdu à la fin du mois.
+
+- La bascule est **calculée à la lecture** (`UsersService.isFreeReportAvailable`), pas par
+  une tâche planifiée — même principe que `lastFreeReset` pour les crédits.
+- La consommation se fait **sous verrou pessimiste, dans la transaction** de génération
+  (`consumeFreeReport`) : deux requêtes simultanées ne peuvent pas obtenir chacune le
+  rapport offert.
+- `GET /brand-report/offer?name=` décrit l'offre sans verdict : `deepReport.purchased`,
+  `priceCredits`, `freeThisMonth`, `account.credits`. Le front ne devine rien.
+- `brand_report_record.costCredits` porte le débit **réel** (0 si offert) : l'historique
+  reste juste après un changement de tarif, et `analyze-logs.py rapports` somme les `cost`
+  portés par les événements.
+- Côté front : confirmation explicite quand 50 crédits partent vraiment, **aucune** quand
+  le rapport est offert — la friction n'y a aucune valeur.
+
 ### Système de crédits
 - 1 suggestion de domaine = 1 crédit
 - Crédits initiaux : 100

@@ -287,7 +287,8 @@
       "LOCKED_TOPUP": "Recharger pour débloquer",
       "LOCKED_FREE_THIS_MONTH": "offert ce mois-ci",
       "LOCKED_FREE_NOTE": "Un rapport approfondi offert chaque mois. Ensuite, {{n}} crédits par nom.",
-      "LOCKED_PAID_NOTE": "{{n}} crédits par nom. Le rapport reste consultable indéfiniment, sans nouveau débit."
+      "LOCKED_PAID_NOTE": "{{n}} crédits par nom. Le rapport reste consultable indéfiniment, sans nouveau débit.",
+      "REPORT_DEBIT_CONFIRM": "Ce rapport sera débité de {{n}} crédits de votre solde. Confirmer ?"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
