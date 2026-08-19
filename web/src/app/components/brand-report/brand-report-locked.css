@@ -1,0 +1,195 @@
+/* Rapport approfondi — état verrouillé, refonte étape 4.
+ *
+ * Même surface claire que l'état débloqué : c'est la même carte, avant achat.
+ * L'utilisateur doit reconnaître le document qu'il s'apprête à payer.
+ */
+
+:host {
+  display: block;
+  font-family: var(--nm-font-body);
+  color: var(--nm-text-light);
+}
+
+.rl {
+  max-width: var(--nm-report-max);
+  margin: 0 auto;
+  background: var(--nm-surface-light);
+  border: 1px solid var(--nm-border-light);
+  border-radius: var(--nm-radius-3xl);
+  overflow: hidden;
+}
+
+.rl-head {
+  padding: 26px var(--nm-card-padding-lg);
+}
+
+.rl-overline {
+  margin: 0 0 6px;
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  text-transform: uppercase;
+  color: var(--nm-text-light-3);
+}
+
+.rl-name {
+  margin: 0 0 14px;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-brand-report);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h1-mobile);
+  line-height: 1.05;
+  color: var(--nm-text-light);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .rl-name {
+    font-size: 32px;
+  }
+}
+
+/* Rappelle ce qui est DÉJÀ payé : sans cela, l'utilisateur a le sentiment de
+   payer deux fois pour le même nom. */
+.rl-intro {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--nm-text-body-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+/* ─── Contrôles verrouillés ──────────────────────────────────────────────── */
+
+.rl-checks {
+  padding: 0 var(--nm-card-padding-lg);
+  border-top: 1px solid var(--nm-divider-light-1);
+}
+
+.rl-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--nm-divider-light-2);
+}
+
+.rl-check:first-child {
+  border-top: 0;
+}
+
+/* Le libellé est en clair : c'est lui qui vend. On montre CE QUI sera
+   vérifié, pas ce qui a été trouvé. */
+.rl-check__label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-on-card);
+  overflow-wrap: anywhere;
+}
+
+/* Barre purement décorative. Elle n'encode rien : largeur fixe, sans rapport
+   avec la longueur ou la nature du verdict. Voir le commentaire du composant :
+   le verdict n'atteint jamais le navigateur avant l'achat. */
+.rl-bar {
+  flex: none;
+  height: 11px;
+  border-radius: var(--nm-radius-xs);
+  background: linear-gradient(90deg, #e8ebea, #dfe3e2);
+}
+
+.rl-check__lock {
+  flex: none;
+  font-size: 13px;
+  color: var(--nm-text-light-3);
+}
+
+@media (max-width: 520px) {
+  /* Sous cette largeur, la barre pousse le libellé sur deux lignes et le
+     verrou déborde : la barre s'efface, le cadenas suffit à dire « verrouillé ». */
+  .rl-bar {
+    display: none;
+  }
+}
+
+/* ─── Pied ───────────────────────────────────────────────────────────────── */
+
+.rl-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px var(--nm-card-padding-lg);
+  background: var(--nm-surface-light-alt);
+  border-top: 1px solid var(--nm-divider-light-1);
+}
+
+.rl-price {
+  flex: 1 1 300px;
+}
+
+.rl-price__amount {
+  margin: 0 0 4px;
+  font-size: var(--nm-text-body);
+  color: var(--nm-text-light);
+}
+
+.rl-price__amount strong {
+  font-family: var(--nm-font-display);
+  font-weight: 700;
+}
+
+.rl-price__free {
+  color: var(--nm-accent-on-light);
+  font-weight: 600;
+}
+
+.rl-price__note {
+  margin: 0;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+.rl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--nm-touch-cta);
+  padding: 14px 26px;
+  border: 0;
+  border-radius: var(--nm-radius-sm);
+  background: var(--nm-accent-on-light);
+  color: var(--nm-surface-light);
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-ui);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.rl-btn:hover {
+  background: var(--nm-accent-on-light-hover);
+}
+
+/* Solde insuffisant : l'action change de nature, donc d'aspect. */
+.rl-btn--topup {
+  background: var(--nm-text-light);
+}
+
+.rl-btn--topup:hover {
+  background: var(--nm-text-on-card);
+}
+
+.rl-btn:focus-visible {
+  outline: 2px solid var(--nm-accent-on-light);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .rl-btn {
+    width: 100%;
+  }
+}

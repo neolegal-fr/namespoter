@@ -1,0 +1,293 @@
+/* Rapport approfondi — état débloqué, refonte étape 4.
+ *
+ * Surface CLAIRE, contrairement à l'accueil et aux résultats : c'est un
+ * document, destiné à être partagé, imprimé et relu. Le fond sombre y passerait
+ * mal à l'impression et en mode sombre de messagerie.
+ *
+ * L'ancien habillage était en indigo/violet (#4f46e5), hérité d'avant la
+ * marque : il est remplacé par l'accent du design, dans sa variante claire
+ * `--nm-accent-on-light` — la variante sombre ne passe pas le contraste AA sur
+ * blanc.
+ */
+
+:host {
+  display: block;
+  font-family: var(--nm-font-body);
+  color: var(--nm-text-light);
+}
+
+.rv {
+  max-width: var(--nm-report-max);
+  margin: 0 auto;
+  background: var(--nm-surface-light);
+  border: 1px solid var(--nm-border-light);
+  border-radius: var(--nm-radius-3xl);
+  overflow: hidden;
+}
+
+/* ─── En-tête ────────────────────────────────────────────────────────────── */
+
+.rv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px var(--nm-card-padding-lg);
+  border-bottom: 1px solid var(--nm-divider-light-1);
+}
+
+.rv-overline {
+  margin: 0 0 6px;
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  text-transform: uppercase;
+  color: var(--nm-text-light-3);
+}
+
+.rv-name {
+  margin: 0;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-brand-report);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h1-mobile);
+  line-height: 1.05;
+  color: var(--nm-text-light);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .rv-name {
+    font-size: 32px;
+  }
+}
+
+.rv-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Badge de synthèse : reprend la paire de couleurs du verdict correspondant. */
+.rv-summary {
+  padding: 8px 14px;
+  border-radius: var(--nm-radius-pill);
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rv-summary--ok {
+  background: var(--nm-verdict-free-light-bg);
+  color: var(--nm-verdict-free-light-fg);
+}
+
+.rv-summary--watch {
+  background: var(--nm-verdict-watch-light-bg);
+  color: var(--nm-verdict-watch-light-fg);
+}
+
+.rv-summary--risk {
+  background: var(--nm-verdict-taken-light-bg);
+  color: var(--nm-verdict-taken-light-fg);
+}
+
+/* ─── Sections ───────────────────────────────────────────────────────────── */
+
+.rv-section {
+  padding: 20px var(--nm-card-padding-lg);
+  border-bottom: 1px solid var(--nm-divider-light-1);
+}
+
+.rv-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.rv-section__title {
+  margin: 0;
+  font-family: var(--nm-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h3);
+  color: var(--nm-text-light);
+}
+
+.rv-section__meta {
+  font-size: var(--nm-text-overline);
+  color: var(--nm-text-light-3);
+  white-space: nowrap;
+}
+
+.rv-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--nm-divider-light-2);
+  font-size: var(--nm-text-ui);
+}
+
+.rv-row:first-of-type {
+  border-top: 0;
+}
+
+.rv-row__label {
+  flex: 1;
+  min-width: 0;
+  color: var(--nm-text-on-card);
+  overflow-wrap: anywhere;
+}
+
+.rv-row__label a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rv-row__label a:hover {
+  color: var(--nm-accent-on-light);
+}
+
+.rv-row__note {
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-text-light-3);
+  text-align: right;
+}
+
+/* Pastilles de verdict, version surface claire. */
+.rv-badge {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: var(--nm-radius-xs);
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rv-badge--free {
+  background: var(--nm-verdict-free-light-bg);
+  color: var(--nm-verdict-free-light-fg);
+}
+
+.rv-badge--taken {
+  background: var(--nm-verdict-taken-light-bg);
+  color: var(--nm-verdict-taken-light-fg);
+}
+
+.rv-badge--watch {
+  background: var(--nm-verdict-watch-light-bg);
+  color: var(--nm-verdict-watch-light-fg);
+}
+
+.rv-badge--unknown {
+  background: var(--nm-divider-light-1);
+  color: var(--nm-text-light-3);
+}
+
+.rv-hits {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+.rv-explain {
+  margin: 10px 0 0;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+/* ─── Qualité du nom ─────────────────────────────────────────────────────── */
+
+.rv-criteria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+}
+
+.rv-criterion {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 180px;
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-light-2);
+}
+
+.rv-criterion strong {
+  color: var(--nm-text-on-card);
+  font-weight: 600;
+}
+
+/* ─── Pied de carte ──────────────────────────────────────────────────────── */
+
+.rv-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px var(--nm-card-padding-lg);
+  background: var(--nm-surface-light-alt);
+}
+
+.rv-disclaimer {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+.rv-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--nm-touch-cta);
+  padding: 14px 26px;
+  border-radius: var(--nm-radius-sm);
+  background: var(--nm-text-light);
+  color: var(--nm-surface-light);
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-ui);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.rv-cta:hover {
+  background: var(--nm-text-on-card);
+}
+
+.rv-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nm-accent-on-light);
+  font-weight: 600;
+  font-size: var(--nm-text-ui-sm);
+  text-decoration: none;
+}
+
+.rv-link:hover {
+  color: var(--nm-accent-on-light-hover);
+}
+
+.rv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
