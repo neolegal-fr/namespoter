@@ -130,7 +130,6 @@ import { applyContentSeo } from '../content/content-seo';
                           <li class="nm-verdict">
                             <span class="nm-verdict__name">{{ d.name }}</span>
                             <span class="nm-verdict__state" [class]="'nm-verdict__state--' + d.state">{{ d.label | translate }}</span>
-                            <span class="nm-verdict__cost">{{ d.cost | translate }}</span>
                           </li>
                         }
                       </ul>
@@ -305,13 +304,18 @@ export class LandingComponent {
    * qu'il ne doit se confondre ni avec « libre » ni avec « pris » — et il
    * n'est jamais facturé, au même titre que « pris ».
    */
+  /**
+   * Plus de coût par ligne : le prix ne dépend pas des extensions. Une
+   * suggestion retenue vaut 1 crédit, qu'on en vérifie une ou cinq — afficher
+   * « 1 crédit » en face de chaque domaine libre suggérait l'inverse.
+   */
   readonly demoDomains = [
-    { name: 'roulio.com',  state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
-    { name: 'bikara.com',  state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
-    { name: 'sprocco.com', state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
-    { name: 'cyclique.fr', state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
-    { name: 'pedalo.com',  state: 'taken',   label: 'HOME.DEMO_TAKEN',   cost: 'HOME.DEMO_COST_0' },
-    { name: 'moyeu.ch',    state: 'unknown', label: 'HOME.DEMO_UNKNOWN', cost: 'HOME.DEMO_COST_0' },
+    { name: 'roulio.com',  state: 'free',    label: 'HOME.DEMO_FREE' },
+    { name: 'bikara.com',  state: 'free',    label: 'HOME.DEMO_FREE' },
+    { name: 'sprocco.com', state: 'free',    label: 'HOME.DEMO_FREE' },
+    { name: 'cyclique.fr', state: 'free',    label: 'HOME.DEMO_FREE' },
+    { name: 'pedalo.com',  state: 'taken',   label: 'HOME.DEMO_TAKEN' },
+    { name: 'moyeu.ch',    state: 'unknown', label: 'HOME.DEMO_UNKNOWN' },
   ];
 
   readonly controls = [1, 2, 3, 4].map((i) => ({

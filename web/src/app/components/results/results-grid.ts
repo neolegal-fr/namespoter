@@ -68,7 +68,7 @@ interface ExtVerdict {
 
     <div class="rg-grid">
       @for (d of visible(); track d.id) {
-        <article class="rg-card" [class.rg-card--strong]="freeCount(d) === extensions().length && extensions().length > 0">
+        <article class="rg-card" [class.rg-card--strong]="allFree(d)">
 
           <header class="rg-card__head">
             <div class="rg-card__id">
@@ -83,9 +83,18 @@ interface ExtVerdict {
                    [attr.aria-label]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate"></i>
               }
             </div>
-            <!-- Le badge porte le COÛT du nom : 1 crédit par domaine libre. -->
-            <span class="rg-cost" [class.rg-cost--accent]="freeCount(d) > 0">
-              {{ (freeCount(d) > 1 ? 'WIZARD.STEP3.GRID_CREDIT_MANY' : 'WIZARD.STEP3.GRID_CREDIT_ONE') | translate:{ n: freeCount(d) } }}
+            <!--
+              Le badge porte le coût RÉEL de la suggestion : 1 crédit, toujours.
+              L'API facture « results.length » (domain.controller.ts) — soit une
+              suggestion retenue, quel que soit le nombre d'extensions vérifiées.
+              Afficher le nombre de domaines libres annonçait un prix faux.
+
+              L'accent ne signale donc plus le prix mais le SIGNAL que
+              l'utilisateur cherche : toutes les extensions demandées libres.
+              Même condition que « .rg-card--strong », jamais sur des verdicts mixtes.
+            -->
+            <span class="rg-cost" [class.rg-cost--accent]="allFree(d)">
+              {{ 'WIZARD.STEP3.GRID_CREDIT_ONE' | translate }}
             </span>
           </header>
 
@@ -214,17 +223,25 @@ export class ResultsGridComponent {
   readonly visible = computed(() => {
     const f = this.filter();
     return this.domains().filter((d) => {
-      if (f === 'free') return this.freeCount(d) === this.extensions().length && this.extensions().length > 0;
+      if (f === 'free') return this.allFree(d);
       if (f === 'report') return this.hasReport(d.name);
       if (f === 'fav') return d.rating === 'liked';
       return true;
     });
   });
 
-  /** Crédits débités : 1 par domaine libre, sur l'ensemble des noms. */
-  readonly debited = computed(() =>
-    this.domains().reduce((n, d) => n + this.freeCount(d), 0),
-  );
+  /**
+   * Crédits débités : 1 par SUGGESTION retenue, pas par domaine libre.
+   * C'est ce que facture l'API (`actualCost = results.length`) ; compter les
+   * domaines libres affichait un total sans rapport avec le solde réel.
+   */
+  readonly debited = computed(() => this.domains().length);
+
+  /** Toutes les extensions demandées sont libres — le cas que l'on cherche. */
+  allFree(d: any): boolean {
+    const exts = this.extensions();
+    return exts.length > 0 && this.freeCount(d) === exts.length;
+  }
 
   freeCount(d: any): number {
     return this.extensions().filter((e) => d.allExtensions?.[e] === true).length;
