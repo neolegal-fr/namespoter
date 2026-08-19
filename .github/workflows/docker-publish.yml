@@ -7,6 +7,15 @@ name: Build and Push Docker Images
 # Sur une PR : build seul, sans push ni login. Une PR non testée oblige à
 # découvrir la casse une fois sur `main`, image déjà publiée — et les PRs
 # Dependabot n'ont de toute façon pas accès aux secrets du dépôt.
+#
+# Les tests de l'API tournent avant les deux builds, qui en dépendent : une
+# suite rouge doit empêcher la publication de l'image, pas être constatée
+# après coup. Le job compile aussi les types (`tsc --noEmit`), car `nest build`
+# dans le Dockerfile ne signalerait la casse qu'au moment du build d'image —
+# et c'est précisément ce qui avait laissé passer une montée de TypeORM.
+#
+# Pas de job pour le web : il n'a aucun test, et `ng test` échoue s'il n'en
+# trouve aucun. À ajouter le jour où une première spec existe.
 on:
   push:
     branches: [main]
@@ -19,8 +28,41 @@ env:
   IMAGE_PREFIX: git.neolegal.fr/neolegal/namorama
 
 jobs:
+  test-api:
+    name: Test API
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      # `--legacy-peer-deps` comme dans `api/Dockerfile` : nest-keycloak-connect
+      # exige `@nestjs/common <11` alors que le projet est en 11.x. Sans le
+      # drapeau, `npm ci` refuse d'installer et le job ne démarre jamais.
+      - name: Install dependencies
+        working-directory: ./api
+        run: npm ci --legacy-peer-deps
+
+      - name: Typecheck
+        working-directory: ./api
+        run: npx tsc -p tsconfig.build.json --noEmit
+
+      - name: Run tests
+        working-directory: ./api
+        run: npm test
+
   build-api:
     name: Build API image
+    needs: test-api
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,6 +90,7 @@ jobs:
 
   build-web:
     name: Build Web image
+    needs: test-api
     runs-on: ubuntu-latest
     permissions:
       contents: read
