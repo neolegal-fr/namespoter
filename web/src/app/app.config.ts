@@ -41,6 +41,14 @@ export function HttpLoaderFactory(http: HttpClient, platformId: Object) {
   return new CustomTranslateLoader(http, isPlatformBrowser(platformId));
 }
 
+/**
+ * Délai au-delà duquel on cesse d'attendre Keycloak au démarrage.
+ *
+ * 8 s : assez pour une connexion lente ou un serveur qui s'éveille, assez
+ * court pour qu'un utilisateur n'ait pas le sentiment d'une page morte.
+ */
+const KEYCLOAK_INIT_TIMEOUT_MS = 8000;
+
 function initializeApp(
   keycloak: KeycloakService,
   translate: TranslateService,
@@ -65,11 +73,26 @@ function initializeApp(
     await config.load();
 
     // 2. Initialiser Keycloak
+    //
     // Le try/catch évite une page blanche sur Safari : ITP bloque l'iframe du
     // silent check-sso (Storage Access API), ce qui fait échouer keycloak.init()
     // et gèle l'APP_INITIALIZER si l'erreur n'est pas capturée.
+    //
+    // Mais il ne suffit pas : quand l'iframe est bloquée par une CSP
+    // `frame-ancestors` plutôt que par une erreur réseau, `keycloak.init()` ne
+    // rejette PAS — il attend un postMessage qui n'arrivera jamais. La promesse
+    // reste alors en suspens, l'APP_INITIALIZER ne se résout jamais, et
+    // l'application ne démarre pas : la page prérendue reste affichée, d'aspect
+    // normal, mais AUCUN élément n'est interactif. C'est un mode de panne
+    // silencieux, et d'autant plus trompeur que la page paraît correcte.
+    //
+    // D'où la course contre un délai : au-delà, on charge en mode non
+    // authentifié, exactement comme le fait déjà le catch en cas d'échec.
+    // Mieux vaut une application utilisable où l'utilisateur doit cliquer sur
+    // « Connexion » qu'une application figée.
     try {
-      await keycloak.init({
+      await Promise.race([
+        keycloak.init({
         config: {
           url: config.keycloakUrl,
           realm: 'namorama',
@@ -82,7 +105,11 @@ function initializeApp(
           checkLoginIframe: false
         },
         bearerExcludedUrls: ['/assets']
-      });
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('keycloak init timeout')), KEYCLOAK_INIT_TIMEOUT_MS),
+        ),
+      ]);
     } catch {
       // SSO check bloqué (Safari ITP, navigateur sans cookies tiers, etc.)
       // L'app charge en mode non-authentifié ; l'utilisateur peut se connecter manuellement.
