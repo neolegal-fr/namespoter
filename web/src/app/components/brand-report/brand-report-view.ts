@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { BrandReport, Availability, NameQuality } from '../../services/brand-report';
 
 /**
@@ -11,7 +11,7 @@ import { BrandReport, Availability, NameQuality } from '../../services/brand-rep
 @Component({
   selector: 'app-brand-report-view',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslatePipe],
   template: `
     <div style="display:flex;flex-direction:column;gap:1rem" *ngIf="report as r">
 

@@ -29,7 +29,7 @@ import { UserService } from '../../services/user';
 import { ProjectService } from '../../services/project';
 import { FeedbackService } from '../../services/feedback';
 import { AnalyticsService } from '../../services/analytics';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-wizard',
@@ -53,7 +53,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     Dialog,
     SplitButton,
     Toast,
-    TranslateModule
+    TranslatePipe
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
@@ -869,7 +869,7 @@ export class WizardComponent implements OnInit {
         this.cdr.detectChanges();
         resolve();
       };
-      this.domainService.findCompetitors(desc, this.effectiveLocale() ?? this.translate.currentLang).subscribe({
+      this.domainService.findCompetitors(desc, this.effectiveLocale() ?? this.translate.currentLang()).subscribe({
         next: (res) => {
           this.competitors.set(res.competitors ?? []);
           this.competitorsSource.set(res.source ?? 'model');
@@ -1061,7 +1061,7 @@ export class WizardComponent implements OnInit {
           setTimeout(() => {
             result.analysisPending = true;
             this.cdr.detectChanges();
-            this.domainService.analyzeName(result.id, this.translate.currentLang).subscribe({
+            this.domainService.analyzeName(result.id, this.translate.currentLang() ?? undefined).subscribe({
               next: (r) => {
                 result.analysis = r.analysis;
                 result.analysisPending = false;
@@ -1105,7 +1105,7 @@ export class WizardComponent implements OnInit {
       extensions: d.allExtensions,
     }));
 
-    this.domainService.pickBest(suggestions, this.translate.currentLang).subscribe({
+    this.domainService.pickBest(suggestions, this.translate.currentLang() ?? 'fr').subscribe({
       next: (result) => {
         this.pickBestResult.set(result);
         this.pickBestKey.set(currentKey);
@@ -1467,7 +1467,7 @@ export class WizardComponent implements OnInit {
     this.loadCompetitors();
 
     const keywords$ = this.domainService
-      .generateKeywords(descToUse, this.effectiveLocale() ?? this.translate.currentLang)
+      .generateKeywords(descToUse, this.effectiveLocale() ?? this.translate.currentLang())
       .pipe(catchError(() => of(null)));
 
     const keywordsResult = await firstValueFrom(keywords$);
@@ -1569,7 +1569,7 @@ export class WizardComponent implements OnInit {
                       setTimeout(() => {
                         domain.analysisPending = true;
                         this.cdr.detectChanges();
-                        this.domainService.analyzeName(saved.id, this.translate.currentLang).subscribe({
+                        this.domainService.analyzeName(saved.id, this.translate.currentLang() ?? undefined).subscribe({
                           next: (a) => {
                             domain.analysis = a.analysis;
                             domain.analysisPending = false;

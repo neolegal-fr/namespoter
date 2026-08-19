@@ -7,7 +7,7 @@ import { FeedbackService } from './services/feedback';
 import { CookieConsentService } from './services/cookie-consent';
 import { KeycloakService } from 'keycloak-angular';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
@@ -29,7 +29,7 @@ import { Drawer } from 'primeng/drawer';
     CommonModule,
     RouterOutlet,
     RouterModule,
-    TranslateModule,
+    TranslatePipe,
     MenuModule,
     ButtonModule,
     MenubarModule,
@@ -510,7 +510,7 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     // Langue (sans accès navigateur) — utile au prerender SSG de la landing.
-    const lang = this.translate.currentLang || 'fr';
+    const lang = this.translate.currentLang() || 'fr';
     this.currentLang.set(lang);
     this.selectedLang = lang;
 

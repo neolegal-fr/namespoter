@@ -220,7 +220,7 @@ export class PrivacyComponent implements OnInit {
   ngOnInit() {
     // FR par défaut (notamment au prerender, où currentLang peut être absent) :
     // on ne bascule en anglais que si la langue active commence par « en ».
-    this.lang.set(this.translate.currentLang?.startsWith('en') ? 'en' : 'fr');
+    this.lang.set(this.translate.currentLang()?.startsWith('en') ? 'en' : 'fr');
     this.translate.onLangChange.subscribe(e => {
       this.lang.set(e.lang?.startsWith('en') ? 'en' : 'fr');
     });

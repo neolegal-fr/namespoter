@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { BrandReportService, BrandReport, Availability, NameQuality } from '../../services/brand-report';
 
 /**
@@ -11,7 +11,7 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
 @Component({
   selector: 'app-rapport-partage',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   template: `
     <div style="max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem">
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem">

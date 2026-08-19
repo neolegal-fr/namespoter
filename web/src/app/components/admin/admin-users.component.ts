@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -18,7 +18,7 @@ import { KeycloakService } from 'keycloak-angular';
   selector: 'app-admin-users',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, TranslateModule,
+    CommonModule, FormsModule, TranslatePipe,
     TableModule, ButtonModule, InputTextModule,
     InputNumberModule, ToastModule, TooltipModule,
     ConfirmDialog,

@@ -9,7 +9,7 @@ import Aura from '@primeuix/themes/aura';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { KeycloakService, KeycloakBearerInterceptor } from 'keycloak-angular';
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { importProvidersFrom } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -51,7 +51,7 @@ function initializeApp(
   return async () => {
     const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
     translate.addLangs(supportedLangs);
-    translate.setDefaultLang('fr');
+    translate.setFallbackLang('fr');
 
     // Côté serveur (prerender SSG) : pas de Keycloak, pas de fetch relatif,
     // pas de navigator. On rend la landing en français par défaut.
@@ -126,15 +126,15 @@ export const appConfig: ApplicationConfig = {
             }
         }
     }),
-    importProvidersFrom(
-      TranslateModule.forRoot({
-        loader: {
-          provide: TranslateLoader,
-          useFactory: HttpLoaderFactory,
-          deps: [HttpClient, PLATFORM_ID]
-        }
-      })
-    ),
+    // ngx-translate 18 a retiré `TranslateModule` : la configuration passe par
+    // des providers autonomes, et les composants importent `TranslatePipe`.
+    provideTranslateService({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient, PLATFORM_ID]
+      }
+    }),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
