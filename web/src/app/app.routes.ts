@@ -28,6 +28,10 @@ import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
+  // Accueil en anglais : même composant, langue tirée de l'URL. Seule page à
+  // avoir une version anglaise réelle — les guides restent en français et
+  // n'ont donc pas de `/en/` (ce serait du contenu dupliqué).
+  { path: 'en', component: LandingComponent },
   { path: 'guides', component: GuidesIndexComponent },
   { path: 'guides/trouver-nom-de-marque', component: GuideNomDeMarqueComponent },
   { path: 'guides/trouver-nom-entreprise', component: GuideNomEntrepriseComponent },

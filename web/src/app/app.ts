@@ -698,7 +698,8 @@ export class AppComponent implements OnInit {
    * campagne d'acquisition — ne serait sinon plus reconnu comme l'accueil.
    */
   isLanding(): boolean {
-    return this.router.url.split('?')[0].split('#')[0] === '/';
+    const path = this.router.url.split('?')[0].split('#')[0];
+    return path === '/' || path === '/en';
   }
 
   reload() {

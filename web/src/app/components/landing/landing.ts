@@ -1,13 +1,17 @@
-import { Component, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, signal, inject } from '@angular/core';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { applyContentSeo } from '../content/content-seo';
 
 /**
  * Accueil — étape 2 de la refonte.
  *
- * Prérendue en HTML statique (SSG). Le contenu reste écrit en dur en français
- * plutôt que via ngx-translate : au prerender, `CustomTranslateLoader` renvoie
- * un dictionnaire vide côté serveur, donc tout texte passé par le pipe
- * `translate` sortirait en clé brute dans le HTML indexé.
+ * Prérendue en HTML statique (SSG), en français à `/` et en anglais à `/en`.
+ * Tout le texte passe par des clés `HOME.*` : au prerender, le bundle serveur
+ * fournit le dictionnaire de la langue de l'URL (`PRERENDER_I18N`), donc le
+ * HTML indexé contient le vrai contenu dans la bonne langue — et le même
+ * composant sert les deux. C'est l'étape 8 du handoff, limitée aux deux
+ * langues dont le contenu existe réellement.
  *
  * Aucune API navigateur : le composant doit rester rendu côté serveur.
  *
@@ -26,7 +30,7 @@ import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, TranslatePipe],
   template: `
     <article class="nm-landing">
 
@@ -37,7 +41,7 @@ import { RouterModule } from '@angular/router';
           <div class="nm-hero__col">
             <p class="nm-pill">
               <span class="nm-pill__dot" aria-hidden="true"></span>
-              Registres, INPI et réseaux interrogés en direct
+              {{ 'HOME.PILL' | translate }}
             </p>
 
             <!--
@@ -47,24 +51,22 @@ import { RouterModule } from '@angular/router';
               la fois. Les séparateurs restent dans le texte, masqués à l'œil.
             -->
             <h1 class="nm-h1">
-              Trouvez un nom de <span class="word-rotator"><span class="word-rotator__item word-rotator__item--1">produit</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--2">marque</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--3">société</span></span><span class="sr-only">&nbsp;</span> vraiment libre
+              {{ 'HOME.H1_A' | translate }} <span class="word-rotator"><span class="word-rotator__item word-rotator__item--1">{{ 'HOME.H1_W1' | translate }}</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--2">{{ 'HOME.H1_W2' | translate }}</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--3">{{ 'HOME.H1_W3' | translate }}</span></span><span class="sr-only">&nbsp;</span> {{ 'HOME.H1_B' | translate }}
             </h1>
 
             <p class="nm-lead">
-              Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs de
-              noms s'arrêtent au .com — Namorama vérifie aussi l'INPI et l'EUIPO,
-              pour que vous choisissiez un nom que vous pourrez vraiment garder.
+              {{ 'HOME.LEAD' | translate }}
             </p>
 
             <div class="nm-cta-row">
-              <a routerLink="/app" class="nm-btn nm-btn--accent">Trouver mon nom</a>
-              <a routerLink="/verifier-disponibilite-nom-de-marque" class="nm-btn nm-btn--ghost">Voir un rapport de marque</a>
+              <a routerLink="/app" class="nm-btn nm-btn--accent">{{ 'HOME.CTA_PRIMARY' | translate }}</a>
+              <a routerLink="/verifier-disponibilite-nom-de-marque" class="nm-btn nm-btn--ghost">{{ 'HOME.CTA_SECONDARY' | translate }}</a>
             </div>
 
             <ul class="nm-mentions">
-              <li>100 crédits offerts chaque mois</li>
-              <li>≈ 50 noms libres + 1 rapport approfondi</li>
-              <li>Sans abonnement</li>
+              <li>{{ 'HOME.MENTION_1' | translate }}</li>
+              <li>{{ 'HOME.MENTION_2' | translate }}</li>
+              <li>{{ 'HOME.MENTION_3' | translate }}</li>
             </ul>
           </div>
 
@@ -75,7 +77,7 @@ import { RouterModule } from '@angular/router';
             « type="button" » et un « aria-controls » vers le panneau.
           -->
           <div class="nm-hero__col">
-            <div class="nm-browser" role="group" aria-label="Aperçu de l'application">
+            <div class="nm-browser" role="group" [attr.aria-label]="'HOME.DEMO_LABEL' | translate">
               <div class="nm-browser__bar" aria-hidden="true">
                 <span class="nm-browser__dot"></span>
                 <span class="nm-browser__dot"></span>
@@ -93,12 +95,12 @@ import { RouterModule } from '@angular/router';
                             aria-controls="nm-demo-panel"
                             (click)="step.set(s.n)">
                       <span class="nm-step__num">{{ s.n }}</span>
-                      <span class="nm-step__label">{{ s.label }}</span>
+                      <span class="nm-step__label">{{ s.label | translate }}</span>
                     </button>
                   }
                 </div>
 
-                <p class="nm-overline">{{ current().overline }}</p>
+                <p class="nm-overline">{{ ('HOME.OVERLINE_' + step()) | translate }}</p>
 
                 <!-- Hauteur plancher : sans elle, la page saute à chaque
                      changement d'étape, les volets n'ayant pas la même taille. -->
@@ -106,49 +108,42 @@ import { RouterModule } from '@angular/router';
 
                   @switch (step()) {
                     @case (1) {
-                      <p class="nm-quote">« Des vélos reconditionnés, vendus en ligne, livrés montés. »</p>
-                      <p class="nm-note">L'IA reformule votre projet, puis en extrait les mots qui portent le nom.</p>
+                      <p class="nm-quote">{{ 'HOME.DEMO_QUOTE' | translate }}</p>
+                      <p class="nm-note">{{ 'HOME.DEMO_NOTE_1' | translate }}</p>
                       <div class="nm-chips">
-                        <span class="nm-chip">vélo</span>
-                        <span class="nm-chip">reconditionné</span>
-                        <span class="nm-chip">roue</span>
-                        <span class="nm-chip nm-chip--accent">+ ajouter</span>
+                        @for (c of chips('HOME.DEMO_CHIPS_1'); track c) { <span class="nm-chip">{{ c }}</span> }
+                        <span class="nm-chip nm-chip--accent">{{ 'HOME.DEMO_CHIP_ADD' | translate }}</span>
                       </div>
                     }
                     @case (2) {
                       <div class="nm-chips">
-                        <span class="nm-chip nm-chip--accent">court</span>
-                        <span class="nm-chip nm-chip--accent">inventé</span>
-                        <span class="nm-chip">prononçable en français</span>
-                        <span class="nm-chip">5 à 8 lettres</span>
-                        <span class="nm-chip">évite « bike »</span>
+                        @for (c of chips('HOME.DEMO_CHIPS_2'); track $index) {
+                          <span class="nm-chip" [class.nm-chip--accent]="$index < 2">{{ c }}</span>
+                        }
                       </div>
-                      <p class="nm-note">Déjà pris dans votre secteur — l'IA les évite : Upway, Loewi, Cyclofix.</p>
-                      <p class="nm-note">Classes INPI surveillées : 12 · 35 · 37</p>
+                      <p class="nm-note">{{ 'HOME.DEMO_NOTE_2A' | translate }}</p>
+                      <p class="nm-note">{{ 'HOME.DEMO_NOTE_2B' | translate }}</p>
                     }
                     @case (3) {
                       <ul class="nm-verdicts">
                         @for (d of demoDomains; track d.name) {
                           <li class="nm-verdict">
                             <span class="nm-verdict__name">{{ d.name }}</span>
-                            <span class="nm-verdict__state" [class]="'nm-verdict__state--' + d.state">{{ d.label }}</span>
-                            <span class="nm-verdict__cost">{{ d.cost }}</span>
+                            <span class="nm-verdict__state" [class]="'nm-verdict__state--' + d.state">{{ d.label | translate }}</span>
+                            <span class="nm-verdict__cost">{{ d.cost | translate }}</span>
                           </li>
                         }
                       </ul>
-                      <p class="nm-note">Seuls les domaines libres consomment un crédit. Les autres sont offerts.</p>
+                      <p class="nm-note">{{ 'HOME.DEMO_NOTE_3' | translate }}</p>
                     }
                     @case (4) {
                       <div class="nm-report-teaser">
                         <p class="nm-report-teaser__name">roulio</p>
-                        <p class="nm-report-teaser__price">50 crédits</p>
+                        <p class="nm-report-teaser__price">{{ 'HOME.DEMO_PRICE' | translate }}</p>
                         <ul class="nm-report-teaser__list">
-                          <li>Marques françaises — INPI</li>
-                          <li>Marques européennes — EUIPO</li>
-                          <li>Pseudos sur 4 réseaux</li>
-                          <li>X · &#64;roulio</li>
+                          @for (c of chips('HOME.DEMO_CHECKS'); track c) { <li>{{ c }}</li> }
                         </ul>
-                        <p class="nm-note">Facturé une seule fois par nom. Le rapport reste dans votre projet, exportable en PDF.</p>
+                        <p class="nm-note">{{ 'HOME.DEMO_NOTE_4' | translate }}</p>
                       </div>
                     }
                   }
@@ -165,17 +160,14 @@ import { RouterModule } from '@angular/router';
 
         <!-- Les 4 contrôles -->
         <section class="nm-section">
-          <h2 class="nm-h2">Le .com est libre. La marque, elle, est déposée depuis 2019.</h2>
-          <p class="nm-section__lead">
-            C'est la mauvaise surprise que Namorama vous évite. Chaque nom passe
-            quatre contrôles, pas un.
-          </p>
+          <h2 class="nm-h2">{{ 'HOME.CONTROLS_H2' | translate }}</h2>
+          <p class="nm-section__lead">{{ 'HOME.CONTROLS_LEAD' | translate }}</p>
           <div class="nm-grid-4">
             @for (c of controls; track c.overline) {
               <div class="nm-card">
-                <p class="nm-card__overline">{{ c.overline }}</p>
-                <h3 class="nm-card__title">{{ c.title }}</h3>
-                <p class="nm-card__text">{{ c.text }}</p>
+                <p class="nm-card__overline">{{ c.overline | translate }}</p>
+                <h3 class="nm-card__title">{{ c.title | translate }}</h3>
+                <p class="nm-card__text">{{ c.text | translate }}</p>
               </div>
             }
           </div>
@@ -183,20 +175,20 @@ import { RouterModule } from '@angular/router';
 
         <!-- Comparatif -->
         <section class="nm-section">
-          <div class="nm-table-scroll" tabindex="0" role="region" aria-label="Comparatif des générateurs de noms">
+          <div class="nm-table-scroll" tabindex="0" role="region" [attr.aria-label]="'HOME.CMP_LABEL' | translate">
           <div class="nm-table" role="table">
             <div class="nm-table__row nm-table__row--head" role="row">
-              <span role="columnheader">Ce que vous obtenez</span>
-              <span role="columnheader" class="nm-table__us">Namorama</span>
-              <span role="columnheader">Générateurs IA</span>
-              <span role="columnheader">Registrars</span>
+              <span role="columnheader">{{ 'HOME.CMP_HEAD' | translate }}</span>
+              <span role="columnheader" class="nm-table__us">{{ 'HOME.CMP_US' | translate }}</span>
+              <span role="columnheader">{{ 'HOME.CMP_AI' | translate }}</span>
+              <span role="columnheader">{{ 'HOME.CMP_REG' | translate }}</span>
             </div>
-            @for (r of compare; track r.critere) {
+            @for (r of compareRows(); track r[0]) {
               <div class="nm-table__row" role="row">
-                <span role="cell">{{ r.critere }}</span>
-                <span role="cell" class="nm-table__us">{{ r.nous }}</span>
-                <span role="cell">{{ r.ia }}</span>
-                <span role="cell">{{ r.reg }}</span>
+                <span role="cell">{{ r[0] }}</span>
+                <span role="cell" class="nm-table__us">{{ r[1] }}</span>
+                <span role="cell">{{ r[2] }}</span>
+                <span role="cell">{{ r[3] }}</span>
               </div>
             }
           </div>
@@ -205,26 +197,20 @@ import { RouterModule } from '@angular/router';
 
         <!-- Pour qui — texte SEO conservé -->
         <section class="nm-section nm-section--narrow">
-          <h2 class="nm-h2 nm-h2--alt">Pour quels projets ?</h2>
-          <p class="nm-prose">
-            Que vous lanciez une <strong>startup</strong>, une <strong>boutique e-commerce</strong>,
-            un <strong>restaurant</strong>, une <strong>application mobile</strong>, un cabinet de
-            <strong>conseil</strong> ou une marque de <strong>cosmétiques</strong>, Namorama vous aide
-            à trouver un nom mémorable dont le nom de domaine est encore libre. Idéal pour
-            choisir un nom de startup, nommer un nouveau produit ou rebrander une activité existante.
-          </p>
+          <h2 class="nm-h2 nm-h2--alt">{{ 'HOME.WHO_H2' | translate }}</h2>
+          <p class="nm-prose" [innerHTML]="'HOME.WHO_TEXT' | translate"></p>
         </section>
 
         <!-- FAQ — adossée au JSON-LD FAQPage d'index.html : les questions
              doivent rester visibles sur la page, sinon le balisage devient
              non conforme. -->
         <section class="nm-section nm-section--narrow">
-          <h2 class="nm-h2 nm-h2--alt">Questions fréquentes</h2>
+          <h2 class="nm-h2 nm-h2--alt">{{ 'HOME.FAQ_H2' | translate }}</h2>
           <div class="nm-faq">
-            @for (f of faq; track f.q) {
+            @for (n of [1, 2, 3, 4]; track n) {
               <div class="nm-faq__item">
-                <h3 class="nm-faq__q">{{ f.q }}</h3>
-                <p class="nm-faq__a">{{ f.a }}</p>
+                <h3 class="nm-faq__q">{{ ('HOME.FAQ_Q' + n) | translate }}</h3>
+                <p class="nm-faq__a">{{ ('HOME.FAQ_A' + n) | translate }}</p>
               </div>
             }
           </div>
@@ -233,9 +219,10 @@ import { RouterModule } from '@angular/router';
         <!-- Guides et générateurs sectoriels — maillage interne conservé.
              Hauteur minimale de 44px : ce sont des cibles tactiles. -->
         <section class="nm-section">
-          <h2 class="nm-h2 nm-h2--alt">Guides de naming par secteur</h2>
+          <h2 class="nm-h2 nm-h2--alt">{{ 'HOME.GUIDES_H2' | translate }}</h2>
           <p class="nm-section__lead">
-            Les pages que Google indexe, et par lesquelles vos futurs clients arrivent.
+            {{ 'HOME.GUIDES_LEAD' | translate }}
+            @if (lang !== 'fr') { <em>{{ 'HOME.GUIDES_NOTE_EN' | translate }}</em> }
           </p>
           <div class="nm-links">
             @for (l of guides; track l.path) {
@@ -248,12 +235,10 @@ import { RouterModule } from '@angular/router';
         <section class="nm-section">
           <div class="nm-final">
             <div>
-              <h2 class="nm-final__title">Votre nom est encore libre</h2>
-              <p class="nm-final__text">
-                100 crédits offerts chaque mois : environ 50 noms libres, et un rapport approfondi.
-              </p>
+              <h2 class="nm-final__title">{{ 'HOME.FINAL_H2' | translate }}</h2>
+              <p class="nm-final__text">{{ 'HOME.FINAL_TEXT' | translate }}</p>
             </div>
-            <a routerLink="/app" class="nm-btn nm-btn--accent">Lancer une recherche gratuite</a>
+            <a routerLink="/app" class="nm-btn nm-btn--accent">{{ 'HOME.FINAL_CTA' | translate }}</a>
           </div>
         </section>
 
@@ -263,25 +248,56 @@ import { RouterModule } from '@angular/router';
   styleUrl: './landing.css',
 })
 export class LandingComponent {
+  private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
+
+  /** Langue de la page, tirée de l'URL : « /en » → en, sinon fr. */
+  readonly lang: 'fr' | 'en' = this.route.snapshot.routeConfig?.path === 'en' ? 'en' : 'fr';
+
+  constructor() {
+    // Au prerender, l'APP_INITIALIZER ne connaît pas l'URL (pas de requête
+    // HTTP en SSG) : c'est ici, où la route est connue, que la langue se
+    // décide. `use()` est synchrone quand le dictionnaire est déjà chargé —
+    // c'est le cas au prerender (PRERENDER_I18N) comme au runtime après
+    // l'APP_INITIALIZER. Sans ce `use`, /en rendrait le contenu français.
+    if (this.translate.currentLang() !== this.lang) {
+      this.translate.use(this.lang);
+    }
+
+    // Métadonnées, canonical, <html lang> et hreflang réciproques, dans la
+    // langue de l'URL. Posés au prerender, donc présents dans le HTML indexé
+    // et dans les aperçus de partage — injecter côté client ne suffirait pas.
+    const t = (k: string) => this.translate.instant(k) as string;
+    applyContentSeo({
+      title: t('HOME.META_TITLE').replace(/^Namorama — /, ''),
+      description: t('HOME.META_DESC'),
+      path: this.lang === 'fr' ? '/' : '/en',
+      lang: this.lang,
+      ogType: 'website',
+      alternates: { fr: '/', en: '/en' },
+    });
+  }
+
   /** Volet affiché dans la démonstration figée du héros. */
   readonly step = signal(3);
 
   readonly steps = [
-    { n: 1, label: 'Décrire' },
-    { n: 2, label: 'Cadrer' },
-    { n: 3, label: 'Domaines' },
-    { n: 4, label: 'Rapport' },
+    { n: 1, label: 'HOME.STEP_1' },
+    { n: 2, label: 'HOME.STEP_2' },
+    { n: 3, label: 'HOME.STEP_3' },
+    { n: 4, label: 'HOME.STEP_4' },
   ];
 
-  private readonly overlines: Record<number, string> = {
-    1: 'Étape 1 — votre projet en une phrase',
-    2: 'Étape 2 — cadrer le style et les contraintes',
-    3: 'Étape 3 — domaines libres · 1 crédit chacun',
-    4: 'Étape 4 — rapport approfondi · 50 crédits',
-  };
+  /** Listes courtes stockées en une clé, séparées par « | » — évite 20 clés de plus. */
+  chips(key: string): string[] {
+    const v = this.translate.instant(key) as string;
+    return v && v !== key ? v.split('|') : [];
+  }
 
-  current() {
-    return { overline: this.overlines[this.step()] };
+  /** Lignes du comparatif : « critère|nous|ia|registrars;… ». */
+  compareRows(): string[][] {
+    const v = this.translate.instant('HOME.CMP_ROWS') as string;
+    return v && v !== 'HOME.CMP_ROWS' ? v.split(';').map((r) => r.split('|')) : [];
   }
 
   /**
@@ -290,65 +306,21 @@ export class LandingComponent {
    * n'est jamais facturé, au même titre que « pris ».
    */
   readonly demoDomains = [
-    { name: 'roulio.com',  state: 'free',    label: 'libre',          cost: '1 crédit' },
-    { name: 'bikara.com',  state: 'free',    label: 'libre',          cost: '1 crédit' },
-    { name: 'sprocco.com', state: 'free',    label: 'libre',          cost: '1 crédit' },
-    { name: 'cyclique.fr', state: 'free',    label: 'libre',          cost: '1 crédit' },
-    { name: 'pedalo.com',  state: 'taken',   label: 'pris',           cost: 'non facturé' },
-    { name: 'moyeu.ch',    state: 'unknown', label: 'non vérifiable', cost: 'non facturé' },
+    { name: 'roulio.com',  state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
+    { name: 'bikara.com',  state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
+    { name: 'sprocco.com', state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
+    { name: 'cyclique.fr', state: 'free',    label: 'HOME.DEMO_FREE',    cost: 'HOME.DEMO_COST_1' },
+    { name: 'pedalo.com',  state: 'taken',   label: 'HOME.DEMO_TAKEN',   cost: 'HOME.DEMO_COST_0' },
+    { name: 'moyeu.ch',    state: 'unknown', label: 'HOME.DEMO_UNKNOWN', cost: 'HOME.DEMO_COST_0' },
   ];
 
-  readonly controls = [
-    {
-      overline: '01 — DOMAINE',
-      title: 'Trois états, pas deux',
-      text: "Libre, pris, ou invérifiable. Un registre en panne ne se déguise jamais en bonne nouvelle.",
-    },
-    {
-      overline: '02 — INPI',
-      title: 'Marques françaises et UE',
-      text: "Recherche d'antériorité à l'INPI et à l'EUIPO, sur les classes de Nice qui vous concernent. La marque UE couvre les 27 États membres.",
-    },
-    {
-      overline: '03 — RÉSEAUX',
-      title: 'Le pseudo suit le nom',
-      text: 'Instagram, LinkedIn, X, TikTok : un nom dont le handle est pris coûte cher en notoriété.',
-    },
-    {
-      overline: '04 — EUROPE',
-      title: 'Pensé pour le .fr',
-      text: 'Noms prononçables en français, extensions européennes en premier, données hébergées en UE.',
-    },
-  ];
+  readonly controls = [1, 2, 3, 4].map((i) => ({
+    overline: `HOME.C${i}_OVER`,
+    title: `HOME.C${i}_TITLE`,
+    text: `HOME.C${i}_TEXT`,
+  }));
 
-  readonly compare = [
-    { critere: 'Noms générés par IA',              nous: 'oui',               ia: 'oui',      reg: '—' },
-    { critere: 'Disponibilité du domaine',         nous: 'registre en direct', ia: 'estimée',  reg: 'oui' },
-    { critere: 'Antériorité de marque INPI / EUIPO', nous: 'incluse',          ia: '—',        reg: '—' },
-    { critere: 'Pseudos réseaux sociaux',          nous: 'inclus',            ia: '—',        reg: '—' },
-    { critere: 'État « invérifiable » signalé',    nous: 'oui',               ia: '—',        reg: '—' },
-    { critere: 'Sans abonnement',                  nous: 'oui',               ia: 'rarement', reg: 'oui' },
-  ];
-
-  readonly faq = [
-    {
-      q: 'Comment trouver un nom de domaine disponible ?',
-      a: "Décrivez votre projet sur Namorama : l'IA propose des noms de produit, de marque ou de société, et teste automatiquement leur disponibilité en domaine via une requête aux registres. Les noms libres sont affichés instantanément, prêts à être réservés chez votre registrar.",
-    },
-    {
-      q: 'Le service est-il gratuit ?',
-      a: 'Oui pour démarrer : vous disposez de 100 crédits gratuits chaque mois, sans abonnement. Une suggestion de domaine coûte 1 crédit. Des packs sans engagement sont disponibles ensuite.',
-    },
-    {
-      q: 'La disponibilité affichée est-elle fiable ?',
-      a: "Oui. Contrairement aux générateurs qui se contentent d'estimer, Namorama interroge le registre en temps réel (RDAP, avec WHOIS en repli). Un domaine indiqué comme disponible l'est réellement au moment de la recherche, et un registre injoignable est signalé comme tel plutôt que deviné.",
-    },
-    {
-      q: 'Quelles extensions de domaine sont vérifiées ?',
-      a: 'Les extensions les plus courantes comme .com, .fr, .io, .co ou .net, ainsi que d\'autres que vous pouvez ajouter selon votre projet. Le résultat s\'affiche sous forme de tableau comparatif.',
-    },
-  ];
-
+  /** Liens de guides — en français seulement : ces pages n'existent que dans cette langue. */
   readonly guides = [
     { path: '/generateur-nom-saas',                    label: 'Nom de startup SaaS' },
     { path: '/generateur-nom-marque-cosmetique',       label: 'Nom de marque cosmétique' },

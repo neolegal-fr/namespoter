@@ -11,6 +11,17 @@ export interface ContentSeo {
   description: string;
   /** Chemin canonique, ex. '/guides/trouver-nom-de-marque'. */
   path: string;
+  /**
+   * Versions de cette page dans d'autres langues, pour les balises `hreflang`
+   * réciproques. Clé = code langue, valeur = chemin. Inclure la page
+   * elle-même. `x-default` est posé automatiquement sur la version française,
+   * qui est la racine du site. Absent ⇒ page monolingue, aucune balise émise.
+   */
+  alternates?: Record<string, string>;
+  /** Langue de la page — pose `<html lang>`. Défaut : fr. */
+  lang?: string;
+  /** `og:type` — 'website' pour l'accueil, 'article' (défaut) pour le contenu. */
+  ogType?: 'website' | 'article';
 }
 
 /**
@@ -32,7 +43,7 @@ export function applyContentSeo(seo: ContentSeo): void {
   meta.updateTag({ property: 'og:title', content: fullTitle });
   meta.updateTag({ property: 'og:description', content: seo.description });
   meta.updateTag({ property: 'og:url', content: url });
-  meta.updateTag({ property: 'og:type', content: 'article' });
+  meta.updateTag({ property: 'og:type', content: seo.ogType ?? 'article' });
   meta.updateTag({ name: 'twitter:title', content: fullTitle });
   meta.updateTag({ name: 'twitter:description', content: seo.description });
 
@@ -44,4 +55,26 @@ export function applyContentSeo(seo: ContentSeo): void {
     doc.head.appendChild(link);
   }
   link.setAttribute('href', url);
+
+  // Langue de la page : `<html lang>` vit hors de l'application Angular, on le
+  // pose directement. Indispensable sur la version anglaise — index.html porte
+  // `lang="fr"` en dur, et Google lirait la page anglaise comme du français.
+  doc.documentElement.setAttribute('lang', seo.lang ?? 'fr');
+
+  // hreflang réciproques. On retire d'abord celles d'une navigation précédente :
+  // au runtime, le <head> survit d'une route à l'autre, et une page monolingue
+  // hériterait sinon des alternates de l'accueil.
+  doc.querySelectorAll('link[rel="alternate"][hreflang]').forEach((l) => l.remove());
+  if (seo.alternates) {
+    const add = (hreflang: string, path: string) => {
+      const l = doc.createElement('link');
+      l.setAttribute('rel', 'alternate');
+      l.setAttribute('hreflang', hreflang);
+      l.setAttribute('href', `${ORIGIN}${path}`);
+      doc.head.appendChild(l);
+    };
+    for (const [lang, path] of Object.entries(seo.alternates)) add(lang, path);
+    // x-default : la version française, racine du site.
+    if (seo.alternates['fr']) add('x-default', seo.alternates['fr']);
+  }
 }

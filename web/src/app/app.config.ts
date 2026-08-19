@@ -1,8 +1,8 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, PLATFORM_ID } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER, PLATFORM_ID, InjectionToken } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, firstValueFrom } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -19,13 +19,44 @@ import { ConfigService } from './services/config';
 import { SessionKeeperService } from './services/session-keeper';
 import { AnalyticsService } from './services/analytics';
 
+/**
+ * Langues dont l'accueil existe VRAIMENT : il a une URL prérendue, ses
+ * métadonnées et son contenu dans cette langue. Les 17 autres langues de
+ * l'interface restent servies côté client, mais n'ont pas d'URL propre —
+ * leur donner un `/de/` qui servirait du français créerait du contenu
+ * dupliqué, ce que Google pénalise. À étendre langue par langue, quand le
+ * contenu existe.
+ */
+export const SITE_LANGS = ['fr', 'en'] as const;
+export type SiteLang = (typeof SITE_LANGS)[number];
+
+/** Langue portée par l'URL (« /en », « /en/… »), `fr` par défaut — la racine est française. */
+export function langFromPath(path: string): SiteLang {
+  const seg = path.split('?')[0].split('#')[0].split('/').filter(Boolean)[0];
+  return (SITE_LANGS as readonly string[]).includes(seg) ? (seg as SiteLang) : 'fr';
+}
+
+/**
+ * Dictionnaires i18n fournis au PRERENDER, lus sur le disque par le bundle
+ * serveur (voir `app.config.server.ts`). Vide côté navigateur. C'est ce qui
+ * permet de prérendre l'accueil en anglais avec son vrai contenu, et non des
+ * clés brutes — sans jamais embarquer `fs` dans le bundle client.
+ */
+export const PRERENDER_I18N = new InjectionToken<Record<string, unknown>>('PRERENDER_I18N', {
+  providedIn: 'root',
+  factory: () => ({}),
+});
+
 export class CustomTranslateLoader implements TranslateLoader {
-  constructor(private http: HttpClient, private isBrowser: boolean) {}
+  constructor(
+    private http: HttpClient,
+    private isBrowser: boolean,
+    private prerendered: Record<string, unknown> = {},
+  ) {}
   getTranslation(lang: string): Observable<any> {
-    // Au prerender (SSG), rien n'est résolvable côté serveur : on renvoie un
-    // dictionnaire vide. La landing prérendue affiche du texte écrit en dur ;
-    // les traductions du shell sont chargées côté client après hydratation.
-    if (!this.isBrowser) return of({});
+    // Au prerender (SSG), aucune requête HTTP n'est possible : on sert le
+    // dictionnaire chargé sur disque par le bundle serveur, ou rien.
+    if (!this.isBrowser) return of(this.prerendered[lang] ?? {});
 
     // Chemin ABSOLU, impérativement. En relatif, « ./assets/… » se résout
     // contre l'URL courante : depuis /guides/xxx ou /projects/:id, la requête
@@ -37,8 +68,8 @@ export class CustomTranslateLoader implements TranslateLoader {
   }
 }
 
-export function HttpLoaderFactory(http: HttpClient, platformId: Object) {
-  return new CustomTranslateLoader(http, isPlatformBrowser(platformId));
+export function HttpLoaderFactory(http: HttpClient, platformId: Object, prerendered: Record<string, unknown>) {
+  return new CustomTranslateLoader(http, isPlatformBrowser(platformId), prerendered);
 }
 
 /**
@@ -56,6 +87,7 @@ function initializeApp(
   platformId: Object,
   sessionKeeper: SessionKeeperService,
   analytics: AnalyticsService,
+
 ) {
   return async () => {
     const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
@@ -63,9 +95,13 @@ function initializeApp(
     translate.setFallbackLang('fr');
 
     // Côté serveur (prerender SSG) : pas de Keycloak, pas de fetch relatif,
-    // pas de navigator. On rend la landing en français par défaut.
+    // pas de navigator. Français par défaut ; une page anglaise (« /en ») bascule
+    // elle-même la langue depuis sa route — au prerender statique il n'y a pas
+    // de requête HTTP, donc `REQUEST` est nul et l'APP_INITIALIZER ne connaît
+    // pas l'URL. Le dictionnaire étant déjà en mémoire (`PRERENDER_I18N`), la
+    // bascule dans le composant est synchrone.
     if (!isPlatformBrowser(platformId)) {
-      translate.use('fr');
+      await firstValueFrom(translate.use('fr'));
       return;
     }
 
@@ -123,7 +159,13 @@ function initializeApp(
     // front ne laisse aucune trace côté serveur.
     analytics.installErrorReporting();
 
-    // 3. Langue depuis le navigateur
+    // 3. Langue : l'URL prime (« /en » est une page anglaise, quoi qu'en dise
+    // le navigateur) ; sinon, détection depuis le navigateur comme avant.
+    const urlLang = window.location.pathname.split('/').filter(Boolean)[0];
+    if ((SITE_LANGS as readonly string[]).includes(urlLang)) {
+      translate.use(urlLang);
+      return;
+    }
     const browserLang = translate.getBrowserLang() ?? '';
     translate.use(supportedLangs.includes(browserLang) ? browserLang : 'fr');
   };
@@ -199,7 +241,7 @@ export const appConfig: ApplicationConfig = {
       loader: {
         provide: TranslateLoader,
         useFactory: HttpLoaderFactory,
-        deps: [HttpClient, PLATFORM_ID]
+        deps: [HttpClient, PLATFORM_ID, PRERENDER_I18N]
       }
     }),
     {
