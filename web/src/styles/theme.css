@@ -1,0 +1,184 @@
+/* Thème clair / sombre / système — couche de RÔLES au-dessus de la palette.
+ *
+ * `tokens.css` pose que la refonte n'est pas un thème clair et un thème
+ * sombre : ses jetons sont nommés par SURFACE (`-dark` / `-light`), parce
+ * qu'un héros est sombre par intention éditoriale, pas parce qu'un mode est
+ * actif. Cette décision reste juste — aucun jeton n'est renommé ni supprimé.
+ *
+ * Ce fichier ajoute une seule couche au-dessus : des rôles `--nm-app-*` qui
+ * pointent, selon le mode, vers les valeurs claires ou sombres déjà définies.
+ * Les composants applicatifs n'utilisent plus que les rôles ; la palette reste
+ * la source des valeurs.
+ *
+ * Ce qui ne bascule JAMAIS, et pourquoi :
+ * - le héros de l'accueil, le CTA final et l'encart de démonstration sont une
+ *   signature de marque : un visiteur en préférence claire doit voir le même
+ *   héros que les autres ;
+ * - le rapport imprimé (voir @media print plus bas) — un PDF sombre est
+ *   inimprimable ;
+ * - les e-mails, dont les styles sont en ligne et figés — les clients de
+ *   messagerie ignorent les variables CSS ;
+ * - Keycloak, servi hors de l'application : il ne connaît ni le localStorage
+ *   ni le choix de l'utilisateur ;
+ * - les sections claires de l'accueil (les 4 contrôles, le comparatif, la FAQ).
+ *   L'ALTERNANCE sombre → clair → sombre est la composition éditoriale de la
+ *   page, pas un mode : la retourner donnerait une page uniformément sombre,
+ *   c'est-à-dire une autre page. `landing.css` garde donc les jetons de
+ *   palette (`--nm-*-light` / `-dark`), et non les rôles.
+ *
+ * Ce qui bascule, à l'inverse : le wizard, la grille de résultats, le rapport
+ * dans ses deux états, les dialogues, le tiroir des projets — du contenu
+ * applicatif, où l'utilisateur passe du temps et où sa préférence compte.
+ */
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --nm-app-bg: var(--nm-bg-light);
+  --nm-app-surface: var(--nm-surface-light);
+  --nm-app-surface-alt: var(--nm-surface-light-alt);
+
+  --nm-app-border: var(--nm-border-light);
+  --nm-app-border-strong: var(--nm-border-light-2);
+  --nm-app-divider: var(--nm-divider-light-1);
+
+  --nm-app-text: var(--nm-text-light);
+  --nm-app-text-2: var(--nm-text-light-2);
+  --nm-app-text-3: var(--nm-text-light-3);
+
+  /* ⚠ Deux jetons d'accent DISTINCTS sur surface claire, non interchangeables.
+     `--nm-accent-on-light` (#0d9a63) sert de texte et de bordure : 4,3:1, il
+     passe pour du texte. Mais employé comme APLAT DE BOUTON avec un libellé
+     blanc, il mesure 3,61:1 et échoue au AA — c'était le cas de tous les
+     boutons primaires du mode clair, « Débloquer le rapport » compris.
+     Le remplissage prend donc `#0d7a4e` (4,85:1 sur blanc). */
+  --nm-app-accent: var(--nm-accent-on-light);
+  --nm-app-accent-hover: var(--nm-accent-on-light-hover);
+  --nm-app-accent-fill: #0d7a4e;
+  --nm-app-accent-fill-hover: #0a6b44;
+  --nm-app-on-accent: #ffffff;
+  --nm-app-accent-surface: var(--nm-accent-surface-light);
+  --nm-app-accent-border: var(--nm-accent-border-light);
+
+  --nm-app-badge-bg: var(--nm-divider-light-1);
+  --nm-app-badge-fg: var(--nm-text-light-3);
+
+  --nm-app-verdict-free-fg: var(--nm-verdict-free-light-fg);
+  --nm-app-verdict-free-bg: var(--nm-verdict-free-light-bg);
+  --nm-app-verdict-taken-fg: var(--nm-verdict-taken-light-fg);
+  --nm-app-verdict-taken-bg: var(--nm-verdict-taken-light-bg);
+  /* ⚠ #9a6a12 sur #fdf3e3 mesure 4,3:1 à 12px, juste sous le seuil : les
+     libellés de verdict « à surveiller » prennent #8a5a12. Le pendant sombre
+     n'est pas concerné. */
+  --nm-app-verdict-unknown-fg: #8a5a12;
+  --nm-app-verdict-unknown-bg: var(--nm-verdict-watch-light-bg);
+
+  /* ⚠ L'ambre des étoiles a besoin d'un pendant clair : #f59e0b mesure 2,15:1
+     sur blanc, or ces étoiles portent un score que l'utilisateur doit lire et
+     comparer d'une carte à l'autre. */
+  --nm-app-star: #b45309;
+  --nm-app-star-empty: var(--nm-text-light-2);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --nm-app-bg: var(--nm-bg-dark);
+  --nm-app-surface: var(--nm-surface-dark);
+  --nm-app-surface-alt: var(--nm-surface-dark-alt);
+
+  --nm-app-border: var(--nm-border-dark);
+  --nm-app-border-strong: var(--nm-border-dark-interactive);
+  --nm-app-divider: var(--nm-divider-dark-1);
+
+  --nm-app-text: var(--nm-text-dark);
+  --nm-app-text-2: var(--nm-text-dark-2);
+  --nm-app-text-3: var(--nm-text-dark-3);
+
+  --nm-app-accent: var(--nm-accent);
+  --nm-app-accent-hover: var(--nm-accent-hover);
+  --nm-app-accent-fill: var(--nm-accent);
+  --nm-app-accent-fill-hover: var(--nm-accent-hover);
+  --nm-app-on-accent: var(--nm-on-accent);
+  --nm-app-accent-surface: var(--nm-accent-surface-dark);
+  --nm-app-accent-border: var(--nm-accent-border-dark);
+
+  --nm-app-badge-bg: var(--nm-divider-dark-3);
+  --nm-app-badge-fg: var(--nm-text-dark-2);
+
+  --nm-app-verdict-free-fg: var(--nm-verdict-free-dark-fg);
+  --nm-app-verdict-free-bg: var(--nm-verdict-free-dark-bg);
+  --nm-app-verdict-taken-fg: var(--nm-verdict-taken-dark-fg);
+  --nm-app-verdict-taken-bg: var(--nm-verdict-taken-dark-bg);
+  --nm-app-verdict-unknown-fg: var(--nm-verdict-unknown-dark-fg);
+  --nm-app-verdict-unknown-bg: var(--nm-verdict-unknown-dark-bg);
+
+  --nm-app-star: #f59e0b;
+  --nm-app-star-empty: var(--nm-text-dark-2);
+}
+
+/* Mode « Système » : aucune valeur stockée, donc aucun attribut sur <html>.
+   La préférence de l'OS s'applique alors, et un basculement le soir suit tout
+   seul — c'est pour cela qu'on ne stocke jamais le mode RÉSOLU. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --nm-app-bg: var(--nm-bg-dark);
+    --nm-app-surface: var(--nm-surface-dark);
+    --nm-app-surface-alt: var(--nm-surface-dark-alt);
+
+    --nm-app-border: var(--nm-border-dark);
+    --nm-app-border-strong: var(--nm-border-dark-interactive);
+    --nm-app-divider: var(--nm-divider-dark-1);
+
+    --nm-app-text: var(--nm-text-dark);
+    --nm-app-text-2: var(--nm-text-dark-2);
+    --nm-app-text-3: var(--nm-text-dark-3);
+
+    --nm-app-accent: var(--nm-accent);
+    --nm-app-accent-hover: var(--nm-accent-hover);
+    --nm-app-accent-fill: var(--nm-accent);
+    --nm-app-accent-fill-hover: var(--nm-accent-hover);
+    --nm-app-on-accent: var(--nm-on-accent);
+    --nm-app-accent-surface: var(--nm-accent-surface-dark);
+    --nm-app-accent-border: var(--nm-accent-border-dark);
+
+    --nm-app-badge-bg: var(--nm-divider-dark-3);
+    --nm-app-badge-fg: var(--nm-text-dark-2);
+
+    --nm-app-verdict-free-fg: var(--nm-verdict-free-dark-fg);
+    --nm-app-verdict-free-bg: var(--nm-verdict-free-dark-bg);
+    --nm-app-verdict-taken-fg: var(--nm-verdict-taken-dark-fg);
+    --nm-app-verdict-taken-bg: var(--nm-verdict-taken-dark-bg);
+    --nm-app-verdict-unknown-fg: var(--nm-verdict-unknown-dark-fg);
+    --nm-app-verdict-unknown-bg: var(--nm-verdict-unknown-dark-bg);
+
+    --nm-app-star: #f59e0b;
+    --nm-app-star-empty: var(--nm-text-dark-2);
+  }
+}
+
+/* Impression : le rapport repasse en surfaces claires quel que soit le mode.
+   Un PDF sombre est inimprimable, et c'est le document que l'utilisateur
+   partage. */
+@media print {
+  :root {
+    color-scheme: light;
+    --nm-app-bg: #ffffff;
+    --nm-app-surface: #ffffff;
+    --nm-app-surface-alt: #ffffff;
+    --nm-app-text: var(--nm-text-light);
+    --nm-app-text-2: var(--nm-text-light-2);
+    --nm-app-text-3: var(--nm-text-light-3);
+    --nm-app-border: var(--nm-border-light);
+    --nm-app-divider: var(--nm-divider-light-1);
+    --nm-app-verdict-free-fg: var(--nm-verdict-free-light-fg);
+    --nm-app-verdict-free-bg: var(--nm-verdict-free-light-bg);
+    --nm-app-verdict-taken-fg: var(--nm-verdict-taken-light-fg);
+    --nm-app-verdict-taken-bg: var(--nm-verdict-taken-light-bg);
+    --nm-app-verdict-unknown-fg: #8a5a12;
+    --nm-app-verdict-unknown-bg: var(--nm-verdict-watch-light-bg);
+  }
+}

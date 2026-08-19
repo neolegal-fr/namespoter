@@ -10,23 +10,20 @@
  * trois couleurs d'état pour tout le produit.
  */
 
-/* La grille porte son propre aplat sombre : elle est rendue dans le wizard,
-   qui est sur fond clair. Elle se présente donc comme un panneau de résultats
-   plutôt que de dépendre d'un parent qu'il aurait fallu retourner en entier. */
+/* La grille SUIT LE MODE et n'a plus d'aplat propre.
+ *
+ * Elle posait `background: var(--nm-bg-dark)` sur son :host — un panneau
+ * sombre au milieu d'un wizard clair, la rupture visuelle la plus forte de
+ * l'écran. Les résultats sont du contenu applicatif, pas une signature de
+ * marque : ils prennent donc les jetons de rôle et se fondent dans la page.
+ * C'est l'option 1 du handoff, et ce que montre la maquette « Écrans
+ * applicatifs ».
+ */
 :host {
   display: block;
   width: 100%;
-  padding: 20px;
-  background: var(--nm-bg-dark);
-  border-radius: var(--nm-radius-2xl);
   font-family: var(--nm-font-body);
-}
-
-@media (max-width: 640px) {
-  :host {
-    padding: 14px;
-    border-radius: var(--nm-radius-lg);
-  }
+  color: var(--nm-app-text);
 }
 
 /* ─── Bandeau de crédits ─────────────────────────────────────────────────
@@ -39,23 +36,23 @@
   gap: 10px 14px;
   padding: 14px 18px;
   margin-bottom: 16px;
-  background: var(--nm-surface-dark);
-  border: 1px solid var(--nm-border-dark);
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
   border-radius: var(--nm-radius-lg);
   font-size: var(--nm-text-ui-sm);
-  color: var(--nm-text-dark-2);
+  color: var(--nm-app-text-2);
   text-align: left;
 }
 
 .rg-credits strong {
-  color: var(--nm-verdict-free-dark-fg);
+  color: var(--nm-app-verdict-free-fg);
   font-weight: 600;
 }
 
 .rg-credits__sep {
   width: 1px;
   height: 16px;
-  background: var(--nm-border-dark-interactive);
+  background: var(--nm-app-border-strong);
   flex: none;
 }
 
@@ -85,10 +82,10 @@
 .rg-filter {
   min-height: var(--nm-touch-min);
   padding: 8px 16px;
-  border: 1px solid var(--nm-border-dark);
+  border: 1px solid var(--nm-app-border);
   border-radius: var(--nm-radius-pill);
-  background: var(--nm-surface-dark);
-  color: var(--nm-text-dark-2);
+  background: var(--nm-app-surface);
+  color: var(--nm-app-text-2);
   font-family: inherit;
   font-size: var(--nm-text-ui-sm);
   cursor: pointer;
@@ -96,24 +93,24 @@
 }
 
 .rg-filter:hover {
-  border-color: var(--nm-border-dark-hover);
+  border-color: var(--nm-app-border-strong);
 }
 
 .rg-filter--on {
-  background: var(--nm-accent-surface-dark);
-  border-color: var(--nm-accent-border-dark);
-  color: var(--nm-accent-hover);
+  background: var(--nm-app-accent-surface);
+  border-color: var(--nm-app-accent-border);
+  color: var(--nm-app-accent-hover);
 }
 
 .rg-filter:focus-visible {
-  outline: 2px solid var(--nm-accent);
+  outline: 2px solid var(--nm-app-accent-fill);
   outline-offset: 2px;
 }
 
 .rg-empty {
   margin: 24px 0;
   text-align: center;
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
   font-size: var(--nm-text-ui);
 }
 
@@ -129,21 +126,21 @@
 .rg-card {
   display: flex;
   flex-direction: column;
-  background: var(--nm-surface-dark);
-  border: 1px solid var(--nm-border-dark);
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
   border-radius: var(--nm-radius-xl);
   padding: var(--nm-card-padding);
   transition: border-color 0.15s;
 }
 
 .rg-card:hover {
-  border-color: var(--nm-border-dark-hover);
+  border-color: var(--nm-app-border-strong);
 }
 
 /* Nom dont TOUTES les extensions demandées sont libres : le cas que
    l'utilisateur cherche. Il mérite d'être repérable sans lire les lignes. */
 .rg-card--strong {
-  border-color: var(--nm-accent-border-dark);
+  border-color: var(--nm-app-accent-border);
 }
 
 .rg-card__head {
@@ -176,22 +173,22 @@
   font-size: var(--nm-text-name-card);
   font-weight: 700;
   letter-spacing: var(--nm-tracking-name-card);
-  color: var(--nm-text-dark);
+  color: var(--nm-app-text);
   overflow-wrap: anywhere;
 }
 
 .rg-tag {
   padding: 2px 8px;
   border-radius: var(--nm-radius-pill);
-  background: var(--nm-divider-dark-3);
-  color: var(--nm-text-dark-2);
+  background: var(--nm-app-divider);
+  color: var(--nm-app-text-2);
   font-size: 11px;
   white-space: nowrap;
 }
 
 .rg-card__manual {
   font-size: 12px;
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
 }
 
 /* Compact et aligné à gauche, comme le badge de synthèse qui le remplace une
@@ -202,15 +199,15 @@
   margin-bottom: 12px;
   padding: 4px 10px;
   border-radius: var(--nm-radius-xs);
-  background: var(--nm-divider-dark-3);
-  color: var(--nm-text-dark-3);
+  background: var(--nm-app-divider);
+  color: var(--nm-app-text-2);
   font-size: 12px;
   white-space: nowrap;
 }
 
 .rg-cost--accent {
-  background: var(--nm-accent-surface-dark);
-  color: var(--nm-accent-hover);
+  background: var(--nm-app-accent-surface);
+  color: var(--nm-app-accent-hover);
 }
 
 /* ─── Verdicts ───────────────────────────────────────────────────────────── */
@@ -234,7 +231,7 @@
 .rg-row__label {
   min-width: 0;
   font-size: var(--nm-text-ui-sm);
-  color: var(--nm-text-dark-2);
+  color: var(--nm-app-text-2);
   overflow-wrap: anywhere;
 }
 
@@ -247,13 +244,13 @@
 }
 
 .rg-row__value--pending {
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
 }
 
 .rg-sep {
   height: 0;
   margin: 14px 0;
-  border-top: 1px dashed var(--nm-border-dark-interactive);
+  border-top: 1px dashed var(--nm-app-border-strong);
 }
 
 /* ─── Palier payant ──────────────────────────────────────────────────────── */
@@ -264,11 +261,11 @@
   gap: 8px;
   margin: 0 0 14px;
   font-size: var(--nm-text-ui-sm);
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
 }
 
 .rg-paid--done {
-  color: var(--nm-accent-hover);
+  color: var(--nm-app-accent-hover);
 }
 
 /* ─── Actions ────────────────────────────────────────────────────────────── */
@@ -294,13 +291,13 @@
 
 .rg-btn--main {
   background: transparent;
-  border: 1px solid var(--nm-border-dark-interactive);
-  color: var(--nm-text-dark);
+  border: 1px solid var(--nm-app-border-strong);
+  color: var(--nm-app-text);
 }
 
 .rg-btn--main:hover {
-  border-color: var(--nm-accent);
-  color: var(--nm-accent-hover);
+  border-color: var(--nm-app-accent-fill);
+  color: var(--nm-app-accent-hover);
 }
 
 .rg-rate {
@@ -315,32 +312,32 @@
   justify-content: center;
   width: var(--nm-touch-card-btn);
   height: var(--nm-touch-card-btn);
-  border: 1px solid var(--nm-border-dark-interactive);
+  border: 1px solid var(--nm-app-border-strong);
   border-radius: var(--nm-radius-sm);
   background: transparent;
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .rg-icon:hover {
-  border-color: var(--nm-border-dark-hover);
-  color: var(--nm-text-dark);
+  border-color: var(--nm-app-border-strong);
+  color: var(--nm-app-text);
 }
 
 .rg-icon--on {
-  color: var(--nm-accent);
-  border-color: var(--nm-accent-border-dark);
+  color: var(--nm-app-accent-fill);
+  border-color: var(--nm-app-accent-border);
 }
 
 .rg-icon--off {
-  color: var(--nm-verdict-taken-dark-fg);
-  border-color: var(--nm-verdict-taken-dark-bg);
+  color: var(--nm-app-verdict-taken-fg);
+  border-color: var(--nm-app-verdict-taken-bg);
 }
 
 .rg-btn:focus-visible,
 .rg-icon:focus-visible {
-  outline: 2px solid var(--nm-accent);
+  outline: 2px solid var(--nm-app-accent-fill);
   outline-offset: 2px;
 }
 
@@ -349,7 +346,7 @@
 .rg-analysis-pending {
   margin: 12px 0 0;
   font-size: 12px;
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
 }
 
 .rg-stars {
@@ -360,31 +357,31 @@
   padding: 0;
   background: none;
   border: 0;
-  color: #f59e0b;
+  color: var(--nm-app-star);
   cursor: pointer;
   font-size: 13px;
 }
 
 .rg-stars .pi-star {
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
 }
 
 .rg-stars__chev {
   margin-left: 4px;
   font-size: 11px;
-  color: var(--nm-text-dark-3);
+  color: var(--nm-app-text-2);
   transition: transform 0.2s ease;
 }
 
 .rg-analysis {
   margin-top: 10px;
   padding: 12px 14px;
-  background: var(--nm-bg-dark);
-  border: 1px solid var(--nm-divider-dark-3);
+  background: var(--nm-app-bg);
+  border: 1px solid var(--nm-app-divider);
   border-radius: var(--nm-radius-sm);
   font-size: var(--nm-text-ui-sm);
   line-height: var(--nm-leading-body);
-  color: var(--nm-text-dark-2);
+  color: var(--nm-app-text-2);
 }
 
 
@@ -397,7 +394,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--nm-text-dark-2);
+  color: var(--nm-app-text-2);
 }
 
 .rg-rows + .rg-rows {
@@ -426,10 +423,10 @@
 .rg-social__code { font-weight: 600; }
 .rg-social__mark { font-size: 9px; }
 
-.rg-social--locked { background: var(--nm-divider-dark-3); color: var(--nm-text-dark-2); }
-.rg-social--free   { background: var(--nm-verdict-free-dark-bg);    color: var(--nm-verdict-free-dark-fg); }
-.rg-social--taken  { background: var(--nm-verdict-taken-dark-bg);   color: var(--nm-verdict-taken-dark-fg); }
-.rg-social--unknown{ background: var(--nm-verdict-unknown-dark-bg); color: var(--nm-verdict-unknown-dark-fg); }
+.rg-social--locked { background: var(--nm-app-divider); color: var(--nm-app-text-2); }
+.rg-social--free   { background: var(--nm-app-verdict-free-bg);    color: var(--nm-app-verdict-free-fg); }
+.rg-social--taken  { background: var(--nm-app-verdict-taken-bg);   color: var(--nm-app-verdict-taken-fg); }
+.rg-social--unknown{ background: var(--nm-app-verdict-unknown-bg); color: var(--nm-app-verdict-unknown-fg); }
 
 /* Badge de synthèse : ce qui rend la comparaison lisible d'un coup d'œil.
    Il remplace le badge de coût une fois le nom vérifié. */
@@ -442,15 +439,15 @@
   font-weight: 600;
 }
 
-.rg-synth--ok    { background: var(--nm-verdict-free-dark-bg);    color: var(--nm-verdict-free-dark-fg); }
-.rg-synth--watch { background: var(--nm-verdict-unknown-dark-bg); color: var(--nm-verdict-unknown-dark-fg); }
-.rg-synth--risk  { background: var(--nm-verdict-taken-dark-bg);   color: var(--nm-verdict-taken-dark-fg); }
+.rg-synth--ok    { background: var(--nm-app-verdict-free-bg);    color: var(--nm-app-verdict-free-fg); }
+.rg-synth--watch { background: var(--nm-app-verdict-unknown-bg); color: var(--nm-app-verdict-unknown-fg); }
+.rg-synth--risk  { background: var(--nm-app-verdict-taken-bg);   color: var(--nm-app-verdict-taken-fg); }
 
 .rg-verified {
   flex: 1;
   margin: 0;
   font-size: var(--nm-text-ui-sm);
-  color: var(--nm-text-dark-2);
+  color: var(--nm-app-text-2);
 }
 
 .rg-refresh {
@@ -459,7 +456,7 @@
   padding: 0;
   background: none;
   border: 0;
-  color: var(--nm-accent-hover);
+  color: var(--nm-app-accent-hover);
   font-family: inherit;
   font-size: var(--nm-text-ui-sm);
   font-weight: 600;
@@ -470,24 +467,24 @@
 /* Le bouton d'achat est l'action principale de la carte : aplat accentué. */
 .rg-btn--buy {
   flex: 1 1 100%;
-  background: var(--nm-accent);
-  border: 1px solid var(--nm-accent);
-  color: var(--nm-on-accent);
+  background: var(--nm-app-accent-fill);
+  border: 1px solid var(--nm-app-accent-fill);
+  color: var(--nm-app-on-accent);
 }
 
 .rg-btn--buy:hover {
-  background: var(--nm-accent-hover);
-  border-color: var(--nm-accent-hover);
+  background: var(--nm-app-accent-hover);
+  border-color: var(--nm-app-accent-hover);
 }
 
 .rg-btn--ghost {
   flex: 1;
   background: transparent;
-  border: 1px solid var(--nm-border-dark-interactive);
-  color: var(--nm-text-dark);
+  border: 1px solid var(--nm-app-border-strong);
+  color: var(--nm-app-text);
 }
 
-.rg-btn--ghost:hover { border-color: var(--nm-border-dark-hover); }
+.rg-btn--ghost:hover { border-color: var(--nm-app-border-strong); }
 
 /* Les actions passent à la ligne : le bouton d'achat occupe toute la largeur,
    les secondaires en dessous. */

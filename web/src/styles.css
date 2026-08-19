@@ -6,6 +6,7 @@
    deux lignes ici, et non plus bas dans le fichier. */
 @import "./styles/fonts.css";
 @import "./styles/tokens.css";
+@import "./styles/theme.css";
 @import "./styles/components.css";
 
 @keyframes pulse {
@@ -19,7 +20,11 @@ body {
     font-family: var(--nm-font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: var(--p-surface-100, #f3f4f6);
+    /* Suit le mode : c'est le fond de toutes les routes applicatives. Les
+       surfaces éditoriales (héros, CTA final) posent leur propre aplat par
+       dessus et ne bougent donc pas. */
+    background-color: var(--nm-app-bg);
+    color: var(--nm-app-text);
 }
 
 /* ─── Bouton "Aide moi à choisir" — icône ambre ─── */
@@ -506,4 +511,54 @@ body {
    page. `!important` : PrimeNG fixe ses propres hauteurs sur `.p-button`. */
 .p-menubar .p-button {
     min-height: var(--nm-touch-min) !important;
+}
+
+/* Menubar hors accueil : suit le mode. Sur l'accueil il reste sombre, fondu
+   dans le héros — une signature éditoriale, pas un mode. */
+.p-menubar:not(.nm-menubar-dark) {
+    background: var(--nm-app-surface) !important;
+    border-color: var(--nm-app-border) !important;
+}
+
+.p-menubar:not(.nm-menubar-dark) .brand-wordmark {
+    color: var(--nm-app-text) !important;
+}
+
+/* Sélecteur de thème : trois états, l'actif prend l'accent du mode courant. */
+.theme-switch {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-pill);
+    background: var(--nm-app-surface-alt);
+}
+
+.theme-switch__btn {
+    min-height: 32px;
+    padding: 0 0.625rem;
+    border: 0;
+    border-radius: var(--nm-radius-pill);
+    background: none;
+    color: var(--nm-app-text-2);
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.theme-switch__btn--on {
+    background: var(--nm-app-accent-surface);
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}
+
+.theme-switch__btn:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+    /* Le menubar est déjà chargé sur mobile : le sélecteur y prend trop de
+       place pour une action rare. Il reste dans le tiroir du compte. */
+    .theme-switch { display: none; }
 }

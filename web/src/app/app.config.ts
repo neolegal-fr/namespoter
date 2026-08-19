@@ -234,12 +234,16 @@ export const appConfig: ApplicationConfig = {
         theme: {
             preset: NamoramaPreset,
             options: {
-                // La refonte n'est pas « un mode sombre » : l'accueil et les
-                // résultats sont sombres, le rapport est clair, dans la même
-                // session. Les surfaces sont donc portées par les jetons
-                // `--nm-*`, pas par une bascule globale de thème — qui
-                // inverserait aussi le rapport, à tort.
-                darkModeSelector: false
+                // MÊME attribut que celui posé par ThemeService et par le
+                // script synchrone d'index.html. Sans cela, p-select, p-dialog,
+                // p-drawer, p-chip et les tooltips resteraient clairs quoi que
+                // fassent nos jetons : deux thèmes superposés.
+                //
+                // Les surfaces choisies pour des raisons éditoriales — héros de
+                // l'accueil, CTA final, encart de démonstration — ne basculent
+                // pas pour autant : elles portent les jetons `--nm-*-dark` en
+                // dur, indépendamment du mode.
+                darkModeSelector: '[data-theme="dark"]'
             }
         }
     }),

@@ -13,14 +13,14 @@
 :host {
   display: block;
   font-family: var(--nm-font-body);
-  color: var(--nm-text-light);
+  color: var(--nm-app-text);
 }
 
 .rv {
   max-width: var(--nm-report-max);
   margin: 0 auto;
-  background: var(--nm-surface-light);
-  border: 1px solid var(--nm-border-light);
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
   border-radius: var(--nm-radius-3xl);
   overflow: hidden;
 }
@@ -34,7 +34,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 26px var(--nm-card-padding-lg);
-  border-bottom: 1px solid var(--nm-divider-light-1);
+  border-bottom: 1px solid var(--nm-app-divider);
 }
 
 .rv-overline {
@@ -43,7 +43,7 @@
   font-weight: 600;
   letter-spacing: var(--nm-tracking-overline);
   text-transform: uppercase;
-  color: var(--nm-text-light-3);
+  color: var(--nm-app-text-2);
 }
 
 .rv-name {
@@ -53,7 +53,7 @@
   font-weight: 700;
   letter-spacing: var(--nm-tracking-h1-mobile);
   line-height: 1.05;
-  color: var(--nm-text-light);
+  color: var(--nm-app-text);
   overflow-wrap: anywhere;
 }
 
@@ -80,25 +80,25 @@
 }
 
 .rv-summary--ok {
-  background: var(--nm-verdict-free-light-bg);
-  color: var(--nm-verdict-free-light-fg);
+  background: var(--nm-app-verdict-free-bg);
+  color: var(--nm-app-verdict-free-fg);
 }
 
 .rv-summary--watch {
-  background: var(--nm-verdict-watch-light-bg);
-  color: var(--nm-verdict-watch-light-fg);
+  background: var(--nm-app-verdict-unknown-bg);
+  color: var(--nm-app-verdict-unknown-fg);
 }
 
 .rv-summary--risk {
-  background: var(--nm-verdict-taken-light-bg);
-  color: var(--nm-verdict-taken-light-fg);
+  background: var(--nm-app-verdict-taken-bg);
+  color: var(--nm-app-verdict-taken-fg);
 }
 
 /* ─── Sections ───────────────────────────────────────────────────────────── */
 
 .rv-section {
   padding: 20px var(--nm-card-padding-lg);
-  border-bottom: 1px solid var(--nm-divider-light-1);
+  border-bottom: 1px solid var(--nm-app-divider);
 }
 
 .rv-section__head {
@@ -115,12 +115,12 @@
   font-size: 17px;
   font-weight: 700;
   letter-spacing: var(--nm-tracking-h3);
-  color: var(--nm-text-light);
+  color: var(--nm-app-text);
 }
 
 .rv-section__meta {
   font-size: var(--nm-text-overline);
-  color: var(--nm-text-light-3);
+  color: var(--nm-app-text-2);
   white-space: nowrap;
 }
 
@@ -129,7 +129,7 @@
   align-items: center;
   gap: 12px;
   padding: 11px 0;
-  border-top: 1px solid var(--nm-divider-light-2);
+  border-top: 1px solid var(--nm-app-divider);
   font-size: var(--nm-text-ui);
 }
 
@@ -140,7 +140,7 @@
 .rv-row__label {
   flex: 1;
   min-width: 0;
-  color: var(--nm-text-on-card);
+  color: var(--nm-app-text);
   overflow-wrap: anywhere;
 }
 
@@ -150,12 +150,12 @@
 }
 
 .rv-row__label a:hover {
-  color: var(--nm-accent-on-light);
+  color: var(--nm-app-accent);
 }
 
 .rv-row__note {
   font-size: var(--nm-text-ui-sm);
-  color: var(--nm-text-light-3);
+  color: var(--nm-app-text-2);
   text-align: right;
 }
 
@@ -172,23 +172,23 @@
 }
 
 .rv-badge--free {
-  background: var(--nm-verdict-free-light-bg);
-  color: var(--nm-verdict-free-light-fg);
+  background: var(--nm-app-verdict-free-bg);
+  color: var(--nm-app-verdict-free-fg);
 }
 
 .rv-badge--taken {
-  background: var(--nm-verdict-taken-light-bg);
-  color: var(--nm-verdict-taken-light-fg);
+  background: var(--nm-app-verdict-taken-bg);
+  color: var(--nm-app-verdict-taken-fg);
 }
 
 .rv-badge--watch {
-  background: var(--nm-verdict-watch-light-bg);
-  color: var(--nm-verdict-watch-light-fg);
+  background: var(--nm-app-verdict-unknown-bg);
+  color: var(--nm-app-verdict-unknown-fg);
 }
 
 .rv-badge--unknown {
-  background: var(--nm-divider-light-1);
-  color: var(--nm-text-light-3);
+  background: var(--nm-app-divider);
+  color: var(--nm-app-text-2);
 }
 
 .rv-hits {
@@ -196,14 +196,14 @@
   padding-left: 18px;
   font-size: var(--nm-text-ui-sm);
   line-height: var(--nm-leading-body);
-  color: var(--nm-text-light-2);
+  color: var(--nm-app-text-2);
 }
 
 .rv-explain {
   margin: 10px 0 0;
   font-size: var(--nm-text-ui-sm);
   line-height: var(--nm-leading-body);
-  color: var(--nm-text-light-2);
+  color: var(--nm-app-text-2);
 }
 
 /* ─── Qualité du nom ─────────────────────────────────────────────────────── */
@@ -220,11 +220,11 @@
   gap: 16px;
   min-width: 180px;
   font-size: var(--nm-text-ui);
-  color: var(--nm-text-light-2);
+  color: var(--nm-app-text-2);
 }
 
 .rv-criterion strong {
-  color: var(--nm-text-on-card);
+  color: var(--nm-app-text);
   font-weight: 600;
 }
 
@@ -237,7 +237,7 @@
   justify-content: space-between;
   gap: 20px;
   padding: 22px var(--nm-card-padding-lg);
-  background: var(--nm-surface-light-alt);
+  background: var(--nm-app-surface-alt);
 }
 
 .rv-disclaimer {
@@ -245,7 +245,7 @@
   margin: 0;
   font-size: var(--nm-text-ui-sm);
   line-height: var(--nm-leading-body);
-  color: var(--nm-text-light-2);
+  color: var(--nm-app-text-2);
 }
 
 .rv-cta {
@@ -256,8 +256,8 @@
   min-height: var(--nm-touch-cta);
   padding: 14px 26px;
   border-radius: var(--nm-radius-sm);
-  background: var(--nm-text-light);
-  color: var(--nm-surface-light);
+  background: var(--nm-app-text);
+  color: var(--nm-app-surface);
   font-family: var(--nm-font-display);
   font-size: var(--nm-text-ui);
   font-weight: 700;
@@ -267,21 +267,21 @@
 }
 
 .rv-cta:hover {
-  background: var(--nm-text-on-card);
+  background: var(--nm-app-text-2);
 }
 
 .rv-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--nm-accent-on-light);
+  color: var(--nm-app-accent);
   font-weight: 600;
   font-size: var(--nm-text-ui-sm);
   text-decoration: none;
 }
 
 .rv-link:hover {
-  color: var(--nm-accent-on-light-hover);
+  color: var(--nm-app-accent-fill-hover);
 }
 
 .rv-actions {

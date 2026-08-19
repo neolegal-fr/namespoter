@@ -36,7 +36,14 @@
     "DELETE_ACCOUNT_BTN": "Delete permanently",
     "CANCEL": "Cancel",
     "LANGUAGE": "Change language",
-    "TOP_UP": "Top up"
+    "TOP_UP": "Top up",
+    "THEME": "Theme",
+    "THEME_SYSTEM": "Follow the system",
+    "THEME_LIGHT": "Light theme",
+    "THEME_DARK": "Dark theme",
+    "THEME_SYSTEM_SHORT": "Auto",
+    "THEME_LIGHT_SHORT": "Light",
+    "THEME_DARK_SHORT": "Dark"
   },
   "ADMIN": {
     "TITLE": "Administration",

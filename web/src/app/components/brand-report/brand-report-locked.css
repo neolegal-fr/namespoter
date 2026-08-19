@@ -7,14 +7,14 @@
 :host {
   display: block;
   font-family: var(--nm-font-body);
-  color: var(--nm-text-light);
+  color: var(--nm-app-text);
 }
 
 .rl {
   max-width: var(--nm-report-max);
   margin: 0 auto;
-  background: var(--nm-surface-light);
-  border: 1px solid var(--nm-border-light);
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
   border-radius: var(--nm-radius-3xl);
   overflow: hidden;
 }
@@ -29,7 +29,7 @@
   font-weight: 600;
   letter-spacing: var(--nm-tracking-overline);
   text-transform: uppercase;
-  color: var(--nm-text-light-3);
+  color: var(--nm-app-text-2);
 }
 
 .rl-name {
@@ -39,7 +39,7 @@
   font-weight: 700;
   letter-spacing: var(--nm-tracking-h1-mobile);
   line-height: 1.05;
-  color: var(--nm-text-light);
+  color: var(--nm-app-text);
   overflow-wrap: anywhere;
 }
 
@@ -56,14 +56,14 @@
   max-width: 60ch;
   font-size: var(--nm-text-body-sm);
   line-height: var(--nm-leading-body);
-  color: var(--nm-text-light-2);
+  color: var(--nm-app-text-2);
 }
 
 /* ─── Contrôles verrouillés ──────────────────────────────────────────────── */
 
 .rl-checks {
   padding: 0 var(--nm-card-padding-lg);
-  border-top: 1px solid var(--nm-divider-light-1);
+  border-top: 1px solid var(--nm-app-divider);
 }
 
 .rl-check {
@@ -71,7 +71,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 0;
-  border-top: 1px solid var(--nm-divider-light-2);
+  border-top: 1px solid var(--nm-app-divider);
 }
 
 .rl-check:first-child {
@@ -84,7 +84,7 @@
   flex: 1;
   min-width: 0;
   font-size: var(--nm-text-ui);
-  color: var(--nm-text-on-card);
+  color: var(--nm-app-text);
   overflow-wrap: anywhere;
 }
 
@@ -95,13 +95,15 @@
   flex: none;
   height: 11px;
   border-radius: var(--nm-radius-xs);
-  background: linear-gradient(90deg, #e8ebea, #dfe3e2);
+  /* Deux jetons de surface plutôt qu'un dégradé figé : la barre doit rester
+     visible sur fond sombre comme sur fond clair. */
+  background: linear-gradient(90deg, var(--nm-app-divider), var(--nm-app-border));
 }
 
 .rl-check__lock {
   flex: none;
   font-size: 13px;
-  color: var(--nm-text-light-3);
+  color: var(--nm-app-text-2);
 }
 
 @media (max-width: 520px) {
@@ -121,8 +123,8 @@
   justify-content: space-between;
   gap: 20px;
   padding: 22px var(--nm-card-padding-lg);
-  background: var(--nm-surface-light-alt);
-  border-top: 1px solid var(--nm-divider-light-1);
+  background: var(--nm-app-surface-alt);
+  border-top: 1px solid var(--nm-app-divider);
 }
 
 .rl-price {
@@ -132,7 +134,7 @@
 .rl-price__amount {
   margin: 0 0 4px;
   font-size: var(--nm-text-body);
-  color: var(--nm-text-light);
+  color: var(--nm-app-text);
 }
 
 .rl-price__amount strong {
@@ -141,7 +143,7 @@
 }
 
 .rl-price__free {
-  color: var(--nm-accent-on-light);
+  color: var(--nm-app-accent);
   font-weight: 600;
 }
 
@@ -149,7 +151,7 @@
   margin: 0;
   font-size: var(--nm-text-ui-sm);
   line-height: var(--nm-leading-body);
-  color: var(--nm-text-light-2);
+  color: var(--nm-app-text-2);
 }
 
 .rl-btn {
@@ -160,8 +162,10 @@
   padding: 14px 26px;
   border: 0;
   border-radius: var(--nm-radius-sm);
-  background: var(--nm-accent-on-light);
-  color: var(--nm-surface-light);
+  /* `-accent-fill` et non `-accent` : le second sert de TEXTE (4,3:1) mais
+     échoue en aplat sous un libellé blanc (3,61:1). Voir theme.css. */
+  background: var(--nm-app-accent-fill);
+  color: var(--nm-app-on-accent);
   font-family: var(--nm-font-display);
   font-size: var(--nm-text-ui);
   font-weight: 700;
@@ -171,20 +175,20 @@
 }
 
 .rl-btn:hover {
-  background: var(--nm-accent-on-light-hover);
+  background: var(--nm-app-accent-fill-hover);
 }
 
 /* Solde insuffisant : l'action change de nature, donc d'aspect. */
 .rl-btn--topup {
-  background: var(--nm-text-light);
+  background: var(--nm-app-text);
 }
 
 .rl-btn--topup:hover {
-  background: var(--nm-text-on-card);
+  background: var(--nm-app-text-2);
 }
 
 .rl-btn:focus-visible {
-  outline: 2px solid var(--nm-accent-on-light);
+  outline: 2px solid var(--nm-app-accent);
   outline-offset: 3px;
 }
 

@@ -5,6 +5,7 @@ import { ProjectService } from './services/project';
 import { PaymentService, PackType } from './services/payment';
 import { FeedbackService } from './services/feedback';
 import { CookieConsentService } from './services/cookie-consent';
+import { ThemeService } from './services/theme';
 import { KeycloakService } from 'keycloak-angular';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -66,6 +67,23 @@ import { Drawer } from 'primeng/drawer';
               <span [class]="currentFlagClass" style="font-size: 1.25rem"></span>
             </button>
             <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body" styleClass="lang-menu"></p-menu>
+
+            <!--
+              Thème : trois états, « Système » par défaut. Une bascule à deux
+              états force un choix, puis cesse de suivre l'OS quand celui-ci
+              passe en mode nuit le soir.
+              Placé à côté de la langue : ce n'est pas une action fréquente.
+            -->
+            <div class="theme-switch" role="group" [attr.aria-label]="'APP.THEME' | translate">
+              @for (t of themeChoices; track t.key) {
+                <button type="button"
+                        class="theme-switch__btn"
+                        [class.theme-switch__btn--on]="theme.choice() === t.key"
+                        [attr.aria-pressed]="theme.choice() === t.key"
+                        [attr.title]="t.label | translate"
+                        (click)="theme.set(t.key)">{{ t.short | translate }}</button>
+              }
+            </div>
 
             <ng-container *ngIf="isLoggedIn()">
               <!-- Compteur de crédits : visible en permanence, c'est le signal
@@ -683,6 +701,16 @@ export class AppComponent implements OnInit {
       },
     });
   }
+
+  /** Sélecteur de thème — « Système » d'abord, c'est le défaut. */
+  /** Public : le gabarit lit `theme.choice()` et appelle `theme.set()`. */
+  readonly theme = inject(ThemeService);
+
+  readonly themeChoices = [
+    { key: 'system' as const, label: 'APP.THEME_SYSTEM', short: 'APP.THEME_SYSTEM_SHORT' },
+    { key: 'light'  as const, label: 'APP.THEME_LIGHT',  short: 'APP.THEME_LIGHT_SHORT' },
+    { key: 'dark'   as const, label: 'APP.THEME_DARK',   short: 'APP.THEME_DARK_SHORT' },
+  ];
 
   goToHome() {
     this.router.navigate(['/']);

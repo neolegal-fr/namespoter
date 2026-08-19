@@ -56,7 +56,7 @@
 
 /* Hover sur les lignes du tableau de domaines */
 .domain-row:hover {
-    background: var(--p-surface-50, var(--nm-surface-light-alt));
+    background: var(--p-surface-50, var(--nm-app-surface-alt));
 }
 
 /* Ligne d'analyse pleine largeur : pas de bordure haute, pas de padding superflu */
@@ -140,13 +140,13 @@
     font-weight: 600;
     border: 1px solid #fde68a;
     border-radius: var(--nm-radius-sm);
-    background: var(--nm-verdict-watch-light-bg);
-    color: var(--nm-verdict-watch-light-fg);
+    background: var(--nm-app-verdict-unknown-bg);
+    color: var(--nm-app-verdict-unknown-fg);
     text-decoration: none;
 }
 .reg-link-btn:hover {
-    background: var(--nm-verdict-watch-light-bg);
-    border-color: var(--nm-verdict-watch-light-fg);
+    background: var(--nm-app-verdict-unknown-bg);
+    border-color: var(--nm-app-verdict-unknown-fg);
 }
 
 /* Hover sur le bouton copier tableau */
@@ -205,9 +205,9 @@
     align-items: center;
     gap: 0.2rem;
     padding: 0.12rem 0.5rem;
-    border: 1px solid var(--p-surface-200, var(--nm-border-light));
+    border: 1px solid var(--p-surface-200, var(--nm-app-border));
     border-radius: 9999px;
-    color: var(--p-surface-600, var(--nm-text-light-2));
+    color: var(--p-surface-600, var(--nm-app-text-2));
     text-decoration: none;
     white-space: nowrap;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
@@ -225,7 +225,7 @@
     padding: 0.55rem 1.1rem;
     border: 0;
     border-radius: 9999px;
-    background: var(--nm-accent-on-light);
+    background: var(--nm-app-accent);
     color: #fff;
     font-weight: 600;
     font-size: 0.85rem;
@@ -233,7 +233,7 @@
     transition: background 0.15s, transform 0.1s;
 }
 .report-cta:hover {
-    background: var(--nm-accent-on-light-hover);
+    background: var(--nm-app-accent-fill-hover);
 }
 .report-cta:active {
     transform: translateY(1px);
@@ -245,9 +245,9 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.7rem;
-    border: 1px solid var(--nm-accent-on-light);
+    border: 1px solid var(--nm-app-accent);
     border-radius: 8px;
-    background: var(--nm-accent-on-light);
+    background: var(--nm-app-accent);
     color: #fff;
     font-size: 0.78rem;
     font-weight: 600;
@@ -256,7 +256,7 @@
     transition: background 0.15s;
 }
 .report-btn:hover {
-    background: var(--nm-accent-on-light-hover);
+    background: var(--nm-app-accent-fill-hover);
 }
 .report-btn i {
     font-size: 0.85rem;
@@ -276,15 +276,15 @@
     border: 1px solid #e2e8f0;
     border-radius: 9999px;
     background: #fff;
-    color: var(--nm-accent-on-light);
+    color: var(--nm-app-accent);
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 }
 .report-back:hover {
-    background: var(--nm-accent-surface-light);
-    border-color: var(--nm-accent-border-light);
+    background: var(--nm-app-accent-surface);
+    border-color: var(--nm-app-accent-border);
 }
 .report-cached-badge {
     display: inline-flex;
@@ -292,21 +292,21 @@
     gap: 0.3rem;
     padding: 0.15rem 0.6rem;
     border-radius: 9999px;
-    background: var(--nm-verdict-watch-light-bg);
-    color: var(--nm-verdict-watch-light-fg);
+    background: var(--nm-app-verdict-unknown-bg);
+    color: var(--nm-app-verdict-unknown-fg);
     font-size: var(--nm-text-ui-sm);
     font-weight: 600;
 }
 .report-card {
     background: #fff;
-    border: 1px solid var(--nm-border-light);
+    border: 1px solid var(--nm-app-border);
     border-radius: 12px;
     padding: 1rem 1.1rem;
 }
 .report-card__title {
     font-size: var(--nm-text-ui-sm);
     font-weight: 700;
-    color: var(--nm-text-light-2);
+    color: var(--nm-app-text-2);
     text-transform: uppercase;
     letter-spacing: .05em;
     margin: 0 0 0.5rem;
@@ -314,7 +314,7 @@
 .report-score-card {
     flex: 1 1 160px;
     background: #fff;
-    border: 1px solid var(--nm-border-light);
+    border: 1px solid var(--nm-app-border);
     border-radius: 12px;
     padding: 0.9rem 1rem;
     text-align: center;
@@ -326,7 +326,7 @@
 }
 .report-score-lbl {
     font-size: var(--nm-text-ui-sm);
-    color: var(--nm-text-light-2);
+    color: var(--nm-app-text-2);
     text-transform: uppercase;
     letter-spacing: .04em;
     margin-top: 0.25rem;
@@ -337,7 +337,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    color: var(--nm-accent-on-light);
+    color: var(--nm-app-accent);
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
@@ -355,7 +355,7 @@
     flex-wrap: wrap;
     padding: 1rem 1.2rem;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--nm-accent-on-light), var(--nm-accent-on-light));
+    background: linear-gradient(135deg, var(--nm-app-accent), var(--nm-app-accent));
     color: #fff;
 }
 .report-hero__btn {
@@ -365,12 +365,12 @@
     padding: 0.6rem 1.1rem;
     border-radius: 9999px;
     background: #fff;
-    color: var(--nm-accent-on-light);
+    color: var(--nm-app-accent);
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
 }
-.report-hero__btn:hover { background: var(--nm-accent-surface-light); }
+.report-hero__btn:hover { background: var(--nm-app-accent-surface); }
 
 /* Skeleton de chargement */
 .sk-block {
@@ -391,7 +391,7 @@
     margin: 0 0 1rem;
     font-size: 0.9rem;
     line-height: 1.55;
-    color: var(--nm-text-light-2);
+    color: var(--nm-app-text-2);
 }
 
 .vd-what {
@@ -400,7 +400,7 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--nm-text-light-3);
+    color: var(--nm-app-text-2);
 }
 
 .vd-list {
@@ -417,11 +417,11 @@
     gap: 0.625rem;
     font-size: 0.85rem;
     line-height: 1.5;
-    color: var(--nm-text-light-2);
+    color: var(--nm-app-text-2);
 }
 
-.vd-list strong { color: var(--nm-text-light); font-weight: 600; }
-.vd-list .pi-check { color: var(--nm-accent-on-light); font-size: 0.8rem; margin-top: 0.2rem; flex: none; }
+.vd-list strong { color: var(--nm-app-text); font-weight: 600; }
+.vd-list .pi-check { color: var(--nm-app-accent); font-size: 0.8rem; margin-top: 0.2rem; flex: none; }
 
 .vd-foot {
     display: flex;
@@ -430,18 +430,18 @@
     justify-content: space-between;
     gap: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--nm-divider-light-1);
+    border-top: 1px solid var(--nm-app-divider);
 }
 
-.vd-price { margin: 0; font-size: 0.9rem; color: var(--nm-text-light-2); }
-.vd-price strong { color: var(--nm-accent-on-light); font-family: var(--nm-font-display); }
+.vd-price { margin: 0; font-size: 0.9rem; color: var(--nm-app-text-2); }
+.vd-price strong { color: var(--nm-app-accent); font-family: var(--nm-font-display); }
 
 .vd-go {
     min-height: var(--nm-touch-cta);
     padding: 0.875rem 1.5rem;
     border: 0;
     border-radius: var(--nm-radius-sm);
-    background: var(--nm-accent-on-light);
+    background: var(--nm-app-accent);
     color: #fff;
     font-family: var(--nm-font-display);
     font-size: 0.9rem;
@@ -449,5 +449,5 @@
     cursor: pointer;
 }
 
-.vd-go:hover { background: var(--nm-accent-on-light-hover); }
-.vd-go--topup { background: var(--nm-text-light); }
+.vd-go:hover { background: var(--nm-app-accent-fill-hover); }
+.vd-go--topup { background: var(--nm-app-text); }
