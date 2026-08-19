@@ -26,7 +26,7 @@ export class ProjectsService {
   async findOne(id: string, user: User): Promise<Project> {
     const project = await this.projectsRepository.findOne({
       where: { id, user: { id: user.id } },
-      relations: ['suggestions'],
+      relations: { suggestions: true },
     });
 
     if (!project) {
@@ -104,7 +104,7 @@ export class ProjectsService {
         // Verify the suggestion belongs to the authenticated user before updating
         const suggestion = await this.suggestionsRepository.findOne({
           where: { id, project: { user: { id: user.id } } },
-          relations: ['project', 'project.user'],
+          relations: { project: { user: true } },
         });
         if (!suggestion) return; // silently skip suggestions that don't belong to the user
         await this.suggestionsRepository.update(id, { availability });
