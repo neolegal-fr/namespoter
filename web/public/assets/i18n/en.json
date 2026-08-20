@@ -280,7 +280,7 @@
       "GRID_LOCKED": "Socials + INPI — {{n}} credits",
       "GRID_REPORT_OWNED": "Trademark and networks checked",
       "GRID_DEEPEN": "Go deeper",
-      "REPORT_TRADEMARK_SCOPE": "French (INPI) and European Union (EUIPO) trademarks",
+      "REPORT_TRADEMARK_SCOPE": "French (INPI), European Union (EUIPO) and international (WIPO) trademarks",
       "REPORT_CLASSES": "classes {{list}}",
       "REPORT_TM_IDENTICAL": "Identical trademark “{{name}}”",
       "REPORT_PLATFORMS": "{{n}} platforms",

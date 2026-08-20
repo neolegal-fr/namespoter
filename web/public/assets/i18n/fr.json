@@ -280,7 +280,7 @@
       "GRID_LOCKED": "Réseaux + INPI — {{n}} crédits",
       "GRID_REPORT_OWNED": "Marque et réseaux vérifiés",
       "GRID_DEEPEN": "Approfondir",
-      "REPORT_TRADEMARK_SCOPE": "Marques françaises (INPI) et de l'Union européenne (EUIPO)",
+      "REPORT_TRADEMARK_SCOPE": "Marques françaises (INPI), de l'Union européenne (EUIPO) et internationales (OMPI)",
       "REPORT_CLASSES": "classes {{list}}",
       "REPORT_TM_IDENTICAL": "Marque identique « {{name}} »",
       "REPORT_PLATFORMS": "{{n}} plateformes",
