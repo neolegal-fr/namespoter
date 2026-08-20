@@ -43,7 +43,11 @@ interface ExtVerdict {
     <div class="rg-credits">
       <span>
         <strong>{{ debited() }}</strong>
-        {{ (debited() > 1 ? 'WIZARD.STEP3.GRID_DEBITED_MANY' : 'WIZARD.STEP3.GRID_DEBITED_ONE') | translate }}
+        @if (reportsDebited() > 0) {
+          {{ 'WIZARD.STEP3.GRID_DEBITED_MIXED' | translate:{ n: reportCost() } }}
+        } @else {
+          {{ (debited() > 1 ? 'WIZARD.STEP3.GRID_DEBITED_MANY' : 'WIZARD.STEP3.GRID_DEBITED_ONE') | translate }}
+        }
       </span>
       <span class="rg-credits__sep" aria-hidden="true"></span>
       <span>{{ 'WIZARD.STEP3.GRID_NEVER_BILLED' | translate }}</span>
@@ -343,7 +347,31 @@ export class ResultsGridComponent {
    * C'est ce que facture l'API (`actualCost = results.length`) ; compter les
    * domaines libres affichait un total sans rapport avec le solde réel.
    */
-  readonly debited = computed(() => this.domains().length);
+  readonly debited = computed(() => {
+    const suggestions = this.domains().length;
+    return suggestions + this.reportsDebited();
+  });
+
+  /**
+   * Crédits débités par les rapports des noms AFFICHÉS ici.
+   *
+   * Somme des débits réels portés par chaque rapport, jamais un nombre de
+   * rapports multiplié par le tarif courant : un rapport offert coûte 0, et un
+   * rapport acheté avant un changement de prix garde le sien. Le total annoncé
+   * doit correspondre à ce qui a quitté le compte, sans quoi c'est le chiffre
+   * le plus vérifiable du produit qui devient contestable.
+   *
+   * `costCredits` à `null` = enregistrement antérieur à la colonne, donc
+   * nécessairement payé au tarif d'alors (le rapport offert est arrivé avec
+   * elle) : on retient le tarif courant, faute de mieux.
+   */
+  readonly reportsDebited = computed(() =>
+    this.domains().reduce((total, d) => {
+      const sum = this.summaryOf(d);
+      if (!sum) return total;
+      return total + (sum.costCredits ?? this.reportCost());
+    }, 0),
+  );
 
   /** Toutes les extensions demandées sont libres — le cas que l'on cherche. */
   allFree(d: any): boolean {

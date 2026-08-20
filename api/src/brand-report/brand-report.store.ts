@@ -57,6 +57,7 @@ export class BrandReportStore {
         euipoHits: has('EU'),
         socials: (rep?.socials ?? []).map((s) => ({ platform: s.platform, status: s.status })),
         score: rep?.score ?? null,
+        costCredits: r.costCredits ?? null,
       };
     });
   }

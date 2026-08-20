@@ -113,6 +113,8 @@ export interface BrandReportSummary {
   euipoHits: boolean;
   socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
   score: number | null;
+  /** Crédits réellement débités : 0 si le rapport offert du mois a servi. */
+  costCredits: number | null;
 }
 
 /** Coût affiché du rapport de marque (aligné sur BRAND_REPORT_COST côté API). */

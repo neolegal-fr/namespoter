@@ -93,4 +93,14 @@ export interface BrandReportSummary {
   euipoHits: boolean;
   socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
   score: number | null;
+  /**
+   * Crédits RÉELLEMENT débités pour ce rapport — 0 s'il a consommé le rapport
+   * offert du mois, sinon le tarif en vigueur au moment de l'achat.
+   *
+   * Exposé pour que l'écran de résultats puisse annoncer un total honnête :
+   * multiplier le nombre de rapports par le tarif COURANT donnerait un chiffre
+   * faux après un changement de prix, et ferait payer sur l'écran un rapport
+   * qui était offert. `null` sur les enregistrements antérieurs à la colonne.
+   */
+  costCredits: number | null;
 }

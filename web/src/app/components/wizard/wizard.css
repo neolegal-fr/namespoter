@@ -725,10 +725,27 @@
    fond gris jusqu'au pied de page. La carte prend la hauteur de son contenu ;
    c'est la ZONE qui garde une hauteur minimale, ce qui fait remonter le pied
    de page sans étirer une surface blanche pour rien. */
+/* Le wizard n'est plus une CARTE posée sur la page : il EST la page.
+ *
+ * Le cadre blanc arrondi datait d'avant la refonte, quand chaque écran était
+ * un panneau. L'accueil, lui, pose ses sections à même le fond — et le wizard
+ * s'ouvre juste après lui. Deux traitements pour deux moitiés du même produit,
+ * séparées par un clic, se remarquent.
+ *
+ * En pratique le cadre n'apportait rien : il fait toute la largeur du
+ * conteneur et toute la hauteur du contenu, donc il ne délimite rien qu'on ne
+ * voie déjà. Ce qui doit être encadré l'est individuellement — les cartes de
+ * résultats, le panneau d'extensions, le rapport.
+ */
 .wizard-shell .p-card {
     height: auto;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 
 .wizard-shell .p-card > .p-card-body {
     min-height: 22rem;
+    padding-left: 0;
+    padding-right: 0;
 }

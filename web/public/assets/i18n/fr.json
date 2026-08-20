@@ -334,7 +334,8 @@
       "SCORE_GOOD": "bon",
       "SCORE_FAIR": "moyen",
       "SCORE_WEAK": "faible",
-      "LOCKED_CHECK_WO": "Marques internationales — OMPI"
+      "LOCKED_CHECK_WO": "Marques internationales — OMPI",
+      "GRID_DEBITED_MIXED": "crédits débités — 1 par suggestion de nom, {{n}} par vérification de marque et réseaux sociaux"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

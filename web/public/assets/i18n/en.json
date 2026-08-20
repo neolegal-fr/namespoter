@@ -334,7 +334,8 @@
       "SCORE_GOOD": "good",
       "SCORE_FAIR": "fair",
       "SCORE_WEAK": "weak",
-      "LOCKED_CHECK_WO": "International trademarks — WIPO"
+      "LOCKED_CHECK_WO": "International trademarks — WIPO",
+      "GRID_DEBITED_MIXED": "credits charged — 1 per name suggestion, {{n}} per trademark and social check"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
