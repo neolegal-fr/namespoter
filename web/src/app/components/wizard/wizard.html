@@ -721,10 +721,13 @@
           <div style="font-size: 0.8rem; color: var(--nm-app-verdict-unknown-fg); margin-bottom: 0.75rem; line-height: 1.45">
             {{ 'WIZARD.STEP3.PICK_URGENCY_SUB' | translate }}
           </div>
-          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap">
-            <a *ngFor="let r of REGISTRARS" [href]="r.url(result.recommended, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-link-btn">
-              <i class="pi pi-shopping-cart" style="font-size: var(--nm-text-ui-sm)"></i> {{ r.label }}
-            </a>
+          <!-- Un bouton, et les bureaux dans son menu — comme partout ailleurs.
+               Les cinq liens alignés demandaient « chez qui ? » avant même que
+               l'utilisateur ait dit « je réserve ». -->
+          <div style="display: flex; justify-content: center">
+            <app-reserver [query]="reserveQuery(result.recommended)"
+                          [label]="reserveQuery(result.recommended)"
+                          variant="cta" campaign="pick_best"></app-reserver>
           </div>
         </div>
       </div>

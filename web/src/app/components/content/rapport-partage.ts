@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ReserverBoutonComponent } from '../shared/reserver-bouton';
 import { BrandReportService, BrandReport, Availability, NameQuality } from '../../services/brand-report';
 
 /**
@@ -11,7 +12,7 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
 @Component({
   selector: 'app-rapport-partage',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule, RouterModule, TranslatePipe, ReserverBoutonComponent],
   template: `
     <div style="max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem">
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem">
@@ -47,7 +48,7 @@ import { BrandReportService, BrandReport, Availability, NameQuality } from '../.
             <div *ngFor="let d of report.domains" class="rp-row">
               <span style="font-family: var(--nm-font-display)">{{ d.domain }}</span>
               <span style="display:flex;align-items:center;gap:.6rem">
-                <a *ngIf="d.status === 'free'" [href]="reserveUrl(report.name, d.extension)" target="_blank" rel="noopener noreferrer" class="rp-link">{{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}</a>
+                <app-reserver *ngIf="d.status === 'free'" [query]="d.domain" campaign="shared_report"></app-reserver>
                 <span class="rp-badge" [style.background]="color(d.status)">{{ statusKey(d.status) | translate }}</span>
               </span>
             </div>
@@ -128,10 +129,6 @@ export class RapportPartageComponent {
   }
   color(s: Availability): string { return s === 'free' ? 'var(--nm-app-verdict-free-fg)' : s === 'taken' ? 'var(--nm-app-verdict-taken-fg)' : 'var(--nm-app-text-2)'; }
   col(score: number): string { return score >= 66 ? 'var(--nm-app-verdict-free-fg)' : score >= 33 ? 'var(--nm-app-verdict-unknown-fg)' : 'var(--nm-app-verdict-taken-fg)'; }
-  reserveUrl(name: string, ext: string): string {
-    const d = `${name}.${ext}`.toLowerCase();
-    return `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${d}&utm_source=namorama&utm_medium=referral`;
-  }
   private readonly QUALITY_LABELS: Record<string, string> = {
     memorability: 'Mémorabilité', pronunciation: 'Prononciation', international: 'International', seo: 'SEO', distinctiveness: 'Distinctivité',
   };

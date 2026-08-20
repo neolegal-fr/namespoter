@@ -1,0 +1,51 @@
+/* Le bouton se lit comme un bouton, pas comme un lien : le caret annonce le
+   menu sans étaler les cinq bureaux à l'avance. */
+.nm-reserve {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-accent);
+    font-family: inherit;
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.nm-reserve:hover {
+    background: var(--nm-app-accent-surface);
+}
+
+.nm-reserve__caret {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+/* En pied de rapport, « Réserver monnom.com » est LA suite du document : même
+   corps et même aplat que l'ancien lien qu'il remplace, pour ne rien perdre de
+   son poids en devenant un bouton à menu. */
+.nm-reserve--cta {
+    gap: 8px;
+    min-height: var(--nm-touch-cta);
+    padding: 14px 26px;
+    border-color: var(--nm-app-text);
+    background: var(--nm-app-text);
+    color: var(--nm-app-surface);
+    font-family: var(--nm-font-display);
+    font-size: var(--nm-text-ui);
+    font-weight: 700;
+}
+
+.nm-reserve--cta:hover {
+    background: var(--nm-app-text-2);
+    border-color: var(--nm-app-text-2);
+}
+
+.nm-reserve--cta .nm-reserve__caret {
+    font-size: 0.8rem;
+}

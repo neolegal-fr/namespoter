@@ -130,25 +130,6 @@
     background: var(--nm-app-bg);
 }
 
-/* ─── liens registrar dans le dialog pick ── */
-.reg-link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border: 1px solid var(--nm-app-verdict-unknown-bg);
-    border-radius: var(--nm-radius-sm);
-    background: var(--nm-app-verdict-unknown-bg);
-    color: var(--nm-app-verdict-unknown-fg);
-    text-decoration: none;
-}
-.reg-link-btn:hover {
-    border-color: var(--nm-app-verdict-unknown-fg);
-    color: var(--nm-app-text);
-}
-
 /* Hover sur le bouton copier tableau */
 .copy-table-btn:hover {
     color: var(--nm-app-accent) !important;

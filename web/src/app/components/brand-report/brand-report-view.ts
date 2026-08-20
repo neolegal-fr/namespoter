@@ -1,8 +1,7 @@
-import { Component, Input, signal, ViewChild } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Menu } from 'primeng/menu';
-import type { MenuItem } from 'primeng/api';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ReserverBoutonComponent } from '../shared/reserver-bouton';
 import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
 
 /**
@@ -28,13 +27,8 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
 @Component({
   selector: 'app-brand-report-view',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, Menu],
+  imports: [CommonModule, TranslatePipe, ReserverBoutonComponent],
   template: `
-    <!-- Un seul menu pour toutes les lignes : il se remplit au clic avec le
-         domaine concerné. Cinq menus dormants pour cinq extensions seraient
-         cinq fois le même contenu. -->
-    <p-menu #menuRegistrars [model]="registrarItems" [popup]="true" appendTo="body"></p-menu>
-
     @if (report; as r) {
       <article class="rv">
 
@@ -158,16 +152,7 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
                      part : au moment de réserver, la question « chez qui ? » est
                      la même que « je réserve ». Le choix est mémorisé, donc on
                      ne le repose pas à chaque ligne. -->
-                <!-- UN bouton, un menu. Le sélecteur accolé se lisait comme un
-                     réglage à part, à remplir avant d'agir ; ici « chez qui ? »
-                     n'apparaît qu'après « je réserve », c'est-à-dire au moment
-                     où la question se pose. -->
-                <button type="button" class="rv-link rv-reserve rv-noprint"
-                        [attr.aria-label]="('WIZARD.STEP3.REPORT_RESERVE' | translate) + ' ' + d.domain"
-                        (click)="ouvrirRegistrars($event, d.domain)">
-                  <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
-                  <i class="pi pi-angle-down rv-link__caret" aria-hidden="true"></i>
-                </button>
+                <app-reserver class="rv-noprint" [query]="d.domain" campaign="brand_report"></app-reserver>
               }
               <span class="rv-badge" [class]="'rv-badge--' + badgeTone(d.status)">
                 {{ statusKey(d.status) | translate }}
@@ -278,10 +263,9 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
             </p>
           }
           @if (heroFreeDomain(r); as hero) {
-            <a class="rv-cta" [href]="reserveUrl(r.name, hero.extension, registrar())" target="_blank" rel="noopener noreferrer">
-              <i class="pi pi-shopping-cart"></i>
-              {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }} {{ hero.domain }}
-            </a>
+            <app-reserver class="rv-noprint" variant="cta"
+                          [query]="hero.domain" [label]="hero.domain"
+                          campaign="brand_report"></app-reserver>
           }
         </footer>
       </article>
@@ -309,67 +293,6 @@ export class BrandReportViewComponent {
   @Input() context: { description?: string; constraints?: { label: string; value: string }[] } | null = null;
 
   readonly INPI_DEPOSIT_URL = 'https://procedures.inpi.fr/?/marques/depot';
-  /**
-   * Les CINQ bureaux déjà câblés dans le wizard, et non trois.
-   *
-   * Le rapport en proposait un sous-ensemble, sans que rien ne le justifie :
-   * un utilisateur qui a ses domaines chez GoDaddy n'ira pas les acheter chez
-   * OVH parce qu'un rapport le lui suggère.
-   */
-  readonly REGISTRARS = [
-    { label: 'OVH', base: 'https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=' },
-    { label: 'Namecheap', base: 'https://www.namecheap.com/domains/registration/results.aspx?domain=' },
-    { label: 'GoDaddy', base: 'https://www.godaddy.com/domainsearch/find?domainToCheck=' },
-    { label: 'Gandi', base: 'https://shop.gandi.net/fr/domain/suggest?search=' },
-    { label: 'Hostinger', base: 'https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=' },
-  ];
-
-  @ViewChild('menuRegistrars') private menuRegistrars?: Menu;
-  registrarItems: MenuItem[] = [];
-
-  /**
-   * Ouvre la liste des bureaux pour CE domaine.
-   *
-   * Le choix est mémorisé et remonte en tête de liste : on réserve rarement
-   * chez cinq bureaux différents, et celui qu'on a déjà choisi mérite d'être
-   * le premier proposé la fois suivante.
-   */
-  ouvrirRegistrars(event: Event, domaine: string): void {
-    this.registrarItems = this.REGISTRARS.map((reg, i) => ({
-      label: reg.label,
-      icon: i === this.registrar() ? 'pi pi-check' : 'pi pi-external-link',
-      command: () => {
-        this.setRegistrar(String(i));
-        window.open(`${reg.base}${domaine.toLowerCase()}&utm_source=namorama&utm_medium=referral`, '_blank', 'noopener');
-      },
-    }));
-    this.menuRegistrars?.toggle(event);
-  }
-
-  /** Bureau retenu, mémorisé : on ne rechoisit pas à chaque rapport. */
-  readonly registrar = signal(this.readRegistrar());
-
-  setRegistrar(i: string): void {
-    const n = Number(i);
-    if (!Number.isInteger(n) || n < 0 || n >= this.REGISTRARS.length) return;
-    this.registrar.set(n);
-    try { localStorage.setItem('nm-registrar', String(n)); } catch { /* stockage bloqué */ }
-  }
-
-  private readRegistrar(): number {
-    try {
-      const v = Number(localStorage.getItem('nm-registrar'));
-      return Number.isInteger(v) && v >= 0 && v < 5 ? v : 0;
-    } catch {
-      return 0;
-    }
-  }
-
-  reserveUrl(name: string, extension: string, i = 0): string {
-    const d = `${name}.${extension}`.toLowerCase();
-    return `${this.REGISTRARS[i].base}${d}&utm_source=namorama&utm_medium=referral`;
-  }
-
   heroFreeDomain(r: ReportLike): { extension: string; domain: string } | null {
     const free = r.domains.filter((d) => d.status === 'free');
     return free.find((d) => d.extension === 'com') ?? free[0] ?? null;

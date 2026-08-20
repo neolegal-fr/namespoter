@@ -35,6 +35,7 @@ import { ResultsGridComponent } from '../results/results-grid';
 import type { BrandReportSummary } from '../../services/brand-report';
 import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
 import { BrandReportViewComponent } from '../brand-report/brand-report-view';
+import { ReserverBoutonComponent } from '../shared/reserver-bouton';
 
 @Component({
   selector: 'app-wizard',
@@ -62,7 +63,8 @@ import { BrandReportViewComponent } from '../brand-report/brand-report-view';
     TranslatePipe,
     ResultsGridComponent,
     BrandReportLockedComponent,
-    BrandReportViewComponent
+    BrandReportViewComponent,
+    ReserverBoutonComponent
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
@@ -402,44 +404,21 @@ export class WizardComponent implements OnInit, OnDestroy {
   ]);
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
-  // ─── US-022 : Buy on registrar ────────────────────
-  readonly REGISTRARS = [
-    {
-      label: 'OVH',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'Namecheap',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.namecheap.com/domains/registration/results.aspx?domain=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'GoDaddy',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.godaddy.com/domainsearch/find?domainToCheck=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'Gandi',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://shop.gandi.net/fr/domain/suggest?search=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'Hostinger',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-  ];
+  /**
+   * Ce qu'on va chercher chez le bureau d'enregistrement.
+   *
+   * Une seule extension demandée : on cherche le domaine complet, prêt à
+   * mettre au panier. Plusieurs : le nom seul, et le bureau montre ce qui est
+   * libre — le contraire imposerait un choix d'extension que l'utilisateur n'a
+   * justement pas fait.
+   *
+   * La liste des bureaux, elle, vit dans `app-reserver` : elle est la même
+   * dans tout le produit.
+   */
+  reserveQuery(name: string): string {
+    const exts = this.selectedExtensions();
+    return exts.length === 1 ? `${name}${exts[0]}` : name;
+  }
 
   /** Lien vers la recherche de marque INPI (base Marques) pour un nom donné. */
   inpiUrl(name: string): string {
@@ -664,13 +643,15 @@ export class WizardComponent implements OnInit, OnDestroy {
       cible.push({ label: 'WIZARD.STEP3.REPORT_T_STYLE', value: registres.join(', ') });
     }
 
-    const inspirations = this.likedExamplesInput().trim();
-    if (inspirations) {
-      cible.push({ label: 'WIZARD.STEP3.REPORT_T_INSPIRATION', value: inspirations });
-    }
-
-    const mots = this.keywords().slice(0, 8).join(', ');
-    if (mots) cible.push({ label: 'WIZARD.STEP3.REPORT_T_KEYWORDS', value: mots });
+    /*
+     * Ni les références, ni les mots-clés.
+     *
+     * Ce sont des ENTRÉES de la génération, pas des traits du public visé :
+     * les noms qu'on a cités en exemple et les mots qu'on a fournis à l'IA. Le
+     * rapport porte sur UN nom déjà choisi ; savoir qu'on avait écrit « Nike,
+     * Aesop » en inspiration n'aide personne à juger celui-là, et allongeait la
+     * seule section du document qui ne parle pas du nom.
+     */
 
     return { description: this.description() || undefined, constraints: cible };
   });

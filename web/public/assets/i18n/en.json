@@ -348,8 +348,6 @@
       "REPORT_T_MARKET_LOCAL": "local — {{pays}}",
       "REPORT_T_MARKET_INTL": "international",
       "REPORT_T_STYLE": "Register",
-      "REPORT_T_INSPIRATION": "References",
-      "REPORT_T_KEYWORDS": "Keywords kept",
       "REPORT_SHARE_MAIL": "Share",
       "REPORT_SHARE_SEND": "Send",
       "REPORT_SHARE_HINT": "The message carries a link to the online report and the document attached.",
