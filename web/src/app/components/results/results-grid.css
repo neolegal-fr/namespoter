@@ -311,37 +311,45 @@
 
 .rg-rate {
   display: flex;
-  gap: 4px;
+  gap: 0;
   flex: none;
 }
 
+/* Pouces SANS cadre.
+ *
+ * Encadrés, deux carrés de 46 px pesaient autant que le nom du domaine
+ * qu'ils accompagnent — alors qu'ils ne servent qu'à affiner les suggestions
+ * suivantes. Le cadre disparaît, la surface tactile reste : le bouton garde
+ * 44 px, seul le dessin s'allège.
+ *
+ * L'état, lui, ne s'allège pas : le glyphe se remplit ET prend la couleur du
+ * verdict. Un pouce cliqué reste reconnaissable sans avoir à le survoler. */
 .rg-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--nm-touch-card-btn);
-  height: var(--nm-touch-card-btn);
-  border: 1px solid var(--nm-app-border-strong);
-  border-radius: var(--nm-radius-sm);
+  width: var(--nm-touch-min);
+  height: var(--nm-touch-min);
+  border: none;
+  border-radius: var(--nm-radius-pill);
   background: transparent;
-  color: var(--nm-app-text-2);
+  color: var(--nm-app-text-3);
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s, background-color 0.15s;
 }
 
 .rg-icon:hover {
-  border-color: var(--nm-app-border-strong);
+  background: var(--nm-app-surface-alt);
   color: var(--nm-app-text);
 }
 
 .rg-icon--on {
-  color: var(--nm-app-accent-fill);
-  border-color: var(--nm-app-accent-border);
+  color: var(--nm-app-accent);
 }
 
 .rg-icon--off {
   color: var(--nm-app-verdict-taken-fg);
-  border-color: var(--nm-app-verdict-taken-bg);
 }
 
 .rg-btn:focus-visible,
@@ -435,7 +443,17 @@
   cursor: default;
 }
 
-.rg-social__code { font-weight: 600; }
+/* Le logo prend la couleur du verdict porté par la pastille : une seule
+   couleur par pastille, donc aucune concurrence entre l'identité du réseau et
+   son état. */
+.rg-social__logo {
+  width: 12px;
+  height: 12px;
+  font-size: 12px;
+  line-height: 1;
+  flex: none;
+}
+
 .rg-social__mark { font-size: 9px; }
 
 .rg-social--locked { background: var(--nm-app-divider); color: var(--nm-app-text-2); }

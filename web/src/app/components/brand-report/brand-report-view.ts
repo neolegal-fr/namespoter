@@ -130,6 +130,15 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
             @for (s of r.socials; track s.platform) {
               <div class="rv-row">
                 <span class="rv-row__label">
+                  <!-- Le logo officiel, monochrome : il identifie le réseau
+                       sans lecture. La couleur reste au verdict, à droite. -->
+                  @if (socialIcon(s.platform) === 'x') {
+                    <svg class="rv-social__logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" [attr.d]="X_LOGO"></path>
+                    </svg>
+                  } @else {
+                    <i [class]="'rv-social__logo pi ' + socialIcon(s.platform)" aria-hidden="true"></i>
+                  }
                   <a [href]="s.url" target="_blank" rel="noopener noreferrer">{{ s.platform }} · &#64;{{ r.handle }}</a>
                 </span>
                 <span class="rv-badge" [class]="'rv-badge--' + badgeTone(s.status)">
@@ -249,6 +258,25 @@ export class BrandReportViewComponent {
       : t === 'watch'
         ? 'WIZARD.STEP3.REPORT_SUMMARY_WATCH'
         : 'WIZARD.STEP3.REPORT_SUMMARY_RISK';
+  }
+
+  /** Marque officielle de X : PrimeIcons n'a que l'ancien oiseau Twitter. */
+  readonly X_LOGO =
+    'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z';
+
+  private readonly SOCIAL_ICONS: Record<string, string> = {
+    github: 'pi-github',
+    linkedin: 'pi-linkedin',
+    telegram: 'pi-telegram',
+    tiktok: 'pi-tiktok',
+    x: 'x',
+    youtube: 'pi-youtube',
+    instagram: 'pi-instagram',
+    facebook: 'pi-facebook',
+  };
+
+  socialIcon(platform: string): string {
+    return this.SOCIAL_ICONS[platform.trim().toLowerCase()] ?? 'pi-globe';
   }
 
   /** Appréciation d'un score, sur l'échelle de verdict du produit. */

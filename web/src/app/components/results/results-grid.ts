@@ -216,9 +216,16 @@ interface ExtVerdict {
             <li class="rg-row">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_SOCIALS' | translate }}</span>
               <span class="rg-socials">
-                @for (s of socialsOf(d); track s.code) {
+                @for (s of socialsOf(d); track s.name) {
                   <span class="rg-social" [class]="'rg-social--' + s.tone" [attr.title]="s.title">
-                    <span class="rg-social__code">{{ s.code }}</span>
+                    @if (s.icon === 'x') {
+                      <svg class="rg-social__logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" [attr.d]="X_LOGO"></path>
+                      </svg>
+                    } @else {
+                      <i class="rg-social__logo pi" [class]="'rg-social__logo pi ' + s.icon" aria-hidden="true"></i>
+                    }
+                    <span class="sr-only">{{ s.name }}</span>
                     <span class="rg-social__mark" aria-hidden="true">{{ s.mark }}</span>
                   </span>
                 }
@@ -408,32 +415,44 @@ export class ResultsGridComponent {
    * `unknown` par construction (voir `ACTIVE_PLATFORMS` côté API) : une
    * plateforme non interrogée qui s'affiche quand même dévalue les autres.
    *
-   * Abréviations en attendant les glyphes officiels monochromes : redessiner
-   * une marque déposée serait pire que rien. Ne jamais employer les logos EN
-   * COULEURS — le rose d'Instagram et le cyan de TikTok entreraient en conflit
-   * avec le code libre/pris, qui est l'information utile.
+   * Les marques officielles, en MONOCHROME. Les abréviations qui les
+   * précédaient — « GH », « in », « TG », « TT » — demandaient d'être décodées
+   * une par une ; un logo se reconnaît sans lecture.
+   *
+   * Monochrome et jamais en couleurs de marque : le rose d'Instagram et le
+   * cyan de TikTok entreraient en concurrence avec le code libre/pris, qui est
+   * l'information utile. Le logo dit DE QUEL réseau il s'agit, la couleur dit
+   * son état — deux rôles, jamais mélangés.
+   *
+   * X a son propre glyphe : PrimeIcons ne propose que `pi-twitter`, l'oiseau,
+   * abandonné en 2023. Afficher l'ancien logo d'un réseau renommé sèmerait le
+   * doute sur la fraîcheur de la vérification elle-même.
    */
+  /** Marque officielle de X, PrimeIcons n'ayant que l'ancien oiseau Twitter. */
+  readonly X_LOGO =
+    'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z';
+
   private readonly PLATFORMS = [
-    { code: 'GH', name: 'GitHub' },
-    { code: 'in', name: 'LinkedIn' },
-    { code: 'TG', name: 'Telegram' },
-    { code: 'TT', name: 'TikTok' },
-    { code: 'X',  name: 'X' },
-    { code: 'YT', name: 'YouTube' },
+    { icon: 'pi-github',   name: 'GitHub' },
+    { icon: 'pi-linkedin', name: 'LinkedIn' },
+    { icon: 'pi-telegram', name: 'Telegram' },
+    { icon: 'pi-tiktok',   name: 'TikTok' },
+    { icon: 'x',           name: 'X' },
+    { icon: 'pi-youtube',  name: 'YouTube' },
   ];
 
-  socialsOf(d: any): { code: string; tone: string; mark: string; title: string }[] {
+  socialsOf(d: any): { icon: string; name: string; tone: string; mark: string; title: string }[] {
     const sum = this.summaryOf(d);
     const t = (k: string) => this.translate.instant(k) as string;
     return this.PLATFORMS.map((p) => {
       const found = sum?.socials.find((s) => s.platform.toLowerCase() === p.name.toLowerCase());
       if (!sum || !found) {
-        return { code: p.code, tone: 'locked', mark: '🔒', title: `${p.name} — ${t('WIZARD.STEP3.GRID_UNVERIFIED')}` };
+        return { icon: p.icon, name: p.name, tone: 'locked', mark: '🔒', title: `${p.name} — ${t('WIZARD.STEP3.GRID_UNVERIFIED')}` };
       }
       const tone = found.status === 'free' ? 'free' : found.status === 'taken' ? 'taken' : 'unknown';
       const mark = tone === 'free' ? '✓' : tone === 'taken' ? '✗' : '?';
       const label = t(tone === 'free' ? 'WIZARD.STEP3.GRID_FREE' : tone === 'taken' ? 'WIZARD.STEP3.GRID_TAKEN' : 'WIZARD.STEP3.GRID_UNKNOWN');
-      return { code: p.code, tone, mark, title: `${p.name} — ${label}` };
+      return { icon: p.icon, name: p.name, tone, mark, title: `${p.name} — ${label}` };
     });
   }
 

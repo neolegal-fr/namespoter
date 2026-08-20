@@ -298,3 +298,15 @@
     font-size: var(--nm-text-ui-sm);
     color: var(--nm-app-text-3);
 }
+
+/* Logo de réseau : monochrome, à la couleur du texte. L'état du compte est
+   porté par la pastille de droite — le logo ne dit que « quel réseau ». */
+.rv-social__logo {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+    line-height: 1;
+    margin-right: 0.45rem;
+    vertical-align: -2px;
+    color: var(--nm-app-text-2);
+}
