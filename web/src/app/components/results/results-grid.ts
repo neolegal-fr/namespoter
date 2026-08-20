@@ -256,32 +256,35 @@ interface ExtVerdict {
           <div class="rg-actions">
             <!-- La date porte sur CE QUE LA CARTE MONTRE, domaines compris :
                  un registre bouge, un nom libre hier peut être déposé
-                 aujourd'hui. Elle est donc là dans les deux états, ce qui
-                 aligne du même coup les cartes vérifiées et les autres — leur
-                 pied avait deux hauteurs différentes. -->
+                 aujourd'hui. Le geste de réactualiser tient dans une icône —
+                 un libellé pour une action secondaire pesait autant que les
+                 boutons du dessous. -->
             <p class="rg-checked">
               @if (checkedLabel(d); as label) {
                 <span>{{ label.key | translate:label.params }}</span>
               } @else {
                 <span class="rg-checked--none">{{ 'WIZARD.STEP3.GRID_CHECKED_UNKNOWN' | translate }}</span>
               }
-              <button type="button" class="rg-refresh" (click)="refreshDomains.emit(d.name)">
-                {{ 'WIZARD.STEP3.GRID_RECHECK_DOMAINS' | translate }}
+              <button type="button" class="rg-refresh"
+                      [disabled]="checkTooRecent(d)"
+                      [attr.aria-label]="('WIZARD.STEP3.GRID_RECHECK_DOMAINS' | translate) + ' — ' + d.name"
+                      [attr.title]="(checkTooRecent(d) ? 'WIZARD.STEP3.GRID_RECHECK_SOON' : 'WIZARD.STEP3.GRID_RECHECK_DOMAINS') | translate"
+                      (click)="summaryOf(d) ? refresh.emit(d.name) : refreshDomains.emit(d.name)">
+                <i class="pi pi-refresh" aria-hidden="true"></i>
               </button>
             </p>
 
-            <!-- DEUX boutons de même taille, dans les deux états. Le gauche
-                 porte marque et réseaux — il les achète, puis les réactualise ;
-                 le droit ouvre le document. Un pied qui change de composition
-                 selon l'état désaligne toutes les cartes entre elles. -->
+            <!-- UNE rangée, toujours de la même hauteur : deux boutons tant que
+                 marque et réseaux restent à acheter, un seul ensuite. Ce qui
+                 disparaît, c'est l'ACTION D'ACHAT — elle n'a plus d'objet — et
+                 non la ligne, dont la hauteur garde les cartes comparables. -->
             <div class="rg-actions__row">
-              <button type="button" class="rg-btn rg-btn--buy"
-                      [disabled]="checkTooRecent(d)"
-                      [attr.title]="checkTooRecent(d) ? ('WIZARD.STEP3.GRID_RECHECK_SOON' | translate) : null"
-                      (click)="verify.emit(d.name)">
-                <i class="pi pi-search" aria-hidden="true"></i>
-                {{ 'WIZARD.STEP3.GRID_VERIFY_SHORT' | translate }}
-              </button>
+              @if (!summaryOf(d)) {
+                <button type="button" class="rg-btn rg-btn--buy" (click)="verify.emit(d.name)">
+                  <i class="pi pi-search" aria-hidden="true"></i>
+                  {{ 'WIZARD.STEP3.GRID_VERIFY_SHORT' | translate }}
+                </button>
+              }
               <button type="button" class="rg-btn rg-btn--ghost" (click)="openReport.emit(d.name)">
                 <i class="pi pi-file-pdf" aria-hidden="true"></i>
                 {{ 'WIZARD.STEP3.GRID_FULL_REPORT' | translate }}

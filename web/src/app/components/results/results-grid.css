@@ -279,10 +279,24 @@
   margin-top: auto;
 }
 
+/* Les deux boutons tiennent CÔTE À CÔTE, jamais l'un sous l'autre : c'est ce
+   qui garde la même hauteur de pied que la carte déjà vérifiée, où le bouton
+   d'achat a disparu. Hauteur fixée, libellé sur une ligne, et chacun libre de
+   se rétrécir (`min-width: 0`) plutôt que de forcer le retour à la ligne. */
 .rg-actions__row {
   display: flex;
   align-items: stretch;
+  flex-wrap: nowrap;
   gap: 8px;
+}
+
+.rg-actions__row .rg-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--nm-touch-card-btn);
+  padding: 0 10px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .rg-checked {
@@ -490,9 +504,16 @@
 .rg-synth--watch { background: var(--nm-app-verdict-unknown-bg); color: var(--nm-app-verdict-unknown-fg); }
 .rg-synth--risk  { background: var(--nm-app-verdict-taken-bg);   color: var(--nm-app-verdict-taken-fg); }
 
+/* Icône seule : le geste est secondaire, son libellé vit dans le title et
+   dans l'aria-label. Cible tactile préservée par le padding. */
 .rg-refresh {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--nm-radius-pill);
   min-height: 0;
   padding: 0;
   background: none;
@@ -529,9 +550,7 @@
 
 /* Les actions passent à la ligne : le bouton d'achat occupe toute la largeur,
    les secondaires en dessous. */
-.rg-actions__row {
-  flex-wrap: wrap;
-}
+
 
 /* Les pouces vivent dans l'en-tête : ils ne s'étirent pas. */
 .rg-card__head .rg-rate { flex: none; }
@@ -642,4 +661,19 @@
 .rg-analyse:hover,
 .rg-analyse:focus-visible {
     text-decoration: underline;
+}
+
+
+.rg-refresh:hover:not(:disabled) {
+    background: var(--nm-app-surface-alt);
+    color: var(--nm-app-text);
+}
+
+.rg-refresh:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.rg-refresh .pi {
+    font-size: 0.8rem;
 }
