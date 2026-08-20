@@ -361,7 +361,10 @@
       "REPORT_SHARE_KO": "L'envoi a échoué",
       "DEBITED_NAMES": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés",
       "DEBITED_MIXED": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés, {{tarif}} pour chacune des {{verifs}} vérifications de marque et réseaux sociaux",
-      "GRID_FILTER_REJECTED": "Rejetés"
+      "GRID_FILTER_REJECTED": "Rejetés",
+      "CHECKING": "Vérification de la disponibilité…",
+      "PIVOT": "Ce nom ne convient pas ?",
+      "PIVOT_CTA": "Décrivez votre projet, l'IA en propose d'autres"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
@@ -423,7 +426,7 @@
     "HTML_LANG": "fr",
     "META_TITLE": "Namorama — Trouvez un nom de marque vraiment libre",
     "META_DESC": "Générateur de noms de marque avec vérification réelle : domaine, réseaux sociaux, et antériorité INPI / EUIPO. 100 crédits offerts chaque mois, sans abonnement.",
-    "PILL": "Registres, INPI et réseaux interrogés en direct",
+    "PILL": "Domaines, marques déposées et réseaux vérifiés en direct",
     "H1_A": "Trouvez un nom de",
     "H1_W1": "produit",
     "H1_W2": "marque",
@@ -498,6 +501,10 @@
     "DEMO_REPORT_TM": "Marques",
     "DEMO_REPORT_SCORE": "Qualité du nom",
     "DEMO_TM_NONE": "aucun dépôt identique",
-    "STEP_3_DOMAINS": "Domaines"
+    "STEP_3_DOMAINS": "Domaines",
+    "HAVE_NAME_TITLE": "Vous avez déjà une idée de nom ?",
+    "HAVE_NAME_LEAD": "Testez-la maintenant : les domaines et l'analyse du nom sont gratuits, la recherche d'antériorité se débloque ensuite.",
+    "HAVE_NAME_PLACEHOLDER": "Le nom que vous avez en tête",
+    "HAVE_NAME_BTN": "Vérifier ce nom"
   }
 }

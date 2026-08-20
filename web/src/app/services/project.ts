@@ -38,6 +38,14 @@ export class ProjectService {
     return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
+  /**
+   * Crée un projet à partir d'un nom seul — le chemin de qui a déjà une idée.
+   * Aucun débit : rien n'est généré, le contrôle de disponibilité est gratuit.
+   */
+  createFromName(name: string, extensions?: string[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/from-name`, { name, extensions });
+  }
+
   setRating(suggestionId: string, rating: 'liked' | 'disliked' | 'neutral'): Observable<{ rating: string }> {
     return this.http.patch<{ rating: string }>(`${this.apiUrl}/suggestions/${suggestionId}/rating`, { rating });
   }

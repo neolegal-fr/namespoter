@@ -391,7 +391,21 @@
           </h2>
           <!-- Le débit sous le titre, en petit : il doit être lisible sans
                jamais concurrencer le résultat qu'on est venu voir. -->
-          <p class="wizard-debit">{{ debitedLabel() }}</p>
+          @if (debitedLabel()) {
+            <p class="wizard-debit">{{ debitedLabel() }}</p>
+          }
+
+          <!-- Le rebond : le nom testé est pris, ou ne convient pas.
+               « 10 suggestions de plus » ne peut rien produire sans projet
+               décrit — proposer le bouton sans la description enverrait l'IA
+               générer à l'aveugle. On renvoie donc à l'étape 1, où la
+               description manque, plutôt que de faire semblant. -->
+          @if (domains().length === 1 && domains()[0].isManual) {
+            <p class="wizard-alt">
+              {{ 'WIZARD.STEP3.PIVOT' | translate }}
+              <button type="button" class="nm-link" (click)="activeIndex.set(0)">{{ 'WIZARD.STEP3.PIVOT_CTA' | translate }}</button>
+            </p>
+          }
 
           <div *ngIf="totalChecked() > 0 && domains().length < 10" class="p-2 border-left-4 border-solid border-round text-sm font-italic wizard-row" style="background: var(--nm-app-verdict-unknown-bg); border-color: var(--nm-app-verdict-unknown-fg); color: var(--nm-app-verdict-unknown-fg); text-align: left">
             {{ 'WIZARD.STEP3.NOTE' | translate:{ total: totalChecked(), count: domains().length } }}

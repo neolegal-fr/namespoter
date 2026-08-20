@@ -702,16 +702,62 @@ export class WizardComponent implements OnInit, OnDestroy {
   );
 
   debitedLabel = computed(() => {
-    const noms = this.domains().length;
+    // Les noms AJOUTÉS À LA MAIN ne sont pas facturés : ils n'ont pas été
+    // générés. Les compter afficherait un débit qui n'a pas eu lieu.
+    const noms = this.domains().filter((d) => !d.isManual).length;
     const verifs = this.domains().filter((d) =>
       this.reportSummaries().some((x) => x.nameKey === this.normName(d.name)),
     ).length;
     const total = noms + this.reportsDebited();
+    if (total === 0) return '';
     return this.translate.instant(
       verifs > 0 ? 'WIZARD.STEP3.DEBITED_MIXED' : 'WIZARD.STEP3.DEBITED_NAMES',
       { total, noms, verifs, tarif: this.brandReportCost },
     ) as string;
   });
+
+  /** Extensions par défaut du chemin « j'ai déjà un nom ». */
+  private readonly EXTENSIONS_PAR_DEFAUT = ['.com', '.fr', '.net', '.org'];
+
+  /**
+   * Entrée directe par un nom : « j'ai une idée, est-elle libre ? »
+   *
+   * Ce visiteur ne veut pas décrire un projet, il veut un verdict. On lui
+   * crée donc un projet portant ce nom, on y ajoute le nom, on contrôle ses
+   * domaines — gratuitement, `recheck` ne débite rien — et on le dépose
+   * directement devant sa réponse, à l'étape des résultats.
+   *
+   * Le projet n'est pas un détail administratif : sans lui, le nom testé
+   * n'existe nulle part une fois l'onglet fermé, et l'utilisateur ne peut ni
+   * y revenir, ni enchaîner sur des suggestions voisines.
+   */
+  /** Un nom est en cours de test : les défauts régionaux ne s'appliquent pas. */
+  private nomEnCours = false;
+
+  private demarrerDepuisNom(nom: string): void {
+    const propre = nom.trim().toLowerCase().replace(/^\./, '').replace(/\.[a-z]{2,10}$/, '');
+    if (!propre) return;
+
+    this.nomEnCours = true;
+    this.loading.set(true);
+    this.loadingKey.set('WIZARD.STEP3.CHECKING');
+    this.selectedExtensions.set([...this.EXTENSIONS_PAR_DEFAUT]);
+
+    this.projectService.createFromName(propre, this.EXTENSIONS_PAR_DEFAUT).subscribe({
+      next: (projet) => {
+        this.projectId.set(projet.id);
+        this.projectName.set(projet.name);
+        this.location.replaceState(`/projects/${projet.id}`);
+        this.newDomainName.set(propre);
+        this.addManualDomain();
+        this.activeIndex.set(2);
+        this.maxActiveIndex.set(2);
+        this.loading.set(false);
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loading.set(false); this.cdr.detectChanges(); },
+    });
+  }
 
   /** Extensions libres pour ce nom — verdicts gratuits, déjà à l'écran. */
   freeExtensionsOf(name: string): string[] {
@@ -1223,6 +1269,32 @@ export class WizardComponent implements OnInit, OnDestroy {
       this.resetProject();
     });
 
+    /*
+     * `?nom=` : quelqu'un arrive avec une idée à tester.
+     *
+     * Non connecté, on ne peut ni créer de projet ni rien mémoriser : le nom
+     * est mis de côté et repris après la connexion, comme l'état du wizard
+     * l'est déjà avant une redirection.
+     */
+    const nomDemande = (this.route.snapshot.queryParamMap.get('nom') ?? '').trim();
+    if (nomDemande) {
+      this.location.replaceState(this.router.url.split('?')[0]);
+      if (this.isLoggedIn()) {
+        this.demarrerDepuisNom(nomDemande);
+      } else {
+        try { localStorage.setItem('nom_a_tester', nomDemande); } catch { /* stockage bloqué */ }
+        this.keycloak.login({ redirectUri: window.location.origin + '/app' });
+        return;
+      }
+    } else if (this.isLoggedIn()) {
+      let enAttente: string | null = null;
+      try { enAttente = localStorage.getItem('nom_a_tester'); } catch { /* stockage bloqué */ }
+      if (enAttente) {
+        try { localStorage.removeItem('nom_a_tester'); } catch { /* stockage bloqué */ }
+        this.demarrerDepuisNom(enAttente);
+      }
+    }
+
     // Le rapport est un écran adressable : c'est l'URL qui l'ouvre et le ferme.
     this.route.queryParams.subscribe(qp => {
       this.syncReportFromUrl(qp[WizardComponent.REPORT_PARAM] ?? null);
@@ -1237,7 +1309,10 @@ export class WizardComponent implements OnInit, OnDestroy {
     });
 
     const savedState = localStorage.getItem('wizard_state');
-    if (!savedState && !this.route.snapshot.params['id']) {
+    // `demarrerDepuisNom` a déjà posé ses extensions : les défauts régionaux
+    // les écrasaient juste après, et la carte sortait en .fr/.com au lieu des
+    // quatre demandées.
+    if (!savedState && !this.route.snapshot.params['id'] && !this.nomEnCours) {
       // Visite fraîche : pré-remplir l'extension locale + options régionales
       // selon la localisation détectée (un état restauré ou un projet priment).
       this.applyRegionalDefaults();
@@ -2165,25 +2240,16 @@ export class WizardComponent implements OnInit, OnDestroy {
                 this.domains.update(list =>
                   list.map(d => d.name === r.name && d.isManual ? { ...d, id: saved.id } : d)
                 );
-                // Persister le rating liked côté serveur puis déclencher l'analyse IA
+                // Le rating « aimé » est persisté, puis l'analyse suit le même
+                // chemin que partout ailleurs.
+                //
+                // Elle avait ici sa TROISIÈME implémentation, qui MUTAIT
+                // l'objet dans le tableau : la grille reçoit `domains` en
+                // entrée signal, une mutation en place ne la réveille pas.
+                // L'analyse était donc bien calculée, jamais affichée — la
+                // carte gardait son bouton « Analyser » pour l'éternité.
                 this.projectService.setRating(saved.id, 'liked').subscribe({
-                  next: () => {
-                    const domain = this.domains().find(d => d.id === saved.id);
-                    if (domain && !domain.analysis && !domain.analysisPending) {
-                      setTimeout(() => {
-                        domain.analysisPending = true;
-                        this.cdr.detectChanges();
-                        this.domainService.analyzeName(saved.id, this.translate.currentLang() ?? undefined).subscribe({
-                          next: (a) => {
-                            domain.analysis = a.analysis;
-                            domain.analysisPending = false;
-                            this.cdr.detectChanges();
-                          },
-                          error: () => { domain.analysisPending = false; this.cdr.detectChanges(); },
-                        });
-                      });
-                    }
-                  },
+                  next: () => this.analyseEnFond(),
                 });
               },
             });
@@ -2191,6 +2257,9 @@ export class WizardComponent implements OnInit, OnDestroy {
         }
 
         this.addingDomain.set(false);
+        // Même traitement qu'après une recherche : la qualité du nom est la
+        // première ligne de la carte, elle ne doit pas y rester en attente.
+        this.analyseEnFond();
         this.cdr.detectChanges();
       },
       error: () => {

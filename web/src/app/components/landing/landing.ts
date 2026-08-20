@@ -1,5 +1,5 @@
 import { Component, signal, inject } from '@angular/core';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { applyContentSeo } from '../content/content-seo';
 
@@ -60,7 +60,6 @@ import { applyContentSeo } from '../content/content-seo';
 
             <div class="nm-cta-row">
               <a routerLink="/app" class="nm-btn nm-btn--accent">{{ 'HOME.CTA_PRIMARY' | translate }}</a>
-              <a routerLink="/verifier-disponibilite-nom-de-marque" class="nm-btn nm-btn--ghost">{{ 'HOME.CTA_SECONDARY' | translate }}</a>
             </div>
 
             <ul class="nm-mentions">
@@ -192,6 +191,25 @@ import { applyContentSeo } from '../content/content-seo';
           <!-- Ce qui n'est pas un contrôle mais compte quand même : dit en une
                ligne, sous la grille, plutôt que déguisé en quatrième carte. -->
           <p class="nm-section__note">{{ 'HOME.CONTROLS_NOTE' | translate }}</p>
+
+          <!-- L'appel à l'action ICI, et pas dans le héros.
+               Le héros s'adresse à qui cherche un nom ; ce visiteur-là en a
+               déjà un, et vient de lire pourquoi le .com libre ne suffit pas.
+               C'est le moment exact où la question « et le mien ? » se pose —
+               la poser trois écrans plus haut, avant l'argument, n'aurait
+               répondu qu'à ceux qui la portaient déjà. -->
+          <form class="nm-test" (submit)="testerNom($event)">
+            <h3 class="nm-test__title">{{ 'HOME.HAVE_NAME_TITLE' | translate }}</h3>
+            <p class="nm-test__lead">{{ 'HOME.HAVE_NAME_LEAD' | translate }}</p>
+            <div class="nm-test__row">
+              <label class="sr-only" for="nm-test-input">{{ 'HOME.HAVE_NAME_PLACEHOLDER' | translate }}</label>
+              <input id="nm-test-input" name="nom" type="text" autocomplete="off"
+                     [placeholder]="'HOME.HAVE_NAME_PLACEHOLDER' | translate">
+              <button type="submit" class="nm-btn nm-btn--accent nm-test__btn">
+                {{ 'HOME.HAVE_NAME_BTN' | translate }}
+              </button>
+            </div>
+          </form>
         </section>
 
         <!-- Comparatif -->
@@ -271,6 +289,7 @@ import { applyContentSeo } from '../content/content-seo';
 export class LandingComponent {
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   /** Langue de la page, tirée de l'URL : « /en » → en, sinon fr. */
   readonly lang: 'fr' | 'en' = this.route.snapshot.routeConfig?.path === 'en' ? 'en' : 'fr';
@@ -333,6 +352,22 @@ export class LandingComponent {
     { n: 3, label: 'HOME.STEP_3_DOMAINS' },
     { n: 4, label: 'WIZARD.STEPS.BRAND' },
   ];
+
+  /**
+   * Envoie le nom saisi vers l'application, qui fera le reste.
+   *
+   * L'accueil ne contrôle rien lui-même : il ne sait pas si le visiteur est
+   * connecté, et un aperçu affiché ici obligerait à redemander le nom juste
+   * après. Le wizard, lui, crée le projet, ajoute le nom et affiche le verdict
+   * — et s'occupe de la connexion si elle manque.
+   */
+  testerNom(event: Event): void {
+    event.preventDefault();
+    const champ = (event.target as HTMLFormElement).elements.namedItem('nom') as HTMLInputElement | null;
+    const nom = (champ?.value ?? '').trim();
+    if (!nom) return;
+    void this.router.navigate(['/app'], { queryParams: { nom } });
+  }
 
   /** Listes courtes stockées en une clé, séparées par « | » — évite 20 clés de plus. */
   chips(key: string): string[] {

@@ -587,3 +587,57 @@
   font-style: normal;
   font-weight: 400;
 }
+
+/* ─── « J'ai déjà un nom » ───────────────────────────────────────────────────
+   Posé sous les trois contrôles, là où l'argument vient d'être fait. Traité
+   comme un encart et non comme un bouton perdu : ce visiteur-là n'est pas de
+   passage, il vient chercher un verdict. */
+.nm-test {
+  margin-top: var(--nm-gap-cards);
+  padding: 20px 22px;
+  border: 1px solid var(--nm-accent-border-light);
+  border-radius: var(--nm-radius-md);
+  background: var(--nm-accent-surface-light);
+}
+
+.nm-test__title {
+  margin: 0 0 4px;
+  font-family: var(--nm-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--nm-text-light);
+}
+
+.nm-test__lead {
+  margin: 0 0 14px;
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-light-2);
+}
+
+.nm-test__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nm-test__row input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  min-height: var(--nm-touch-cta);
+  padding: 0 16px;
+  border: 1px solid var(--nm-border-light-2);
+  border-radius: var(--nm-radius-md);
+  background: var(--nm-surface-light);
+  color: var(--nm-text-light);
+  font-family: var(--nm-font-body);
+  font-size: 16px;
+}
+
+.nm-test__row input:focus-visible {
+  outline: 2px solid var(--nm-accent-text-light);
+  outline-offset: 1px;
+}
+
+.nm-test__btn {
+  flex: none;
+}

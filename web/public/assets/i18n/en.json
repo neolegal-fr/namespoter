@@ -361,7 +361,10 @@
       "REPORT_SHARE_KO": "Sending failed",
       "DEBITED_NAMES": "{{total}} credits charged — 1 for each of the {{noms}} names suggested",
       "DEBITED_MIXED": "{{total}} credits charged — 1 for each of the {{noms}} names suggested, {{tarif}} for each of the {{verifs}} trademark and social checks",
-      "GRID_FILTER_REJECTED": "Rejected"
+      "GRID_FILTER_REJECTED": "Rejected",
+      "CHECKING": "Checking availability…",
+      "PIVOT": "This name does not work for you?",
+      "PIVOT_CTA": "Describe your project and the AI will suggest others"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -423,7 +426,7 @@
     "HTML_LANG": "en",
     "META_TITLE": "Namorama — Find a brand name that is genuinely free",
     "META_DESC": "Brand name generator with real checks: domain, social handles, and INPI / EUIPO trademark prior-art. 100 free credits every month, no subscription.",
-    "PILL": "Registries, INPI and social networks queried live",
+    "PILL": "Domains, registered trademarks and social handles checked live",
     "H1_A": "Find a",
     "H1_W1": "product",
     "H1_W2": "brand",
@@ -498,6 +501,10 @@
     "DEMO_REPORT_TM": "Trademarks",
     "DEMO_REPORT_SCORE": "Name quality",
     "DEMO_TM_NONE": "no identical filing",
-    "STEP_3_DOMAINS": "Domains"
+    "STEP_3_DOMAINS": "Domains",
+    "HAVE_NAME_TITLE": "Already have a name in mind?",
+    "HAVE_NAME_LEAD": "Test it now: domains and the name analysis are free, the prior-art search unlocks afterwards.",
+    "HAVE_NAME_PLACEHOLDER": "The name you have in mind",
+    "HAVE_NAME_BTN": "Check this name"
   }
 }
