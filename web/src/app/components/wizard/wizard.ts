@@ -895,6 +895,11 @@ export class WizardComponent implements OnInit, OnDestroy {
       .full(name, {
         emails,
         force,
+        // Les extensions DEMANDÉES, et non la liste par défaut du serveur : le
+        // rapport annonçait la disponibilité de .io, .net et .app à qui n'avait
+        // demandé que .fr et .com — trois verdicts sans objet, et trois lignes
+        // qui font douter du reste.
+        extensions: this.selectedExtensions().map((e) => e.replace(/^\./, '')),
         context: { description: ctx.description, audience: ctx.constraints.map((c) => ({ label: this.translate.instant(c.label), value: c.value })) },
       })
       .pipe(timeout(90000))

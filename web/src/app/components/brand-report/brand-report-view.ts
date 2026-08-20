@@ -37,6 +37,10 @@ import { SafeHtml } from '@angular/platform-browser';
             <p class="rv-overline">
               {{ 'WIZARD.STEP3.REPORT_CTA' | translate }}
               @if (r.generatedAt) { · {{ r.generatedAt | date: 'd MMMM y, HH:mm' }} }
+              <!-- Réactualiser se demande EN LISANT la date : c'est elle qui
+                   fait douter de la fraîcheur, pas un bouton en pied de page.
+                   Gratuit — la mise à jour ne redébite rien. -->
+              <ng-content select="[refresh]"></ng-content>
             </p>
             <h2 class="rv-name">{{ r.name }}</h2>
           </div>
@@ -138,19 +142,6 @@ import { SafeHtml } from '@angular/platform-browser';
           <div class="rv-section__head">
             <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_DOMAINS' | translate }}</h3>
             <span class="rv-section__meta">
-              <!-- Le bureau d'enregistrement se choisit : cinq étaient déjà
-                   câblés dans le produit, le rapport n'en proposait qu'un.
-                   « rv-noprint » : réserver n'a aucun sens sur un papier. -->
-              @if (REGISTRARS.length > 1) {
-                <label class="rv-registrar rv-noprint">
-                  <span class="sr-only">{{ 'WIZARD.STEP3.REPORT_REGISTRAR' | translate }}</span>
-                  <select [value]="registrar()" (change)="setRegistrar($any($event.target).value)">
-                    @for (reg of REGISTRARS; track reg.label; let i = $index) {
-                      <option [value]="i">{{ reg.label }}</option>
-                    }
-                  </select>
-                </label>
-              }
               RDAP@if (r.generatedAt) { · {{ r.generatedAt | date: 'HH:mm:ss' }} }
             </span>
           </div>
@@ -158,9 +149,23 @@ import { SafeHtml } from '@angular/platform-browser';
             <div class="rv-row">
               <span class="rv-row__label">{{ d.domain }}</span>
               @if (d.status === 'free') {
-                <a class="rv-link" [href]="reserveUrl(r.name, d.extension, registrar())" target="_blank" rel="noopener noreferrer">
-                  <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
-                </a>
+                <!-- Le bureau se choisit SUR le bouton, pas dans un réglage à
+                     part : au moment de réserver, la question « chez qui ? » est
+                     la même que « je réserve ». Le choix est mémorisé, donc on
+                     ne le repose pas à chaque ligne. -->
+                <span class="rv-reserve rv-noprint">
+                  <a class="rv-link" [href]="reserveUrl(r.name, d.extension, registrar())" target="_blank" rel="noopener noreferrer">
+                    <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
+                  </a>
+                  <label class="rv-reserve__who">
+                    <span class="sr-only">{{ 'WIZARD.STEP3.REPORT_REGISTRAR' | translate }}</span>
+                    <select [value]="registrar()" (change)="setRegistrar($any($event.target).value)">
+                      @for (reg of REGISTRARS; track reg.label; let i = $index) {
+                        <option [value]="i">{{ reg.label }}</option>
+                      }
+                    </select>
+                  </label>
+                </span>
               }
               <span class="rv-badge" [class]="'rv-badge--' + badgeTone(d.status)">
                 {{ statusKey(d.status) | translate }}

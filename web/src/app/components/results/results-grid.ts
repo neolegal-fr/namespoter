@@ -107,55 +107,22 @@ interface ExtVerdict {
             </div>
           </header>
 
-          <!-- Badge de synthèse : ce qui rend plusieurs noms vérifiés
-               comparables d'un coup d'œil dans la grille. -->
-          <!-- Badge de synthèse SOUS le nom, à gauche : il ne partage plus
-               d'emplacement avec le coût. Deux informations de nature
-               différente au même endroit se lisent l'une pour l'autre. -->
-          <!-- Présent dans LES DEUX états, à la même place : sans lui, les
-               cartes vérifiées commençaient leur liste 50 px plus bas que les
-               autres, et deux cartes voisines ne se lisaient plus ligne à
-               ligne. Non vérifié, il dit qu'il n'y a pas encore de synthèse —
-               ce qui est une information, pas un vide. -->
-          @if (summaryOf(d); as sum) {
-            <p class="rg-synth" [class]="'rg-synth--' + synthTone(sum)">{{ synthKey(sum) | translate:{ n: blockerCount(sum) } }}</p>
-          } @else {
-            <p class="rg-synth rg-synth--none">{{ 'WIZARD.STEP3.GRID_UNVERIFIED' | translate }}</p>
-          }
-
+          <!-- Plus de pastille de synthèse.
+               « à surveiller », « 3 obstacles » : l'utilisateur ne sait pas
+               d'où sort le chiffre ni ce qu'il recouvre, et la carte le lui dit
+               déjà ligne par ligne, en nommant chaque source. Un résumé qu'on
+               ne peut pas vérifier d'un coup d'œil n'aide pas à décider. -->
           <!--
-            Règle d'alignement : les six lignes existent dans LES DEUX états, au
-            même endroit et dans le même ordre. Seule la colonne de droite
-            change — de « non vérifié » au verdict réel. Rien ne se déplace après
-            l'achat, ce qui rend comparables un nom vérifié et un nom qui ne
-            l'est pas.
+            Règle d'alignement : toutes les lignes existent dans LES DEUX
+            états, au même endroit et dans le même ordre. Seule la colonne de
+            droite change — de « non vérifié » au verdict réel. Rien ne se
+            déplace après l'achat, ce qui rend comparables un nom vérifié et un
+            nom qui ne l'est pas.
           -->
+          <!-- La QUALITÉ d'abord : c'est ce que l'outil apporte et que les
+               registrars ne donnent pas. La disponibilité vient ensuite — elle
+               ne vaut d'être lue que si le nom, lui, vaut quelque chose. -->
           <ul class="rg-rows">
-            @for (v of verdicts(d); track v.ext) {
-              <li class="rg-row">
-                <span class="rg-row__label">{{ v.domain }}</span>
-                @switch (v.key) {
-                  @case ('pending') {
-                    <span class="rg-row__value rg-row__value--pending">
-                      <i class="pi pi-spin pi-spinner"></i> {{ 'WIZARD.STEP3.GRID_CHECKING' | translate }}
-                    </span>
-                  }
-                  @default {
-                    <span class="rg-row__value" [class]="'rg-v--' + v.key">{{ stateLabel(v.key) | translate }}</span>
-                  }
-                }
-              </li>
-            }
-
-            <!--
-              L'analyse est une LIGNE LIBELLÉE, présente sur TOUTES les cartes.
-              Sans libellé, on lit les étoiles comme une note de disponibilité
-              ou un avis d'autres utilisateurs. Et une ligne qui n'existe que
-              sur certaines cartes décale les suivantes : les noms cessent
-              d'être comparables, ce qui est l'objet même de cet écran.
-              Pas encore calculée : un tiret. JAMAIS cinq étoiles vides, qui se
-              lisent comme une note nulle.
-            -->
             <li class="rg-row rg-row--analysis">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
               @if (d.analysisPending) {
@@ -182,6 +149,34 @@ interface ExtVerdict {
                 </button>
               }
             </li>
+          </ul>
+
+          <ul class="rg-rows">
+            @for (v of verdicts(d); track v.ext) {
+              <li class="rg-row">
+                <span class="rg-row__label">{{ v.domain }}</span>
+                @switch (v.key) {
+                  @case ('pending') {
+                    <span class="rg-row__value rg-row__value--pending">
+                      <i class="pi pi-spin pi-spinner"></i> {{ 'WIZARD.STEP3.GRID_CHECKING' | translate }}
+                    </span>
+                  }
+                  @default {
+                    <span class="rg-row__value" [class]="'rg-v--' + v.key">{{ stateLabel(v.key) | translate }}</span>
+                  }
+                }
+              </li>
+            }
+
+            <!--
+              L'analyse est une LIGNE LIBELLÉE, présente sur TOUTES les cartes.
+              Sans libellé, on lit les étoiles comme une note de disponibilité
+              ou un avis d'autres utilisateurs. Et une ligne qui n'existe que
+              sur certaines cartes décale les suivantes : les noms cessent
+              d'être comparables, ce qui est l'objet même de cet écran.
+              Pas encore calculée : un tiret. JAMAIS cinq étoiles vides, qui se
+              lisent comme une note nulle.
+            -->
           </ul>
 
           @if (expandedAnalysisId() === d.id && d.analysis) {

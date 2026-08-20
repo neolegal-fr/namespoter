@@ -371,3 +371,115 @@
     flex-wrap: wrap;
     justify-content: flex-end;
 }
+
+/* Réactualiser, dans la ligne de date : icône seule, poids d'une note. */
+.rv-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: 0.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nm-radius-pill);
+    background: none;
+    color: var(--nm-app-accent);
+    cursor: pointer;
+    vertical-align: -6px;
+}
+
+.rv-refresh:hover { background: var(--nm-app-accent-surface); }
+.rv-refresh .pi { font-size: 0.72rem; }
+
+/* Réserver + chez qui : un seul geste, deux éléments accolés. */
+.rv-reserve {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.rv-reserve__who select {
+    padding: 2px 4px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-xs);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text-2);
+    font: inherit;
+    font-size: var(--nm-text-overline);
+}
+
+/* ═══ Impression ═══════════════════════════════════════════════════════════
+ *
+ * L'objectif est un document qu'on peut joindre à un dossier, pas une capture
+ * d'écran allongée. Trois choses le décident, et aucune n'est décorative :
+ *
+ *   — ce qui n'a pas de sens sur papier disparaît (réserver, choisir un
+ *     bureau, réactualiser, partager) ;
+ *   — aucune section ne se coupe entre deux pages : un verdict de marque à
+ *     cheval sur une pliure se lit de travers, et un titre orphelin en bas de
+ *     page fait croire à une fin de document ;
+ *   — les couleurs de fond ne sont pas garanties à l'impression (les
+ *     navigateurs les suppriment par défaut), donc chaque pastille reçoit une
+ *     bordure : sans elle, « libre » et « pris » sortent identiques en gris.
+ */
+@media print {
+    .rv {
+        border: 0;
+        box-shadow: none;
+        background: #fff;
+    }
+
+    .rv-head {
+        padding: 0 0 12px;
+        border-bottom: 2px solid #2c3532;
+    }
+
+    .rv-name { font-size: 26pt; }
+
+    /* Jamais de section à cheval sur une pliure, jamais de titre orphelin. */
+    .rv-section {
+        padding: 12px 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .rv-section__title,
+    .rv-section__head {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .rv-row,
+    .rv-criterion,
+    .rv-hits li {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Les aplats ne survivent pas à l'impression : la bordure porte l'état. */
+    .rv-badge,
+    .nm-verdict {
+        border: 1px solid currentColor;
+        background: transparent !important;
+        font-weight: 600;
+    }
+
+    /* Une URL imprimée doit être lisible : le lien perd son intérêt sur papier,
+       mais son adresse, elle, reste utile pour les notices de marque. */
+    .rv-hits a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #5c6663;
+        word-break: break-all;
+    }
+
+    .rv-foot {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Réactualiser est une ACTION : elle n'a pas de sens sur un papier. */
+    .rv-refresh,
+    .rv-cta { display: none; }
+}

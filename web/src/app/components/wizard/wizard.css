@@ -779,3 +779,30 @@
     flex-wrap: wrap;
     margin-bottom: 1.25rem;
 }
+
+
+/* ═══ Impression du rapport ════════════════════════════════════════════════
+   Les règles qui concernent le CHROME de la page (barre, pied de site) vivent
+   dans styles.css : elles visent des éléments hors de cette vue, que
+   l'encapsulation de composant ne peut pas atteindre. Ici, seulement ce qui
+   appartient au wizard. */
+@media print {
+    .report-page__bar,
+    .report-back,
+    .report-actions,
+    /* Le nom du projet, répété au-dessus du nom du rapport : deux titres
+       différents en tête de document, dont un qui ne le concerne pas. */
+    .wizard-project-title {
+        display: none !important;
+    }
+
+    .report-page {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .wizard-shell {
+        max-width: none;
+    }
+}

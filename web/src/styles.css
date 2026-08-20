@@ -650,3 +650,32 @@ body {
     color: var(--nm-app-accent);
     font-weight: 600;
 }
+
+
+/* ═══ Impression ═══════════════════════════════════════════════════════════
+ *
+ * Ce qu'on imprime est un DOCUMENT, pas une capture d'écran de l'application.
+ * Le chrome disparaît donc : barre de navigation, pied de site, notifications.
+ * Un rapport joint à un dossier ne commence pas par un menu.
+ *
+ * `@page` fixe les marges et neutralise les en-têtes du navigateur (URL, date,
+ * pagination), qui doublonneraient avec ceux du document.
+ */
+@page {
+    size: A4;
+    margin: 16mm 14mm;
+}
+
+@media print {
+    .p-menubar,
+    .p-toast,
+    .p-drawer-mask,
+    body > footer,
+    footer.mt-8 {
+        display: none !important;
+    }
+
+    html, body {
+        background: #fff !important;
+    }
+}

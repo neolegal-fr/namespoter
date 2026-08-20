@@ -887,6 +887,13 @@
           lui appartiennent (partage, actualisation, envoi par e-mail).
         -->
         <app-brand-report-view [report]="report" [context]="reportContext()">
+          <button refresh type="button" class="rv-refresh"
+                  *ngIf="!isSampleReport()"
+                  [attr.title]="'WIZARD.STEP3.GRID_REFRESH' | translate"
+                  [attr.aria-label]="'WIZARD.STEP3.GRID_REFRESH' | translate"
+                  (click)="refreshBrandReport(report.name)">
+            <i class="pi pi-refresh" aria-hidden="true"></i>
+          </button>
           <span actions *ngIf="!isSampleReport()" class="rv-actions">
             <button type="button" class="nm-btn-tertiary" (click)="printReport()">
               <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
