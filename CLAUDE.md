@@ -68,24 +68,29 @@ Les scripts SQL à appliquer vivent dans `api/migrations/`, datés, idempotents
 (`ADD COLUMN IF NOT EXISTS`), avec la commande d'application et le retour arrière en
 en-tête. **Ordre impératif : appliquer le SQL avant de déployer l'image qui en dépend.**
 
-### Rapport approfondi offert mensuel
+### Tarification du rapport de marque
 
-Chaque compte a droit à **un rapport approfondi gratuit par mois calendaire**,
-indépendamment du solde. Le premier rapport du mois ne débite rien ; les suivants coûtent
-`BRAND_REPORT_COST`. Non cumulable : un droit non utilisé est perdu à la fin du mois.
+Une règle, une seule : **un rapport coûte `BRAND_REPORT_COST` crédits**. Les 100 crédits
+offerts chaque mois couvrent environ 50 suggestions de domaines et un rapport — de quoi
+essayer le produit sans mécanique supplémentaire à expliquer.
 
-- La bascule est **calculée à la lecture** (`UsersService.isFreeReportAvailable`), pas par
-  une tâche planifiée — même principe que `lastFreeReset` pour les crédits.
-- La consommation se fait **sous verrou pessimiste, dans la transaction** de génération
-  (`consumeFreeReport`) : deux requêtes simultanées ne peuvent pas obtenir chacune le
-  rapport offert.
+Le **rapport offert mensuel a été retiré** (20/08/2026). Il demandait une comptabilité
+parallèle : période de référence, horodatage de consommation, verrou pessimiste pour
+éviter qu'une double requête n'obtienne deux gratuités, coût réel mémorisé sur chaque
+enregistrement, et un champ `freeThisMonth` que le front devait interroger avant
+d'afficher un prix. Tout cela pour un avantage que le solde mensuel accordait déjà.
+
+Ce qui subsiste et reste utile :
+
+- `brand_report_record.costCredits` porte le débit **réel** — 0 sur une actualisation,
+  déjà payée une fois. L'historique reste juste après un changement de tarif.
+- Les colonnes `user.freeReportPeriod` et `user.freeReportUsedAt` restent en base, inertes :
+  les supprimer imposerait une migration destructive en production pour deux champs que
+  plus rien ne lit.
 - `GET /brand-report/offer?name=` décrit l'offre sans verdict : `deepReport.purchased`,
-  `priceCredits`, `freeThisMonth`, `account.credits`. Le front ne devine rien.
-- `brand_report_record.costCredits` porte le débit **réel** (0 si offert) : l'historique
-  reste juste après un changement de tarif, et `analyze-logs.py rapports` somme les `cost`
-  portés par les événements.
-- Côté front : confirmation explicite quand 50 crédits partent vraiment, **aucune** quand
-  le rapport est offert — la friction n'y a aucune valeur.
+  `priceCredits`, `account.credits`.
+- La confirmation avant débit est **inconditionnelle** : 50 crédits, la moitié de la
+  réserve mensuelle, partent en un clic.
 
 ### Système de crédits
 - 1 suggestion de domaine = 1 crédit

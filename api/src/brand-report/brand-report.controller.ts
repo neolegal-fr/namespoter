@@ -123,7 +123,6 @@ export class BrandReportController {
       deepReport: {
         purchased,
         priceCredits: BRAND_REPORT_COST,
-        freeThisMonth: this.usersService.isFreeReportAvailable(user),
       },
       account: { credits: user.totalCredits },
     };
@@ -189,11 +188,12 @@ export class BrandReportController {
       return { ...cached, remainingCredits: user.totalCredits, emailed: false, cached: true };
     }
 
-    // Le droit au rapport offert dispense du solde : on ne bloque faute de
-    // crédits que s'il est déjà consommé ce mois-ci. Lecture indicative ici ;
-    // la décision définitive se prend sous verrou, dans la transaction.
-    const freeLikely = this.usersService.isFreeReportAvailable(user);
-    if (!isRefresh && !freeLikely && user.totalCredits < BRAND_REPORT_COST) {
+    // Une règle, une seule : un rapport coûte son tarif. Le rapport offert
+    // mensuel a été retiré — il demandait une comptabilité parallèle (période
+    // de référence, horodatage, verrou pessimiste, coût réel mémorisé) pour
+    // une gratuité que les 100 crédits mensuels couvrent déjà : 50 suggestions
+    // et un rapport, sans mécanique supplémentaire à expliquer ni à déboguer.
+    if (!isRefresh && user.totalCredits < BRAND_REPORT_COST) {
       this.events.event('brand_report_blocked_no_credits', { sub: keycloakUser.sub, cost: BRAND_REPORT_COST });
       throw new ForbiddenException('Crédits insuffisants');
     }
@@ -216,27 +216,17 @@ export class BrandReportController {
       throw e;
     }
 
-    // Consommer le droit gratuit OU débiter le tarif plein — jamais les deux,
-    // et la décision se prend sous verrou : `consumeFreeReport` pose un verrou
-    // pessimiste sur la ligne utilisateur, donc deux requêtes simultanées ne
-    // peuvent pas obtenir chacune le rapport offert.
+    // Débit du tarif plein, sauf rafraîchissement — déjà payé une fois.
     let remainingCredits = user.totalCredits;
-    let costCharged = BRAND_REPORT_COST;
-    if (isRefresh) {
-      // Déjà payé une fois : ni crédit débité, ni droit gratuit consommé.
-      costCharged = 0;
-    } else
-    await this.dataSource.transaction(async (manager) => {
-      const free = await this.usersService.consumeFreeReport(keycloakUser.sub, manager);
-      if (free) {
-        costCharged = 0;
-        return;
-      }
-      const newTotal = await this.usersService.decrementCredits(keycloakUser.sub, BRAND_REPORT_COST, manager);
-      // -1 = crédits devenus insuffisants entre-temps : on annule (rollback).
-      if (newTotal < 0) throw new ForbiddenException('Crédits insuffisants');
-      remainingCredits = newTotal;
-    });
+    let costCharged = isRefresh ? 0 : BRAND_REPORT_COST;
+    if (!isRefresh) {
+      await this.dataSource.transaction(async (manager) => {
+        const newTotal = await this.usersService.decrementCredits(keycloakUser.sub, BRAND_REPORT_COST, manager);
+        // -1 = crédits devenus insuffisants entre-temps : on annule (rollback).
+        if (newTotal < 0) throw new ForbiddenException('Crédits insuffisants');
+        remainingCredits = newTotal;
+      });
+    }
 
     // Mémoriser, avec le coût RÉELLEMENT débité, pour éviter tout re-débit
     // ultérieur et garder un historique juste même si le tarif change.

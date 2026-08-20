@@ -433,21 +433,52 @@
 .rv-refresh:hover { background: var(--nm-app-accent-surface); }
 .rv-refresh .pi { font-size: 0.72rem; }
 
-/* Réserver + chez qui : un seul geste, deux éléments accolés. */
+/* « Réserver chez X » : UN contrôle, pas deux.
+ *
+ * Le lien et le sélecteur étaient côte à côte mais séparés — on lisait deux
+ * commandes indépendantes, et le choix du bureau passait pour un réglage sans
+ * rapport. Accolés en un bloc bordé, avec un séparateur interne, ils se lisent
+ * comme un bouton à menu : l'action à gauche, chez qui à droite. */
 .rv-reserve {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-sm);
+    overflow: hidden;
+    background: var(--nm-app-surface);
+}
+
+.rv-reserve .rv-link {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    padding: 5px 10px;
+    white-space: nowrap;
+}
+
+.rv-reserve .rv-link:hover {
+    background: var(--nm-app-accent-surface);
+}
+
+.rv-reserve__who {
+    display: inline-flex;
+    align-items: stretch;
+    border-left: 1px solid var(--nm-app-border);
 }
 
 .rv-reserve__who select {
-    padding: 2px 4px;
-    border: 1px solid var(--nm-app-border);
-    border-radius: var(--nm-radius-xs);
-    background: var(--nm-app-surface);
+    padding: 0 1.4rem 0 0.5rem;
+    border: 0;
+    background: transparent;
     color: var(--nm-app-text-2);
     font: inherit;
-    font-size: var(--nm-text-overline);
+    font-size: var(--nm-text-ui-sm);
+    cursor: pointer;
+}
+
+.rv-reserve__who select:hover {
+    background: var(--nm-app-surface-alt);
+    color: var(--nm-app-text);
 }
 
 /* ═══ Impression ═══════════════════════════════════════════════════════════

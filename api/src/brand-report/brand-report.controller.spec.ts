@@ -159,101 +159,49 @@ describe('BrandReportController — traçage des demandes', () => {
  * débiterait un rapport dû), ni être servi deux fois (on offrirait 50 crédits
  * de trop), ni dispenser un second rapport du tarif plein.
  */
-describe('BrandReportController — rapport offert mensuel', () => {
-  const dto = { name: 'Qonto' } as any;
-  const user = { sub: 'kc-123', email: 'me@example.com' };
-
-  function make(opts: { totalCredits: number; freeAvailable: boolean; purchased?: boolean }) {
-    const generate = jest.fn().mockResolvedValue({ name: 'Qonto', score: 80 });
-    const decrementCredits = jest.fn().mockResolvedValue(opts.totalCredits - BRAND_REPORT_COST);
-    const findOrCreate = jest.fn().mockResolvedValue({ totalCredits: opts.totalCredits });
-    const isFreeReportAvailable = jest.fn().mockReturnValue(opts.freeAvailable);
-    let freeLeft = opts.freeAvailable;
-    const consumeFreeReport = jest.fn().mockImplementation(async () => {
-      if (!freeLeft) return false;
-      freeLeft = false;
-      return true;
-    });
-    const event = jest.fn();
-    const save = jest.fn().mockResolvedValue(undefined);
-    const find = jest.fn().mockResolvedValue(opts.purchased ? { name: 'Qonto', score: 80 } : null);
-    const ctrl = new BrandReportController(
-      { generate } as any,
-      { find, save } as any,
-      { sendReport: jest.fn().mockResolvedValue(true) } as any,
-      { findOrCreate, decrementCredits, isFreeReportAvailable, consumeFreeReport } as any,
-      { transaction: (cb: any) => cb({}) } as any,
-      { event } as any,
-    );
-    return { ctrl, generate, decrementCredits, consumeFreeReport, event, save };
-  }
-
-  it('le premier rapport du mois est offert : aucun débit, coût enregistré à 0', async () => {
-    const { ctrl, decrementCredits, save, event } = make({ totalCredits: 100, freeAvailable: true });
-    const res: any = await ctrl.full(dto, user);
-    expect(decrementCredits).not.toHaveBeenCalled();
-    expect(save).toHaveBeenCalledWith('kc-123', 'Qonto', expect.any(Object), 0);
-    expect(res.costCredits).toBe(0);
-    expect(res.remainingCredits).toBe(100);
-    expect(event).toHaveBeenCalledWith('brand_report_generated', expect.objectContaining({ cost: 0, free: true }));
-  });
-
-  it('le droit dispense du solde : un compte à 0 crédit obtient son rapport offert', async () => {
-    const { ctrl, decrementCredits, event } = make({ totalCredits: 0, freeAvailable: true });
-    await expect(ctrl.full(dto, user)).resolves.toBeDefined();
-    expect(decrementCredits).not.toHaveBeenCalled();
-    expect(event).not.toHaveBeenCalledWith('brand_report_blocked_no_credits', expect.any(Object));
-  });
-
-  it('le second rapport du mois est débité au tarif plein, avec le coût enregistré', async () => {
-    const { ctrl, decrementCredits, save, consumeFreeReport } = make({ totalCredits: 100, freeAvailable: true });
-    await ctrl.full(dto, user);                         // consomme le droit
-    await ctrl.full({ name: 'Autre' } as any, user);    // second nom, même mois
-    expect(consumeFreeReport).toHaveBeenCalledTimes(2);
-    expect(decrementCredits).toHaveBeenCalledTimes(1);
-    expect(decrementCredits).toHaveBeenCalledWith('kc-123', BRAND_REPORT_COST, expect.anything());
-    expect(save).toHaveBeenLastCalledWith('kc-123', 'Autre', expect.any(Object), BRAND_REPORT_COST);
-  });
-
-  it('droit consommé ET solde insuffisant : bloqué, rien généré', async () => {
-    const { ctrl, generate } = make({ totalCredits: 10, freeAvailable: false });
-    await expect(ctrl.full(dto, user)).rejects.toBeInstanceOf(ForbiddenException);
-    expect(generate).not.toHaveBeenCalled();
-  });
-
-  it('un rapport déjà acheté est renvoyé sans consommer le droit ni débiter', async () => {
-    const { ctrl, consumeFreeReport, decrementCredits } = make({ totalCredits: 100, freeAvailable: true, purchased: true });
-    const res: any = await ctrl.full(dto, user);
-    expect(res.cached).toBe(true);
-    expect(consumeFreeReport).not.toHaveBeenCalled();
-    expect(decrementCredits).not.toHaveBeenCalled();
-  });
-
-  /**
-   * Contrat d'API du handoff : avant achat, la réponse ne contient AUCUN champ
-   * de verdict — ni domaines, ni marque, ni réseaux, ni score, ni compteur.
-   * C'est ce qui rend le paywall non contournable depuis le navigateur.
+describe('BrandReportController — une règle unique de tarification', () => {
+  /*
+   * Le rapport offert mensuel a été retiré. Ces tests verrouillent ce qui le
+   * remplace : un tarif, toujours le même, et aucune comptabilité parallèle.
    */
-  it('GET /offer ne fuit aucun verdict et décrit exactement l\'offre', async () => {
-    const { ctrl } = make({ totalCredits: 73, freeAvailable: true, purchased: false });
-    const res: any = await ctrl.offer('Qonto', user);
-    expect(res).toEqual({
-      deepReport: { purchased: false, priceCredits: BRAND_REPORT_COST, freeThisMonth: true },
-      account: { credits: 73 },
-    });
-    for (const k of ['domains', 'socials', 'trademark', 'score', 'quality', 'report', 'hits']) {
-      expect(JSON.stringify(res)).not.toContain(`"${k}"`);
-    }
+  const faire = (credits: number) => {
+    const decrement = jest.fn().mockResolvedValue(credits - 50);
+    const save = jest.fn().mockResolvedValue(undefined);
+    const users: any = {
+      findOrCreate: jest.fn().mockResolvedValue({ totalCredits: credits, email: 'a@b.c' }),
+      decrementCredits: decrement,
+    };
+    const controller: any = new BrandReportController(
+      { generate: jest.fn().mockResolvedValue({ name: 'qonto', score: 70, domains: [], socials: [], trademark: {} }) } as any,
+      { find: jest.fn().mockResolvedValue(null), save } as any,
+      { sendReport: jest.fn().mockResolvedValue(true) } as any,
+      users,
+      { transaction: (cb: any) => cb({}) } as any,
+      { event: jest.fn(), warn: jest.fn() } as any,
+    );
+    return { controller, decrement, save, users };
+  };
+
+  it('débite le tarif plein, dès le premier rapport du mois', async () => {
+    const { controller, decrement, save } = faire(100);
+    await controller.full({ name: 'qonto' }, { sub: 'u1', email: 'a@b.c' });
+    expect(decrement).toHaveBeenCalledWith('u1', 50, expect.anything());
+    expect(save.mock.calls[0][3]).toBe(50);
+  });
+
+  it("refuse quand le solde ne couvre pas le tarif — plus aucune gratuité n'en dispense", async () => {
+    const { controller, decrement } = faire(0);
+    await expect(controller.full({ name: 'qonto' }, { sub: 'u1' })).rejects.toThrow('Crédits insuffisants');
+    expect(decrement).not.toHaveBeenCalled();
+  });
+
+  it('ne consulte aucun droit gratuit : la méthode a disparu du service', () => {
+    const { users } = faire(100);
+    expect((users as any).consumeFreeReport).toBeUndefined();
+    expect((users as any).isFreeReportAvailable).toBeUndefined();
   });
 });
 
-/**
- * Rafraîchissement gratuit et sans limite de temps (décision produit).
- *
- * Ces tests protègent les deux sens : ne jamais refacturer une mise à jour,
- * et ne jamais laisser un rafraîchissement écraser le coût d'origine — sinon
- * un rapport payé 50 crédits deviendrait un rapport à 0 dans l'historique.
- */
 describe('BrandReportController — rafraîchissement gratuit', () => {
   const user = { sub: 'kc-123', email: 'me@example.com' };
   const vieux = new Date(Date.now() - 48 * 3600 * 1000).toISOString();

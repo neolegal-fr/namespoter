@@ -86,7 +86,7 @@ export interface BrandReport {
   emailed?: boolean;
   /** true = rapport déjà généré, renvoyé sans nouveau débit. */
   cached?: boolean;
-  /** Crédits réellement débités : 0 si le rapport offert du mois a été consommé. */
+  /** Crédits réellement débités — 0 sur une actualisation, déjà payée. */
   costCredits?: number;
 }
 
@@ -98,8 +98,6 @@ export interface BrandReportOffer {
   deepReport: {
     purchased: boolean;
     priceCredits: number;
-    /** Le rapport offert du mois calendaire est-il encore disponible ? */
-    freeThisMonth: boolean;
   };
   account: { credits: number };
 }
@@ -117,7 +115,7 @@ export interface BrandReportSummary {
   euipoHits: boolean;
   socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
   score: number | null;
-  /** Crédits réellement débités : 0 si le rapport offert du mois a servi. */
+  /** Crédits réellement débités au moment de l'achat. */
   costCredits: number | null;
 }
 

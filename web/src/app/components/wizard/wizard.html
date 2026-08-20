@@ -763,14 +763,10 @@
         <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_REFRESH' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_REFRESH_D' | translate }}</span></li>
       </ul>
 
-      <!-- « Offert ce mois-ci » d'abord, le tarif ensuite : c'est l'argument
-           qui se perdrait totalement sur un bouton de carte. -->
+      <!-- Le tarif en pied, après le contexte : sur un bouton de carte, il
+           arrête avant d'avoir expliqué ce qu'on achète. -->
       <div class="vd-foot">
-        @if (reportIsFree()) {
-          <p class="vd-price"><strong>{{ 'WIZARD.STEP3.VERIFY_FREE_FOOT' | translate }}</strong> — {{ 'WIZARD.STEP3.VERIFY_PAID_FOOT' | translate:{ n: brandReportCost } }}</p>
-        } @else {
-          <p class="vd-price"><strong>{{ 'WIZARD.STEP3.VERIFY_PRICE' | translate:{ n: brandReportCost } }}</strong></p>
-        }
+        <p class="vd-price"><strong>{{ 'WIZARD.STEP3.VERIFY_PRICE' | translate:{ n: brandReportCost } }}</strong></p>
         @if (hasEnoughReportCredits()) {
           <button type="button" class="vd-go" (click)="confirmBrandReport()">{{ 'WIZARD.STEP3.VERIFY_GO' | translate }}</button>
         } @else {
@@ -892,7 +888,6 @@
             [domainsChecked]="selectedExtensions().length"
             [freeExtensions]="freeExtensionsOf(brandReportName())"
             [canAfford]="hasEnoughReportCredits()"
-            [freeThisMonth]="reportIsFree()"
             (unlock)="confirmBrandReport()"
             (topUp)="openCreditPurchase()">
           </app-brand-report-locked>
@@ -907,7 +902,6 @@
             [domainsChecked]="selectedExtensions().length"
             [freeExtensions]="freeExtensionsOf(brandReportName())"
             [canAfford]="hasEnoughReportCredits()"
-            [freeThisMonth]="reportIsFree()"
             (unlock)="confirmBrandReport()"
             (topUp)="openCreditPurchase()">
           </app-brand-report-locked>

@@ -50,16 +50,17 @@ export class User {
   lastFreeReset: Date | null;
 
   /**
-   * Rapport approfondi offert : un par mois calendaire, indépendant du solde.
+   * Vestiges du rapport offert mensuel, RETIRÉ du produit.
    *
-   * `freeReportPeriod` est le mois de référence (« 2026-08») et
-   * `freeReportUsedAt` l'horodatage de consommation. Le droit est disponible
-   * quand la période courante diffère de `freeReportPeriod`, ou quand
-   * `freeReportUsedAt` est nul : la bascule est CALCULÉE À LA LECTURE, comme
-   * pour `lastFreeReset` — pas de tâche planifiée, donc pas de compte oublié.
+   * La règle est redevenue simple : un rapport coûte son tarif, et les 100
+   * crédits mensuels couvrent 50 suggestions plus un rapport. La gratuité
+   * demandait une comptabilité parallèle — période de référence, horodatage,
+   * verrou pessimiste, coût réel mémorisé — pour un avantage que le solde
+   * offrait déjà.
    *
-   * Non cumulable : un droit non utilisé est perdu à la fin du mois (décision
-   * produit). Un rapport déjà payé reste consultable sans nouveau débit.
+   * Les colonnes restent en base : les supprimer imposerait une migration
+   * destructive en production pour gagner deux champs inertes. Plus rien ne
+   * les lit ni ne les écrit.
    */
   @Column({ nullable: true, type: 'varchar', length: 7 })
   freeReportPeriod: string | null;

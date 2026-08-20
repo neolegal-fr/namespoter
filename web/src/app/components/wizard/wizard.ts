@@ -870,7 +870,6 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.reportOffer.set(null);
     this.brandReportService.offer(name).subscribe({
       next: (o) => this.reportOffer.set({
-        freeThisMonth: o.deepReport.freeThisMonth,
         priceCredits: o.deepReport.priceCredits,
         credits: o.account.credits,
       }),
@@ -900,17 +899,12 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   /**
    * Offre du serveur pour le nom courant : acheté, prix, droit gratuit, solde.
-   * Chargée à chaque ouverture de la confirmation — le droit au rapport offert
-   * peut avoir été consommé dans un autre onglet, ou le mois avoir changé.
-   * `null` tant que la réponse n'est pas arrivée : la carte affiche alors le
-   * tarif plein, jamais une gratuité qu'on ne sait pas encore confirmer.
+   * Chargée à chaque ouverture de la confirmation : le solde peut avoir bougé
+   * dans un autre onglet. `null` tant que la réponse n'est pas arrivée — la
+   * carte affiche alors le tarif par défaut, jamais un prix deviné.
    */
-  readonly reportOffer = signal<{ freeThisMonth: boolean; priceCredits: number; credits: number } | null>(null);
+  readonly reportOffer = signal<{ priceCredits: number; credits: number } | null>(null);
 
-  /** Le rapport est-il offert pour ce nom, d'après le serveur ? */
-  reportIsFree(): boolean {
-    return this.reportOffer()?.freeThisMonth === true;
-  }
 
   /** Ouvre la confirmation (coût, solde, destinataires) après avoir chargé l'email du compte. */
   private async openReportConfirm(): Promise<void> {
@@ -932,7 +926,7 @@ export class WizardComponent implements OnInit, OnDestroy {
    * ne pas proposer un bouton qui échouera.
    */
   hasEnoughReportCredits(): boolean {
-    return this.reportIsFree() || this.userService.creditsValue >= this.brandReportCost;
+    return this.userService.creditsValue >= this.brandReportCost;
   }
 
   /** Renvoie vers l'achat de crédits (dialogue existant). */
@@ -947,10 +941,10 @@ export class WizardComponent implements OnInit, OnDestroy {
   /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
   confirmBrandReport(): void {
     if (!this.hasEnoughReportCredits()) { this.openCreditPurchase(); return; }
-    // Quand 50 crédits sont réellement débités — la moitié de la réserve
-    // mensuelle en un clic — on demande une confirmation explicite. Quand le
-    // rapport est offert, aucune : la friction n'y a aucune valeur.
-    if (!this.reportIsFree() && !this.forceRegen()) {
+    // 50 crédits — la moitié de la réserve mensuelle — partent en un clic : la
+    // confirmation est explicite, et elle l'est toujours. Il n'y a plus de cas
+    // « offert » où la friction n'aurait pas d'objet.
+    if (!this.forceRegen()) {
       this.confirmationService.confirm({
         header: this.translate.instant('WIZARD.STEP3.REPORT_CONFIRM_TITLE'),
         message: this.translate.instant('WIZARD.STEP3.REPORT_DEBIT_CONFIRM', { n: this.brandReportCost }),

@@ -33,12 +33,6 @@ interface LockedCheck {
  * │ du verdict. Elles portent `aria-hidden`, n'ayant rien à annoncer.      │
  * └────────────────────────────────────────────────────────────────────────┘
  *
- * Le pied de carte n'affiche PAS le rapport offert mensuel. L'API n'expose ni
- * `deepReport.freeThisMonth` ni `deepReport.purchased` (chantier back-end,
- * étape 9 du handoff) : afficher « offert ce mois-ci » sans savoir si le droit
- * est disponible reviendrait à promettre la gratuité au hasard, puis à débiter
- * 50 crédits. Le composant est prêt à le porter — `freeThisMonth` est une
- * entrée optionnelle, non renseignée tant que le serveur ne la fournit pas.
  */
 @Component({
   selector: 'app-brand-report-locked',
@@ -90,16 +84,9 @@ interface LockedCheck {
           } @else {
           <p class="rl-price__amount">
             <strong>{{ 'WIZARD.STEP3.GRID_CREDIT_MANY' | translate:{ n: priceCredits() } }}</strong>
-            @if (freeThisMonth()) {
-              <span class="rl-price__free">— {{ 'WIZARD.STEP3.LOCKED_FREE_THIS_MONTH' | translate }}</span>
-            }
           </p>
           <p class="rl-price__note">
-            @if (freeThisMonth()) {
-              {{ 'WIZARD.STEP3.LOCKED_FREE_NOTE' | translate:{ n: priceCredits() } }}
-            } @else {
-              {{ 'WIZARD.STEP3.LOCKED_PAID_NOTE' | translate:{ n: priceCredits() } }}
-            }
+            {{ 'WIZARD.STEP3.LOCKED_PAID_NOTE' | translate:{ n: priceCredits() } }}
           </p>
           }
         </div>
@@ -149,11 +136,6 @@ export class BrandReportLockedComponent {
   readonly freeExtensions = input<string[]>([]);
   /** Le compte peut-il payer : solde suffisant, ou droit gratuit disponible. */
   readonly canAfford = input(true);
-  /**
-   * Droit au rapport offert du mois. Reste `false` tant que l'API n'expose pas
-   * `deepReport.freeThisMonth` — on ne devine pas une gratuité.
-   */
-  readonly freeThisMonth = input(false);
 
   readonly unlock = output<void>();
   readonly topUp = output<void>();
