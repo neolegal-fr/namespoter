@@ -10,8 +10,22 @@ const SEARCH_URL = `${BASE}/services/apidiffusion/api/marques/search`;
 const REQUEST_TIMEOUT_MS = 15000;
 
 /**
- * Chaque notice = un appel HTTP de plus (et le quota INPI tourne à ~100/période).
- * On n'enrichit donc les classes que pour un petit nombre de dépôts pertinents.
+ * Chaque notice consomme une unité de quota, exactement comme une recherche.
+ *
+ * Mesuré le 20/08/2026 sur le compte de production, en lisant les en-têtes que
+ * la passerelle renvoie : `x-rate-limit-remaining` (100 unités) et
+ * `x-size-limit-remaining` (~50 Mo). Une recherche fait −1, une notice fait −1
+ * aussi — ce n'est donc pas « la recherche coûte, l'enrichissement est gratuit ».
+ *
+ * Conséquence directe sur le plafond : un rapport coûte jusqu'à
+ * 1 + MAX_NOTICE_FETCHES unités, soit 6 — donc **au plus ~16 rapports par
+ * période**, tous comptes confondus, puisqu'il n'y a qu'un compte INPI.
+ *
+ * La DURÉE de la période n'est écrite nulle part : ni dans les en-têtes (aucun
+ * `x-rate-limit-reset` ni `Retry-After`), ni dans l'OpenAPI de la passerelle,
+ * ni dans la documentation publique de l'INPI. Constaté seulement qu'elle
+ * dépasse la dizaine de minutes : trois appels espacés de sept minutes se sont
+ * cumulés sans réinitialisation.
  */
 const MAX_NOTICE_FETCHES = 5;
 
