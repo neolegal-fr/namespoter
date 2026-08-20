@@ -207,7 +207,9 @@
 
 .rg-cost--accent {
   background: var(--nm-app-accent-surface);
-  color: var(--nm-app-accent-hover);
+  /* accent-hover est un vert de survol, pas un vert de texte : 4,32:1 sur la
+     surface accentuée. --nm-app-accent y est mesuré à 4,85:1. */
+  color: var(--nm-app-accent);
 }
 
 /* ─── Verdicts ───────────────────────────────────────────────────────────── */

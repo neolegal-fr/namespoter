@@ -406,7 +406,10 @@ import { Drawer } from 'primeng/drawer';
         </div>
       </p-dialog>
 
-      <footer class="mt-8 py-6 border-top-1 border-solid text-center text-400 text-sm" style="background: white">
+      <!-- Le pied de page portait « text-400 » (une nuance décorative : 1,31:1 sur
+           blanc) et un « background: white » en dur, qui l'excluait du thème. -->
+      <footer class="mt-8 py-6 border-top-1 border-solid text-center text-sm"
+              style="background: var(--nm-app-surface); color: var(--nm-app-text-2); border-color: var(--nm-app-border)">
         <div class="mb-2 font-bold text-500">Namorama &copy; 2026</div>
         {{ 'APP.FOOTER' | translate }}
         <a href="https://neolegal.fr" target="_blank" rel="noopener" style="color: inherit; font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor">NeoLegal</a>

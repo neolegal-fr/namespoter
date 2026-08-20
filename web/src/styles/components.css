@@ -355,9 +355,18 @@
  * la lecture ; souligné ET gras, il devient plus visible que l'action
  * principale de l'écran.
  */
+/* Le lien peut être un <a> ou un <button> — c'est le geste qui compte, pas la
+   balise. D'où la remise à zéro du bouton : sans elle, `color-scheme: dark`
+   fait peindre au navigateur son gris de bouton système (#6b6b6b), sur lequel
+   le vert clair ne mesure que 3:1. */
 .nm-link {
+    padding: 0;
+    border: none;
+    background: none;
     color: var(--nm-app-accent);
+    font: inherit;
     font-weight: inherit;
+    text-align: inherit;
     text-decoration: none;
     cursor: pointer;
 }

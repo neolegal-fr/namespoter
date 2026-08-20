@@ -53,7 +53,12 @@
      blanc, il mesure 3,61:1 et échoue au AA — c'était le cas de tous les
      boutons primaires du mode clair, « Débloquer le rapport » compris.
      Le remplissage prend donc `#0d7a4e` (4,85:1 sur blanc). */
-  --nm-app-accent: var(--nm-accent-on-light);
+  /* ⚠ Corrigé après mesure : #0d9a63 sur blanc ne fait pas 4,3:1 comme
+     l'annonçait ce commentaire, mais 3,61:1 — sous le seuil de AA pour du
+     texte, et 3,26:1 seulement sur la surface accentuée claire, où il servait
+     aux liens, aux filtres actifs et au sélecteur de thème. Le vert de texte
+     rejoint donc celui de l'aplat : une seule valeur accessible partout. */
+  --nm-app-accent: var(--nm-accent-text-light);
   --nm-app-accent-hover: var(--nm-accent-on-light-hover);
   --nm-app-accent-fill: #0d7a4e;
   --nm-app-accent-fill-hover: #0a6b44;

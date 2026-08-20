@@ -35,7 +35,7 @@
 
   --nm-text-dark: #f2f5f3;
   --nm-text-dark-2: #9aa5a0;
-  --nm-text-dark-3: #6d7873;
+  --nm-text-dark-3: #828d88;  /* 5,64:1 sur le fond sombre — #6d7873 n'était qu'à 4,23 */
   --nm-text-dark-strong: #c9d3ce;
 
   /* ─── Accent ─────────────────────────────────────────────────────────────
@@ -57,6 +57,10 @@
      une bordure de carte accentuée sur fond clair : elle était recopiée en dur
      (#c9e9d8) dans les maquettes. La surface reprend celle du verdict
      « libre », dont elle est dérivée. */
+  /* Vert de TEXTE sur surface claire : 5,37:1 sur blanc, 4,85:1 sur la
+     surface accentuée. Distinct de --nm-accent-on-light, réservé aux bordures
+     et aux aplats décoratifs, qui n'atteint que 3,61:1. */
+  --nm-accent-text-light: #0d7a4e;
   --nm-accent-surface-light: #e8f7ef;
   --nm-accent-border-light: #c9e9d8;
   --nm-accent-ghost-bg: #1c2b26;
@@ -74,7 +78,7 @@
 
   --nm-text-light: #0b0e10;
   --nm-text-light-2: #5c6663;
-  --nm-text-light-3: #8a938f;
+  --nm-text-light-3: #6a7470;  /* 4,83:1 sur blanc — #8a938f n'était qu'à 3,16 */
   --nm-text-on-card: #2c3532;
 
   /* ─── Verdicts de disponibilité ──────────────────────────────────────────

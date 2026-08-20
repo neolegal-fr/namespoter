@@ -462,6 +462,9 @@
     "GUIDES_NOTE_EN": "Ces guides sont pour l'instant disponibles en français.",
     "FINAL_H2": "Votre nom est encore libre",
     "FINAL_TEXT": "100 crédits offerts chaque mois : environ 50 suggestions vérifiées, et un rapport de marque.",
-    "FINAL_CTA": "Lancer une recherche gratuite"
+    "FINAL_CTA": "Lancer une recherche gratuite",
+    "H1_B_PRE": "",
+    "H1_B_EM": "vraiment",
+    "H1_B_POST": "libre"
   }
 }

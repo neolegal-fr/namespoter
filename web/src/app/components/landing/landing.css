@@ -368,7 +368,7 @@
   font-size: var(--nm-text-overline-sm);
   font-weight: 600;
   letter-spacing: var(--nm-tracking-overline);
-  color: var(--nm-accent-on-light);
+  color: var(--nm-accent-text-light);
 }
 
 .nm-card__title {
@@ -437,7 +437,7 @@
 }
 
 .nm-table__us {
-  color: var(--nm-accent-on-light);
+  color: var(--nm-accent-text-light);
   font-weight: 600;
 }
 
@@ -549,4 +549,19 @@
 .nm-steps__aside:focus-visible {
   outline: 2px solid var(--nm-accent);
   outline-offset: 2px;
+}
+
+/* Le mot qui porte la promesse : « vraiment » libre, et non « libre en .com ».
+ *
+ * Il est mis en italique parce que la nuance est la raison d'être du produit —
+ * un domaine libre ne dit rien de la marque ni des réseaux. Space Grotesk n'a
+ * pas d'italique dessiné ; on emprunte donc celui d'IBM Plex Sans (voir
+ * fonts.css), une vraie italique plutôt qu'une pente synthétique. Le corps est
+ * relevé de 2 % : à taille égale, l'italique humaniste paraît plus petite que
+ * la grotesque qui l'entoure. */
+.nm-h1__em {
+  font-family: var(--nm-font-body);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.02em;
 }

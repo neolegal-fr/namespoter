@@ -51,7 +51,7 @@ import { applyContentSeo } from '../content/content-seo';
               la fois. Les séparateurs restent dans le texte, masqués à l'œil.
             -->
             <h1 class="nm-h1">
-              {{ 'HOME.H1_A' | translate }} <span class="word-rotator"><span class="word-rotator__item word-rotator__item--1">{{ 'HOME.H1_W1' | translate }}</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--2">{{ 'HOME.H1_W2' | translate }}</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--3">{{ 'HOME.H1_W3' | translate }}</span></span><span class="sr-only">&nbsp;</span> {{ 'HOME.H1_B' | translate }}
+              {{ 'HOME.H1_A' | translate }} <span class="word-rotator"><span class="word-rotator__item word-rotator__item--1">{{ 'HOME.H1_W1' | translate }}</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--2">{{ 'HOME.H1_W2' | translate }}</span><span class="sr-only"> / </span><span class="word-rotator__item word-rotator__item--3">{{ 'HOME.H1_W3' | translate }}</span></span><span class="sr-only">&nbsp;</span> {{ 'HOME.H1_B_PRE' | translate }} <em class="nm-h1__em">{{ 'HOME.H1_B_EM' | translate }}</em> {{ 'HOME.H1_B_POST' | translate }}
             </h1>
 
             <p class="nm-lead">

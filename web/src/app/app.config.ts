@@ -206,6 +206,22 @@ const NamoramaPreset = definePreset(Aura, {
      * nôtre coexisteraient à l'écran.
      */
     colorScheme: {
+      /*
+       * ⚠ Une rampe `surface` n'est PAS « nos surfaces rangées dans l'ordre » :
+       * c'est une échelle de luminosité que PrimeNG parcourt DANS LES DEUX
+       * SENS. En sombre, Aura prend `surface.0` pour le texte, `surface.400`
+       * pour le texte secondaire et `surface.900/950` pour les fonds.
+       *
+       * La rampe sombre posée ici partait de nos fonds sombres dès l'indice
+       * 300 : `text.mutedColor = {surface.400}` valait donc #2a3236, du
+       * quasi-noir sur du quasi-noir. C'est ce qui rendait illisibles, en mode
+       * sombre, le libellé « Projets » du menu (1,38:1), les étapes inactives
+       * du fil (1,43:1) et le choix segmenté (1,48:1).
+       *
+       * Les deux rampes vont donc du plus clair (0) au plus foncé (950), comme
+       * `slate` et `zinc` chez Aura, avec la teinte verdâtre du design. Chaque
+       * correspondance sémantique d'Aura a été mesurée : toutes passent AA.
+       */
       light: {
         surface: {
           0:   '#ffffff',
@@ -213,29 +229,42 @@ const NamoramaPreset = definePreset(Aura, {
           100: '#f4f6f5',
           200: '#eef1f0',
           300: '#e3e7e5',
-          400: '#dde2e0',
-          500: '#8a938f',
-          600: '#5c6663',
-          700: '#2c3532',
+          400: '#aab3af',  // icônes et bordures au survol — plus décoratif que lisible
+          500: '#5c6663',  // text.mutedColor : 5,94:1 sur blanc
+          600: '#4a534f',
+          700: '#2c3532',  // text.color : 12,63:1 sur blanc
           800: '#1b211f',
           900: '#0b0e10',
           950: '#070909',
         },
+        /*
+         * `primary.color` sert d'APLAT sous un libellé blanc. Aura le prend en
+         * `{primary.500}` — notre #16c47a, soit 2,28:1 avec du blanc : tous les
+         * boutons primaires du mode clair échouaient, ainsi que l'étape active
+         * du fil. On force donc le vert d'aplat déjà retenu pour nos propres
+         * boutons (`--nm-app-accent-fill`), mesuré à 5,37:1.
+         */
+        primary: {
+          color: '#0d7a4e',
+          contrastColor: '#ffffff',
+          hoverColor: '#0a6b44',
+          activeColor: '#075437',
+        },
       },
       dark: {
         surface: {
-          0:   '#f2f5f3',
-          50:  '#c9d3ce',
-          100: '#9aa5a0',
-          200: '#6d7873',
-          300: '#3a4448',
-          400: '#2a3236',
-          500: '#263033',
-          600: '#232b2f',
-          700: '#1b2225',
-          800: '#12171a',
-          900: '#0e1315',
-          950: '#0b0e10',
+          0:   '#f2f5f3',  // text.color : 16,45:1 sur nos cartes sombres
+          50:  '#e4e9e6',
+          100: '#c9d3ce',
+          200: '#b0bcb7',
+          300: '#9aa5a0',  // text.hoverMutedColor
+          400: '#8a938f',  // text.mutedColor : 5,72:1 sur nos cartes sombres
+          500: '#7c8782',  // indications de saisie : 5,20:1 sur le fond de page
+          600: '#3a4448',  // bordures au survol
+          700: '#232b2f',  // bordures
+          800: '#1b2225',
+          900: '#12171a',  // fond de contenu = --nm-surface-dark
+          950: '#0b0e10',  // fond de champ = --nm-bg-dark
         },
       },
     },

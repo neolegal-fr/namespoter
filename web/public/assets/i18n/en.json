@@ -462,6 +462,9 @@
     "GUIDES_NOTE_EN": "These guides are currently available in French.",
     "FINAL_H2": "Your name is still free",
     "FINAL_TEXT": "100 free credits every month: about 50 checked suggestions, and one in-depth report.",
-    "FINAL_CTA": "Start a free search"
+    "FINAL_CTA": "Start a free search",
+    "H1_B_PRE": "name that is",
+    "H1_B_EM": "genuinely",
+    "H1_B_POST": "free"
   }
 }
