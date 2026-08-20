@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
 import { BrandReportService, BrandReport, ReportLike, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
 import { KeycloakService } from 'keycloak-angular';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Steps } from 'primeng/steps';
 import { Card } from 'primeng/card';
 import { Button } from 'primeng/button';
@@ -39,6 +39,7 @@ import { BrandReportViewComponent } from '../brand-report/brand-report-view';
   selector: 'app-wizard',
   standalone: true,
   imports: [
+    RouterModule,
     CommonModule,
     FormsModule,
     Steps,

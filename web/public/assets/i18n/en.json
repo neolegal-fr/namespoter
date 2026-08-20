@@ -117,7 +117,9 @@
       "REFINE_BTN": "Refine with AI",
       "CONTINUE_BTN": "Continue to setup",
       "SUGGESTION_TITLE": "Suggested refinement:",
-      "USE_VERSION": "Use this version"
+      "USE_VERSION": "Use this version",
+      "HAVE_NAME": "Already have a name in mind?",
+      "HAVE_NAME_CTA": "Test it directly"
     },
     "STEP2": {
       "TITLE": "Your preferences",
@@ -429,7 +431,7 @@
     "H1_B": "name that is genuinely free",
     "LEAD": "Domain, social handles, and no registered trademark. Name generators stop at the .com — Namorama also checks INPI and EUIPO, so you pick a name you can actually keep.",
     "CTA_PRIMARY": "Find my name",
-    "CTA_SECONDARY": "See a full report",
+    "CTA_SECONDARY": "I already have a name",
     "MENTION_1": "100 free credits every month",
     "MENTION_2": "≈ 50 checked suggestions + 1 report",
     "MENTION_3": "No subscription",
@@ -495,6 +497,7 @@
     "DEMO_REPORT_SOC": "Socials",
     "DEMO_REPORT_TM": "Trademarks",
     "DEMO_REPORT_SCORE": "Name quality",
-    "DEMO_TM_NONE": "no identical filing"
+    "DEMO_TM_NONE": "no identical filing",
+    "STEP_3_DOMAINS": "Domains"
   }
 }

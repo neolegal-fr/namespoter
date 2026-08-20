@@ -117,7 +117,9 @@
       "REFINE_BTN": "Reformuler avec l'IA",
       "CONTINUE_BTN": "Continuer vers la configuration",
       "SUGGESTION_TITLE": "Reformulation suggérée :",
-      "USE_VERSION": "Utiliser cette version"
+      "USE_VERSION": "Utiliser cette version",
+      "HAVE_NAME": "Vous avez déjà un nom en tête ?",
+      "HAVE_NAME_CTA": "Testez-le directement"
     },
     "STEP2": {
       "TITLE": "Vos préférences",
@@ -429,7 +431,7 @@
     "H1_B": "vraiment libre",
     "LEAD": "Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs de noms s'arrêtent au .com — Namorama vérifie aussi l'INPI et l'EUIPO, pour que vous choisissiez un nom que vous pourrez vraiment garder.",
     "CTA_PRIMARY": "Trouver mon nom",
-    "CTA_SECONDARY": "Voir un rapport complet",
+    "CTA_SECONDARY": "J'ai déjà un nom",
     "MENTION_1": "100 crédits offerts chaque mois",
     "MENTION_2": "≈ 50 suggestions vérifiées + 1 rapport",
     "MENTION_3": "Sans abonnement",
@@ -495,6 +497,7 @@
     "DEMO_REPORT_SOC": "Réseaux",
     "DEMO_REPORT_TM": "Marques",
     "DEMO_REPORT_SCORE": "Qualité du nom",
-    "DEMO_TM_NONE": "aucun dépôt identique"
+    "DEMO_TM_NONE": "aucun dépôt identique",
+    "STEP_3_DOMAINS": "Domaines"
   }
 }

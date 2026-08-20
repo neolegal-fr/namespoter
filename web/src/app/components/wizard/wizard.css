@@ -814,3 +814,11 @@
     font-size: var(--nm-text-ui-sm);
     color: var(--nm-app-text-2);
 }
+
+/* L'autre entrée : discrète, mais à hauteur de la première étape — pas au
+   pied de page, où on ne la lit qu'après avoir renoncé. */
+.wizard-alt {
+    margin: 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}

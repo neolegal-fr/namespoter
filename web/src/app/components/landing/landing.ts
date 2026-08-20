@@ -324,7 +324,13 @@ export class LandingComponent {
   readonly steps = [
     { n: 1, label: 'WIZARD.STEPS.DESCRIPTION' },
     { n: 2, label: 'WIZARD.STEPS.KEYWORDS' },
-    { n: 3, label: 'WIZARD.STEPS.DOMAINS' },
+    // « Domaines » ici, « Résultats » dans le wizard : ce n'est pas un écart.
+    // Le fil de l'accueil sépare en quatre ce que le wizard réunit en trois —
+    // l'étape 3 y traite les seuls domaines, puisque marque et réseaux ont
+    // leur propre étape juste après. Employer le libellé du wizard donnerait
+    // « Résultats » suivi de « Marque et réseaux », c'est-à-dire un résultat
+    // qui ne contient pas tout le résultat.
+    { n: 3, label: 'HOME.STEP_3_DOMAINS' },
     { n: 4, label: 'WIZARD.STEPS.BRAND' },
   ];
 

@@ -115,6 +115,17 @@
           </p-button>
         </div>
 
+        <!-- L'autre entrée du produit, à hauteur de la première étape.
+             Qui arrive avec un nom en tête n'a rien à décrire : le faire
+             passer par une description de projet, une génération et trente
+             suggestions pour atteindre le nom qu'il voulait tester, c'est lui
+             demander de payer un détour. C'est pourtant le visiteur le plus
+             engagé — et celui pour qui le risque de marque est le plus proche. -->
+        <p class="wizard-alt">
+          {{ 'WIZARD.STEP1.HAVE_NAME' | translate }}
+          <a class="nm-link" routerLink="/verifier-disponibilite-nom-de-marque">{{ 'WIZARD.STEP1.HAVE_NAME_CTA' | translate }}</a>
+        </p>
+
         <div *ngIf="refinedDescription()" class="mt-4 p-3 border-left-4 border-solid border-round" style="max-width: 48rem; width: 100%; text-align: left; background: var(--nm-app-accent-surface); border-color: var(--nm-app-accent)">
           <h4 class="font-bold mb-2" style="color: var(--nm-app-accent)">{{ 'WIZARD.STEP1.SUGGESTION_TITLE' | translate }}</h4>
           <p class="font-italic text-800" style="white-space: pre-line">{{ refinedDescription() }}</p>
