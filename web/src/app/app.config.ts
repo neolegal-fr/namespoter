@@ -96,7 +96,16 @@ function initializeApp(
 
 ) {
   return async () => {
-    const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
+    /*
+     * Les deux langues RÉELLEMENT servies. Les dix-sept autres fichiers
+     * restent dans le dépôt mais ne sont plus proposés : à 158 clés sur 456,
+     * ils donnaient un produit mi-traduit. Compléter l'un d'eux, c'est
+     * l'ajouter ici et dans `AppComponent.languages`.
+     *
+     * Conséquence voulue : un navigateur en allemand reçoit désormais
+     * l'anglais, entièrement, plutôt qu'un tiers d'allemand.
+     */
+    const supportedLangs = ['fr', 'en'];
     translate.addLangs(supportedLangs);
     /*
      * Repli en ANGLAIS, et non en français.
@@ -184,7 +193,15 @@ function initializeApp(
       return;
     }
     const browserLang = translate.getBrowserLang() ?? '';
-    translate.use(supportedLangs.includes(browserLang) ? browserLang : 'fr');
+    /*
+     * Langue du navigateur si elle est servie, sinon l'ANGLAIS.
+     *
+     * Le repli était le français : un navigateur allemand, italien ou japonais
+     * recevait donc un produit en français. L'anglais se lit plus largement, et
+     * un visiteur francophone n'est pas concerné — son navigateur annonce
+     * « fr », qui est servi.
+     */
+    translate.use(supportedLangs.includes(browserLang) ? browserLang : 'en');
   };
 }
 

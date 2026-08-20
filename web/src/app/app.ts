@@ -459,26 +459,21 @@ export class AppComponent implements OnInit {
   userName = signal('');
   userEmail = signal('');
   
+  /**
+   * DEUX langues proposées, et non dix-neuf.
+   *
+   * Les dix-sept autres n'avaient que 158 des 456 clés : deux tiers de chaque
+   * écran retombaient sur le repli, et l'utilisateur lisait un produit
+   * mi-traduit. Mieux vaut ne pas proposer une langue que la proposer au
+   * tiers — surtout sur des écrans qui facturent et qui portent des verdicts
+   * juridiques.
+   *
+   * Les fichiers restent dans `public/assets/i18n/` : rouvrir une langue une
+   * fois complétée ne coûte qu'une ligne ici et une dans `supportedLangs`.
+   */
   readonly languages = [
-    { label: 'Čeština',    code: 'cs' },
-    { label: 'Dansk',      code: 'da' },
-    { label: 'Deutsch',    code: 'de' },
-    { label: 'English',    code: 'en' },
-    { label: 'Español',    code: 'es' },
-    { label: 'Suomi',      code: 'fi' },
     { label: 'Français',   code: 'fr' },
-    { label: 'Magyar',     code: 'hu' },
-    { label: 'Italiano',   code: 'it' },
-    { label: 'Nederlands', code: 'nl' },
-    { label: 'Norsk',      code: 'no' },
-    { label: 'Polski',     code: 'pl' },
-    { label: 'Português',  code: 'pt' },
-    { label: 'Română',     code: 'ro' },
-    { label: 'Svenska',    code: 'sv' },
-    { label: 'Türkçe',     code: 'tr' },
-    { label: 'Русский',    code: 'ru' },
-    { label: '日本語',      code: 'ja' },
-    { label: '中文',        code: 'zh' },
+    { label: 'English',    code: 'en' },
   ];
 
   readonly langMenuItems: MenuItem[] = this.languages.map(l => ({
