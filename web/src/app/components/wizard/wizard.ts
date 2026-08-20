@@ -1446,6 +1446,11 @@ export class WizardComponent implements OnInit, OnDestroy {
         this.activeIndex.set(2);
         this.maxActiveIndex.set(2);
         this.loading.set(false);
+
+        // Un projet rouvert reçoit le même traitement qu'une recherche fraîche :
+        // les noms sans analyse en obtiennent une, en tâche de fond. Le résultat
+        // est mémorisé côté serveur, donc ce coût n'est payé qu'une fois par nom.
+        this.analyseEnFond();
         
         if (this.router.url !== `/projects/${id}`) {
           this.router.navigate(['/projects', id], { replaceUrl: true });
@@ -1787,6 +1792,33 @@ export class WizardComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Lance l'analyse des noms qui n'en ont pas encore, en tâche de fond.
+   *
+   * Trois à la fois, pas trente : chaque analyse est un appel au modèle, et
+   * les tirer d'un coup allongerait la fin de recherche sans rien afficher
+   * plus tôt. À trois, les premières cartes se remplissent pendant qu'on lit
+   * les premières lignes — et l'ordre suit celui de la liste, donc ce qu'on
+   * regarde arrive en premier.
+   *
+   * Best-effort : un échec laisse la carte sur son bouton « Analyser ». Rien
+   * n'est réessayé automatiquement, un modèle qui refuse deux fois refusera
+   * la troisième.
+   */
+  private analyseEnFond(): void {
+    const file = this.domains().filter((d) => d.id && !d.analysis && !d.analysisPending).map((d) => d.id as string);
+    if (!file.length) return;
+
+    const PARALLELE = 3;
+    let i = 0;
+    const suivant = () => {
+      if (i >= file.length) return;
+      const id = file[i++];
+      this.analyseOne(id, suivant);
+    };
+    for (let n = 0; n < Math.min(PARALLELE, file.length); n++) suivant();
+  }
+
+  /**
    * Calcule l'analyse d'un nom à la demande.
    *
    * Elle se déclenchait jusqu'ici au seul « j'aime », ce qui laissait un tiret
@@ -1795,9 +1827,9 @@ export class WizardComponent implements OnInit, OnDestroy {
    * nom, et les faire tous d'office coûterait trente appels par recherche pour
    * une donnée que personne ne lit toujours.
    */
-  analyseOne(id: string): void {
+  analyseOne(id: string, termine?: () => void): void {
     const cible = this.domains().find((d) => d.id === id);
-    if (!cible || cible.analysis || cible.analysisPending) return;
+    if (!cible || cible.analysis || cible.analysisPending) { termine?.(); return; }
 
     // ⚠ Remplacer l'élément, ne jamais le muter : la grille reçoit `domains`
     // en entrée SIGNAL et n'observe donc que la référence du tableau. Une
@@ -1810,10 +1842,13 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.domainService.analyzeName(id, this.translate.currentLang() ?? undefined).subscribe({
       next: (a) => {
         remplacer({ analysis: a.analysis, analysisPending: false });
-        this.expandedAnalysisId.set(id); // déplier : on vient de la demander
+        // Déplié seulement si l'utilisateur l'a DEMANDÉ : en tâche de fond,
+        // ouvrir trente panneaux derrière son dos serait insupportable.
+        if (!termine) this.expandedAnalysisId.set(id);
         this.cdr.detectChanges();
+        termine?.();
       },
-      error: () => { remplacer({ analysisPending: false }); this.cdr.detectChanges(); },
+      error: () => { remplacer({ analysisPending: false }); this.cdr.detectChanges(); termine?.(); },
     });
   }
 
@@ -2254,6 +2289,13 @@ export class WizardComponent implements OnInit, OnDestroy {
               return saved ? { ...d, id: saved.id } : d;
             }));
           }
+
+          // L'analyse part TOUTE SEULE, dès que les identifiants existent.
+          // Elle ne se déclenchait qu'au « j'aime » ou à la vérification :
+          // sur une recherche fraîche, les trente cartes affichaient donc un
+          // appel à l'action là où se trouve maintenant la première ligne de
+          // la carte — la qualité du nom, c'est-à-dire ce que l'outil apporte.
+          this.analyseEnFond();
 
           // Issue #1 — persister les ratings « likés » pendant la recherche (id désormais dispo)
           this.domains().forEach(d => {
