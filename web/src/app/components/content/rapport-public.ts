@@ -174,8 +174,17 @@ export class RapportPublicComponent implements OnInit {
           }),
         });
         this.chargement.set(false);
+        // Combien de noms ressortent entièrement libres : c'est le signal qui
+        // dit si le produit répond à ce que les visiteurs viennent chercher.
+        this.analytics.track('public_report_shown', {
+          libres: this.rapport()?.domains.filter((d) => d.status === 'free').length ?? 0,
+        });
       },
-      error: () => { this.erreur.set(true); this.chargement.set(false); },
+      error: () => {
+        this.analytics.track('public_report_failed');
+        this.erreur.set(true);
+        this.chargement.set(false);
+      },
     });
   }
 

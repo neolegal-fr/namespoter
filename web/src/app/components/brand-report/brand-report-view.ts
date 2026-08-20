@@ -36,10 +36,6 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
             <p class="rv-overline">
               {{ 'WIZARD.STEP3.REPORT_CTA' | translate }}
               @if (r.generatedAt) { · {{ r.generatedAt | date: 'd MMMM y, HH:mm' }} }
-              <!-- Réactualiser se demande EN LISANT la date : c'est elle qui
-                   fait douter de la fraîcheur, pas un bouton en pied de page.
-                   Gratuit — la mise à jour ne redébite rien. -->
-              <ng-content select="[refresh]"></ng-content>
             </p>
             <h2 class="rv-name">{{ r.name }}</h2>
           </div>

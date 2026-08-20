@@ -365,7 +365,8 @@
       "LOCKED_SIGNUP_NOTE": "Enough to check this name and explore others. No subscription, no card.",
       "LOCKED_SIGNUP_CTA": "Create my account",
       "SEED_PROJECT": "For alternative name suggestions, fill in your project details.",
-      "SEED_PROJECT_CTA": "Describe my project"
+      "SEED_PROJECT_CTA": "Describe my project",
+      "SETUP_FIRST_BTN": "Describe the project to get alternatives"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -427,7 +428,7 @@
     "HTML_LANG": "en",
     "META_TITLE": "Namorama — Find a brand name that is genuinely free",
     "META_DESC": "Brand name generator with real checks: domain, social handles, and INPI / EUIPO trademark prior-art. 100 free credits every month, no subscription.",
-    "PILL": "Domains, registered trademarks and social handles checked live",
+    "PILL": "Domain names, registered trademarks and social handles checked live",
     "H1_A": "Find a",
     "H1_W1": "product",
     "H1_W2": "brand",

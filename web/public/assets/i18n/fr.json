@@ -365,7 +365,8 @@
       "LOCKED_SIGNUP_NOTE": "De quoi vérifier ce nom et en explorer d'autres. Sans abonnement, sans carte bancaire.",
       "LOCKED_SIGNUP_CTA": "Créer mon compte",
       "SEED_PROJECT": "Pour des suggestions de noms alternatifs, complétez les informations de projet.",
-      "SEED_PROJECT_CTA": "Décrire mon projet"
+      "SEED_PROJECT_CTA": "Décrire mon projet",
+      "SETUP_FIRST_BTN": "Décrire le projet pour obtenir des alternatives"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
@@ -427,7 +428,7 @@
     "HTML_LANG": "fr",
     "META_TITLE": "Namorama — Trouvez un nom de marque vraiment libre",
     "META_DESC": "Générateur de noms de marque avec vérification réelle : domaine, réseaux sociaux, et antériorité INPI / EUIPO. 100 crédits offerts chaque mois, sans abonnement.",
-    "PILL": "Domaines, marques déposées et réseaux vérifiés en direct",
+    "PILL": "Noms de domaine, marques déposées et réseaux sociaux vérifiés en direct",
     "H1_A": "Trouvez un nom de",
     "H1_W1": "produit",
     "H1_W2": "marque",

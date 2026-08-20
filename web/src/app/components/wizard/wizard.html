@@ -549,8 +549,17 @@
                 severity="danger"
                 (onClick)="cancelSearch()">
               </p-button>
-              <!-- More suggestions (domains already shown) -->
+              <!-- Générer des alternatives suppose de savoir ce qu'on nomme.
+                   Un projet créé depuis un nom seul n'a ni description ni
+                   mots-clés : le bouton produirait des noms tirés du vide. Il
+                   renvoie donc à l'étape qui manque, et le dit. -->
               <ng-container *ngIf="domains().length > 0 && !loading()">
+                <p-button *ngIf="!description()"
+                  [label]="'WIZARD.STEP3.SETUP_FIRST_BTN' | translate"
+                  icon="pi pi-pencil"
+                  (onClick)="activeIndex.set(0)">
+                </p-button>
+                <ng-container *ngIf="description()">
                 <ng-container *ngIf="(userService.credits$ | async) as totalCredits; else zeroCreditsBlock">
                   <p-button
                     [label]="'WIZARD.STEP3.MORE_BTN' | translate"
@@ -566,6 +575,7 @@
                     (onClick)="projectService.showCreditDialog.set(true)">
                   </p-button>
                 </ng-template>
+                </ng-container>
               </ng-container>
             </div>
             <!-- Label crédits sous les boutons -->
@@ -935,14 +945,13 @@
         </div>
 
         <app-brand-report-view [report]="report" [context]="reportContext()">
-          <button refresh type="button" class="rv-refresh"
-                  *ngIf="!isSampleReport()"
-                  [attr.title]="'WIZARD.STEP3.GRID_REFRESH' | translate"
-                  [attr.aria-label]="'WIZARD.STEP3.GRID_REFRESH' | translate"
-                  (click)="refreshBrandReport(report.name)">
-            <i class="pi pi-refresh" aria-hidden="true"></i>
-          </button>
           <span actions *ngIf="!isSampleReport()" class="rv-actions">
+            <!-- Actualiser au même rang que les autres actions du document, et
+                 au même format : posé dans la ligne de date, il y pesait comme
+                 une icône isolée sans libellé, plus visible que ce qu'il fait. -->
+            <button type="button" class="nm-btn-tertiary" (click)="refreshBrandReport(report.name)">
+              <i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.GRID_REFRESH' | translate }}
+            </button>
             <button type="button" class="nm-btn-tertiary" (click)="printReport()">
               <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
             </button>

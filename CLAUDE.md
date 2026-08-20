@@ -159,6 +159,17 @@ Les logs servent à répondre à deux questions : **quelle erreur un utilisateur
 
 `snake_case`, verbe au passé, préfixé par le domaine : `search_started`, `search_completed`, `search_blocked_no_credits`, `wizard_step_viewed`, `login_required_before_search`, `client_error`. Ajouter un événement quand il répond à une question qu'on se pose vraiment — pas « au cas où ».
 
+Deux parcours coexistent et ne partagent aucun repère, d'où deux entonnoirs :
+
+- **générer un nom** (`python3 - funnel`) : décrire → cadrer → chercher → vérifier ;
+- **tester un nom qu'on a** (`python3 - nom`) : `public_report_requested` →
+  `public_report_shown` → `name_test_project_created`, avec les deux sorties possibles
+  (`public_report_signup_clicked` pour approfondir, `public_report_project_clicked` pour
+  chercher autre chose).
+
+`report_locked_abandoned` mérite une mention à part : il marque un départ du rapport sans
+achat. C'est le seul endroit où le prix se discute vraiment, et le seul moyen de le voir.
+
 ### Parcours utilisateur
 
 Deux canaux complémentaires :
@@ -184,6 +195,9 @@ ssh namorama-prod "python3 - rapports" < scripts/analyze-logs.py
 
 # Quota INPI : évolution du compteur dans le temps, et remises à zéro
 ssh namorama-prod "python3 - quota"    < scripts/analyze-logs.py
+
+# Parcours « j'ai déjà un nom » : de la page publique au projet créé
+ssh namorama-prod "python3 - nom"      < scripts/analyze-logs.py
 
 # Requêtes les plus lentes / codes de statut par route / lignes brutes
 ssh namorama-prod "python3 - slow"   < scripts/analyze-logs.py

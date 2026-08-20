@@ -518,6 +518,7 @@ export class WizardComponent implements OnInit, OnDestroy {
    * remplaçant l'entrée, pour ne pas sortir du site.
    */
   closeReport(): void {
+    if (!this.brandReport() && !this.isSampleReport()) this.analytics.track('report_locked_abandoned');
     if (this.reportUrlPushed) {
       this.reportUrlPushed = false;
       this.location.back();
@@ -743,6 +744,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     if (!propre) return;
 
     this.nomEnCours = true;
+    this.analytics.track('name_test_started');
     this.loading.set(true);
     this.loadingKey.set('WIZARD.STEP3.CHECKING');
     this.selectedExtensions.set([...this.EXTENSIONS_PAR_DEFAUT]);
@@ -757,6 +759,7 @@ export class WizardComponent implements OnInit, OnDestroy {
         this.activeIndex.set(2);
         this.maxActiveIndex.set(2);
         this.loading.set(false);
+        this.analytics.track('name_test_project_created');
         this.cdr.detectChanges();
         if (this.verifierApresCreation) {
           this.verifierApresCreation = false;
@@ -822,6 +825,7 @@ export class WizardComponent implements OnInit, OnDestroy {
   readonly shareSending = signal(false);
 
   openShareMail(): void {
+    this.analytics.track('report_share_opened');
     this.shareEmails.set(this.userEmail() || '');
     this.showShareMail.set(true);
   }
@@ -854,6 +858,7 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   /** Ouvre la boîte d'impression, dont la destination par défaut est le PDF. */
   printReport(): void {
+    this.analytics.track('report_printed');
     if (typeof window !== 'undefined') window.print();
   }
 
@@ -1883,6 +1888,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     const remplacer = (champs: Record<string, unknown>) =>
       this.domains.update((list) => list.map((d) => (d.id === id ? { ...d, ...champs } : d)));
 
+    if (!termine) this.analytics.track('name_analysis_requested');
     remplacer({ analysisPending: true });
     this.domainService.analyzeName(id, this.translate.currentLang() ?? undefined).subscribe({
       next: (a) => {
@@ -1905,6 +1911,7 @@ export class WizardComponent implements OnInit, OnDestroy {
    * registres pour un nom. Même endpoint, un seul nom.
    */
   recheckOneName(name: string): void {
+    this.analytics.track('domains_rechecked');
     const cible = this.domains().find((d) => this.normName(d.name) === this.normName(name));
     if (!cible || this.selectedExtensions().length === 0) return;
 
