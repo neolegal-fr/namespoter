@@ -16,6 +16,10 @@ SaaS pour trouver des noms de marque et domaines disponibles à partir d'une des
 - `just stop` : arrête tout
 - `just build` : compile API + Web
 - `just clean` : supprime node_modules, dist, volumes Docker
+- `just dev-api-url` : sous WSL, pointe `config.json` sur l'IP de la distribution
+  et **masque le fichier du diff** (`--skip-worktree`). Le navigateur Windows
+  n'atteint pas le `localhost` de WSL ; cette IP change à chaque redémarrage et
+  n'a rien à faire dans le dépôt. `just dev-api-url-reset` réarme le suivi.
 
 ## Architecture
 

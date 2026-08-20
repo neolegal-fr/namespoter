@@ -241,6 +241,12 @@ import { applyContentSeo } from '../content/content-seo';
             }
           </div>
           </div>
+          <!-- Le tableau défile horizontalement sur petit écran (décision
+               assumée : à moins de 72 px par colonne, « registre en direct »
+               se casse en quatre lignes). Encore faut-il le DIRE : sans cette
+               ligne, la troisième colonne apparaît tranchée au milieu d'un mot
+               et rien n'indique qu'il y a quelque chose derrière. -->
+          <p class="nm-table__hint">{{ 'HOME.CMP_SCROLL_HINT' | translate }}</p>
         </section>
 
         <!-- Pour qui — texte SEO conservé -->

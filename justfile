@@ -34,3 +34,26 @@ clean:
     docker-compose -f infra/docker-compose.yml down -v
     rm -rf api/node_modules api/dist web/node_modules web/dist web/.angular
     @echo "Nettoyage terminé."
+
+# ─── Développement sous WSL ────────────────────────────────────────────────
+#
+# Le navigateur tourne sous Windows, l'API dans la distribution : `localhost`
+# n'y désigne pas la même machine, et `web/public/assets/config.json` doit
+# porter l'IP de la distribution pour que le front joigne l'API.
+#
+# Cette IP ne doit PAS être versionnée — elle change à chaque redémarrage de
+# WSL et ne vaut que pour ce poste. `--skip-worktree` retire donc le fichier
+# du diff tant que l'adresse locale est posée : plus de modification à écarter
+# à chaque commit, et plus d'IP privée partie en production par mégarde.
+dev-api-url:
+    @bash -c 'ip=$(hostname -I | awk "{print \$1}"); \
+      git update-index --no-skip-worktree web/public/assets/config.json 2>/dev/null || true; \
+      printf "{\n  \"apiUrl\": \"http://%s:3001\",\n  \"keycloakUrl\": \"http://localhost:8080\"\n}\n" "$ip" > web/public/assets/config.json; \
+      git update-index --skip-worktree web/public/assets/config.json; \
+      echo "config.json → http://$ip:3001 (masqué du suivi Git)"'
+
+# Revenir à l'état versionné et réarmer le suivi du fichier.
+dev-api-url-reset:
+    @bash -c 'git update-index --no-skip-worktree web/public/assets/config.json 2>/dev/null || true; \
+      git checkout -- web/public/assets/config.json; \
+      echo "config.json → localhost:3001 (suivi Git réarmé)"'

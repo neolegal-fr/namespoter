@@ -201,6 +201,16 @@
   min-height: 344px;
 }
 
+/* Sur mobile, le plancher devient un plafond de vide : le volet « rapport »
+   ne fait pas 344 px, et l'écart part en zone morte au milieu de l'écran. Les
+   colonnes se sont empilées, la hauteur varie déjà d'une étape à l'autre —
+   figer le pire cas n'empêche plus rien, il ne fait que creuser. */
+@media (max-width: 640px) {
+  .nm-panel__body {
+    min-height: 0;
+  }
+}
+
 .nm-quote {
   margin: 0 0 12px;
   padding: 14px 16px;
@@ -271,14 +281,11 @@
   color: var(--nm-text-dark);
 }
 
-.nm-report-teaser__price {
-  margin: 2px 0 14px;
-  font-size: var(--nm-text-ui);
-  font-weight: 600;
-  color: var(--nm-accent-hover);
-}
 
-.nm-report-teaser__list {
+/* `__lines`, comme le gabarit — la règle visait `__list`, qui n'existe nulle
+   part : la liste retombait donc sur le style par défaut du navigateur, puces
+   comprises, et le score se collait à son libellé faute de mise en page. */
+.nm-report-teaser__lines {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -287,6 +294,20 @@
   gap: 8px;
   font-size: var(--nm-text-ui-sm);
   color: var(--nm-text-dark-2);
+}
+
+/* Libellé à gauche, verdict à droite : c'est la ligne du vrai rapport. */
+.nm-report-teaser__lines li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nm-report-teaser__score {
+  font-family: var(--nm-font-display);
+  font-weight: 700;
+  color: var(--nm-text-dark);
 }
 
 /* ═══ Sections claires ═══════════════════════════════════════════════════ */
@@ -452,6 +473,20 @@
   letter-spacing: var(--nm-tracking-overline);
   text-transform: uppercase;
   color: var(--nm-text-light-3);
+}
+
+/* Visible seulement là où le tableau déborde vraiment. */
+.nm-table__hint {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .nm-table__hint {
+    display: block;
+    margin: 8px 2px 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-text-light-3);
+  }
 }
 
 .nm-table__us {
@@ -679,6 +714,12 @@
 }
 
 .nm-panel__sample a {
+  /* Seul sur sa ligne, c'est un lien d'action : au doigt, il lui faut la
+     hauteur qui va avec — 18 px se ratent. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 8px;
   color: var(--nm-accent-hover);
   text-decoration: none;
 }

@@ -437,6 +437,21 @@ body {
     color: var(--p-surface-500);
     margin-bottom: 1.5rem;
 }
+
+/* Au doigt, les liens de NAVIGATION des pages de contenu — fil d'Ariane, liens
+   entre guides, appels à l'action posés seuls sur leur ligne — méritent une
+   cible qu'on atteint : 18 à 20 px de haut, c'est la moitié du minimum. Les
+   liens au fil du texte, eux, ne bougent pas : les épaissir déformerait
+   l'interligne d'un paragraphe pour rien. */
+@media (pointer: coarse) {
+    .article .meta a,
+    .article li > a:only-child,
+    .article p > a:only-child {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+    }
+}
 /* Tableau comparatif */
 .article .compare {
     width: 100%;
@@ -641,6 +656,76 @@ body {
 
 /* Le sélecteur de thème du pied de page : même primitive que dans la barre,
    simplement centrée sous le texte légal. */
+/* Cases à cocher au doigt : 16 px de côté, c'est la moitié de la cible
+   minimale. On agrandit la boîte PrimeNG plutôt que d'ajouter une zone
+   invisible — un contrôle qui a l'air petit se vise petit. */
+@media (pointer: coarse) {
+    .p-checkbox,
+    .p-checkbox-box {
+        width: 24px;
+        height: 24px;
+    }
+
+    .p-checkbox-icon {
+        font-size: 14px;
+    }
+}
+
+/* ─── Liens de pied de page ────────────────────────────────────────────────
+   Sur grand écran, la ligne ponctuée d'origine ; dès qu'elle s'empile, des
+   cibles de 40 px et plus de séparateurs orphelins en début de ligne. */
+.nm-foot__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 0.5rem;
+}
+
+.nm-foot__links > * + *::before {
+    content: '·';
+    margin-right: 0.5rem;
+    color: var(--nm-app-text-3);
+}
+
+.nm-foot__links a,
+.nm-foot__links button {
+    padding: 6px 2px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: pointer;
+}
+
+.nm-foot__by a {
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+}
+
+@media (max-width: 640px) {
+    .nm-foot__links {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* Empilés, les liens n'ont plus besoin de séparateur — et un « · » seul
+       en début de ligne ressemble à une puce ratée. */
+    .nm-foot__links > * + *::before {
+        content: none;
+        margin: 0;
+    }
+
+    .nm-foot__links a,
+    .nm-foot__links button {
+        display: block;
+        padding: 11px 0;
+    }
+}
+
 .theme-switch--foot {
     display: inline-flex;
     margin: 0 0 0.75rem;

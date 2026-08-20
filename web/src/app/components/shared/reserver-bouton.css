@@ -4,6 +4,9 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    /* 34 px de haut : une ligne de tableau reste dense, mais le bouton cesse
+       d'être une cible de 29 px — sous le seuil où le pouce vise juste. */
+    min-height: 34px;
     padding: 5px 10px;
     border: 1px solid var(--nm-app-border);
     border-radius: var(--nm-radius-sm);
@@ -48,4 +51,14 @@
 
 .nm-reserve--cta .nm-reserve__caret {
     font-size: 0.8rem;
+}
+
+
+/* Pointeur grossier (doigt) : on passe au seuil confortable, quel que soit
+   l'écran — une tablette n'est pas un petit écran, la main est la même. */
+@media (pointer: coarse) {
+    .nm-reserve {
+        min-height: 40px;
+        padding: 8px 14px;
+    }
 }

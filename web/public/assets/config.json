@@ -1,4 +1,4 @@
 {
-  "apiUrl": "http://192.168.184.171:3001",
+  "apiUrl": "http://localhost:3001",
   "keycloakUrl": "http://localhost:8080"
 }

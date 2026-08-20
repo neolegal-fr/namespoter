@@ -188,3 +188,19 @@
   --nm-touch-card-btn: 46px;
   --nm-touch-cta: 52px;
 }
+
+/* ─── Petits écrans ────────────────────────────────────────────────────────
+ *
+ * Deux jetons seulement, et pour une raison mesurable : 11 px, c'est la taille
+ * des surtitres et des pastilles de verdict. Lisible sur un écran de bureau à
+ * 60 cm, pas sur un téléphone tenu à bout de bras, où ces deux jetons portent
+ * justement les VERDICTS — « libre », « pris », « non vérifiable ». Le reste
+ * de l'échelle typographique ne bouge pas : elle est déjà dimensionnée pour
+ * les deux contextes.
+ */
+@media (max-width: 640px) {
+  :root {
+    --nm-text-overline-sm: 12px;
+    --nm-text-ui-sm: 13.5px;
+  }
+}

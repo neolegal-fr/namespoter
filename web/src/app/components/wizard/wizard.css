@@ -159,6 +159,26 @@
 }
 
 /* ─── Bandeau extensions (étape 3) ─────────────── */
+/* Une ligne quand il y a la place, une colonne sinon. */
+.extensions-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .extensions-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .extensions-row > * {
+        width: 100%;
+    }
+}
+
 .extensions-bar {
     background: var(--nm-app-surface-alt);
     border: 1px solid var(--nm-app-border);

@@ -26,6 +26,15 @@
     font-size: 16px;
 }
 
+/* Le champ prend toute la largeur dès que le bouton passe à la ligne : sans
+   cela, « Vérifier » reste un moignon aligné à gauche sous un champ pleine
+   largeur — deux gabarits différents pour un seul geste. */
+@media (max-width: 640px) {
+    .rp-form button {
+        width: 100%;
+    }
+}
+
 .rp-form input:focus-visible {
     outline: 2px solid var(--nm-app-accent);
     outline-offset: 1px;

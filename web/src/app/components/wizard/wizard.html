@@ -157,7 +157,10 @@
              l'écran. Un paramètre qui décide des résultats n'a pas sa place
              dans les résultats. -->
         <div class="extensions-bar wizard-field">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
+          <!-- La classe porte l'empilement sur petit écran : en ligne, le
+               libellé, les puces et le champ d'ajout se répartissaient de part
+               et d'autre du pli, puces à droite et libellé dessous. -->
+          <div class="extensions-row">
             <h4 class="section-label" style="margin: 0; white-space: nowrap">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
             <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1">
               <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>

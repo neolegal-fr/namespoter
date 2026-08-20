@@ -1330,10 +1330,25 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.showLanding.set(false);
   }
 
+  /**
+   * Bouton de fin de cadrage.
+   *
+   * Il porte « Lancer la recherche » quand aucun nom n'a encore été produit —
+   * et il la lance donc vraiment. Il ne faisait que changer d'écran : on
+   * atterrissait sur une étape 3 VIDE, avec le même libellé à recliquer, sans
+   * rien qui explique pourquoi rien ne s'affiche. Sur mobile, cet écran vide
+   * occupe toute la hauteur : la recherche paraît avoir échoué.
+   *
+   * Quand des noms existent déjà, le libellé devient « Voir les résultats » et
+   * l'action reste une simple navigation : relancer coûterait des crédits pour
+   * une liste déjà payée.
+   */
   goToExtensions() {
     // #4 — repères du marché chargés en tâche de fond, avant le lancement de la recherche
     this.loadCompetitors();
-    this.nextStep(); // step 1 (keywords) → step 2 (extensions)
+    const premiere = this.domains().length === 0;
+    this.nextStep();
+    if (premiere && this.selectedExtensions().length > 0) this.findDomains(false);
   }
 
   /**
