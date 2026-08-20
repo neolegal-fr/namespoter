@@ -48,7 +48,22 @@ interface ExtVerdict {
                 class="nm-filter"
                 [class.nm-filter--on]="filter() === f.key"
                 [attr.aria-pressed]="filter() === f.key"
-                (click)="filter.set(f.key)">{{ f.label | translate }}</button>
+                (click)="filter.set(f.key)">
+          {{ f.label | translate }} <span class="nm-filter__n">{{ count(f.key) }}</span>
+        </button>
+      }
+
+      <!-- À part : c'est la seule vue qui montre ce qu'on a écarté. Absente
+           tant qu'aucun nom n'a été rejeté. -->
+      @if (count('rejected') > 0) {
+        <span class="rg-filters__sep" aria-hidden="true"></span>
+        <button type="button"
+                class="nm-filter nm-filter--rejected"
+                [class.nm-filter--on]="filter() === 'rejected'"
+                [attr.aria-pressed]="filter() === 'rejected'"
+                (click)="filter.set('rejected')">
+          {{ 'WIZARD.STEP3.GRID_FILTER_REJECTED' | translate }} <span class="nm-filter__n">{{ count('rejected') }}</span>
+        </button>
       }
     </div>
 
@@ -330,14 +345,48 @@ export class ResultsGridComponent {
   readonly analyse = output<string>();
   readonly toggleAnalysis = output<string>();
 
-  readonly filter = signal<'all' | 'free' | 'report' | 'fav'>('all');
+  readonly filter = signal<'all' | 'free' | 'report' | 'fav' | 'rejected'>('all');
 
+  /**
+   * Filtres EXCLUSIFS : une seule vue à la fois.
+   *
+   * « Rejetés » en fait partie plutôt que d'être une bascule à côté. Une
+   * bascule « afficher aussi les rejetés » impose deux modèles mentaux dans la
+   * même barre — un choix exclusif ET un cumul — et son libellé doit
+   * s'expliquer lui-même. Or le besoin réel est de REVOIR ce qu'on a écarté,
+   * pour se raviser : c'est une vue, pas un ajout à la vue courante. On y
+   * entre, on remet un pouce à zéro, le nom quitte la liste.
+   *
+   * Il est séparé des quatre autres et n'apparaît qu'en cas de besoin : un
+   * filtre qui ne renverrait jamais rien serait du bruit permanent.
+   */
   readonly filters = [
     { key: 'all' as const,    label: 'WIZARD.STEP3.GRID_FILTER_ALL' },
     { key: 'free' as const,   label: 'WIZARD.STEP3.GRID_FILTER_FREE' },
     { key: 'report' as const, label: 'WIZARD.STEP3.GRID_FILTER_REPORT' },
     { key: 'fav' as const,    label: 'WIZARD.STEP3.GRID_FILTER_FAV' },
   ];
+
+  /**
+   * Combien de noms chaque filtre renverrait.
+   *
+   * Affiché sur la pastille : sans le compte, on clique pour découvrir une
+   * liste vide, et on ne sait pas si « Favoris » vaut le détour. Le compte
+   * répond avant le clic.
+   */
+  count(key: string): number {
+    return this.domains().filter((d) => this.matches(d, key)).length;
+  }
+
+  private matches(d: any, f: string): boolean {
+    const rejete = d.rating === 'disliked';
+    if (f === 'rejected') return rejete;
+    if (rejete) return false; // les rejetés ne reviennent que par leur propre vue
+    if (f === 'free') return this.allFree(d);
+    if (f === 'report') return !!this.summaryOf(d);
+    if (f === 'fav') return this.isLiked(d);
+    return true;
+  }
 
   private readonly byName = computed(() => {
     const m = new Map<string, BrandReportSummary>();
@@ -372,12 +421,7 @@ export class ResultsGridComponent {
    */
   readonly visible = computed(() => {
     const f = this.filter();
-    const kept = this.domains().filter((d) => {
-      if (f === 'free') return this.allFree(d);
-      if (f === 'report') return !!this.summaryOf(d);
-      if (f === 'fav') return this.isLiked(d);
-      return true;
-    });
+    const kept = this.domains().filter((d) => this.matches(d, f));
     const rank = (d: any) => (this.summaryOf(d) ? 0 : this.isLiked(d) ? 1 : 2);
     return [...kept].sort((a, b) => rank(a) - rank(b));
   });

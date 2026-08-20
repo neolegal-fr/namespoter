@@ -408,11 +408,6 @@
             <!-- Rétabli ici : ce bouton vivait dans l'en-tête du tableau, que la
                  refonte remplace par des cartes. Sans lui, les noms rejetés
                  deviennent définitivement invisibles. -->
-            <button type="button" class="nm-btn-tertiary" (click)="showDisliked.set(!showDisliked())"
-              [attr.aria-pressed]="showDisliked()">
-              <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()"></i>
-              <span>{{ (showDisliked() ? 'WIZARD.STEP3.FILTER_HIDE_DISLIKED' : 'WIZARD.STEP3.FILTER_SHOW_ALL') | translate }}</span>
-            </button>
 
             <button type="button" class="nm-btn-tertiary" (click)="copyTable()">
               <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'"></i>

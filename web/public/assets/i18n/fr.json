@@ -204,8 +204,6 @@
       "PICK_FAVOURITES": "Parmi les noms aimés uniquement",
       "RATE_LIKED": "J'aime ce nom",
       "RATE_DISLIKED": "Je n'aime pas ce nom",
-      "FILTER_SHOW_ALL": "Afficher aussi les noms rejetés",
-      "FILTER_HIDE_DISLIKED": "Masquer les noms rejetés",
       "PICK_URGENCY_TITLE": "Les bons noms partent vite.",
       "PICK_URGENCY_SUB": "Celui-ci est libre en ce moment — peut-être plus demain. Ne laissez pas quelqu'un d'autre l'enregistrer avant vous.",
       "PICK_BUY_BTN": "Acheter ce domaine",
@@ -360,7 +358,8 @@
       "REPORT_SHARE_OK": "Rapport envoyé",
       "REPORT_SHARE_KO": "L'envoi a échoué",
       "DEBITED_NAMES": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés",
-      "DEBITED_MIXED": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés, {{tarif}} pour chacune des {{verifs}} vérifications de marque et réseaux sociaux"
+      "DEBITED_MIXED": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés, {{tarif}} pour chacune des {{verifs}} vérifications de marque et réseaux sociaux",
+      "GRID_FILTER_REJECTED": "Rejetés"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

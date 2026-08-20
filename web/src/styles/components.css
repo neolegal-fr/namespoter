@@ -375,3 +375,20 @@
 .nm-link:focus-visible {
     text-decoration: underline;
 }
+
+/* Compteur sur un filtre : il répond « y a-t-il quelque chose ? » avant le
+   clic. Discret — c'est une indication, pas un verdict. */
+.nm-filter__n {
+    margin-left: 0.35rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.65;
+}
+
+/* La vue des noms écartés se tient à l'écart des quatre autres. */
+.nm-filter--rejected {
+    color: var(--nm-app-text-3);
+}
+
+.nm-filter--rejected.nm-filter--on {
+    color: var(--nm-app-text);
+}

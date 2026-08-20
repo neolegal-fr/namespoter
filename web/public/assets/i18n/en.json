@@ -204,8 +204,6 @@
       "PICK_FAVOURITES": "Among liked names only",
       "RATE_LIKED": "I like this name",
       "RATE_DISLIKED": "I don't like this name",
-      "FILTER_SHOW_ALL": "Also show rejected names",
-      "FILTER_HIDE_DISLIKED": "Hide rejected names",
       "PICK_URGENCY_TITLE": "Good names go fast.",
       "PICK_URGENCY_SUB": "This one is available right now — maybe not tomorrow. Don't let someone else register it before you.",
       "PICK_BUY_BTN": "Buy this domain",
@@ -360,7 +358,8 @@
       "REPORT_SHARE_OK": "Report sent",
       "REPORT_SHARE_KO": "Sending failed",
       "DEBITED_NAMES": "{{total}} credits charged — 1 for each of the {{noms}} names suggested",
-      "DEBITED_MIXED": "{{total}} credits charged — 1 for each of the {{noms}} names suggested, {{tarif}} for each of the {{verifs}} trademark and social checks"
+      "DEBITED_MIXED": "{{total}} credits charged — 1 for each of the {{noms}} names suggested, {{tarif}} for each of the {{verifs}} trademark and social checks",
+      "GRID_FILTER_REJECTED": "Rejected"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

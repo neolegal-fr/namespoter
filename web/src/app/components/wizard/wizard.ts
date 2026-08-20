@@ -383,7 +383,6 @@ export class WizardComponent implements OnInit, OnDestroy {
   pickBestResult = signal<{ recommended: string; reason: string } | null>(null);
   pickBestCandidates = signal<string[]>([]);
   private pickBestKey = signal<string | null>(null);
-  showDisliked = signal(false);
   likedDomains = computed(() => this.domains().filter(d => d.rating === 'liked'));
 
   pickMenuItems = computed<MenuItem[]>(() => [
@@ -1171,9 +1170,11 @@ export class WizardComponent implements OnInit, OnDestroy {
   filteredDomains = computed(() => {
     const mode = this.matchMode();
     const exts = this.selectedExtensions();
-    const showDisliked = this.showDisliked();
+
     return this.domains().filter(d => {
-      if (!showDisliked && d.rating === 'disliked') return false;
+      // Le tri par notation appartient à la GRILLE, qui porte déjà les filtres
+      // « Favoris » et « Vérifiés ». Ici on ne filtre que sur la recherche
+      // elle-même — extensions et critère de disponibilité.
       if (exts.length === 0) return true;
       // Ignorer les extensions en cours de vérification (null) dans le filtre
       const knownExts = exts.filter(ext => d.allExtensions?.[ext] !== null && d.allExtensions?.[ext] !== undefined);
