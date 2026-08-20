@@ -43,16 +43,12 @@ interface ExtVerdict {
     <div class="rg-credits">
       <span>
         <strong>{{ debited() }}</strong>
-        @if (reportsDebited() > 0) {
-          {{ 'WIZARD.STEP3.GRID_DEBITED_MIXED' | translate:{ n: reportCost() } }}
+        @if (reportsCount() > 0) {
+          {{ 'WIZARD.STEP3.GRID_DEBITED_MIXED' | translate:{ noms: domains().length, verifs: reportsCount(), tarif: reportCost() } }}
         } @else {
-          {{ (debited() > 1 ? 'WIZARD.STEP3.GRID_DEBITED_MANY' : 'WIZARD.STEP3.GRID_DEBITED_ONE') | translate }}
+          {{ 'WIZARD.STEP3.GRID_DEBITED_NAMES' | translate:{ noms: domains().length } }}
         }
       </span>
-      <span class="rg-credits__sep" aria-hidden="true"></span>
-      <span>{{ 'WIZARD.STEP3.GRID_NEVER_BILLED' | translate }}</span>
-      <span class="rg-credits__sep" aria-hidden="true"></span>
-      <span>{{ 'WIZARD.STEP3.GRID_REPORT_PRICE' | translate:{ n: reportCost() } }}</span>
     </div>
 
     <!-- Filtres. Aucun ne porte sur une donnée payante (INPI, réseaux) :
@@ -116,8 +112,15 @@ interface ExtVerdict {
           <!-- Badge de synthèse SOUS le nom, à gauche : il ne partage plus
                d'emplacement avec le coût. Deux informations de nature
                différente au même endroit se lisent l'une pour l'autre. -->
+          <!-- Présent dans LES DEUX états, à la même place : sans lui, les
+               cartes vérifiées commençaient leur liste 50 px plus bas que les
+               autres, et deux cartes voisines ne se lisaient plus ligne à
+               ligne. Non vérifié, il dit qu'il n'y a pas encore de synthèse —
+               ce qui est une information, pas un vide. -->
           @if (summaryOf(d); as sum) {
             <p class="rg-synth" [class]="'rg-synth--' + synthTone(sum)">{{ synthKey(sum) | translate:{ n: blockerCount(sum) } }}</p>
+          } @else {
+            <p class="rg-synth rg-synth--none">{{ 'WIZARD.STEP3.GRID_UNVERIFIED' | translate }}</p>
           }
 
           <!--
@@ -153,7 +156,7 @@ interface ExtVerdict {
               Pas encore calculée : un tiret. JAMAIS cinq étoiles vides, qui se
               lisent comme une note nulle.
             -->
-            <li class="rg-row">
+            <li class="rg-row rg-row--analysis">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
               @if (d.analysisPending) {
                 <span class="rg-row__value rg-row__value--pending"><i class="pi pi-spin pi-spinner"></i></span>
@@ -183,7 +186,19 @@ interface ExtVerdict {
           <!-- Palier payant : trois lignes, jamais une seule mention. Elles
                nomment les registres et les plateformes, ce qui dispense le
                bouton de les répéter. -->
-          <ul class="rg-rows">
+          <!-- Les trois lignes du palier payant sont CLIQUABLES tant qu'elles
+               sont verrouillées : c'est là que le regard se pose en se demandant
+               « et pour ce nom ? ». Répondre « allez chercher le bouton en bas »
+               à un geste aussi naturel, c'est perdre l'intention au moment où
+               elle existe. Une fois vérifiées, elles redeviennent du texte : il
+               n'y a plus rien à déclencher. -->
+          <ul class="rg-rows" [class.rg-rows--locked]="!summaryOf(d)"
+              [attr.role]="!summaryOf(d) ? 'button' : null"
+              [attr.tabindex]="!summaryOf(d) ? 0 : null"
+              [attr.aria-label]="!summaryOf(d) ? (('WIZARD.STEP3.GRID_VERIFY' | translate) + ' — ' + d.name) : null"
+              (click)="!summaryOf(d) && verify.emit(d.name)"
+              (keydown.enter)="!summaryOf(d) && verify.emit(d.name)"
+              (keydown.space)="!summaryOf(d) && verify.emit(d.name)">
             <li class="rg-row">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_TM_INPI' | translate }}</span>
               @if (summaryOf(d); as sum) {
@@ -232,28 +247,39 @@ interface ExtVerdict {
           </ul>
 
           <div class="rg-actions">
-            @if (summaryOf(d); as sum) {
-              <p class="rg-verified">
-                {{ 'WIZARD.STEP3.GRID_VERIFIED_ON' | translate:{ date: (sum.verifiedAt | date: 'd MMM') } }}
-                <button type="button" class="rg-refresh" (click)="refresh.emit(d.name)">
-                  {{ 'WIZARD.STEP3.GRID_REFRESH' | translate }}
-                </button>
-              </p>
+            <!-- La date porte sur CE QUE LA CARTE MONTRE, domaines compris :
+                 un registre bouge, un nom libre hier peut être déposé
+                 aujourd'hui. Elle est donc là dans les deux états, ce qui
+                 aligne du même coup les cartes vérifiées et les autres — leur
+                 pied avait deux hauteurs différentes. -->
+            <p class="rg-checked">
+              @if (checkedLabel(d); as label) {
+                <span>{{ label.key | translate:label.params }}</span>
+              } @else {
+                <span class="rg-checked--none">{{ 'WIZARD.STEP3.GRID_CHECKED_UNKNOWN' | translate }}</span>
+              }
+              <button type="button" class="rg-refresh" (click)="refreshDomains.emit(d.name)">
+                {{ 'WIZARD.STEP3.GRID_RECHECK_DOMAINS' | translate }}
+              </button>
+            </p>
+
+            <!-- DEUX boutons de même taille, dans les deux états. Le gauche
+                 porte marque et réseaux — il les achète, puis les réactualise ;
+                 le droit ouvre le document. Un pied qui change de composition
+                 selon l'état désaligne toutes les cartes entre elles. -->
+            <div class="rg-actions__row">
+              <button type="button" class="rg-btn rg-btn--buy"
+                      [disabled]="checkTooRecent(d)"
+                      [attr.title]="checkTooRecent(d) ? ('WIZARD.STEP3.GRID_RECHECK_SOON' | translate) : null"
+                      (click)="verify.emit(d.name)">
+                <i class="pi pi-search" aria-hidden="true"></i>
+                {{ 'WIZARD.STEP3.GRID_VERIFY_SHORT' | translate }}
+              </button>
               <button type="button" class="rg-btn rg-btn--ghost" (click)="openReport.emit(d.name)">
+                <i class="pi pi-file-pdf" aria-hidden="true"></i>
                 {{ 'WIZARD.STEP3.GRID_FULL_REPORT' | translate }}
               </button>
-            } @else {
-              <!-- AUCUN PRIX sur ce bouton : à ce stade l'utilisateur ne sait pas
-                   encore ce que la vérification lui apporte, un tarif ne peut que
-                   l'arrêter. Le prix — et la mention « offert ce mois-ci » —
-                   appartiennent à la popup, après le contexte. -->
-              <button type="button" class="rg-btn rg-btn--buy" (click)="verify.emit(d.name)">
-                {{ 'WIZARD.STEP3.GRID_VERIFY' | translate }}
-              </button>
-              <button type="button" class="rg-btn rg-btn--ghost" (click)="openReport.emit(d.name)">
-                {{ 'WIZARD.STEP3.GRID_FULL_REPORT' | translate }}
-              </button>
-            }
+            </div>
           </div>
         </article>
       }
@@ -287,6 +313,8 @@ export class ResultsGridComponent {
   readonly openReport = output<string>();
   readonly verify = output<string>();
   readonly refresh = output<string>();
+  /** Réactualiser la seule disponibilité des domaines de ce nom. */
+  readonly refreshDomains = output<string>();
   readonly toggleAnalysis = output<string>();
 
   readonly filter = signal<'all' | 'free' | 'report' | 'fav'>('all');
@@ -364,6 +392,9 @@ export class ResultsGridComponent {
    * nécessairement payé au tarif d'alors (le rapport offert est arrivé avec
    * elle) : on retient le tarif courant, faute de mieux.
    */
+  /** Nombre de noms de cette liste dont marque et réseaux ont été vérifiés. */
+  readonly reportsCount = computed(() => this.domains().filter((d) => !!this.summaryOf(d)).length);
+
   readonly reportsDebited = computed(() =>
     this.domains().reduce((total, d) => {
       const sum = this.summaryOf(d);
@@ -493,6 +524,52 @@ export class ResultsGridComponent {
     // Le singulier a sa propre clé : « 1 obstacles » se remarque.
     return this.blockerCount(sum) === 1 ? 'WIZARD.STEP3.GRID_SYNTH_RISK_ONE' : 'WIZARD.STEP3.GRID_SYNTH_RISK';
   }
+
+  /**
+   * Depuis quand le contenu de la carte tient.
+   *
+   * Deux sources, et la plus ANCIENNE l'emporte : la carte annonce une seule
+   * date pour tout ce qu'elle montre, et dire « vérifié aujourd'hui » parce
+   * que la marque l'a été, alors que les domaines datent de la semaine
+   * dernière, serait faux là où ça compte.
+   */
+  checkedAt(d: any): Date | null {
+    const dates = [d.checkedAt, this.summaryOf(d)?.verifiedAt]
+      .filter(Boolean)
+      .map((v: any) => new Date(v))
+      .filter((x) => !isNaN(x.getTime()));
+    if (!dates.length) return null;
+    return new Date(Math.min(...dates.map((x) => x.getTime())));
+  }
+
+  /** Libellé de fraîcheur : « à l'instant », « il y a 3 h », puis la date. */
+  checkedLabel(d: any): { key: string; params?: Record<string, unknown> } | null {
+    const at = this.checkedAt(d);
+    if (!at) return null;
+    const min = Math.floor((this.now - at.getTime()) / 60000);
+    if (min < 2) return { key: 'WIZARD.STEP3.GRID_CHECKED_NOW' };
+    if (min < 60) return { key: 'WIZARD.STEP3.GRID_CHECKED_MIN', params: { n: min } };
+    const h = Math.floor(min / 60);
+    if (h < 24) return { key: 'WIZARD.STEP3.GRID_CHECKED_HOURS', params: { n: h } };
+    return { key: 'WIZARD.STEP3.GRID_CHECKED_ON', params: { date: at.toLocaleDateString() } };
+  }
+
+  /**
+   * Marque et réseaux déjà vérifiés il y a moins de 24 h.
+   *
+   * On ne repasse pas : les registres de marques ne bougent pas d'un jour à
+   * l'autre, et une requête INPI par carte et par heure viderait le quota
+   * partagé du produit. Le bouton reste VISIBLE mais inerte — le faire
+   * disparaître décalerait à nouveau les cartes entre elles.
+   */
+  checkTooRecent(d: any): boolean {
+    const at = this.summaryOf(d)?.verifiedAt;
+    if (!at) return false; // jamais vérifié : le bouton achète
+    return this.now - new Date(at).getTime() < 24 * 3600 * 1000;
+  }
+
+  /** Instant du rendu, figé : recalculer à chaque cycle ferait clignoter les libellés. */
+  private readonly now = Date.now();
 
   /** Nombre d'obstacles : « obstacles » sans chiffre n'est pas un libellé. */
   blockerCount(sum: BrandReportSummary): number {

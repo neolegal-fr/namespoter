@@ -263,10 +263,6 @@
       "TM_UNKNOWN_EXPLAIN": "La vérification automatique n'a pas pu aboutir pour ce nom (source indisponible). Lancez la <strong>recherche officielle INPI</strong> pour trancher.",
       "REPORT_RETRY": "Réessayer",
       "REPORT_LOADING_HINT": "Cela prend généralement quelques secondes.",
-      "GRID_DEBITED_ONE": "crédit débité — 1 par suggestion retenue",
-      "GRID_DEBITED_MANY": "crédits débités — 1 par suggestion retenue",
-      "GRID_NEVER_BILLED": "Quel que soit le nombre d'extensions vérifiées",
-      "GRID_REPORT_PRICE": "Rapport complet : {{n}} crédits par nom",
       "GRID_FILTER_ALL": "Tous",
       "GRID_FILTER_FREE": "Tout libre",
       "GRID_FILTER_REPORT": "Noms vérifiés",
@@ -335,7 +331,16 @@
       "SCORE_FAIR": "moyen",
       "SCORE_WEAK": "faible",
       "LOCKED_CHECK_WO": "Marques internationales — OMPI",
-      "GRID_DEBITED_MIXED": "crédits débités — 1 par suggestion de nom, {{n}} par vérification de marque et réseaux sociaux"
+      "GRID_DEBITED_MIXED": "crédits débités — 1 pour chacun des {{noms}} noms proposés, {{tarif}} pour chacune des {{verifs}} vérifications de marque et réseaux sociaux",
+      "GRID_VERIFY_SHORT": "Marque et réseaux",
+      "GRID_CHECKED_NOW": "Vérifié à l'instant",
+      "GRID_CHECKED_MIN": "Vérifié il y a {{n}} min",
+      "GRID_CHECKED_HOURS": "Vérifié il y a {{n}} h",
+      "GRID_CHECKED_ON": "Vérifié le {{date}}",
+      "GRID_CHECKED_UNKNOWN": "Date de vérification inconnue",
+      "GRID_RECHECK_DOMAINS": "Revérifier",
+      "GRID_RECHECK_SOON": "Marque et réseaux vérifiés il y a moins de 24 h",
+      "GRID_DEBITED_NAMES": "crédits débités — 1 pour chacun des {{noms}} noms proposés"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

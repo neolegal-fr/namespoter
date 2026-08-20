@@ -417,6 +417,7 @@
               (rate)="setRating($event.result, $event.rating)"
               (verify)="askBrandReport($event)"
               (refresh)="refreshBrandReport($event)"
+              (refreshDomains)="recheckOneName($event)"
               (openReport)="openFullReport($event)"
               (toggleAnalysis)="toggleAnalysis($event)">
             </app-results-grid>

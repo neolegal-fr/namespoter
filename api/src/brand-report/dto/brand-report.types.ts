@@ -53,6 +53,15 @@ export interface NameQuality {
   score: number;
   /** Notes par critère (memorability, pronunciation, international, seo, distinctiveness). */
   scores: Record<string, number>;
+  /**
+   * Comment le nom est construit et ce qu'il évoque, en une phrase.
+   *
+   * Les cinq notes disent si le nom est BON ; elles ne disent pas ce qu'il
+   * VEUT DIRE. Devant « Verdalya », la première question n'est pas « 4/5 en
+   * mémorabilité ? » mais « ça vient d'où ? » — sans quoi on ne sait pas
+   * défendre le nom devant un associé.
+   */
+  origin?: string;
   strengths?: string;
   watchout?: string;
 }

@@ -263,10 +263,6 @@
       "TM_UNKNOWN_EXPLAIN": "The automatic check could not complete for this name (source unavailable). Run the <strong>official INPI search</strong> to decide.",
       "REPORT_RETRY": "Try again",
       "REPORT_LOADING_HINT": "This usually takes a few seconds.",
-      "GRID_DEBITED_ONE": "credit charged — 1 per suggestion kept",
-      "GRID_DEBITED_MANY": "credits charged — 1 per suggestion kept",
-      "GRID_NEVER_BILLED": "Whatever the number of extensions checked",
-      "GRID_REPORT_PRICE": "Full report: {{n}} credits per name",
       "GRID_FILTER_ALL": "All",
       "GRID_FILTER_FREE": "Fully available",
       "GRID_FILTER_REPORT": "Checked names",
@@ -335,7 +331,16 @@
       "SCORE_FAIR": "fair",
       "SCORE_WEAK": "weak",
       "LOCKED_CHECK_WO": "International trademarks — WIPO",
-      "GRID_DEBITED_MIXED": "credits charged — 1 per name suggestion, {{n}} per trademark and social check"
+      "GRID_DEBITED_MIXED": "credits charged — 1 for each of the {{noms}} names suggested, {{tarif}} for each of the {{verifs}} trademark and social checks",
+      "GRID_VERIFY_SHORT": "Trademark & socials",
+      "GRID_CHECKED_NOW": "Checked just now",
+      "GRID_CHECKED_MIN": "Checked {{n}} min ago",
+      "GRID_CHECKED_HOURS": "Checked {{n}} h ago",
+      "GRID_CHECKED_ON": "Checked on {{date}}",
+      "GRID_CHECKED_UNKNOWN": "Check date unknown",
+      "GRID_RECHECK_DOMAINS": "Re-check",
+      "GRID_RECHECK_SOON": "Trademark and socials checked less than 24 h ago",
+      "GRID_DEBITED_NAMES": "credits charged — 1 for each of the {{noms}} names suggested"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

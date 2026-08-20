@@ -259,11 +259,35 @@
 
 /* ─── Actions ────────────────────────────────────────────────────────────── */
 
+/* Pied de carte : une ligne de date, puis deux boutons de même taille. La
+   composition ne change JAMAIS d'un état à l'autre — c'est ce qui garantit que
+   deux cartes voisines se terminent à la même hauteur. */
 .rg-actions {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
   margin-top: auto;
+}
+
+.rg-actions__row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.rg-checked {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-app-text-2);
+}
+
+.rg-checked--none {
+  color: var(--nm-app-text-3);
+  font-style: italic;
 }
 
 .rg-btn {
@@ -456,16 +480,10 @@
 .rg-synth--watch { background: var(--nm-app-verdict-unknown-bg); color: var(--nm-app-verdict-unknown-fg); }
 .rg-synth--risk  { background: var(--nm-app-verdict-taken-bg);   color: var(--nm-app-verdict-taken-fg); }
 
-.rg-verified {
-  flex: 1;
-  margin: 0;
-  font-size: var(--nm-text-ui-sm);
-  color: var(--nm-app-text-2);
-}
-
 .rg-refresh {
-  display: block;
-  min-height: var(--nm-touch-min);
+  display: inline;
+  flex: none;
+  min-height: 0;
   padding: 0;
   background: none;
   border: 0;
@@ -501,9 +519,8 @@
 
 /* Les actions passent à la ligne : le bouton d'achat occupe toute la largeur,
    les secondaires en dessous. */
-.rg-actions {
+.rg-actions__row {
   flex-wrap: wrap;
-  gap: 8px;
 }
 
 /* Les pouces vivent dans l'en-tête : ils ne s'étirent pas. */
@@ -536,4 +553,62 @@
 .rg-v--watch {
   background: var(--nm-app-verdict-unknown-bg);
   color: var(--nm-app-verdict-unknown-fg);
+}
+
+
+/* Palier verrouillé : cliquable dans son ensemble. Le survol le dit — un
+   cadenas seul se lit comme « interdit », pas comme « cliquez pour ouvrir ». */
+.rg-rows--locked {
+    cursor: pointer;
+    border-radius: var(--nm-radius-sm);
+    transition: background-color 0.15s;
+}
+
+.rg-rows--locked:hover,
+.rg-rows--locked:focus-visible {
+    background: var(--nm-app-surface-alt);
+    outline: none;
+}
+
+.rg-rows--locked:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+/* Icône dans les boutons de pied de carte. */
+.rg-btn .pi {
+    font-size: 0.8rem;
+}
+
+/* Pas encore de synthèse : neutre, jamais un verdict. */
+.rg-synth--none {
+    background: var(--nm-app-badge-bg);
+    color: var(--nm-app-text-2);
+}
+
+
+/* La ligne d'analyse réserve toujours la hauteur du bouton d'étoiles, même
+   quand elle n'affiche qu'un tiret : sinon une carte encore sans analyse
+   remonte de 18 px tout ce qui la suit, et cesse d'être comparable à sa
+   voisine. */
+.rg-row--analysis {
+    min-height: var(--nm-touch-min);
+}
+
+/* La date et son lien tiennent sur une ligne : deux lignes sur une carte et
+   une sur l'autre décalent les pieds. La date s'abrège au besoin, le lien
+   jamais — c'est lui qui se clique. */
+.rg-checked {
+    flex-wrap: nowrap;
+}
+
+.rg-checked > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rg-checked .rg-refresh {
+    white-space: nowrap;
 }

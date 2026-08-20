@@ -1233,6 +1233,7 @@ export class WizardComponent implements OnInit, OnDestroy {
         this.domains.set(project.suggestions.map((s: any) => ({
           id: s.id,
           name: s.domainName,
+          checkedAt: s.checkedAt ?? null,
           style: s.style || 'standard',
           allExtensions: s.availability,
           rating: s.rating ?? 'neutral',
@@ -1579,6 +1580,55 @@ export class WizardComponent implements OnInit, OnDestroy {
     if (this.projectId()) {
       this.projectService.updateProject(this.projectId()!, { extensions: this.selectedExtensions() }).subscribe();
     }
+  }
+
+  /**
+   * Recontrôle la disponibilité d'UN seul nom.
+   *
+   * Le recontrôle global existait déjà, mais il porte sur toute la liste : le
+   * déclencher pour rafraîchir une carte enverrait trente requêtes aux
+   * registres pour un nom. Même endpoint, un seul nom.
+   */
+  recheckOneName(name: string): void {
+    const cible = this.domains().find((d) => this.normName(d.name) === this.normName(name));
+    if (!cible || this.selectedExtensions().length === 0) return;
+
+    // Les extensions repassent à `null` — « en cours », et non « indisponible ».
+    this.domains.update((list) =>
+      list.map((d) =>
+        d === cible
+          ? { ...d, allExtensions: Object.fromEntries(this.selectedExtensions().map((e) => [e, null])) }
+          : d,
+      ),
+    );
+    this.cdr.detectChanges();
+
+    this.domainService.recheckDomains([cible.name], this.selectedExtensions()).subscribe({
+      next: (res: any) => {
+        const frais = (res?.domains ?? []).find((x: any) => this.normName(x.name) === this.normName(name));
+        this.domains.update((list) =>
+          list.map((d) =>
+            this.normName(d.name) === this.normName(name)
+              ? { ...d, allExtensions: frais?.allExtensions ?? d.allExtensions, checkedAt: new Date().toISOString() }
+              : d,
+          ),
+        );
+        const enregistrable = this.domains().find((d) => this.normName(d.name) === this.normName(name));
+        if (enregistrable?.id) {
+          this.projectService
+            .updateSuggestionsAvailability([{ id: enregistrable.id, availability: enregistrable.allExtensions }])
+            .subscribe();
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Échec : on remet ce qu'on savait plutôt qu'un écran de points d'interrogation.
+        this.domains.update((list) =>
+          list.map((d) => (d === cible ? cible : d)),
+        );
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   recheckIfNeeded() {

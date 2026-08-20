@@ -311,3 +311,12 @@
     vertical-align: -2px;
     color: var(--nm-app-text-2);
 }
+
+/* Ce que le nom évoque : première ligne de la section qualité, en corps de
+   lecture — c'est une phrase, pas une métadonnée. */
+.rv-origin {
+    margin: 0 0 0.85rem;
+    font-size: var(--nm-text-body-sm);
+    line-height: 1.55;
+    color: var(--nm-app-text);
+}

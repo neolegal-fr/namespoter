@@ -641,11 +641,13 @@ Respond ONLY with a JSON object. Example:
   "lang": "${lang}",
   "scores": { "memorability": 4, "pronunciation": 3, "international": 5, "seo": 3, "distinctiveness": 4 },
   "comments": { "memorability": "...", "pronunciation": "...", "international": "...", "seo": "...", "distinctiveness": "..." },
+  "origin": "max 18 words",
   "strengths": "max 15 words",
   "watchout": "max 15 words"
 }
 
-Scores are integers 1-5. Be honest and concise.`;
+Scores are integers 1-5. Be honest and concise.
+"origin": how the name is built and what it evokes — the roots or words it combines, and the impression it leaves. One sentence, no marketing adjectives.`;
 
     try {
       const response = await this.openai.chat.completions.create({

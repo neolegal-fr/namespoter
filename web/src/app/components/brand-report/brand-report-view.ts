@@ -52,6 +52,62 @@ import { SafeHtml } from '@angular/platform-browser';
           </div>
         </header>
 
+        <!-- L'ordre du document suit celui de la décision : d'abord CE QUE
+             VAUT le nom, ensuite ce qui peut l'empêcher. Les domaines et
+             l'analyse sont acquis dès la recherche ; marques et réseaux
+             viennent après, parce qu'ils s'achètent. -->
+        <!-- Qualité du nom — issue de l'analyse déjà produite pendant la
+             recherche, donc disponible avant tout achat. -->
+        @if (locked && analysis) {
+          <section class="rv-section">
+            <div class="rv-section__head">
+              <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
+              @if (analysisScore > 0) {
+                <span class="rv-section__meta">
+                  <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(analysisScore * 20)">{{ scoreKey(analysisScore * 20) | translate }}</span>
+                  <strong style="color: var(--nm-app-text)">{{ analysisScore }}/5</strong>
+                </span>
+              }
+            </div>
+            <div class="rv-explain" [innerHTML]="analysis"></div>
+          </section>
+        }
+
+        @if (r.quality; as q) {
+          <section class="rv-section">
+            <div class="rv-section__head">
+              <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
+              <!-- Le chiffre reste en couleur de texte ; c'est une PASTILLE
+                   de verdict qui porte l'appréciation. Un nombre coloré se lit
+                   comme un état sans dire lequel, et introduit des couleurs
+                   ad hoc hors de l'échelle du produit. -->
+              <span class="rv-section__meta">
+                <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(q.score)">{{ scoreKey(q.score) | translate }}</span>
+                <strong style="color: var(--nm-app-text)">{{ q.score }}/100</strong>
+              </span>
+            </div>
+            <!-- D'ABORD ce que le nom raconte, ensuite ses notes. Les cinq
+                 critères disent si le nom est bon ; ils ne disent pas ce qu'il
+                 veut dire — et c'est la première question qu'on se pose devant
+                 un nom inventé, celle qu'il faudra savoir répondre à un
+                 associé. -->
+            @if (q.origin) {
+              <p class="rv-origin">{{ q.origin }}</p>
+            }
+            <div class="rv-criteria">
+              @for (c of criteria(q); track c.label) {
+                <span class="rv-criterion">{{ c.label }} <strong>{{ c.value }}/5</strong></span>
+              }
+            </div>
+            @if (q.strengths) {
+              <p class="rv-explain"><strong>{{ 'WIZARD.STEP3.REPORT_STRENGTHS' | translate }} :</strong> {{ q.strengths }}</p>
+            }
+            @if (q.watchout) {
+              <p class="rv-explain"><strong>{{ 'WIZARD.STEP3.REPORT_WATCHOUT' | translate }} :</strong> {{ q.watchout }}</p>
+            }
+          </section>
+        }
+
         <!-- Noms de domaine -->
         <section class="rv-section">
           <div class="rv-section__head">
@@ -164,50 +220,6 @@ import { SafeHtml } from '@angular/platform-browser';
              donc ni prix ni solde, et surtout aucun verdict payant. -->
         @if (locked) {
           <ng-content select="[locked]"></ng-content>
-        }
-
-        <!-- Qualité du nom — issue de l'analyse déjà produite pendant la
-             recherche, donc disponible avant tout achat. -->
-        @if (locked && analysis) {
-          <section class="rv-section">
-            <div class="rv-section__head">
-              <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
-              @if (analysisScore > 0) {
-                <span class="rv-section__meta">
-                  <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(analysisScore * 20)">{{ scoreKey(analysisScore * 20) | translate }}</span>
-                  <strong style="color: var(--nm-app-text)">{{ analysisScore }}/5</strong>
-                </span>
-              }
-            </div>
-            <div class="rv-explain" [innerHTML]="analysis"></div>
-          </section>
-        }
-
-        @if (r.quality; as q) {
-          <section class="rv-section">
-            <div class="rv-section__head">
-              <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
-              <!-- Le chiffre reste en couleur de texte ; c'est une PASTILLE
-                   de verdict qui porte l'appréciation. Un nombre coloré se lit
-                   comme un état sans dire lequel, et introduit des couleurs
-                   ad hoc hors de l'échelle du produit. -->
-              <span class="rv-section__meta">
-                <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(q.score)">{{ scoreKey(q.score) | translate }}</span>
-                <strong style="color: var(--nm-app-text)">{{ q.score }}/100</strong>
-              </span>
-            </div>
-            <div class="rv-criteria">
-              @for (c of criteria(q); track c.label) {
-                <span class="rv-criterion">{{ c.label }} <strong>{{ c.value }}/5</strong></span>
-              }
-            </div>
-            @if (q.strengths) {
-              <p class="rv-explain"><strong>{{ 'WIZARD.STEP3.REPORT_STRENGTHS' | translate }} :</strong> {{ q.strengths }}</p>
-            }
-            @if (q.watchout) {
-              <p class="rv-explain"><strong>{{ 'WIZARD.STEP3.REPORT_WATCHOUT' | translate }} :</strong> {{ q.watchout }}</p>
-            }
-          </section>
         }
 
         <!-- Pied : avertissement obligatoire + action de réservation -->
