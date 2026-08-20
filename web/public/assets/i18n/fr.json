@@ -120,8 +120,8 @@
       "USE_VERSION": "Utiliser cette version"
     },
     "STEP2": {
-      "TITLE": "Configuration",
-      "SUBTITLE": "Vos inspirations, vos mots-clés, votre public cible et la longueur des noms.",
+      "TITLE": "Vos préférences",
+      "SUBTITLE": "Ce qui vous inspire, les mots à retenir, votre public et la longueur des noms.",
       "KEYWORDS_TITLE": "Mots-clés",
       "KEYWORDS_COUNT": "{{n}} / {{max}} mots-clés",
       "KEYWORDS_FULL": "Limite de {{max}} mots-clés atteinte : retirez-en un pour en ajouter un autre.",

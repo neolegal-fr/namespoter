@@ -120,8 +120,8 @@
       "USE_VERSION": "Use this version"
     },
     "STEP2": {
-      "TITLE": "Configuration",
-      "SUBTITLE": "Your inspiration, keywords, target audience and name length.",
+      "TITLE": "Your preferences",
+      "SUBTITLE": "What inspires you, the words to keep, your audience and how long names should be.",
       "KEYWORDS_TITLE": "Keywords",
       "KEYWORDS_COUNT": "{{n}} / {{max}} keywords",
       "KEYWORDS_FULL": "Limit of {{max}} keywords reached: remove one to add another.",

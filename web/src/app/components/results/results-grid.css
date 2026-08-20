@@ -147,16 +147,26 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  /* Le badge passe à la ligne plutôt que d'écraser le nom : un nom long, ou un
-     libellé de coût long dans une autre langue, coupait « Roulio » en
-     « Rouli / o ». Constaté à 390px. */
-  flex-wrap: wrap;
+  /* Jamais de retour à la ligne : les pouces restent au bout du nom. Ils
+     descendaient en dessous dès qu'un nom était long — « platsvegetauxadomicile »
+     suffit — et l'en-tête gagnait alors la hauteur d'un bouton, décalant toutes
+     les lignes suivantes par rapport aux cartes voisines. */
+  flex-wrap: nowrap;
   gap: 6px 10px;
   margin-bottom: 14px;
+  /* Hauteur de DEUX lignes de nom, même quand une seule suffit : sans elle,
+     « navelor » et « platsvegetauxadomicile » ne commencent pas leurs listes
+     à la même hauteur, et les cartes voisines cessent d'être comparables
+     ligne à ligne. */
+  min-height: calc(2 * 1.3 * var(--nm-text-name-card));
 }
 
 .rg-card__id {
+  /* `min-width: 0` : sans lui, un mot long refuse de se replier et pousse les
+     pouces hors de la carte — la règle par défaut d'un élément flex est de ne
+     jamais descendre sous la largeur de son contenu. */
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 .rg-card__id {
@@ -175,15 +185,6 @@
   letter-spacing: var(--nm-tracking-name-card);
   color: var(--nm-app-text);
   overflow-wrap: anywhere;
-}
-
-.rg-tag {
-  padding: 2px 8px;
-  border-radius: var(--nm-radius-pill);
-  background: var(--nm-app-divider);
-  color: var(--nm-app-text-2);
-  font-size: 11px;
-  white-space: nowrap;
 }
 
 .rg-card__manual {

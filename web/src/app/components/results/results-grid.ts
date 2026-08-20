@@ -75,14 +75,14 @@ interface ExtVerdict {
       @for (d of visible(); track d.id) {
         <article class="rg-card" [class.rg-card--strong]="allFree(d)">
 
+          <!-- En-tête sur UNE ligne, toujours.
+               Il enveloppait quand le nom était long : les pouces passaient
+               dessous, l'en-tête gagnait la hauteur d'un bouton, et toutes les
+               lignes des cartes voisines cessaient de s'aligner — or la
+               comparaison ligne à ligne est l'objet même de cet écran. -->
           <header class="rg-card__head">
             <div class="rg-card__id">
               <h3 class="rg-card__name">{{ d.name }}</h3>
-              @if (isLocal() && d.style && d.style !== 'standard') {
-                <span class="rg-tag">
-                  {{ (d.style === 'descriptive' ? 'WIZARD.STYLE.DESCRIPTIVE' : 'WIZARD.STYLE.CULTURAL') | translate }}
-                </span>
-              }
               @if (d.isManual) {
                 <i class="pi pi-pencil rg-card__manual" [attr.aria-label]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate"></i>
               }
@@ -274,7 +274,6 @@ export class ResultsGridComponent {
   /** Synthèses des noms vérifiés, indexées par nom normalisé. */
   readonly summaries = input<BrandReportSummary[]>([]);
   readonly reportCost = input(50);
-  readonly isLocal = input(false);
   readonly expandedAnalysisId = input<string | null>(null);
   readonly analysisRenderer = input<(a: string | null) => SafeHtml>(() => '' as unknown as SafeHtml);
   /**

@@ -140,7 +140,7 @@
         </div>
 
         <!-- #3 / #4 : inspirations — ce qui existe déjà sur le marché + noms aimés -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.INSPIRATION_TITLE' | translate }}</h4>
 
           <!-- Liste du marché, notable ligne par ligne -->
@@ -221,7 +221,7 @@
         </div>
 
         <!-- Mots-clés -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
           <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem">
             <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
             <span [style.color]="keywordsFull() ? 'var(--nm-app-verdict-taken-fg)' : ''" class="text-500" style="font-size: var(--nm-text-ui-sm); flex-shrink: 0">
@@ -239,7 +239,7 @@
         </div>
 
         <!-- Cible internationale ou locale -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.TARGET_TITLE' | translate }}</h4>
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
             <p-selectButton
@@ -263,7 +263,7 @@
         </div>
 
         <!-- US-032 : Styles de noms (local seulement) -->
-        <div *ngIf="isLocal()" style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+        <div *ngIf="isLocal()" class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.NAMING_STYLES_TITLE' | translate }}</h4>
           <label style="display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.9rem">
             <input type="checkbox" [checked]="descriptiveNames()" (change)="descriptiveNames.set($any($event.target).checked)"
@@ -278,7 +278,7 @@
         </div>
 
         <!-- #1 : Longueur minimale des noms générés -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.5rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.5rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.MIN_LENGTH_TITLE' | translate }}</h4>
           <p-selectButton
             [options]="MIN_LENGTH_OPTIONS"
@@ -309,7 +309,7 @@
           </div>
         </div>
 
-        <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
+        <div class="flex mt-3" class="wizard-field" style=" justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <p-button
             [label]="'WIZARD.STEP2.NEXT_BTN' | translate"
@@ -412,7 +412,6 @@
               [extensions]="selectedExtensions()"
               [summaries]="reportSummaries()"
               [reportCost]="brandReportCost"
-              [isLocal]="isLocal()"
               [expandedAnalysisId]="expandedAnalysisId()"
               [analysisRenderer]="analysisRenderer"
               (rate)="setRating($event.result, $event.rating)"

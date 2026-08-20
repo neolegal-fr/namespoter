@@ -630,3 +630,23 @@ body {
     /* Sur mobile, le globe suffit : le menubar est déjà chargé. */
     .lang-toggle__code { display: none; }
 }
+
+/* Mode actif dans le menu du compte : la coche le dit déjà, l'accent le
+   confirme sans avoir à comparer les trois lignes. */
+.p-menu .menu-item--on .p-menu-item-link,
+.p-menu .menu-item--on .p-menu-item-icon {
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}
+
+/* Le sélecteur de thème du pied de page : même primitive que dans la barre,
+   simplement centrée sous le texte légal. */
+.theme-switch--foot {
+    display: inline-flex;
+    margin: 0 0 0.75rem;
+}
+
+.account-sheet__row--on {
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}

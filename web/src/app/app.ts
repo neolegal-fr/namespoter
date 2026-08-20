@@ -23,6 +23,13 @@ import { FormsModule } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
 import { Drawer } from 'primeng/drawer';
 
+/** Icône propre à chaque mode, remplacée par une coche sur le mode actif. */
+const THEME_ICONS: Record<'system' | 'light' | 'dark', string> = {
+  system: 'pi pi-desktop',
+  light: 'pi pi-sun',
+  dark: 'pi pi-moon',
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -75,23 +82,6 @@ import { Drawer } from 'primeng/drawer';
               <span class="lang-toggle__code">{{ currentLangLabel }}</span>
             </button>
             <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body" styleClass="lang-menu"></p-menu>
-
-            <!--
-              Thème : trois états, « Système » par défaut. Une bascule à deux
-              états force un choix, puis cesse de suivre l'OS quand celui-ci
-              passe en mode nuit le soir.
-              Placé à côté de la langue : ce n'est pas une action fréquente.
-            -->
-            <div class="theme-switch" role="group" [attr.aria-label]="'APP.THEME' | translate">
-              @for (t of themeChoices; track t.key) {
-                <button type="button"
-                        class="theme-switch__btn"
-                        [class.theme-switch__btn--on]="theme.choice() === t.key"
-                        [attr.aria-pressed]="theme.choice() === t.key"
-                        [attr.title]="t.label | translate"
-                        (click)="theme.set(t.key)">{{ t.short | translate }}</button>
-              }
-            </div>
 
             <ng-container *ngIf="isLoggedIn()">
               <!-- Compteur de crédits : visible en permanence, c'est le signal
@@ -196,6 +186,16 @@ import { Drawer } from 'primeng/drawer';
               <i [class]="item.icon"></i><span>{{ item.label }}</span>
             </button>
           </ng-container>
+
+          <div class="account-sheet__section">{{ 'APP.THEME' | translate }}</div>
+          @for (t of themeChoices; track t.key) {
+            <button type="button" class="account-sheet__row"
+                    [class.account-sheet__row--on]="theme.choice() === t.key"
+                    (click)="theme.set(t.key)">
+              <i [class]="theme.choice() === t.key ? 'pi pi-check' : themeIcon(t.key)"></i>
+              <span>{{ t.label | translate }}</span>
+            </button>
+          }
 
           <div class="account-sheet__section"></div>
           <button type="button" class="account-sheet__row" (click)="sheetLogout()">
@@ -410,6 +410,25 @@ import { Drawer } from 'primeng/drawer';
            blanc) et un « background: white » en dur, qui l'excluait du thème. -->
       <footer class="mt-8 py-6 border-top-1 border-solid text-center text-sm"
               style="background: var(--nm-app-surface); color: var(--nm-app-text-2); border-color: var(--nm-app-border)">
+        <!--
+          Le sélecteur de thème vit dans le menu du compte : ce n'est pas une
+          action fréquente, et la barre de menu doit rester celle des actions
+          du produit. Reste le cas du visiteur sans compte, qui n'a pas ce
+          menu — il le retrouve ici, sur les pages de contenu qui suivent bien
+          le thème (mentions, guides, comparatifs).
+        -->
+        <div *ngIf="!isLoggedIn()" class="theme-switch theme-switch--foot" role="group"
+             [attr.aria-label]="'APP.THEME' | translate">
+          @for (t of themeChoices; track t.key) {
+            <button type="button"
+                    class="theme-switch__btn"
+                    [class.theme-switch__btn--on]="theme.choice() === t.key"
+                    [attr.aria-pressed]="theme.choice() === t.key"
+                    [attr.title]="t.label | translate"
+                    (click)="theme.set(t.key)">{{ t.short | translate }}</button>
+          }
+        </div>
+
         <div class="mb-2 font-bold text-500">Namorama &copy; 2026</div>
         {{ 'APP.FOOTER' | translate }}
         <a href="https://neolegal.fr" target="_blank" rel="noopener" style="color: inherit; font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor">NeoLegal</a>
@@ -606,7 +625,10 @@ export class AppComponent implements OnInit {
   }
 
   updateProfileMenu() {
-    this.translate.get(['APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT', 'APP.DELETE_ACCOUNT']).subscribe(res => {
+    this.translate.get([
+      'APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT', 'APP.DELETE_ACCOUNT',
+      'APP.THEME', 'APP.THEME_SYSTEM', 'APP.THEME_LIGHT', 'APP.THEME_DARK',
+    ]).subscribe(res => {
       this.profileMenuItems = [
         {
           label: this.userName(),
@@ -633,7 +655,25 @@ export class AppComponent implements OnInit {
               command: () => this.logout()
             }
           ]
-        }
+        },
+        /*
+         * Le thème descend ici depuis la barre de menu : trois états à demeure
+         * dans l'en-tête pour un réglage qu'on touche une fois, cela pesait
+         * autant que « Projets ». Groupe distinct, et non items mêlés au
+         * compte : ce n'est pas une action sur le compte.
+         *
+         * L'état courant se lit à l'icône, qui passe à la coche — un menu
+         * n'ayant pas d'état pressé, il faut le dire dans l'item lui-même.
+         */
+        {
+          label: res['APP.THEME'],
+          items: this.themeChoices.map((t) => ({
+            label: res[t.label],
+            icon: this.theme.choice() === t.key ? 'pi pi-check' : THEME_ICONS[t.key],
+            styleClass: this.theme.choice() === t.key ? 'menu-item--on' : undefined,
+            command: () => { this.theme.set(t.key); this.updateProfileMenu(); },
+          })),
+        },
       ];
       this.cdr.detectChanges();
     });
@@ -715,6 +755,10 @@ export class AppComponent implements OnInit {
   /** Sélecteur de thème — « Système » d'abord, c'est le défaut. */
   /** Public : le gabarit lit `theme.choice()` et appelle `theme.set()`. */
   readonly theme = inject(ThemeService);
+
+  themeIcon(key: 'system' | 'light' | 'dark'): string {
+    return THEME_ICONS[key];
+  }
 
   readonly themeChoices = [
     { key: 'system' as const, label: 'APP.THEME_SYSTEM', short: 'APP.THEME_SYSTEM_SHORT' },

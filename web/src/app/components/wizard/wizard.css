@@ -472,6 +472,18 @@
     margin-right: auto;
 }
 
+/* Les blocs de l'étape de cadrage.
+ *
+ * Ils étaient bornés à 32rem (512 px) écrits en dur, sept fois. Sur un écran
+ * large, cela donnait une colonne étroite perdue au milieu du vide — et les
+ * mots-clés, qui sont des pastilles, s'y empilaient sur quinze rangs. Ils
+ * suivent maintenant la colonne de lecture des autres étapes : une seule
+ * largeur pour tout le wizard, définie à un seul endroit. */
+.wizard-field {
+    width: 100%;
+    max-width: 45rem;
+}
+
 /* La grille, elle, prend tout le conteneur : c'est ce qui la rend comparable. */
 .wizard-row--wide {
     max-width: none;

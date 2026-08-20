@@ -57,6 +57,31 @@ export interface NamingConstraints {
 }
 
 /** Longueur mini par défaut d'un nom généré — en dessous, presque tout est déposé. */
+/**
+ * Plafond de mots-clés proposés. Quinze : de quoi couvrir plusieurs angles
+ * sans transformer l'étape de cadrage en corvée de tri.
+ */
+export const KEYWORD_LIMIT = 15;
+
+/**
+ * Dédoublonne sans tenir compte de la casse ni des espaces, en gardant l'ORDRE
+ * du modèle — il les rend du plus au moins pertinent, et c'est le début de
+ * liste qu'on conserve.
+ */
+export function dedupeKeywords(raw: string[]): string[] {
+  const vus = new Set<string>();
+  const out: string[] = [];
+  for (const k of raw) {
+    const mot = k.trim();
+    if (!mot) continue;
+    const cle = mot.toLowerCase();
+    if (vus.has(cle)) continue;
+    vus.add(cle);
+    out.push(mot);
+  }
+  return out;
+}
+
 export const DEFAULT_MIN_NAME_LENGTH = 7;
 /** Plancher absolu réglable depuis l'UI (avec avertissement « difficile »). */
 export const MIN_NAME_LENGTH_FLOOR = 5;
@@ -182,6 +207,17 @@ export class DomainService {
     }
   }
 
+  /**
+   * Mots-clés proposés à l'étape de cadrage : les 15 plus pertinents.
+   *
+   * Le modèle en produisait « au moins 20 » et en rendait couramment 40 : une
+   * liste qu'on ne lit plus, qu'on ne trie pas, et dont on garde tout par
+   * lassitude — or ces mots pilotent la génération. Quinze se parcourent d'un
+   * regard, et l'utilisateur en ajoute autant qu'il veut.
+   *
+   * Le plafond est appliqué APRÈS la réponse, pas seulement demandé dans la
+   * consigne : une consigne est une intention, pas une garantie.
+   */
   async generateKeywords(description: string, locale?: string): Promise<string[]> {
     const localeInstruction = locale
       ? `Generate keywords primarily in the language with code "${locale}", culturally adapted for that market. Include both native-language terms and commonly used English loanwords in this market.`
@@ -194,8 +230,9 @@ export class DomainService {
           {
             role: 'system',
             content: `You are an SEO and semantics expert.
-            Identify AT LEAST 20 relevant keywords and associated terms for the following description.
+            Identify the ${KEYWORD_LIMIT} MOST RELEVANT keywords for the following description, ordered from most to least relevant.
             Vary the angles: synonyms, technical terms, user benefits, and abstract concepts related to the domain.
+            Prefer precision over coverage: a shorter, sharper list is better than an exhaustive one.
             ${localeInstruction}
             Return ONLY a comma-separated list of words, no numbering.`,
           },
@@ -207,7 +244,7 @@ export class DomainService {
 
       const content = response.choices[0].message.content;
       if (!content) return [];
-      return content.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      return dedupeKeywords(content.split(',')).slice(0, KEYWORD_LIMIT);
     } catch (error) {
       this.logger.error('Erreur lors de la génération des mots-clés:', error);
       throw error;
