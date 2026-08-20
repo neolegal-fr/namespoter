@@ -226,6 +226,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-height: 26px;
+}
+
+/* La ligne réseaux porte deux rangées de pastilles : son libellé s'aligne en
+   haut, pas au centre de la grille. */
+.rg-row:has(.rg-socials) {
+  align-items: flex-start;
 }
 
 .rg-row__label {
@@ -403,10 +410,16 @@
 
 /* Pastilles de réseaux. La couleur ne porte jamais l'information seule : un
    symbole l'accompagne, et le nom complet est dans `title`. */
+/* Grille de 3 colonnes sur deux rangées, et non un retour à la ligne libre :
+   à six pastilles, une rangée unique déborde d'une carte de 280–380px, et un
+   retour libre déplacerait les lignes suivantes — les cartes cesseraient
+   d'être alignées entre elles. */
 .rg-socials {
-  display: inline-flex;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 4px 6px;
   flex: none;
+  justify-items: end;
 }
 
 .rg-social {

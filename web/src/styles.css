@@ -27,10 +27,6 @@ body {
     color: var(--nm-app-text);
 }
 
-/* ─── Bouton "Aide moi à choisir" — icône ambre ─── */
-.pick-btn .pi-lightbulb {
-    color: #f59e0b !important;
-}
 
 /* ─── Mot tournant du H1 (produit / marque / société) ─────────────
    Les trois mots occupent la MÊME cellule de grille : la largeur se cale sur

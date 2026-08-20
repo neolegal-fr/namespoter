@@ -543,3 +543,23 @@
     font-size: var(--nm-text-ui-sm);
     color: var(--nm-app-text);
 }
+
+/* « Aide-moi à choisir » ressort d'un cran : secondaire contouré, pas une
+   couleur nouvelle. L'ampoule perd son ambre — l'ambre est une couleur de
+   verdict dans ce produit, pas un ornement. */
+.pick-btn.p-splitbutton .p-button {
+    min-height: var(--nm-touch-min);
+    background: transparent;
+    border-color: var(--nm-app-border-strong);
+    color: var(--nm-app-text);
+}
+
+.pick-btn.p-splitbutton .p-button:hover {
+    background: var(--nm-app-surface-alt);
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
+}
+
+.pick-btn .pi-lightbulb {
+    color: inherit !important;
+}

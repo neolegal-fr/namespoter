@@ -102,6 +102,16 @@ import { applyContentSeo } from '../content/content-seo';
 
                 <p class="nm-overline">{{ ('HOME.OVERLINE_' + step()) | translate }}</p>
 
+                <!-- Le rapport n'est pas une étape : il se montre à part, sans
+                     numéro ni trait de liaison avec le fil. -->
+                <button type="button" class="nm-steps__aside"
+                        [class.nm-steps__aside--on]="step() === 4"
+                        [attr.aria-pressed]="step() === 4"
+                        (click)="step.set(step() === 4 ? 3 : 4)">
+                  <i class="pi pi-file-check" aria-hidden="true"></i>
+                  {{ 'HOME.STEP_4' | translate }}
+                </button>
+
                 <!-- Hauteur plancher : sans elle, la page saute à chaque
                      changement d'étape, les volets n'ayant pas la même taille. -->
                 <div id="nm-demo-panel" class="nm-panel__body">
@@ -280,11 +290,20 @@ export class LandingComponent {
   /** Volet affiché dans la démonstration figée du héros. */
   readonly step = signal(3);
 
+  /**
+   * Le fil de la démonstration reprend le wizard RÉEL : trois étapes, et les
+   * MÊMES clés i18n — pas des libellés recopiés qui divergeraient à la
+   * première retouche. Il en annonçait quatre (« Décrire · Cadrer · Domaines ·
+   * Rapport ») sous d'autres mots : l'utilisateur qui cliquait « Trouver mon
+   * nom » ne retrouvait ni le nombre d'étapes, ni le vocabulaire.
+   *
+   * Le rapport n'est pas une étape du wizard — c'est une action depuis une
+   * carte. Il sort donc du fil, et se montre en volet supplémentaire.
+   */
   readonly steps = [
-    { n: 1, label: 'HOME.STEP_1' },
-    { n: 2, label: 'HOME.STEP_2' },
-    { n: 3, label: 'HOME.STEP_3' },
-    { n: 4, label: 'HOME.STEP_4' },
+    { n: 1, label: 'WIZARD.STEPS.DESCRIPTION' },
+    { n: 2, label: 'WIZARD.STEPS.KEYWORDS' },
+    { n: 3, label: 'WIZARD.STEPS.DOMAINS' },
   ];
 
   /** Listes courtes stockées en une clé, séparées par « | » — évite 20 clés de plus. */

@@ -56,8 +56,8 @@ interface ExtVerdict {
     <div class="rg-filters" role="group" aria-label="Filtrer les résultats">
       @for (f of filters; track f.key) {
         <button type="button"
-                class="rg-filter"
-                [class.rg-filter--on]="filter() === f.key"
+                class="nm-filter"
+                [class.nm-filter--on]="filter() === f.key"
                 [attr.aria-pressed]="filter() === f.key"
                 (click)="filter.set(f.key)">{{ f.label | translate }}</button>
       }
@@ -84,6 +84,12 @@ interface ExtVerdict {
               }
             </div>
 
+            <!-- Coût TOUJOURS présent, à droite : « 1 crédit ». Accentué
+                 seulement si toutes les extensions demandées sont libres. -->
+            <span class="rg-cost" [class.rg-cost--accent]="allFree(d)">
+              {{ 'WIZARD.STEP3.GRID_CREDIT_ONE' | translate }}
+            </span>
+
             <!--
               Les pouces vivent DANS l'en-tête, à droite du nom : ils portent
               sur le nom, pas sur le rapport. Près du bouton d'achat, leur objet
@@ -109,12 +115,11 @@ interface ExtVerdict {
 
           <!-- Badge de synthèse : ce qui rend plusieurs noms vérifiés
                comparables d'un coup d'œil dans la grille. -->
+          <!-- Badge de synthèse SOUS le nom, à gauche : il ne partage plus
+               d'emplacement avec le coût. Deux informations de nature
+               différente au même endroit se lisent l'une pour l'autre. -->
           @if (summaryOf(d); as sum) {
-            <p class="rg-synth" [class]="'rg-synth--' + synthTone(sum)">{{ synthKey(sum) | translate }}</p>
-          } @else {
-            <span class="rg-cost" [class.rg-cost--accent]="allFree(d)">
-              {{ 'WIZARD.STEP3.GRID_CREDIT_ONE' | translate }}
-            </span>
+            <p class="rg-synth" [class]="'rg-synth--' + synthTone(sum)">{{ synthKey(sum) | translate:{ n: blockerCount(sum) } }}</p>
           }
 
           <!--
@@ -141,27 +146,34 @@ interface ExtVerdict {
               </li>
             }
 
-            <!-- L'analyse est une LIGNE LIBELLÉE, pas un ornement flottant :
-                 sans libellé, on y lit une note de disponibilité ou un avis. -->
-            @if (d.analysisPending) {
-              <li class="rg-row">
-                <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
+            <!--
+              L'analyse est une LIGNE LIBELLÉE, présente sur TOUTES les cartes.
+              Sans libellé, on lit les étoiles comme une note de disponibilité
+              ou un avis d'autres utilisateurs. Et une ligne qui n'existe que
+              sur certaines cartes décale les suivantes : les noms cessent
+              d'être comparables, ce qui est l'objet même de cet écran.
+              Pas encore calculée : un tiret. JAMAIS cinq étoiles vides, qui se
+              lisent comme une note nulle.
+            -->
+            <li class="rg-row">
+              <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
+              @if (d.analysisPending) {
                 <span class="rg-row__value rg-row__value--pending"><i class="pi pi-spin pi-spinner"></i></span>
-              </li>
-            } @else if (d.analysis) {
-              <li class="rg-row">
-                <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_ANALYSIS' | translate }}</span>
+              } @else if (d.analysis) {
                 <button type="button" class="rg-stars" (click)="toggleAnalysis.emit(d.id)"
                         [attr.aria-expanded]="expandedAnalysisId() === d.id"
-                        [attr.aria-label]="'WIZARD.STEP3.ANALYSIS_TOGGLE' | translate">
+                        [attr.aria-label]="('WIZARD.STEP3.ANALYSIS_TOGGLE' | translate) + ' — ' + starScore(d.analysis) + '/5'">
                   @for (filled of stars(d.analysis); track $index) {
-                    <i class="pi" [class.pi-star-fill]="filled" [class.pi-star]="!filled"></i>
+                    <i class="pi" [class.pi-star-fill]="filled" [class.pi-star]="!filled" aria-hidden="true"></i>
                   }
-                  <i class="pi pi-chevron-down rg-stars__chev"
+                  <span class="sr-only">{{ starScore(d.analysis) }}/5</span>
+                  <i class="pi pi-chevron-down rg-stars__chev" aria-hidden="true"
                      [style.transform]="expandedAnalysisId() === d.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
                 </button>
-              </li>
-            }
+              } @else {
+                <span class="rg-row__value rg-row__value--pending">—</span>
+              }
+            </li>
           </ul>
 
           @if (expandedAnalysisId() === d.id && d.analysis) {
@@ -390,17 +402,24 @@ export class ResultsGridComponent {
   }
 
   /**
-   * Pastilles de réseaux. Abréviations en attendant les glyphes officiels
-   * monochromes : redessiner une marque déposée serait pire que rien. Ne
-   * jamais employer les logos EN COULEURS — le rose d'Instagram et le cyan de
-   * TikTok entreraient en conflit avec le code libre/pris, qui est
-   * l'information utile.
+   * Pastilles de réseaux — les SIX réellement interrogées.
+   *
+   * Instagram et Facebook en sont absents tant que leur adaptateur renvoie
+   * `unknown` par construction (voir `ACTIVE_PLATFORMS` côté API) : une
+   * plateforme non interrogée qui s'affiche quand même dévalue les autres.
+   *
+   * Abréviations en attendant les glyphes officiels monochromes : redessiner
+   * une marque déposée serait pire que rien. Ne jamais employer les logos EN
+   * COULEURS — le rose d'Instagram et le cyan de TikTok entreraient en conflit
+   * avec le code libre/pris, qui est l'information utile.
    */
   private readonly PLATFORMS = [
-    { code: 'IG', name: 'Instagram' },
+    { code: 'GH', name: 'GitHub' },
     { code: 'in', name: 'LinkedIn' },
-    { code: 'X',  name: 'X' },
+    { code: 'TG', name: 'Telegram' },
     { code: 'TT', name: 'TikTok' },
+    { code: 'X',  name: 'X' },
+    { code: 'YT', name: 'YouTube' },
   ];
 
   socialsOf(d: any): { code: string; tone: string; mark: string; title: string }[] {
@@ -429,13 +448,27 @@ export class ResultsGridComponent {
 
   synthKey(sum: BrandReportSummary): string {
     const t = this.synthTone(sum);
-    return t === 'ok' ? 'WIZARD.STEP3.GRID_SYNTH_OK' : t === 'watch' ? 'WIZARD.STEP3.GRID_SYNTH_WATCH' : 'WIZARD.STEP3.GRID_SYNTH_RISK';
+    if (t === 'ok') return 'WIZARD.STEP3.GRID_SYNTH_OK';
+    if (t === 'watch') return 'WIZARD.STEP3.GRID_SYNTH_WATCH';
+    // Le singulier a sa propre clé : « 1 obstacles » se remarque.
+    return this.blockerCount(sum) === 1 ? 'WIZARD.STEP3.GRID_SYNTH_RISK_ONE' : 'WIZARD.STEP3.GRID_SYNTH_RISK';
   }
 
-  /** Note sur 5, extraite du texte d'analyse par le wizard puis convertie. */
-  stars(analysis: string | null): boolean[] {
+  /** Nombre d'obstacles : « obstacles » sans chiffre n'est pas un libellé. */
+  blockerCount(sum: BrandReportSummary): number {
+    return [this.tmTone(sum, 'inpi'), this.tmTone(sum, 'euipo')].filter((t) => t === 'taken').length
+      + sum.socials.filter((s) => s.status === 'taken').length;
+  }
+
+  /** Note sur 5, lue dans le texte d'analyse. Exposée aux lecteurs d'écran :
+      cinq images d'étoiles ne disent rien à qui ne les voit pas. */
+  starScore(analysis: string | null): number {
     const m = analysis?.match(/(\d+(?:[.,]\d+)?)\s*\/\s*5/);
-    const score = m ? Math.round(parseFloat(m[1].replace(',', '.'))) : 0;
+    return m ? Math.round(parseFloat(m[1].replace(',', '.'))) : 0;
+  }
+
+  stars(analysis: string | null): boolean[] {
+    const score = this.starScore(analysis);
     return Array.from({ length: 5 }, (_, i) => i < score);
   }
 

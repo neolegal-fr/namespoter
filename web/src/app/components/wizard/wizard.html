@@ -353,6 +353,14 @@
           </div>
 
           <div class="wizard-row" style="display: flex; justify-content: space-between; align-items: center">
+            <!--
+              Trois actions de MÊME RANG au-dessus de la liste, donc trois
+              boutons tertiaires identiques. Elles avaient trois traitements —
+              bouton encadré à icône ampoule ambre, lien à entonnoir, lien à
+              icône — sans qu'aucune hiérarchie ne le justifie. Et l'ampoule
+              ambre introduisait une quatrième couleur d'accent, alors que
+              l'ambre est une couleur de VERDICT dans ce produit.
+            -->
             <p-splitButton *ngIf="filteredDomains().length >= 2"
               [label]="'WIZARD.STEP3.PICK_BEST_BTN' | translate"
               icon="pi pi-lightbulb"
@@ -362,19 +370,18 @@
               (onClick)="helpMePick('all')"
               appendTo="body">
             </p-splitButton>
+
             <!-- Rétabli ici : ce bouton vivait dans l'en-tête du tableau, que la
                  refonte remplace par des cartes. Sans lui, les noms rejetés
                  deviennent définitivement invisibles. -->
-            <button type="button" (click)="showDisliked.set(!showDisliked())"
-              style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--nm-app-text-2); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem"
-              [attr.aria-pressed]="showDisliked()"
-              [pTooltip]="(showDisliked() ? ('WIZARD.STEP3.FILTER_HIDE_DISLIKED' | translate) : ('WIZARD.STEP3.FILTER_SHOW_ALL' | translate))"
-              tooltipPosition="top">
-              <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()" style="font-size: var(--nm-text-ui-sm)"></i>
+            <button type="button" class="nm-btn-tertiary" (click)="showDisliked.set(!showDisliked())"
+              [attr.aria-pressed]="showDisliked()">
+              <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()"></i>
               <span>{{ (showDisliked() ? 'WIZARD.STEP3.FILTER_HIDE_DISLIKED' : 'WIZARD.STEP3.FILTER_SHOW_ALL') | translate }}</span>
             </button>
-            <button type="button" (click)="copyTable()" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--nm-app-text-2); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0; transition: color 0.15s; margin-left: auto" class="copy-table-btn">
-              <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'" [style.color]="copiedDomain() === 'table' ? 'var(--nm-app-verdict-free-fg)' : null"></i>
+
+            <button type="button" class="nm-btn-tertiary" (click)="copyTable()">
+              <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'"></i>
               <span>{{ (copiedDomain() === 'table' ? 'WIZARD.STEP3.COPIED' : 'WIZARD.STEP3.COPY_RESULTS') | translate }}</span>
             </button>
           </div>
