@@ -399,6 +399,26 @@
     font-size: var(--nm-text-ui-sm);
 }
 
+/* Au doigt, les liens du document doivent se viser.
+ *
+ * Ils restent des liens de TEXTE — pas de bordure, pas d'aplat — mais gagnent
+ * la hauteur qui manque : 18 px pour « Déposer ma marque à l'INPI », 19 px
+ * pour un réseau, c'est moitié moins que ce qu'un pouce atteint sans reprise.
+ * L'espacement des lignes suit, sinon les cibles se chevauchent. */
+@media (pointer: coarse) {
+  .rv-link,
+  .rv-row__label a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  .rv-row {
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+}
+
 /* Ce qui n'a pas de sens sur un papier : réserver, choisir un bureau. */
 @media print {
     .rv-noprint { display: none !important; }

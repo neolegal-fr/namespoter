@@ -506,7 +506,8 @@
     "HAVE_NAME_LEAD": "Testez-la maintenant : les domaines et l'analyse du nom sont gratuits, la recherche d'antériorité se débloque ensuite.",
     "HAVE_NAME_PLACEHOLDER": "Le nom que vous avez en tête",
     "HAVE_NAME_BTN": "Vérifier ce nom",
-    "SEE_SAMPLE": "Voir un exemple de rapport complet →"
+    "SEE_SAMPLE": "Voir un exemple de rapport complet →",
+    "CMP_SCROLL_HINT": "Faites glisser le tableau pour voir les autres colonnes."
   },
   "PUBLIC_REPORT": {
     "PLACEHOLDER": "Le nom que vous voulez tester",

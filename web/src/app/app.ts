@@ -430,17 +430,21 @@ const THEME_ICONS: Record<'system' | 'light' | 'dark', string> = {
         </div>
 
         <div class="mb-2 font-bold text-500">Namorama &copy; 2026</div>
-        {{ 'APP.FOOTER' | translate }}
-        <a href="https://neolegal.fr" target="_blank" rel="noopener" style="color: inherit; font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor">NeoLegal</a>
-        <span style="margin: 0 0.5rem">·</span>
-        <button type="button" (click)="openFeedback()"
-                style="background: none; border: none; cursor: pointer; color: inherit; font-size: inherit; text-decoration: underline; text-decoration-style: dotted; padding: 0">
-          {{ 'APP.FEEDBACK' | translate }}
-        </button>
-        <span style="margin: 0 0.5rem">·</span>
-        <a routerLink="/legal" style="color: inherit; text-decoration: underline; text-decoration-style: dotted">{{ 'APP.LEGAL' | translate }}</a>
-        <span style="margin: 0 0.5rem">·</span>
-        <a routerLink="/privacy" style="color: inherit; text-decoration: underline; text-decoration-style: dotted">{{ 'APP.PRIVACY' | translate }}</a>
+        <!--
+          Une vraie liste, et non une phrase ponctuée de « · » : au pli du
+          téléphone, « Mentions légales » se coupait en deux lignes et chaque
+          lien ne mesurait que 16 px de haut. Les séparateurs sont posés par le
+          CSS, qui les retire quand les liens s'empilent.
+        -->
+        <nav class="nm-foot__links" [attr.aria-label]="'APP.FOOTER' | translate">
+          <span class="nm-foot__by">
+            {{ 'APP.FOOTER' | translate }}
+            <a href="https://neolegal.fr" target="_blank" rel="noopener">NeoLegal</a>
+          </span>
+          <button type="button" (click)="openFeedback()">{{ 'APP.FEEDBACK' | translate }}</button>
+          <a routerLink="/legal">{{ 'APP.LEGAL' | translate }}</a>
+          <a routerLink="/privacy">{{ 'APP.PRIVACY' | translate }}</a>
+        </nav>
       </footer>
       <p-toast key="app" position="top-right"></p-toast>
     </main>

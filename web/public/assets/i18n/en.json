@@ -506,7 +506,8 @@
     "HAVE_NAME_LEAD": "Test it now: domains and the name analysis are free, the prior-art search unlocks afterwards.",
     "HAVE_NAME_PLACEHOLDER": "The name you have in mind",
     "HAVE_NAME_BTN": "Check this name",
-    "SEE_SAMPLE": "See a sample full report →"
+    "SEE_SAMPLE": "See a sample full report →",
+    "CMP_SCROLL_HINT": "Swipe the table to see the other columns."
   },
   "PUBLIC_REPORT": {
     "PLACEHOLDER": "The name you want to test",

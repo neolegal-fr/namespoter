@@ -161,6 +161,15 @@
   min-height: calc(2 * 1.3 * var(--nm-text-name-card));
 }
 
+/* Une seule colonne : il n'y a plus de carte voisine avec quoi s'aligner, et
+   la ligne réservée devient une bande blanche sous chaque nom — dix cartes,
+   dix trous, et autant de défilement pour rien. */
+@media (max-width: 620px) {
+  .rg-card__head {
+    min-height: 0;
+  }
+}
+
 .rg-card__id {
   /* `min-width: 0` : sans lui, un mot long refuse de se replier et pousse les
      pouces hors de la carte — la règle par défaut d'un élément flex est de ne
@@ -482,7 +491,7 @@
   flex: none;
 }
 
-.rg-social__mark { font-size: 9px; }
+.rg-social__mark { font-size: 8px; }
 
 .rg-social--locked { background: var(--nm-app-divider); color: var(--nm-app-text-2); }
 .rg-social--free   { background: var(--nm-app-verdict-free-bg);    color: var(--nm-app-verdict-free-fg); }
@@ -694,4 +703,20 @@
     align-self: stretch;
     margin: 0 0.25rem;
     background: var(--nm-app-divider);
+}
+
+/* Au doigt : réactualiser et « Analyser » sont des actions, pas des mentions.
+   28 px et 18 px de haut, elles se ratent une fois sur trois.
+   En FIN de feuille, à dessein : les règles de base de `.rg-refresh` sont
+   écrites plus haut et l'emporteraient à specificité égale. */
+@media (pointer: coarse) {
+  .rg-refresh {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rg-analyse {
+    min-height: 40px;
+    padding: 0 4px;
+  }
 }

@@ -245,7 +245,12 @@ interface ExtVerdict {
                       <i class="rg-social__logo pi" [class]="'rg-social__logo pi ' + s.icon" aria-hidden="true"></i>
                     }
                     <span class="sr-only">{{ s.name }}</span>
-                    <span class="rg-social__mark" aria-hidden="true">{{ s.mark }}</span>
+                    <!-- Une ICÔNE de la police du produit, et non un emoji :
+                         « 🔒 » sortait en carré vide partout où aucune police
+                         d'emoji n'est installée — six carrés par carte. « ✓ »
+                         et « ✗ » ont le même défaut dans une police d'affichage
+                         incomplète. -->
+                    <i class="rg-social__mark pi" [class]="'rg-social__mark pi ' + s.mark" aria-hidden="true"></i>
                   </span>
                 }
               </span>
@@ -522,10 +527,10 @@ export class ResultsGridComponent {
     return this.PLATFORMS.map((p) => {
       const found = sum?.socials.find((s) => s.platform.toLowerCase() === p.name.toLowerCase());
       if (!sum || !found) {
-        return { icon: p.icon, name: p.name, tone: 'locked', mark: '🔒', title: `${p.name} — ${t('WIZARD.STEP3.GRID_UNVERIFIED')}` };
+        return { icon: p.icon, name: p.name, tone: 'locked', mark: 'pi-lock', title: `${p.name} — ${t('WIZARD.STEP3.GRID_UNVERIFIED')}` };
       }
       const tone = found.status === 'free' ? 'free' : found.status === 'taken' ? 'taken' : 'unknown';
-      const mark = tone === 'free' ? '✓' : tone === 'taken' ? '✗' : '?';
+      const mark = tone === 'free' ? 'pi-check' : tone === 'taken' ? 'pi-times' : 'pi-question';
       const label = t(tone === 'free' ? 'WIZARD.STEP3.GRID_FREE' : tone === 'taken' ? 'WIZARD.STEP3.GRID_TAKEN' : 'WIZARD.STEP3.GRID_UNKNOWN');
       return { icon: p.icon, name: p.name, tone, mark, title: `${p.name} — ${label}` };
     });
