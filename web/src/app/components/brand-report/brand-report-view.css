@@ -291,3 +291,10 @@
   align-items: center;
   margin-top: 12px;
 }
+
+/* Raison technique d'un verdict « non vérifiable » — discrète, factuelle. */
+.rv-note {
+    margin: 0.35rem 0 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-3);
+}

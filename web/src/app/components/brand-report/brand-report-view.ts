@@ -85,6 +85,14 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
 
           <p class="rv-explain" [innerHTML]="tmExplainKey(r.trademark.match) | translate"></p>
 
+          <!-- La RAISON du « non vérifiable », quand le serveur la donne.
+               Sans elle, une configuration manquante et une panne de l'INPI
+               affichent le même texte : impossible de savoir s'il faut
+               réessayer plus tard ou corriger un réglage. -->
+          @if (r.trademark.match === 'unknown' && r.trademark.note) {
+            <p class="rv-note">{{ r.trademark.note }}</p>
+          }
+
           @if (r.trademark.hits.length) {
             <ul class="rv-hits">
               @for (h of r.trademark.hits.slice(0, 8); track h.name + h.applicationNumber) {

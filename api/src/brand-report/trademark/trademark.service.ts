@@ -50,6 +50,12 @@ export class TrademarkService {
   async check(name: string): Promise<TrademarkResult> {
     const deepLink = this.deepLink(name);
     if (!this.username || !this.password) {
+      // Journalisé, et pas seulement retourné : sans identifiants, TOUS les
+      // rapports sortent « non vérifiable » sur le volet marque — pour 50
+      // crédits. Une panne de configuration en production doit apparaître dans
+      // `python3 - errors`, pas seulement dans un rapport que personne ne relit.
+      this.events.warn('INPI_USERNAME/INPI_PASSWORD absents : volet marque non vérifiable', 'trademark_check_unconfigured');
+      this.events.event('trademark_check_unconfigured');
       return { office: 'INPI', match: 'unknown', hits: [], deepLink, note: 'Vérification INPI non configurée.' };
     }
     try {
