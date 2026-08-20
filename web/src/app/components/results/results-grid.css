@@ -622,3 +622,24 @@
 .rg-checked .rg-refresh {
     white-space: nowrap;
 }
+
+
+/* « Analyser » : une action, pas un verdict — donc discrète, à la place du
+   futur score, et sans cadre pour ne pas concurrencer les deux boutons du
+   pied de carte. */
+.rg-analyse {
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nm-app-accent);
+    font: inherit;
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rg-analyse:hover,
+.rg-analyse:focus-visible {
+    text-decoration: underline;
+}

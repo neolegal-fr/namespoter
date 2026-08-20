@@ -414,10 +414,12 @@
               [reportCost]="brandReportCost"
               [expandedAnalysisId]="expandedAnalysisId()"
               [analysisRenderer]="analysisRenderer"
+              [analysisScorer]="analysisScorer"
               (rate)="setRating($event.result, $event.rating)"
               (verify)="askBrandReport($event)"
               (refresh)="refreshBrandReport($event)"
               (refreshDomains)="recheckOneName($event)"
+              (analyse)="analyseOne($event)"
               (openReport)="openFullReport($event)"
               (toggleAnalysis)="toggleAnalysis($event)">
             </app-results-grid>

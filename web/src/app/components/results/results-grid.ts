@@ -172,7 +172,14 @@ interface ExtVerdict {
                      [style.transform]="expandedAnalysisId() === d.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
                 </button>
               } @else {
-                <span class="rg-row__value rg-row__value--pending">—</span>
+                <!-- Un tiret ne disait rien : ni « pas encore », ni « jamais »,
+                     ni comment l'obtenir — il se lisait comme une panne. Le
+                     calcul reste à la demande (un appel au modèle par nom, sur
+                     trente cartes, pour une donnée que personne ne lit
+                     toujours), mais il s'annonce et se déclenche d'un clic. -->
+                <button type="button" class="rg-analyse" (click)="analyse.emit(d.id)">
+                  {{ 'WIZARD.STEP3.GRID_ANALYSE_NOW' | translate }}
+                </button>
               }
             </li>
           </ul>
@@ -302,6 +309,17 @@ export class ResultsGridComponent {
   readonly reportCost = input(50);
   readonly expandedAnalysisId = input<string | null>(null);
   readonly analysisRenderer = input<(a: string | null) => SafeHtml>(() => '' as unknown as SafeHtml);
+
+  /**
+   * Lecture de la note, fournie par le wizard.
+   *
+   * La grille en avait sa PROPRE version : une expression régulière cherchant
+   * « n/5 » dans le texte. Or l'analyse arrive aujourd'hui en JSON, où ce motif
+   * n'existe pas — toute carte analysée affichait donc cinq étoiles vides, ce
+   * qui se lit comme une note nulle, exactement ce que la refonte interdit.
+   * Une seule lecture, celle du wizard, qui connaît les deux formats.
+   */
+  readonly analysisScorer = input<(a: string | null) => number>(() => 0);
   /**
    * Normalisation des noms. Doit rester identique à `normName()` du wizard,
    * qui alimente les synthèses — sans quoi un nom vérifié ne serait pas
@@ -315,6 +333,8 @@ export class ResultsGridComponent {
   readonly refresh = output<string>();
   /** Réactualiser la seule disponibilité des domaines de ce nom. */
   readonly refreshDomains = output<string>();
+  /** Calculer l'analyse de ce nom, à la demande (identifiant de suggestion). */
+  readonly analyse = output<string>();
   readonly toggleAnalysis = output<string>();
 
   readonly filter = signal<'all' | 'free' | 'report' | 'fav'>('all');
@@ -580,8 +600,7 @@ export class ResultsGridComponent {
   /** Note sur 5, lue dans le texte d'analyse. Exposée aux lecteurs d'écran :
       cinq images d'étoiles ne disent rien à qui ne les voit pas. */
   starScore(analysis: string | null): number {
-    const m = analysis?.match(/(\d+(?:[.,]\d+)?)\s*\/\s*5/);
-    return m ? Math.round(parseFloat(m[1].replace(',', '.'))) : 0;
+    return Math.round(this.analysisScorer()(analysis));
   }
 
   stars(analysis: string | null): boolean[] {

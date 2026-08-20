@@ -340,7 +340,8 @@
       "GRID_CHECKED_UNKNOWN": "Check date unknown",
       "GRID_RECHECK_DOMAINS": "Re-check",
       "GRID_RECHECK_SOON": "Trademark and socials checked less than 24 h ago",
-      "GRID_DEBITED_NAMES": "credits charged — 1 for each of the {{noms}} names suggested"
+      "GRID_DEBITED_NAMES": "credits charged — 1 for each of the {{noms}} names suggested",
+      "GRID_ANALYSE_NOW": "Analyse"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

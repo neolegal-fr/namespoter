@@ -1343,15 +1343,14 @@ export class WizardComponent implements OnInit, OnDestroy {
         // US-005 — déclencher l'analyse IA si liked et pas encore analysé
         if (res.rating === 'liked' && !result.analysis && !result.analysisPending) {
           setTimeout(() => {
-            result.analysisPending = true;
+            this.domains.update(l => l.map(d => d.id === result.id ? { ...d, analysisPending: true } : d));
             this.cdr.detectChanges();
             this.domainService.analyzeName(result.id, this.translate.currentLang() ?? undefined).subscribe({
               next: (r) => {
-                result.analysis = r.analysis;
-                result.analysisPending = false;
+                this.domains.update(l => l.map(d => d.id === result.id ? { ...d, analysis: r.analysis, analysisPending: false } : d));
                 this.cdr.detectChanges();
               },
-              error: () => { result.analysisPending = false; this.cdr.detectChanges(); },
+              error: () => { this.domains.update(l => l.map(d => d.id === result.id ? { ...d, analysisPending: false } : d)); this.cdr.detectChanges(); },
             });
           });
         }
@@ -1460,6 +1459,9 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   /** Passé tel quel à la grille de résultats, qui n'a pas de sanitizer. */
   readonly analysisRenderer = (a: string | null): SafeHtml => this.parseAnalysisHtml(a);
+
+  /** Passée à la grille : elle connaît le JSON comme l'ancien format texte. */
+  readonly analysisScorer = (a: string | null): number => this.parseAnalysisScore(a);
 
   parseAnalysisHtml(analysis: string | null): SafeHtml {
     if (!analysis) return this.sanitizer.bypassSecurityTrustHtml('');
@@ -1580,6 +1582,37 @@ export class WizardComponent implements OnInit, OnDestroy {
     if (this.projectId()) {
       this.projectService.updateProject(this.projectId()!, { extensions: this.selectedExtensions() }).subscribe();
     }
+  }
+
+  /**
+   * Calcule l'analyse d'un nom à la demande.
+   *
+   * Elle se déclenchait jusqu'ici au seul « j'aime », ce qui laissait un tiret
+   * sur toutes les cartes fraîches — lu comme une panne plutôt que comme un
+   * « pas encore ». Elle reste à la demande : c'est un appel au modèle par
+   * nom, et les faire tous d'office coûterait trente appels par recherche pour
+   * une donnée que personne ne lit toujours.
+   */
+  analyseOne(id: string): void {
+    const cible = this.domains().find((d) => d.id === id);
+    if (!cible || cible.analysis || cible.analysisPending) return;
+
+    // ⚠ Remplacer l'élément, ne jamais le muter : la grille reçoit `domains`
+    // en entrée SIGNAL et n'observe donc que la référence du tableau. Une
+    // mutation en place ne la réveille pas, `detectChanges()` compris — c'est
+    // ainsi qu'une analyse arrivait sans jamais s'afficher.
+    const remplacer = (champs: Record<string, unknown>) =>
+      this.domains.update((list) => list.map((d) => (d.id === id ? { ...d, ...champs } : d)));
+
+    remplacer({ analysisPending: true });
+    this.domainService.analyzeName(id, this.translate.currentLang() ?? undefined).subscribe({
+      next: (a) => {
+        remplacer({ analysis: a.analysis, analysisPending: false });
+        this.expandedAnalysisId.set(id); // déplier : on vient de la demander
+        this.cdr.detectChanges();
+      },
+      error: () => { remplacer({ analysisPending: false }); this.cdr.detectChanges(); },
+    });
   }
 
   /**

@@ -340,7 +340,8 @@
       "GRID_CHECKED_UNKNOWN": "Date de vérification inconnue",
       "GRID_RECHECK_DOMAINS": "Revérifier",
       "GRID_RECHECK_SOON": "Marque et réseaux vérifiés il y a moins de 24 h",
-      "GRID_DEBITED_NAMES": "crédits débités — 1 pour chacun des {{noms}} noms proposés"
+      "GRID_DEBITED_NAMES": "crédits débités — 1 pour chacun des {{noms}} noms proposés",
+      "GRID_ANALYSE_NOW": "Analyser"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
