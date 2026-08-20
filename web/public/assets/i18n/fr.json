@@ -106,7 +106,7 @@
       "DESCRIPTION": "Description",
       "KEYWORDS": "Cadrage",
       "EXTENSIONS": "Extensions",
-      "DOMAINS": "Domaines",
+      "DOMAINS": "Résultats",
       "BRAND": "Marque et réseaux"
     },
     "STEP1": {
@@ -121,7 +121,7 @@
     },
     "STEP2": {
       "TITLE": "Vos préférences",
-      "SUBTITLE": "Ce qui vous inspire, les mots à retenir, votre public et la longueur des noms.",
+      "SUBTITLE": "Les extensions visées, les mots à retenir, votre public et la longueur des noms.",
       "KEYWORDS_TITLE": "Mots-clés",
       "KEYWORDS_COUNT": "{{n}} / {{max}} mots-clés",
       "KEYWORDS_FULL": "Limite de {{max}} mots-clés atteinte : retirez-en un pour en ajouter un autre.",
@@ -172,7 +172,7 @@
       "CULTURAL": "culturel"
     },
     "STEP3": {
-      "TITLE": "Domaines {{extensions}} disponibles",
+      "TITLE": "{{n}} suggestions retenues en {{extensions}}",
       "SUBTITLE": "Voici nos suggestions pour votre projet.",
       "NOTE": "Note : Nous avons analysé {{total}} idées de noms, mais seulement {{count}} étaient réellement disponibles en .com.",
       "NO_RESULTS": "Aucun domaine trouvé. Essayez de changer vos mots-clés.",

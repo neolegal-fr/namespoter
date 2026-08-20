@@ -106,7 +106,7 @@
       "DESCRIPTION": "Description",
       "KEYWORDS": "Framing",
       "EXTENSIONS": "Extensions",
-      "DOMAINS": "Domains",
+      "DOMAINS": "Results",
       "BRAND": "Trademark & socials"
     },
     "STEP1": {
@@ -121,7 +121,7 @@
     },
     "STEP2": {
       "TITLE": "Your preferences",
-      "SUBTITLE": "What inspires you, the words to keep, your audience and how long names should be.",
+      "SUBTITLE": "The extensions you target, the words to keep, your audience and how long names should be.",
       "KEYWORDS_TITLE": "Keywords",
       "KEYWORDS_COUNT": "{{n}} / {{max}} keywords",
       "KEYWORDS_FULL": "Limit of {{max}} keywords reached: remove one to add another.",
@@ -172,7 +172,7 @@
       "CULTURAL": "cultural"
     },
     "STEP3": {
-      "TITLE": "Available {{extensions}} domains",
+      "TITLE": "{{n}} names shortlisted in {{extensions}}",
       "SUBTITLE": "Here are our suggestions for your project.",
       "NOTE": "Note: We analyzed {{total}} name ideas, but only {{count}} were actually available in .com.",
       "NO_RESULTS": "No domains found. Try changing your keywords.",
