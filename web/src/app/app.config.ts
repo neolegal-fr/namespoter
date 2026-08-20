@@ -98,7 +98,18 @@ function initializeApp(
   return async () => {
     const supportedLangs = ['cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh'];
     translate.addLangs(supportedLangs);
-    translate.setFallbackLang('fr');
+    /*
+     * Repli en ANGLAIS, et non en français.
+     *
+     * Dix-sept des dix-neuf langues n'ont que 158 des 456 clés : tout le reste
+     * tombe sur le repli. Un germanophone lisait donc du français au milieu de
+     * son écran — une langue qu'il ne parle pas forcément, sur un produit qui
+     * facture. L'anglais est complet (456/456) et se lit à peu près partout.
+     *
+     * Le français n'y perd rien : c'est la langue de RÉFÉRENCE, aucune de ses
+     * clés ne manque, elle ne passe donc jamais par le repli.
+     */
+    translate.setFallbackLang('en');
 
     // Côté serveur (prerender SSG) : pas de Keycloak, pas de fetch relatif,
     // pas de navigator. Français par défaut ; une page anglaise (« /en ») bascule

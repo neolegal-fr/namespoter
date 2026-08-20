@@ -141,9 +141,8 @@ import { SafeHtml } from '@angular/platform-browser';
         <section class="rv-section">
           <div class="rv-section__head">
             <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_DOMAINS' | translate }}</h3>
-            <span class="rv-section__meta">
-              RDAP@if (r.generatedAt) { · {{ r.generatedAt | date: 'HH:mm:ss' }} }
-            </span>
+            <!-- Ni « RDAP » ni l'heure : le nom du protocole ne dit rien à qui
+                 lit le document, et la date de génération est déjà en tête. -->
           </div>
           @for (d of r.domains; track d.domain) {
             <div class="rv-row">
