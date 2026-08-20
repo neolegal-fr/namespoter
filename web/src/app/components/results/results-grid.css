@@ -177,6 +177,16 @@
   min-width: 0;
 }
 
+/* Capitale initiale sur le NOM seul, jamais sur les domaines listés dessous :
+   un nom de marque se porte comme un nom propre, une adresse s'écrit en bas de
+   casse. `::first-letter` plutôt que `capitalize`, qui mettrait aussi une
+   majuscule après un trait d'union — « Co-Create » au lieu de « Co-create ».
+   Et un traitement d'AFFICHAGE, non une transformation de la donnée : c'est
+   « vertlivre.fr » qu'on achète. */
+.rg-card__name::first-letter {
+  text-transform: uppercase;
+}
+
 .rg-card__name {
   margin: 0;
   font-family: var(--nm-font-display);
