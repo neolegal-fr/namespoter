@@ -40,6 +40,8 @@ export interface TrademarkResult {
 export interface NameQuality {
   score: number; // 0-100
   scores: Record<string, number>; // critère -> note 1-5
+  /** Une phrase par critère : pourquoi cette note. */
+  comments?: Record<string, string>;
   /** Comment le nom est construit et ce qu'il évoque, en une phrase. */
   origin?: string;
   strengths?: string;

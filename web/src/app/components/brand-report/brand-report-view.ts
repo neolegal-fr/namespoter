@@ -2,7 +2,6 @@ import { Component, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
-import { SafeHtml } from '@angular/platform-browser';
 
 /**
  * Rapport de marque — état DÉBLOQUÉ, refonte étape 4.
@@ -85,23 +84,6 @@ import { SafeHtml } from '@angular/platform-browser';
              VAUT le nom, ensuite ce qui peut l'empêcher. Les domaines et
              l'analyse sont acquis dès la recherche ; marques et réseaux
              viennent après, parce qu'ils s'achètent. -->
-        <!-- Qualité du nom — issue de l'analyse déjà produite pendant la
-             recherche, donc disponible avant tout achat. -->
-        @if (locked && analysis) {
-          <section class="rv-section">
-            <div class="rv-section__head">
-              <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
-              @if (analysisScore > 0) {
-                <span class="rv-section__meta">
-                  <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(analysisScore * 20)">{{ scoreKey(analysisScore * 20) | translate }}</span>
-                  <strong style="color: var(--nm-app-text)">{{ analysisScore }}/5</strong>
-                </span>
-              }
-            </div>
-            <div class="rv-explain" [innerHTML]="analysis"></div>
-          </section>
-        }
-
         @if (r.quality; as q) {
           <section class="rv-section">
             <div class="rv-section__head">
@@ -123,9 +105,25 @@ import { SafeHtml } from '@angular/platform-browser';
             @if (q.origin) {
               <p class="rv-origin">{{ q.origin }}</p>
             }
+            <!-- UNE seule présentation de la qualité, que le rapport soit
+                 acquis ou non. La page verrouillée en avait une jolie (barres,
+                 commentaire par critère) et la page acquise une liste plate de
+                 « 4/5 » : deux rendus pour la même donnée, selon qu'on avait
+                 payé. La barre situe la note d'un coup d'œil, et le commentaire
+                 dit POURQUOI — « International 2/5 » ne se défend pas devant un
+                 associé, « sens peu transparent hors du français » si. -->
             <div class="rv-criteria">
               @for (c of criteria(q); track c.label) {
-                <span class="rv-criterion">{{ c.label }} <strong>{{ c.value }}/5</strong></span>
+                <div class="rv-criterion">
+                  <div class="rv-criterion__head">
+                    <span class="rv-criterion__label">{{ c.label }}</span>
+                    <strong class="rv-criterion__score" [class]="'rv-criterion__score--' + c.tone">{{ c.value }}/5</strong>
+                  </div>
+                  <div class="rv-criterion__bar" aria-hidden="true">
+                    <span [class]="'rv-criterion__fill rv-criterion__fill--' + c.tone" [style.width.%]="c.value * 20"></span>
+                  </div>
+                  @if (c.comment) { <span class="rv-criterion__note">{{ c.comment }}</span> }
+                </div>
               }
             </div>
             @if (q.strengths) {
@@ -299,12 +297,6 @@ export class BrandReportViewComponent {
    */
   @Input() locked = false;
 
-  /** Analyse du nom déjà produite pendant la recherche, rendue en HTML. */
-  @Input() analysis: SafeHtml | null = null;
-
-  /** Note sur 5 lue dans cette analyse (0 = inconnue). */
-  @Input() analysisScore = 0;
-
   /**
    * Le projet tel que l'utilisateur l'a décrit, et le cadre qu'il a posé.
    * Absent sur la page de partage publique, qui ne doit rien révéler du projet.
@@ -454,8 +446,14 @@ export class BrandReportViewComponent {
     distinctiveness: 'Distinctivité',
   };
 
-  criteria(q: NameQuality): { label: string; value: number }[] {
-    return Object.entries(q.scores).map(([k, v]) => ({ label: this.QUALITY_LABELS[k] ?? k, value: v }));
+  criteria(q: NameQuality): { label: string; value: number; comment?: string; tone: string }[] {
+    return Object.entries(q.scores).map(([k, v]) => ({
+      label: this.QUALITY_LABELS[k] ?? k,
+      value: v,
+      comment: q.comments?.[k],
+      // Même échelle que les verdicts du produit : rien de neuf à apprendre.
+      tone: v >= 4 ? 'free' : v === 3 ? 'watch' : 'taken',
+    }));
   }
 }
 

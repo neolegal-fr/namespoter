@@ -225,23 +225,64 @@
 /* ─── Qualité du nom ─────────────────────────────────────────────────────── */
 
 .rv-criteria {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px 24px;
 }
 
 .rv-criterion {
+  min-width: 0;
+}
+
+.rv-criterion__head {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
-  min-width: 180px;
-  font-size: var(--nm-text-ui);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.rv-criterion__label {
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  text-transform: uppercase;
   color: var(--nm-app-text-2);
 }
 
-.rv-criterion strong {
-  color: var(--nm-app-text);
-  font-weight: 600;
+.rv-criterion__score {
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 700;
+}
+
+/* Même échelle que les verdicts : le lecteur n'a pas un second code à apprendre. */
+.rv-criterion__score--free  { color: var(--nm-app-verdict-free-fg); }
+.rv-criterion__score--watch { color: var(--nm-app-verdict-unknown-fg); }
+.rv-criterion__score--taken { color: var(--nm-app-verdict-taken-fg); }
+
+.rv-criterion__bar {
+  height: 4px;
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-app-divider);
+  overflow: hidden;
+}
+
+.rv-criterion__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--nm-radius-pill);
+}
+
+.rv-criterion__fill--free  { background: var(--nm-app-verdict-free-fg); }
+.rv-criterion__fill--watch { background: var(--nm-app-verdict-unknown-fg); }
+.rv-criterion__fill--taken { background: var(--nm-app-verdict-taken-fg); }
+
+.rv-criterion__note {
+  display: block;
+  margin-top: 5px;
+  font-size: var(--nm-text-ui-sm);
+  line-height: 1.45;
+  color: var(--nm-app-text-2);
 }
 
 /* ─── Pied de carte ──────────────────────────────────────────────────────── */

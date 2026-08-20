@@ -54,6 +54,14 @@ export interface NameQuality {
   /** Notes par critère (memorability, pronunciation, international, seo, distinctiveness). */
   scores: Record<string, number>;
   /**
+   * Une phrase par critère : POURQUOI cette note.
+   *
+   * « International 2/5 » ne se discute pas, ne s'améliore pas et ne se
+   * défend pas devant un associé. « Sens peu transparent hors du français »,
+   * si. Le modèle les produisait déjà ; elles étaient jetées à la lecture.
+   */
+  comments?: Record<string, string>;
+  /**
    * Comment le nom est construit et ce qu'il évoque, en une phrase.
    *
    * Les cinq notes disent si le nom est BON ; elles ne disent pas ce qu'il

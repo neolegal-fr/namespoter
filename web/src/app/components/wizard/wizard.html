@@ -855,9 +855,16 @@
           *ngIf="partialReport(brandReportName()) as partial; else lockedOnly"
           [report]="partial"
           [context]="reportContext()"
-          [locked]="true"
-          [analysis]="partialAnalysis(brandReportName())"
-          [analysisScore]="partialAnalysisScore(brandReportName())">
+          [locked]="true">
+          <!-- Mêmes actions d'en-tête que sur un rapport acquis : le document
+               s'imprime déjà (domaines et qualité y sont). « Partager » attend
+               en revanche qu'il y ait un rapport à envoyer — l'endpoint
+               retransmet un document mémorisé, il n'en fabrique pas. -->
+          <span actions class="rv-actions">
+            <button type="button" class="nm-btn-tertiary" (click)="printReport()">
+              <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
+            </button>
+          </span>
           <app-brand-report-locked locked
             [embedded]="true"
             [name]="brandReportName()"

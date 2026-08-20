@@ -588,7 +588,44 @@ export class WizardComponent implements OnInit, OnDestroy {
         status: (state === true ? 'free' : state === false ? 'taken' : 'unknown') as Availability,
       };
     });
-    return { name: d.name, handle: base.replace(/[^a-z0-9]/g, ''), domains };
+    return {
+      name: d.name,
+      handle: base.replace(/[^a-z0-9]/g, ''),
+      domains,
+      // La qualité passe par le MÊME champ que sur un rapport acquis : une
+      // seule donnée, une seule présentation. Elle était rendue à part, en
+      // HTML brut, ce qui donnait deux mises en forme pour la même chose selon
+      // qu'on avait payé.
+      quality: this.qualityFromAnalysis(d.analysis),
+    };
+  }
+
+  /**
+   * Convertit l'analyse stockée (JSON du modèle) en qualité structurée.
+   *
+   * `null` si elle n'a pas encore été calculée, ou si le texte n'est pas du
+   * JSON — les analyses anciennes étaient en texte libre, et on n'invente pas
+   * de notes à partir d'une prose.
+   */
+  private qualityFromAnalysis(analysis: string | null): NameQuality | undefined {
+    if (!analysis) return undefined;
+    try {
+      const j = JSON.parse(analysis);
+      const scores = j?.scores;
+      if (!scores || typeof scores !== 'object') return undefined;
+      const vals = Object.values(scores).filter((n): n is number => typeof n === 'number');
+      if (!vals.length) return undefined;
+      return {
+        score: Math.round((vals.reduce((a, b) => a + b, 0) / vals.length / 5) * 100),
+        scores,
+        comments: j.comments && typeof j.comments === 'object' ? j.comments : undefined,
+        origin: typeof j.origin === 'string' ? j.origin : undefined,
+        strengths: typeof j.strengths === 'string' ? j.strengths : undefined,
+        watchout: typeof j.watchout === 'string' ? j.watchout : undefined,
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   /**

@@ -115,6 +115,7 @@ export class BrandReportService {
       return {
         score: Math.round((avg / 5) * 100),
         scores,
+        comments: json.comments && typeof json.comments === 'object' ? json.comments : undefined,
         origin: typeof json.origin === 'string' ? json.origin : undefined,
         strengths: typeof json.strengths === 'string' ? json.strengths : undefined,
         watchout: typeof json.watchout === 'string' ? json.watchout : undefined,
