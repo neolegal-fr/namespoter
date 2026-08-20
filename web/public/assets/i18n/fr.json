@@ -133,7 +133,7 @@
       "MATCH_ALL_HINT": "La recherche peut être plus longue : chaque nom doit être libre sur toutes les extensions retenues.",
       "BACK_BTN": "Retour",
       "NEXT_BTN": "Continuer vers les extensions",
-      "SEARCH_BTN": "Rechercher des domaines",
+      "SEARCH_BTN": "Lancer la recherche",
       "TARGET_TITLE": "Public cible",
       "TARGET_INTL": "International",
       "TARGET_LOCAL": "Local / Régional",
@@ -165,14 +165,15 @@
       "LIKED_EXAMPLES_LABEL": "Noms qui vous inspirent",
       "DISLIKED_EXAMPLES_LABEL": "Noms à éviter",
       "EXTENSIONS_PLACEHOLDER": ".io, .app, .co",
-      "EXTENSIONS_ADD": "Ajouter cette extension"
+      "EXTENSIONS_ADD": "Ajouter cette extension",
+      "SEE_RESULTS_BTN": "Voir les résultats"
     },
     "STYLE": {
       "DESCRIPTIVE": "descriptif",
       "CULTURAL": "culturel"
     },
     "STEP3": {
-      "TITLE": "{{n}} suggestions retenues en {{extensions}}",
+      "TITLE": "{{n}} noms disponibles en {{extensions}}",
       "SUBTITLE": "Voici nos suggestions pour votre projet.",
       "NOTE": "Note : Nous avons analysé {{total}} idées de noms, mais seulement {{count}} étaient réellement disponibles en .com.",
       "NO_RESULTS": "Aucun domaine trouvé. Essayez de changer vos mots-clés.",
@@ -357,7 +358,9 @@
       "REPORT_SHARE_SEND": "Envoyer",
       "REPORT_SHARE_HINT": "Le message contient un lien vers le rapport en ligne et le document en pièce jointe.",
       "REPORT_SHARE_OK": "Rapport envoyé",
-      "REPORT_SHARE_KO": "L'envoi a échoué"
+      "REPORT_SHARE_KO": "L'envoi a échoué",
+      "DEBITED_NAMES": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés",
+      "DEBITED_MIXED": "{{total}} crédits débités — 1 pour chacun des {{noms}} noms proposés, {{tarif}} pour chacune des {{verifs}} vérifications de marque et réseaux sociaux"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
@@ -403,7 +406,9 @@
     "WIZARD_CTA_SUFFIX": ", et gagnez jusqu'à 500 crédits."
   },
   "COMMON": {
-    "CANCEL": "Annuler"
+    "CANCEL": "Annuler",
+    "AND": "et",
+    "OR": "ou"
   },
   "SHARED_REPORT": {
     "LOADING": "Chargement du rapport…",

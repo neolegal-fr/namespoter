@@ -133,7 +133,7 @@
       "MATCH_ALL_HINT": "The search may take longer: each name must be free on every selected extension.",
       "BACK_BTN": "Back",
       "NEXT_BTN": "Continue to extensions",
-      "SEARCH_BTN": "Search for domains",
+      "SEARCH_BTN": "Start the search",
       "TARGET_TITLE": "Target audience",
       "TARGET_INTL": "International",
       "TARGET_LOCAL": "Local / Regional",
@@ -165,14 +165,15 @@
       "LIKED_EXAMPLES_LABEL": "Names you like",
       "DISLIKED_EXAMPLES_LABEL": "Names to avoid",
       "EXTENSIONS_PLACEHOLDER": ".io, .app, .co",
-      "EXTENSIONS_ADD": "Add this extension"
+      "EXTENSIONS_ADD": "Add this extension",
+      "SEE_RESULTS_BTN": "See the results"
     },
     "STYLE": {
       "DESCRIPTIVE": "descriptive",
       "CULTURAL": "cultural"
     },
     "STEP3": {
-      "TITLE": "{{n}} names shortlisted in {{extensions}}",
+      "TITLE": "{{n}} names available in {{extensions}}",
       "SUBTITLE": "Here are our suggestions for your project.",
       "NOTE": "Note: We analyzed {{total}} name ideas, but only {{count}} were actually available in .com.",
       "NO_RESULTS": "No domains found. Try changing your keywords.",
@@ -357,7 +358,9 @@
       "REPORT_SHARE_SEND": "Send",
       "REPORT_SHARE_HINT": "The message carries a link to the online report and the document attached.",
       "REPORT_SHARE_OK": "Report sent",
-      "REPORT_SHARE_KO": "Sending failed"
+      "REPORT_SHARE_KO": "Sending failed",
+      "DEBITED_NAMES": "{{total}} credits charged — 1 for each of the {{noms}} names suggested",
+      "DEBITED_MIXED": "{{total}} credits charged — 1 for each of the {{noms}} names suggested, {{tarif}} for each of the {{verifs}} trademark and social checks"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -403,7 +406,9 @@
     "WIZARD_CTA_SUFFIX": ", and earn up to 500 credits."
   },
   "COMMON": {
-    "CANCEL": "Cancel"
+    "CANCEL": "Cancel",
+    "AND": "and",
+    "OR": "or"
   },
   "SHARED_REPORT": {
     "LOADING": "Loading report…",

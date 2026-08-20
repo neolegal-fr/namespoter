@@ -806,3 +806,11 @@
         max-width: none;
     }
 }
+
+/* Le débit, sous le titre des résultats : lisible, jamais concurrent du
+   résultat qu'on est venu voir. */
+.wizard-debit {
+    margin: 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}

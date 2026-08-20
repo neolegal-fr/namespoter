@@ -636,6 +636,46 @@ export class WizardComponent implements OnInit, OnDestroy {
     return { description: this.description() || undefined, constraints: cible };
   });
 
+  /**
+   * Les extensions telles qu'elles se lisent dans le titre.
+   *
+   * « .fr et .com » quand chaque nom doit être libre PARTOUT, « .fr ou .com »
+   * quand une seule suffit : deux listes qui n'ont pas la même valeur, et dont
+   * rien ne disait laquelle on regardait.
+   */
+  extensionsPhrase = computed(() => {
+    const exts = this.selectedExtensions();
+    if (exts.length <= 1) return exts.join('');
+    const lien = this.translate.instant(this.matchMode() === 'all' ? 'COMMON.AND' : 'COMMON.OR') as string;
+    return exts.slice(0, -1).join(', ') + ' ' + lien + ' ' + exts[exts.length - 1];
+  });
+
+  /**
+   * Ce qui a été débité pour cette liste, tous postes confondus.
+   *
+   * Somme des débits RÉELS des rapports (0 si offert, tarif d'alors sinon) et
+   * non un nombre de rapports multiplié par le tarif courant : la phrase doit
+   * correspondre à ce qui a quitté le compte.
+   */
+  private reportsDebited = computed(() =>
+    this.domains().reduce((total, d) => {
+      const s = this.reportSummaries().find((x) => x.nameKey === this.normName(d.name));
+      return s ? total + (s.costCredits ?? this.brandReportCost) : total;
+    }, 0),
+  );
+
+  debitedLabel = computed(() => {
+    const noms = this.domains().length;
+    const verifs = this.domains().filter((d) =>
+      this.reportSummaries().some((x) => x.nameKey === this.normName(d.name)),
+    ).length;
+    const total = noms + this.reportsDebited();
+    return this.translate.instant(
+      verifs > 0 ? 'WIZARD.STEP3.DEBITED_MIXED' : 'WIZARD.STEP3.DEBITED_NAMES',
+      { total, noms, verifs, tarif: this.brandReportCost },
+    ) as string;
+  });
+
   /** Extensions libres pour ce nom — verdicts gratuits, déjà à l'écran. */
   freeExtensionsOf(name: string): string[] {
     const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));

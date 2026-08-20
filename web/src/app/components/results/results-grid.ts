@@ -40,17 +40,6 @@ interface ExtVerdict {
   template: `
     <!-- Bandeau de crédits — pièce maîtresse du modèle économique : le débit
          doit être incontestable, donc énoncé avant les résultats. -->
-    <div class="rg-credits">
-      <span>
-        <strong>{{ debited() }}</strong>
-        @if (reportsCount() > 0) {
-          {{ 'WIZARD.STEP3.GRID_DEBITED_MIXED' | translate:{ noms: domains().length, verifs: reportsCount(), tarif: reportCost() } }}
-        } @else {
-          {{ 'WIZARD.STEP3.GRID_DEBITED_NAMES' | translate:{ noms: domains().length } }}
-        }
-      </span>
-    </div>
-
     <!-- Filtres. Aucun ne porte sur une donnée payante (INPI, réseaux) :
          elle n'existe pas sur les noms dont le rapport n'est pas acheté. -->
     <div class="rg-filters" role="group" aria-label="Filtrer les résultats">
@@ -301,7 +290,7 @@ interface ExtVerdict {
 export class ResultsGridComponent {
   private readonly translate = inject(TranslateService);
   /**
-   * Entrées SIGNAL et non `@Input` classiques : `visible()` et `debited()` sont
+   * Entrées SIGNAL et non `@Input` classiques : `visible()` est
    * des `computed`, qui ne suivent que des signaux. Avec des entrées ordinaires
    * ils auraient été calculés une fois puis figés — la grille aurait cessé de
    * se mettre à jour dès la première vérification de domaine arrivée.
@@ -392,40 +381,6 @@ export class ResultsGridComponent {
     const rank = (d: any) => (this.summaryOf(d) ? 0 : this.isLiked(d) ? 1 : 2);
     return [...kept].sort((a, b) => rank(a) - rank(b));
   });
-
-  /**
-   * Crédits débités : 1 par SUGGESTION retenue, pas par domaine libre.
-   * C'est ce que facture l'API (`actualCost = results.length`) ; compter les
-   * domaines libres affichait un total sans rapport avec le solde réel.
-   */
-  readonly debited = computed(() => {
-    const suggestions = this.domains().length;
-    return suggestions + this.reportsDebited();
-  });
-
-  /**
-   * Crédits débités par les rapports des noms AFFICHÉS ici.
-   *
-   * Somme des débits réels portés par chaque rapport, jamais un nombre de
-   * rapports multiplié par le tarif courant : un rapport offert coûte 0, et un
-   * rapport acheté avant un changement de prix garde le sien. Le total annoncé
-   * doit correspondre à ce qui a quitté le compte, sans quoi c'est le chiffre
-   * le plus vérifiable du produit qui devient contestable.
-   *
-   * `costCredits` à `null` = enregistrement antérieur à la colonne, donc
-   * nécessairement payé au tarif d'alors (le rapport offert est arrivé avec
-   * elle) : on retient le tarif courant, faute de mieux.
-   */
-  /** Nombre de noms de cette liste dont marque et réseaux ont été vérifiés. */
-  readonly reportsCount = computed(() => this.domains().filter((d) => !!this.summaryOf(d)).length);
-
-  readonly reportsDebited = computed(() =>
-    this.domains().reduce((total, d) => {
-      const sum = this.summaryOf(d);
-      if (!sum) return total;
-      return total + (sum.costCredits ?? this.reportCost());
-    }, 0),
-  );
 
   /** Toutes les extensions demandées sont libres — le cas que l'on cherche. */
   allFree(d: any): boolean {
