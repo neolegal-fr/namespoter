@@ -453,27 +453,93 @@
 .vd-go--topup { background: var(--nm-app-text); }
 
 /* ─── Largeur du wizard ───────────────────────────────────────────────────
-   Trois étapes, deux besoins opposés : décrire un projet se lit mieux dans
-   une colonne étroite, comparer neuf noms demande de la largeur. L'écran de
-   résultats passe donc à la largeur de contenu du design (1200px) ; les deux
-   premiers restent à 44rem, comme avant. */
+   UN conteneur, 1200px, pour les trois étapes : la carte blanche ne change
+   jamais de largeur d'une étape à l'autre. Elle passait de ~880px à ~1400px
+   entre l'étape 2 et l'étape 3, et la page « sautait » au milieu du parcours.
+
+   Ce sont les CONTENUS qui diffèrent, pas le cadre : les formulaires gardent
+   une colonne de lecture de 720px à l'intérieur du conteneur, la grille de
+   résultats en occupe toute la largeur. */
 .wizard-shell {
-    max-width: 44rem;
+    max-width: var(--nm-content-max);
     margin: 0 auto;
 }
 
-.wizard-shell--wide {
-    max-width: var(--nm-content-max);
-}
-
-/* Les rangées de l'étape 3 suivent la largeur de l'écran au lieu d'être
-   figées à 36rem : sinon la grille s'élargit et les barres au-dessus restent
-   étroites, ce qui décale tout l'écran. */
+/* Colonne de lecture des étapes 1 et 2, et des rangées de l'étape 3 qui ne
+   sont pas la grille (bandeau de crédits, filtres, navigation). */
 .wizard-row {
     width: 100%;
-    max-width: 36rem;
+    max-width: 45rem;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.wizard-shell--wide .wizard-row {
+/* La grille, elle, prend tout le conteneur : c'est ce qui la rend comparable. */
+.wizard-row--wide {
     max-width: none;
+}
+
+/* ─── En-tête de projet ───────────────────────────────────────────────────
+   Casse d'origine, pas de capitales forcées : « Repro », pas « REPRO ». Les
+   capitales cassent les noms accentués et écrasent les noms courts.
+   Couleur de texte et non accent : l'accent est réservé à ce qui se clique et
+   aux verdicts. Et 24px, pour rester sous le titre d'étape dans la
+   hiérarchie — il était plus gros que lui. */
+.wizard-project-title {
+    margin: 0;
+    font-family: var(--nm-font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: var(--nm-tracking-h3);
+    color: var(--nm-app-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── Actions du rapport ──────────────────────────────────────────────────
+   Le document est rendu par `app-brand-report-view` ; le wizard ne garde que
+   les actions qui lui appartiennent. Trois actions de même rang, donc trois
+   boutons tertiaires identiques — pas trois traitements différents. */
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    max-width: var(--nm-report-max);
+    margin: 0 auto;
+    padding: 0 0.25rem;
+}
+
+.report-actions__meta {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}
+
+.report-actions__ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-verdict-free-fg);
+}
+
+.report-sample-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: var(--nm-report-max);
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--nm-app-accent-border);
+    border-radius: var(--nm-radius-lg);
+    background: var(--nm-app-accent-surface);
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text);
 }

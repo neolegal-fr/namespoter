@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Moje Projekty",
+    "TITLE": "Moje projekty",
     "SUBTITLE": "Pokračujte ve svých vyhledáváních tam, kde jste skončili.",
     "EMPTY": "Zatím žádné projekty.",
     "OPEN": "Otevřít",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domény"
     },
     "STEP1": {
-      "TITLE": "Váš Projekt",
+      "TITLE": "Váš projekt",
       "PROJECT_NAME_TITLE": "Název projektu (volitelný)",
       "SUBTITLE": "Popište své řešení, cílovou skupinu a hodnoty.",
       "PLACEHOLDER": "Např.: Platforma pro doručování místních a ekologických květin...",

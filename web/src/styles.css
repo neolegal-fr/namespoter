@@ -327,54 +327,66 @@ body {
 
 /* ─── Stepper ────────────────────────────────────── */
 
-/* Cercle de l'étape */
+/* Un seul rendu d'état, sur les trois étapes : le fil changeait d'aspect
+   entre l'étape 1 (puce blanche, chiffre vert) et les étapes 2–3 (puce
+   pleine) — le même composant, dans le même parcours. */
 .p-steps .p-steps-item .p-steps-number {
     width: 2.25rem;
     height: 2.25rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border: 2px solid var(--p-surface-300);
-    background: white;
-    color: var(--p-surface-500);
+    /* Jamais `text-3` : le AA échoue sur les deux surfaces. */
+    border: 2px solid var(--nm-app-border-strong);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text-2);
     transition: all 0.2s ease;
 }
 
-/* Étape active */
+/* Étape courante : puce pleine. */
 .p-steps .p-steps-item.p-highlight .p-steps-number {
-    background: var(--p-primary-color);
-    border-color: var(--p-primary-color);
-    color: white;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--p-primary-color) 20%, transparent);
+    background: var(--nm-app-accent-fill);
+    border-color: var(--nm-app-accent-fill);
+    color: var(--nm-app-on-accent);
+    box-shadow: 0 0 0 4px var(--nm-app-accent-surface);
 }
 
-/* Label de l'étape active */
 .p-steps .p-steps-item.p-highlight .p-steps-title {
-    color: var(--p-primary-color);
+    color: var(--nm-app-accent);
     font-weight: 600;
 }
 
-/* Labels des autres étapes */
+/* Étape franchie : puce contourée, accent — distincte de « à venir ». */
+.p-steps .p-steps-item.p-steps-item-visited .p-steps-number {
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
+    background: var(--nm-app-surface);
+}
+
 .p-steps .p-steps-title {
     font-size: 0.8rem;
     margin-top: 0.4rem;
-    color: var(--p-surface-500);
+    color: var(--nm-app-text-2);
 }
 
-/* Ligne de connexion */
 .p-steps .p-steps-item:before {
-    border-top-color: var(--p-surface-200);
+    border-top-color: var(--nm-app-border);
 }
 
-/* ─── Bouton IA (indigo) ─────────────────────────── */
+/* ─── Bouton « Reformuler avec l'IA » ─────────────
+   Était en indigo #6366f1, à côté du bouton vert : deux couleurs de marque
+   concurrentes sur la seule ligne d'action de l'écran, et l'indigo attirait
+   l'œil davantage que l'action principale. L'IA n'est pas une marque à part
+   dans ce produit — c'est une action secondaire. */
 .btn-ai.p-button {
-    background: #6366f1;
-    border-color: #6366f1;
-    color: white;
+    background: transparent;
+    border-color: var(--nm-app-border-strong);
+    color: var(--nm-app-text);
 }
 
 .btn-ai.p-button:hover {
-    background: #4f46e5 !important;
-    border-color: #4f46e5 !important;
+    background: transparent;
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
 }
 
 /* ─── Pages de contenu / articles SEO ─────────────── */

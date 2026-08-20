@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Mijn Projecten",
+    "TITLE": "Mijn projecten",
     "SUBTITLE": "Hervat uw zoekopdrachten waar u gebleven was.",
     "EMPTY": "Nog geen projecten.",
     "OPEN": "Openen",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domeinen"
     },
     "STEP1": {
-      "TITLE": "Uw Project",
+      "TITLE": "Uw project",
       "PROJECT_NAME_TITLE": "Projectnaam (optioneel)",
       "SUBTITLE": "Beschrijf uw oplossing, uw doelgroep en uw waarden.",
       "PLACEHOLDER": "Bijv.: Een platform voor lokale en milieuvriendelijke bloemenbezorging...",

@@ -79,6 +79,11 @@
      comparer d'une carte à l'autre. */
   --nm-app-star: #b45309;
   --nm-app-star-empty: var(--nm-text-light-2);
+
+  /* État désactivé : surface neutre, JAMAIS un accent éclairci. Un bouton
+     désactivé qui ressemble à un bouton actif décoloré se clique quand même. */
+  --nm-app-disabled-bg: var(--nm-divider-light-1);
+  --nm-app-disabled-fg: var(--nm-text-light-3);
 }
 
 :root[data-theme='dark'] {
@@ -116,6 +121,9 @@
 
   --nm-app-star: #f59e0b;
   --nm-app-star-empty: var(--nm-text-dark-2);
+
+  --nm-app-disabled-bg: var(--nm-divider-dark-3);
+  --nm-app-disabled-fg: var(--nm-text-dark-3);
 }
 
 /* Mode « Système » : aucune valeur stockée, donc aucun attribut sur <html>.
@@ -157,6 +165,9 @@
 
     --nm-app-star: #f59e0b;
     --nm-app-star-empty: var(--nm-text-dark-2);
+
+    --nm-app-disabled-bg: var(--nm-divider-dark-3);
+    --nm-app-disabled-fg: var(--nm-text-dark-3);
   }
 }
 

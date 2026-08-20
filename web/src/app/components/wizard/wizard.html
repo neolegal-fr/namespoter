@@ -1,11 +1,10 @@
 <!--
-  Le wizard porte sa propre largeur, et elle change selon l'étape : ses étapes
-  ont des besoins opposés. Décrire un projet se lit mieux dans une colonne
-  étroite ; comparer neuf noms demande de la largeur. Enfermé dans le
-  conteneur commun à 44rem, l'écran de résultats n'affichait que deux colonnes
-  de cartes là où le design en prévoit quatre.
+  Le wizard porte sa propre largeur : UN conteneur de 1200px pour les trois
+  étapes, la carte ne change jamais de taille d'une étape à l'autre. Ce sont
+  les contenus qui diffèrent — les formulaires gardent une colonne de lecture
+  de 45rem, la grille de résultats prend toute la largeur.
 -->
-<div class="w-full wizard-shell" [class.wizard-shell--wide]="!showLanding() && activeIndex() === 2">
+<div class="w-full wizard-shell">
 
   <!-- ─── Landing page (visiteurs non connectés) ─────────── -->
   <div *ngIf="showLanding()" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2rem; padding: 2rem 0">
@@ -43,13 +42,18 @@
 
   <!-- ─── Wizard ───────────────────────────────────────────── -->
   <p-card *ngIf="!showLanding()" styleClass="md:p-5">
-    <div class="w-full mb-5" style="text-align: center" *ngIf="activeIndex() > 0">
+    <!-- En-tête de projet CONSTANT sur les trois étapes : il apparaissait aux
+         étapes 2 et 3 et disparaissait à l'étape 1, pour le même projet et la
+         même URL. Et il était en accent, plus gros que le titre de l'écran :
+         l'accent vert est réservé aux éléments actionnables et aux verdicts,
+         sinon il cesse de vouloir dire quelque chose. -->
+    <div class="w-full mb-5" style="text-align: center">
       <!-- Affichage du nom avec clic pour éditer -->
       <div *ngIf="!isEditingName()"
            (click)="isEditingName.set(true)"
            class="edit-name-trigger cursor-pointer"
            style="display: inline-flex; align-items: center; gap: 0.75rem; max-width: calc(100vw - 2rem); overflow: hidden">
-        <h1 class="font-bold text-primary" style="margin: 0; font-size: clamp(1.5rem, 7vw, 2.5rem); text-transform: uppercase; font-weight: 900; letter-spacing: -0.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+        <h1 class="wizard-project-title">
           {{ projectName() || ('WIZARD.STEPS.' + (activeIndex() === 0 ? 'DESCRIPTION' : activeIndex() === 1 ? 'KEYWORDS' : 'DOMAINS') | translate) }}
         </h1>
         <i class="pi pi-pencil text-lg text-400" style="flex-shrink: 0; opacity: 0; transition: opacity 0.2s ease"></i>
@@ -378,7 +382,7 @@
           <!-- Grille de cartes (refonte, étape 3). Remplace la matrice
                noms × extensions. La logique reste dans le wizard : le
                composant ne reçoit que des données et remonte des événements. -->
-          <div class="wizard-row">
+          <div class="wizard-row wizard-row--wide">
             <app-results-grid
               [domains]="filteredDomains()"
               [extensions]="selectedExtensions()"
@@ -768,143 +772,50 @@
         </app-brand-report-locked>
       </div>
 
-      <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem">
+      <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem 1rem 2rem">
 
-        <!-- Bannière exemple -->
-        <div *ngIf="isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.7rem 1rem; background: var(--nm-app-accent-surface); border: 1px solid var(--nm-app-accent-border); border-radius: 10px">
-          <span style="font-size: 0.88rem; color: var(--nm-app-accent)"><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
-          <button type="button" class="report-cta" (click)="showReportDialog.set(false)">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
+        <!-- Bandeau « exemple » : ce rapport-ci n'est pas celui de l'utilisateur. -->
+        <div *ngIf="isSampleReport()" class="report-sample-banner">
+          <span><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
+          <button type="button" class="nm-btn-primary" (click)="showReportDialog.set(false)">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
         </div>
 
-        <!-- Barre cache : date + régénérer -->
-        <div *ngIf="!isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--nm-app-text-2)">
-          <span><i class="pi pi-clock" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_GENERATED_ON' | translate }} {{ formatReportDate(report.generatedAt) }}<span *ngIf="report.cached"> · {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}</span></span>
-          <a *ngIf="report.cached" class="report-link" (click)="regenerateBrandReport()"><i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.REPORT_REGENERATE' | translate }} ({{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }})</a>
-        </div>
+        <!--
+          UN seul composant de rapport, partagé avec la page publique et la page
+          de partage. Le wizard en dupliquait 199 lignes : c'est pour cela que le
+          rapport n'affichait pas ce que la carte promettait — pas de section
+          EUIPO, une autre échelle de verdicts, un autre pied de page. Le
+          composant porte le document ; le wizard ne garde que les actions qui
+          lui appartiennent (partage, actualisation, envoi par e-mail).
+        -->
+        <app-brand-report-view [report]="report"></app-brand-report-view>
 
-        <!-- Action héro : réserver le meilleur domaine libre -->
-        <div *ngIf="heroFreeDomain(report) as hero" class="report-hero">
-          <div>
-            <div style="font-size: var(--nm-text-ui-sm); text-transform: uppercase; letter-spacing: .05em; opacity: .85">{{ 'WIZARD.STEP3.REPORT_HERO_LABEL' | translate }}</div>
-            <div style="font-family: var(--nm-font-display); font-size: 1.25rem; font-weight: 800; margin-top: 0.15rem">{{ hero.domain }}</div>
-          </div>
-          <a [href]="reserveDomainUrl(report.name, hero.extension, 0)" target="_blank" rel="noopener noreferrer" class="report-hero__btn">
-            <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
-          </a>
-        </div>
+        <div class="report-actions">
+          <span class="report-actions__meta">
+            <i class="pi pi-clock"></i>
+            {{ 'WIZARD.STEP3.REPORT_GENERATED_ON' | translate }} {{ formatReportDate(report.generatedAt) }}
+          </span>
 
-        <!-- Scores en tête -->
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap">
-          <div class="report-score-card">
-            <div class="report-score-num" [style.color]="report.score >= 66 ? 'var(--nm-app-verdict-free-fg)' : report.score >= 33 ? 'var(--nm-app-verdict-unknown-fg)' : 'var(--nm-app-verdict-taken-fg)'">{{ report.score }}<span style="font-size: 0.9rem; color: var(--nm-app-text-2)">/100</span></div>
-            <div class="report-score-lbl">{{ 'WIZARD.STEP3.REPORT_AVAILABILITY' | translate }}</div>
-          </div>
-          <div *ngIf="report.quality as q" class="report-score-card">
-            <div class="report-score-num" [style.color]="q.score >= 66 ? 'var(--nm-app-verdict-free-fg)' : q.score >= 33 ? 'var(--nm-app-verdict-unknown-fg)' : 'var(--nm-app-verdict-taken-fg)'">{{ q.score }}<span style="font-size: 0.9rem; color: var(--nm-app-text-2)">/100</span></div>
-            <div class="report-score-lbl">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</div>
-          </div>
-        </div>
-
-        <!-- Marque -->
-        <div class="report-card">
-          <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK' | translate }}</h3>
-          <div style="font-size: 0.9rem">
-            <span [ngSwitch]="report.trademark.match" style="font-weight: 600">
-              <span *ngSwitchCase="'none'" style="color: var(--nm-app-verdict-free-fg)"><i class="pi pi-check-circle"></i> {{ 'WIZARD.STEP3.TM_NONE_HEAD' | translate }}</span>
-              <span *ngSwitchCase="'exact'" style="color: var(--nm-app-verdict-taken-fg)"><i class="pi pi-times-circle"></i> {{ 'WIZARD.STEP3.TM_EXACT_HEAD' | translate }}</span>
-              <span *ngSwitchCase="'similar'" style="color: var(--nm-app-verdict-unknown-fg)"><i class="pi pi-exclamation-triangle"></i> {{ 'WIZARD.STEP3.TM_SIMILAR_HEAD' | translate }}</span>
-              <span *ngSwitchDefault style="color: var(--nm-app-text-2)"><i class="pi pi-question-circle"></i> {{ 'WIZARD.STEP3.TM_UNKNOWN_HEAD' | translate }}</span>
-            </span>
-
-            <!-- Explication concrète + prochaines actions -->
-            <p [innerHTML]="tmExplainKey(report.trademark.match) | translate" style="margin: 0.5rem 0 0; color: var(--nm-app-text-2); font-size: 0.85rem; line-height: 1.55"></p>
-
-            <ul *ngIf="report.trademark.hits.length" style="margin: 0.6rem 0 0.3rem; padding-left: 1.1rem; color: var(--nm-app-text-2); font-size: 0.84rem">
-              <li *ngFor="let h of report.trademark.hits.slice(0, 8)" style="margin: 0.15rem 0">
-                {{ h.name }} <span style="color: var(--nm-app-text-2)">({{ h.collection }}<span *ngIf="h.classes.length"> · classes {{ h.classes.join(', ') }}</span><span *ngIf="h.status"> · {{ h.status }}</span>)</span>
-                <a *ngIf="h.noticeUrl" [href]="h.noticeUrl" target="_blank" rel="noopener noreferrer" class="check-link" style="font-size: var(--nm-text-ui-sm); margin-left: 0.3rem">notice</a>
-              </li>
-            </ul>
-
-            <!-- Actions marque : déposer (si libre/proche) + recherche officielle (proéminente si indisponible) -->
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.7rem">
-              <a *ngIf="report.trademark.match === 'none' || report.trademark.match === 'similar'" [href]="INPI_DEPOSIT_URL" target="_blank" rel="noopener noreferrer" class="report-cta">
-                <i class="pi pi-shield" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_DEPOSIT' | translate }}
-              </a>
-              <a [href]="report.trademark.deepLink" target="_blank" rel="noopener noreferrer"
-                 [ngClass]="report.trademark.match === 'unknown' ? 'report-cta' : 'check-link'" style="font-size: 0.82rem">
-                <i class="pi pi-search" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }}
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Domaines + Réseaux -->
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap">
-          <div class="report-card" style="flex: 1 1 300px">
-            <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_DOMAINS' | translate }}</h3>
-            <div *ngFor="let d of report.domains" style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid var(--nm-app-divider)">
-              <span style="font-family: var(--nm-font-display)">{{ d.domain }}</span>
-              <span style="display: flex; align-items: center; gap: 0.6rem">
-                <!-- Réserver chez plusieurs registrars (ancien bouton, enrichi) -->
-                <div *ngIf="d.status === 'free'" class="reg-split" (click)="$event.stopPropagation()">
-                  <a [href]="reserveDomainUrl(report.name, d.extension, 0)" target="_blank" rel="noopener noreferrer" class="reg-split__main">
-                    <i class="pi pi-shopping-cart"></i><span class="reg-label"> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}</span>
-                  </a>
-                  <button type="button" class="reg-split__toggle" (click)="toggleReg(d.domain, $event)">
-                    <i class="pi pi-chevron-down"></i>
-                  </button>
-                  <div *ngIf="openReg() === d.domain" class="reg-split__menu">
-                    <a *ngFor="let r of REGISTRARS; let i = index" [href]="reserveDomainUrl(report.name, d.extension, i)" target="_blank" rel="noopener noreferrer" class="reg-split__item">
-                      {{ r.label }}
-                    </a>
-                  </div>
-                </div>
-                <span [style.background]="reportStatusColor(d.status)" style="color: var(--nm-app-surface); font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(d.status) | translate }}</span>
-              </span>
-            </div>
-          </div>
-
-          <div class="report-card" style="flex: 1 1 240px">
-            <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
-            <div *ngFor="let s of report.socials" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid var(--nm-app-divider)">
-              <a [href]="s.url" target="_blank" rel="noopener noreferrer" style="color: var(--nm-app-text); text-decoration: none">{{ s.platform }}<span *ngIf="s.planned" style="color: var(--nm-app-text-2); font-size: var(--nm-text-ui-sm)"> ({{ 'WIZARD.STEP3.SOCIAL_SOON' | translate }})</span></a>
-              <span [style.background]="reportStatusColor(s.status)" style="color: var(--nm-app-surface); font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(s.status) | translate }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Qualité du nom -->
-        <div *ngIf="report.quality as q" class="report-card">
-          <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem">
-            <div *ngFor="let c of qualityCriteria(q)" style="display: flex; justify-content: space-between; gap: 1rem; min-width: 180px; font-size: 0.86rem; padding: 0.2rem 0">
-              <span>{{ c.label }}</span>
-              <span style="color: var(--nm-app-text-2); font-weight: 600">{{ c.value }}/5</span>
-            </div>
-          </div>
-          <p *ngIf="q.strengths" style="margin: 0.6rem 0 0; font-size: 0.85rem"><strong style="color: var(--nm-app-verdict-free-fg)">{{ 'WIZARD.STEP3.REPORT_STRENGTHS' | translate }} :</strong> {{ q.strengths }}</p>
-          <p *ngIf="q.watchout" style="margin: 0.3rem 0 0; font-size: 0.85rem"><strong style="color: var(--nm-app-verdict-unknown-fg)">{{ 'WIZARD.STEP3.REPORT_WATCHOUT' | translate }} :</strong> {{ q.watchout }}</p>
-        </div>
-
-        <p *ngIf="report.emailed" style="margin: 0; font-size: 0.82rem; color: var(--nm-app-verdict-free-fg)"><i class="pi pi-envelope" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}</p>
-
-        <!-- Partager le rapport (lien public en lecture seule) -->
-        <div *ngIf="report.shareToken && !isSampleReport()" style="display: flex; align-items: center; gap: 0.6rem">
-          <a class="report-link" (click)="copyShareLink(report)"><i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}</a>
-          <span *ngIf="shareCopied()" style="font-size: 0.78rem; color: var(--nm-app-verdict-free-fg)"><i class="pi pi-check" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_COPIED' | translate }}</span>
-        </div>
-
-        <p style="margin: 0; padding: 0.7rem 0.85rem; background: var(--nm-app-divider); border-radius: 8px; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">{{ report.disclaimer }}</p>
-
-        <!-- Retour à la liste (bas de page aussi, pour ne pas remonter) -->
-        <div style="text-align: center; margin-top: 0.5rem">
-          <button type="button" class="report-back" (click)="showReportDialog.set(false)">
-            <i class="pi pi-arrow-left"></i> {{ 'WIZARD.STEP3.REPORT_BACK' | translate }}
+          <!-- Actualisation GRATUITE : décision produit. Le tarif n'apparaît
+               plus ici — il n'y en a plus. -->
+          <button type="button" class="nm-btn-tertiary" (click)="refreshBrandReport(report.name)">
+            <i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.GRID_REFRESH' | translate }}
           </button>
+
+          <button type="button" class="nm-btn-tertiary" (click)="copyShareLink(report)">
+            <i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}
+          </button>
+          <span *ngIf="shareCopied()" class="report-actions__ok">
+            <i class="pi pi-check"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_COPIED' | translate }}
+          </span>
+
+          <span *ngIf="report.emailed" class="report-actions__ok">
+            <i class="pi pi-envelope"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}
+          </span>
         </div>
       </div>
     </div>
+
   </p-dialog>
 
   <p-confirmDialog></p-confirmDialog>

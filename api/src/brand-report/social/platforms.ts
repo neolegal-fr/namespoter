@@ -104,7 +104,24 @@ export const PLATFORM_ADAPTERS: PlatformAdapter[] = [
   planned('Facebook', (h) => `https://www.facebook.com/${h}`),
 ];
 
-/** Adaptateur « planifié » : contrat visible dans le rapport, statut toujours `unknown`. */
+/** Adaptateur « planifié » : déclaré ici, mais JAMAIS servi — voir ci-dessous. */
 function planned(platform: string, profileUrl: (h: string) => string): PlatformAdapter {
   return { platform, profileUrl, planned: true, check: async () => 'unknown' };
 }
+
+/**
+ * Plateformes réellement interrogées, seules à figurer dans un rapport.
+ *
+ * Une plateforme non interrogée ne s'affiche pas : une ligne « bientôt » dans
+ * un rapport payé dévalue les autres — l'utilisateur a payé pour des verdicts,
+ * pas pour un inventaire de ce qui viendra. Instagram et Facebook restent donc
+ * hors rapport, hors carte et hors décompte annoncé tant que leur adaptateur
+ * renvoie `unknown` par construction.
+ *
+ * Le jour où ils répondent, retirer leur `planned` les réintègre partout d'un
+ * coup — y compris dans le nombre annoncé, qui est calculé et non écrit en dur.
+ */
+export const ACTIVE_PLATFORMS: PlatformAdapter[] = PLATFORM_ADAPTERS.filter((p) => !p.planned);
+
+/** Nombre de plateformes annoncées : calculé, jamais recopié dans un libellé. */
+export const ACTIVE_PLATFORM_COUNT = ACTIVE_PLATFORMS.length;

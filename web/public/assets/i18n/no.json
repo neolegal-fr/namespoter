@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Mine Prosjekter",
+    "TITLE": "Mine prosjekter",
     "SUBTITLE": "Fortsett søkene dine der du slapp.",
     "EMPTY": "Ingen prosjekter ennå.",
     "OPEN": "Åpne",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domener"
     },
     "STEP1": {
-      "TITLE": "Ditt Prosjekt",
+      "TITLE": "Ditt prosjekt",
       "PROJECT_NAME_TITLE": "Prosjektnavn (valgfritt)",
       "SUBTITLE": "Beskriv løsningen din, målgruppen din og verdiene dine.",
       "PLACEHOLDER": "F.eks.: En plattform for lokal og miljøvennlig blomsterlevering...",

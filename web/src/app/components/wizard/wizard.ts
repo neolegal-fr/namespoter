@@ -33,6 +33,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ResultsGridComponent } from '../results/results-grid';
 import type { BrandReportSummary } from '../../services/brand-report';
 import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
+import { BrandReportViewComponent } from '../brand-report/brand-report-view';
 
 @Component({
   selector: 'app-wizard',
@@ -58,7 +59,8 @@ import { BrandReportLockedComponent } from '../brand-report/brand-report-locked'
     Toast,
     TranslatePipe,
     ResultsGridComponent,
-    BrandReportLockedComponent
+    BrandReportLockedComponent,
+    BrandReportViewComponent
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
@@ -560,11 +562,6 @@ export class WizardComponent implements OnInit {
 
   /** Régénérer un rapport en cache (redébite) : repasse par la confirmation. */
   readonly forceRegen = signal(false);
-  regenerateBrandReport(): void {
-    this.forceRegen.set(true);
-    this.showReportDialog.set(false);
-    this.openReportConfirm();
-  }
 
   /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
   confirmBrandReport(): void {
@@ -647,10 +644,6 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  /** URL de réservation d'un domaine chez un registrar donné (extension avec point). */
-  reserveDomainUrl(name: string, extension: string, registrarIndex = 0): string {
-    return this.REGISTRARS[registrarIndex].url(name, [`.${extension}`]);
-  }
 
   // ─── Partage du rapport (Sally #5) ─────────────────────────────────────────
   readonly shareCopied = signal(false);
@@ -801,17 +794,7 @@ export class WizardComponent implements OnInit {
     return `WIZARD.STEP3.TM_${(match || 'unknown').toUpperCase()}_EXPLAIN`;
   }
 
-  openReg = signal<string | null>(null);
 
-  toggleReg(name: string, event: MouseEvent) {
-    event.stopPropagation();
-    this.openReg.set(this.openReg() === name ? null : name);
-  }
-
-  @HostListener('document:click')
-  closeReg() {
-    this.openReg.set(null);
-  }
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
   private searchTimeoutHandle: ReturnType<typeof setTimeout> | null = null;

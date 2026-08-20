@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Proiectele Mele",
+    "TITLE": "Proiectele mele",
     "SUBTITLE": "Reia căutările tale de unde ai rămas.",
     "EMPTY": "Niciun proiect încă.",
     "OPEN": "Deschide",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domenii"
     },
     "STEP1": {
-      "TITLE": "Proiectul Tău",
+      "TITLE": "Proiectul tău",
       "PROJECT_NAME_TITLE": "Numele proiectului (opțional)",
       "SUBTITLE": "Descrie soluția ta, publicul țintă și valorile tale.",
       "PLACEHOLDER": "Ex.: O platformă de livrare de flori locale și ecologice...",

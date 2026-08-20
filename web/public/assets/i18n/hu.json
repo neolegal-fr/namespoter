@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Saját Projektek",
+    "TITLE": "Saját projektek",
     "SUBTITLE": "Folytassa kereséseit ott, ahol abbahagyta.",
     "EMPTY": "Még nincs projekt.",
     "OPEN": "Megnyitás",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domainek"
     },
     "STEP1": {
-      "TITLE": "Az Ön Projektje",
+      "TITLE": "Az ön projektje",
       "PROJECT_NAME_TITLE": "Projekt neve (opcionális)",
       "SUBTITLE": "Írja le megoldását, célközönségét és értékeit.",
       "PLACEHOLDER": "Pl.: Helyi és ökológiai virágszállítási platform...",

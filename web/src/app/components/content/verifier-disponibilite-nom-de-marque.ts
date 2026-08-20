@@ -143,7 +143,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
     .checker { margin: 1.5rem 0 2rem; padding: 1.25rem; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; }
     .checker-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .checker-row input { flex: 1 1 200px; padding: 0.6rem 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
-    .checker-row button { padding: 0.6rem 1.2rem; border: 0; border-radius: 8px; background: #6366f1; color: #fff; font-weight: 600; cursor: pointer; }
+    .checker-row button { padding: 0.6rem 1.2rem; border: 0; border-radius: 8px; background: var(--nm-app-accent-fill); color: var(--nm-app-on-accent); font-weight: 600; cursor: pointer; }
     .checker-row button:disabled { opacity: .6; cursor: default; }
     .checker-error { color: #dc2626; margin: 0.75rem 0 0; }
     .checker-result { margin-top: 1rem; }

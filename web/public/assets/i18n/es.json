@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Mis Proyectos",
+    "TITLE": "Mis proyectos",
     "SUBTITLE": "Retome sus búsquedas donde las dejó.",
     "EMPTY": "Ningún proyecto por el momento.",
     "OPEN": "Abrir",
@@ -79,7 +79,7 @@
       "DOMAINS": "Dominios"
     },
     "STEP1": {
-      "TITLE": "Su Proyecto",
+      "TITLE": "Su proyecto",
       "PROJECT_NAME_TITLE": "Nombre del proyecto (opcional)",
       "SUBTITLE": "Describa su solución, su público y sus valores.",
       "PLACEHOLDER": "Ej.: Una plataforma de entrega de flores locales y ecológicas...",

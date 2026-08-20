@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AppLoggerService } from '../../common/logging/app-logger.service';
 import type { SocialAvailability } from '../dto/brand-report.types';
-import { PLATFORM_ADAPTERS, type PlatformAdapter, type SocialHttp } from './platforms';
+import { ACTIVE_PLATFORMS, type PlatformAdapter, type SocialHttp } from './platforms';
 
 const REQUEST_TIMEOUT_MS = 8000;
 
@@ -28,7 +28,9 @@ export class SocialCheckService {
   /** Vérifie toutes les plateformes en parallèle pour un pseudo donné. */
   async check(handle: string): Promise<SocialAvailability[]> {
     const results = await Promise.all(
-      PLATFORM_ADAPTERS.map((adapter) => this.checkOne(adapter, handle)),
+      // ACTIVE_PLATFORMS et non PLATFORM_ADAPTERS : une plateforme non
+      // interrogée ne figure pas dans un rapport payé — voir platforms.ts.
+      ACTIVE_PLATFORMS.map((adapter) => this.checkOne(adapter, handle)),
     );
     return results;
   }

@@ -140,3 +140,229 @@
   color: var(--nm-verdict-unknown-dark-fg);
   background: var(--nm-verdict-unknown-dark-bg);
 }
+
+/* ═══ Primitives d'interface partagées ══════════════════════════════════════
+ *
+ * Ces classes existent parce que les mêmes objets — un verdict, un bouton
+ * primaire, un contrôle segmenté, un lien — étaient dessinés différemment d'un
+ * écran à l'autre : le handoff avait été appliqué écran par écran. Une seule
+ * définition ici, employée partout.
+ *
+ * Toutes les valeurs viennent des rôles `--nm-app-*` : ces éléments suivent
+ * donc le mode clair/sombre.
+ */
+
+/* ─── Verdict ────────────────────────────────────────────────────────────
+ * UNE échelle pour tout le produit. Bas de casse partout.
+ *
+ * Deux états à ne jamais confondre, et qui ne partagent ni couleur ni icône :
+ *   « non vérifiable » = le registre n'a pas répondu (ambre, information) ;
+ *   « non vérifié »    = vous ne l'avez pas encore acheté (neutre + cadenas).
+ *
+ * Proscrits : l'aplat vert ou rouge saturé à texte blanc, et le rond « ? ».
+ */
+.nm-verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: var(--nm-radius-xs);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.nm-verdict--free {
+    background: var(--nm-app-verdict-free-bg);
+    color: var(--nm-app-verdict-free-fg);
+}
+
+.nm-verdict--taken {
+    background: var(--nm-app-verdict-taken-bg);
+    color: var(--nm-app-verdict-taken-fg);
+}
+
+/* « non vérifiable » et « à surveiller » partagent la paire ambre : dans les
+   deux cas l'information existe mais demande un regard humain. */
+.nm-verdict--unknown,
+.nm-verdict--watch {
+    background: var(--nm-app-verdict-unknown-bg);
+    color: var(--nm-app-verdict-unknown-fg);
+}
+
+/* Non acheté : neutre. Ce n'est pas un verdict, c'est une absence de verdict. */
+.nm-verdict--locked {
+    background: var(--nm-app-badge-bg);
+    color: var(--nm-app-text-2);
+}
+
+.nm-verdict--pending {
+    background: transparent;
+    color: var(--nm-app-text-2);
+}
+
+/* ─── Boutons ────────────────────────────────────────────────────────────── */
+
+.nm-btn-primary,
+.nm-btn-secondary,
+.nm-btn-tertiary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--nm-touch-min);
+    padding: 0.625rem 1.125rem;
+    border-radius: var(--nm-radius-sm);
+    font-family: var(--nm-font-body);
+    font-size: var(--nm-text-ui);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+/* `-accent-fill` et non `-accent` : le second est une couleur de TEXTE
+   (4,3:1) et échoue en aplat sous un libellé blanc (3,61:1). */
+.nm-btn-primary {
+    border: 1px solid var(--nm-app-accent-fill);
+    background: var(--nm-app-accent-fill);
+    color: var(--nm-app-on-accent);
+}
+
+.nm-btn-primary:hover:not(:disabled) {
+    background: var(--nm-app-accent-fill-hover);
+    border-color: var(--nm-app-accent-fill-hover);
+}
+
+.nm-btn-secondary {
+    border: 1px solid var(--nm-app-border-strong);
+    background: transparent;
+    color: var(--nm-app-text);
+}
+
+.nm-btn-secondary:hover:not(:disabled) {
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
+}
+
+/* Actions de même rang au-dessus d'une liste : même poids visuel, aucune
+   hiérarchie inventée par la couleur. */
+.nm-btn-tertiary {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--nm-app-text-2);
+    font-weight: 500;
+}
+
+.nm-btn-tertiary:hover:not(:disabled) {
+    background: var(--nm-app-surface-alt);
+    color: var(--nm-app-text);
+}
+
+/* Un bouton désactivé ne ressemble jamais à un bouton actif décoloré : on
+   change de surface, pas d'opacité. */
+.nm-btn-primary:disabled,
+.nm-btn-secondary:disabled,
+.nm-btn-tertiary:disabled {
+    background: var(--nm-app-disabled-bg);
+    border-color: var(--nm-app-disabled-bg);
+    color: var(--nm-app-disabled-fg);
+    cursor: not-allowed;
+}
+
+.nm-btn-primary:focus-visible,
+.nm-btn-secondary:focus-visible,
+.nm-btn-tertiary:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+/* ─── Contrôle segmenté ──────────────────────────────────────────────────
+ * Choix exclusif DANS un formulaire. À distinguer des filtres en pilules,
+ * qui filtrent une liste — deux gestes différents, deux formes.
+ */
+.nm-seg {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-md);
+    background: var(--nm-app-surface-alt);
+}
+
+.nm-seg__btn {
+    min-height: 40px;
+    padding: 0 0.875rem;
+    border: 0;
+    border-radius: calc(var(--nm-radius-md) - 3px);
+    background: transparent;
+    color: var(--nm-app-text-2);
+    font-family: inherit;
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.nm-seg__btn--on {
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.nm-seg__btn:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: -2px;
+}
+
+@media (pointer: coarse) {
+    .nm-seg__btn { min-height: var(--nm-touch-min); }
+}
+
+/* ─── Filtres en pilules ─────────────────────────────────────────────────── */
+
+.nm-filter {
+    min-height: var(--nm-touch-min);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-pill);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text-2);
+    font-family: inherit;
+    font-size: var(--nm-text-ui-sm);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+
+.nm-filter:hover { border-color: var(--nm-app-border-strong); }
+
+.nm-filter--on {
+    background: var(--nm-app-accent-surface);
+    border-color: var(--nm-app-accent-border);
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}
+
+.nm-filter:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+/* ─── Liens ──────────────────────────────────────────────────────────────
+ * Un seul traitement : accent, jamais gras, soulignement au survol et au
+ * focus seulement. Un lien souligné en permanence dans un paragraphe alourdit
+ * la lecture ; souligné ET gras, il devient plus visible que l'action
+ * principale de l'écran.
+ */
+.nm-link {
+    color: var(--nm-app-accent);
+    font-weight: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.nm-link:hover,
+.nm-link:focus-visible {
+    text-decoration: underline;
+}
