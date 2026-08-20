@@ -177,6 +177,9 @@ ssh namorama-prod "python3 - errors" < scripts/analyze-logs.py
 # Rapports de marque : demandes, issues, et détail par compte (sub)
 ssh namorama-prod "python3 - rapports" < scripts/analyze-logs.py
 
+# Quota INPI : évolution du compteur dans le temps, et remises à zéro
+ssh namorama-prod "python3 - quota"    < scripts/analyze-logs.py
+
 # Requêtes les plus lentes / codes de statut par route / lignes brutes
 ssh namorama-prod "python3 - slow"   < scripts/analyze-logs.py
 ssh namorama-prod "python3 - http"   < scripts/analyze-logs.py
@@ -205,3 +208,24 @@ Deux sources, volontairement distinctes — elles ne mesurent pas la même chose
 - **Admin de l'app** : les rapports **produits**, lus en base (`brand_report_record`). KPI période + total, et une colonne « Rapports » par utilisateur. Un compte supprimé ne compte plus (jointure sur le `sub`).
 
 > L'admin affichera toujours un chiffre ≤ celui des logs : un rapport bloqué faute de crédits est une demande, pas un rapport.
+
+### Quota INPI
+
+Le volet marque d'un rapport s'appuie sur **un seul compte INPI**, partagé par tout le
+produit. La passerelle expose ce qu'il en reste à chaque appel de diffusion :
+`x-rate-limit-remaining` (sur **100**) et `x-size-limit-remaining` (~**50 Mo**).
+
+- Une **notice coûte une unité au même titre qu'une recherche** — mesuré, pas supposé.
+  Un rapport en consomme donc jusqu'à **6** (1 recherche + `MAX_NOTICE_FETCHES`), soit
+  **au plus ~16 rapports par période**.
+- **La durée de la période n'est documentée nulle part** : aucun `x-rate-limit-reset`,
+  rien dans l'OpenAPI de la passerelle ni dans la documentation publique de l'INPI.
+  C'est pourquoi chaque appel journalise `trademark_quota_observed` : `python3 - quota`
+  affiche la suite chronologique et **signale les remontées du compteur**, ce qui encadre
+  la période entre deux bornes observées.
+- Sous 12 appels restants, `trademark_quota_low` passe en `warn` : le manque de quota ne
+  casse rien de visible, il fait retomber le volet marque sur « non vérifiable » dans un
+  rapport pourtant facturé.
+
+> Ne jamais partager ce compte avec le développement local : les tests videraient le
+> quota de la production. Un second compte INPI, ou le message « non configurée ».

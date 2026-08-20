@@ -236,6 +236,50 @@ def http(rows):
         print(f"  {sum(statuses.values()):6}  {route:42} {detail}")
 
 
+def quota(rows):
+    """Évolution du quota INPI dans le temps — et donc, à l'usage, sa période.
+
+    La passerelle ne dit nulle part quand son compteur repart : pas d'en-tête
+    `x-rate-limit-reset`, rien dans l'OpenAPI, rien dans la documentation. La
+    seule façon de connaître la période est de regarder QUAND la valeur remonte.
+    D'où l'affichage chronologique, avec la remontée signalée explicitement.
+    """
+    obs = [r for r in rows if r.get("context") == "trademark_quota_observed"]
+    if not obs:
+        print("Aucune observation de quota INPI.")
+        print("Le compteur n'est lu que sur les appels de diffusion (recherche, notice) :")
+        print("aucune trace signifie qu'aucun rapport de marque n'a été produit sur la période.")
+        return
+
+    print(f"Quota INPI — {len(obs)} appels observés\n")
+    print(f"{'horodatage':<22} {'appel':<8} {'restant':>8}  {'Mo restants':>12}")
+    prev = None
+    resets = []
+    for r in obs:
+        rem = r.get("remaining")
+        by = r.get("bytesRemaining")
+        mo = f"{by / 1_000_000:.1f}" if isinstance(by, (int, float)) else "-"
+        flag = ""
+        if prev is not None and isinstance(rem, int) and rem > prev[1]:
+            flag = f"  ← REMISE À ZÉRO (dernier appel : {prev[0]})"
+            resets.append((prev[0], str(r.get("ts"))[:19]))
+        print(f"{str(r.get('ts'))[:19]:<22} {str(r.get('endpoint')):<8} {str(rem):>8}  {mo:>12}{flag}")
+        if isinstance(rem, int):
+            prev = (str(r.get("ts"))[:19], rem)
+
+    print()
+    if resets:
+        print("Remises à zéro observées (la période tombe entre ces deux bornes) :")
+        for before, after in resets:
+            print(f"  après {before}  →  avant {after}")
+    else:
+        print("Aucune remise à zéro observée : la période dépasse l'intervalle couvert ici.")
+
+    low = [r for r in rows if r.get("context") == "trademark_quota_low"]
+    if low:
+        print(f"\n{len(low)} alerte(s) « quota presque épuisé » — dernière : {str(low[-1].get('ts'))[:19]}")
+
+
 def raw(rows):
     for r in rows[-30:]:
         print(json.dumps(r, ensure_ascii=False)[:220])
@@ -245,6 +289,7 @@ MODES = {
     "errors": errors,
     "funnel": funnel,
     "rapports": rapports,
+    "quota": quota,
     "slow": slow,
     "http": http,
     "raw": raw,
