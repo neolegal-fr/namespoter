@@ -500,9 +500,37 @@ body {
    basse, pour se fondre dans le héros.
    `!important` : PrimeNG applique ses propres fonds sur `.p-menubar`, et une
    simple classe utilitaire ne les emporte pas. */
+/* La barre de l'accueil est une SURFACE SOMBRE, quel que soit le mode : elle
+   se fond dans le héros. Elle redéfinit donc les rôles pour ce qu'elle
+   contient, au lieu de recolorer ses éléments un par un — sinon chaque
+   nouveau bouton hérite des couleurs du mode clair sur un fond noir. C'est ce
+   qui rendait « Français » et « Projets » illisibles en mode clair (3,26:1).
+   Les jetons `--p-*` sont repris de même : PrimeNG ne connaît pas les nôtres. */
 .nm-menubar-dark.p-menubar {
     background: var(--nm-bg-dark) !important;
     border: 0 !important;
+
+    --nm-app-surface: var(--nm-surface-dark);
+    --nm-app-surface-alt: var(--nm-surface-dark-alt);
+    --nm-app-border: var(--nm-border-dark);
+    --nm-app-border-strong: var(--nm-border-dark-interactive);
+    --nm-app-text: var(--nm-text-dark);
+    --nm-app-text-2: var(--nm-text-dark-2);
+    --nm-app-text-3: var(--nm-text-dark-3);
+    --nm-app-accent: var(--nm-accent);
+    --nm-app-accent-hover: var(--nm-accent-hover);
+    --nm-app-accent-surface: var(--nm-accent-surface-dark);
+    --nm-app-accent-border: var(--nm-accent-border-dark);
+    --nm-app-badge-bg: var(--nm-divider-dark-3);
+    --nm-app-badge-fg: var(--nm-text-dark-2);
+
+    --p-text-color: var(--nm-text-dark);
+    --p-text-muted-color: var(--nm-text-dark-2);
+    --p-text-hover-color: var(--nm-text-dark);
+    --p-text-hover-muted-color: var(--nm-text-dark-2);
+    --p-button-text-secondary-color: var(--nm-text-dark);
+    --p-button-text-secondary-hover-background: var(--nm-surface-dark);
+    --p-content-hover-background: var(--nm-surface-dark);
 }
 
 .nm-menubar-dark .brand-wordmark,
