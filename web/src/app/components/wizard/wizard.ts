@@ -599,25 +599,41 @@ export class WizardComponent implements OnInit, OnDestroy {
    * contraintes, impossible de savoir pourquoi CE nom a été proposé.
    */
   reportContext = computed(() => {
-    const contraintes: { label: string; value: string }[] = [];
-    contraintes.push({
-      label: 'WIZARD.STEP3.REPORT_C_LENGTH',
-      value: this.translate.instant('WIZARD.STEP3.REPORT_C_LENGTH_V', { n: this.minNameLength() }),
+    /*
+     * « Public cible », et non « cadre de la recherche ».
+     *
+     * Le bloc listait la longueur minimale, les extensions et le critère de
+     * disponibilité : des réglages de RECHERCHE, qui n'expliquent rien du nom
+     * une fois le rapport relu. Ce qui compte pour juger un nom, c'est à QUI
+     * il s'adresse — marché, langue, registre — et c'est ce que l'utilisateur
+     * a réellement paramétré à l'étape de cadrage.
+     */
+    const cible: { label: string; value: string }[] = [];
+    const t = (k: string, p?: Record<string, unknown>) => this.translate.instant(k, p) as string;
+
+    cible.push({
+      label: 'WIZARD.STEP3.REPORT_T_MARKET',
+      value: this.isLocal()
+        ? t('WIZARD.STEP3.REPORT_T_MARKET_LOCAL', { pays: (this.effectiveLocale() ?? '').toUpperCase() })
+        : t('WIZARD.STEP3.REPORT_T_MARKET_INTL'),
     });
-    if (this.selectedExtensions().length) {
-      contraintes.push({ label: 'WIZARD.STEP3.REPORT_C_EXTENSIONS', value: this.selectedExtensions().join(' ') });
+
+    const registres: string[] = [];
+    if (this.descriptiveNames()) registres.push(t('WIZARD.STYLE.DESCRIPTIVE'));
+    if (this.culturalNames()) registres.push(t('WIZARD.STYLE.CULTURAL'));
+    if (registres.length) {
+      cible.push({ label: 'WIZARD.STEP3.REPORT_T_STYLE', value: registres.join(', ') });
     }
-    contraintes.push({
-      label: 'WIZARD.STEP3.REPORT_C_MATCH',
-      value: this.translate.instant(this.matchMode() === 'all' ? 'WIZARD.STEP2.MATCH_ALL' : 'WIZARD.STEP2.MATCH_ANY'),
-    });
-    if (this.isLocal()) {
-      contraintes.push({
-        label: 'WIZARD.STEP3.REPORT_C_LOCAL',
-        value: this.translate.instant('WIZARD.STEP3.REPORT_C_LOCAL_V'),
-      });
+
+    const inspirations = this.likedExamplesInput().trim();
+    if (inspirations) {
+      cible.push({ label: 'WIZARD.STEP3.REPORT_T_INSPIRATION', value: inspirations });
     }
-    return { description: this.description() || undefined, constraints: contraintes };
+
+    const mots = this.keywords().slice(0, 8).join(', ');
+    if (mots) cible.push({ label: 'WIZARD.STEP3.REPORT_T_KEYWORDS', value: mots });
+
+    return { description: this.description() || undefined, constraints: cible };
   });
 
   /** Extensions libres pour ce nom — verdicts gratuits, déjà à l'écran. */
@@ -669,6 +685,42 @@ export class WizardComponent implements OnInit, OnDestroy {
    * en-tête ni son nom. Le dialogue plein écran masquait le problème ; une
    * page ne le masque plus.
    */
+  // ─── Partage par email d'un rapport déjà acquis ──────────────────────────
+  readonly showShareMail = signal(false);
+  readonly shareEmails = signal('');
+  readonly shareSending = signal(false);
+
+  openShareMail(): void {
+    this.shareEmails.set(this.userEmail() || '');
+    this.showShareMail.set(true);
+  }
+
+  /**
+   * Renvoie le rapport par email. Aucun débit : il existe déjà, on ne fait que
+   * le retransmettre — d'où un endpoint distinct de la génération.
+   */
+  sendShareMail(): void {
+    const emails = this.parseEmails(this.shareEmails());
+    this.shareSending.set(true);
+    this.brandReportService.sendByMail(this.brandReportName(), emails).subscribe({
+      next: (res) => {
+        this.shareSending.set(false);
+        this.showShareMail.set(false);
+        this.messageService.add({
+          severity: res?.sent ? 'success' : 'warn',
+          summary: this.translate.instant(res?.sent ? 'WIZARD.STEP3.REPORT_SHARE_OK' : 'WIZARD.STEP3.REPORT_SHARE_KO'),
+          life: 4000,
+        });
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.shareSending.set(false);
+        this.messageService.add({ severity: 'error', summary: this.translate.instant('WIZARD.STEP3.REPORT_SHARE_KO'), life: 4000 });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
   /** Ouvre la boîte d'impression, dont la destination par défaut est le PDF. */
   printReport(): void {
     if (typeof window !== 'undefined') window.print();

@@ -782,7 +782,39 @@
         <span *ngIf="brandReport()?.cached" class="report-cached-badge">
           <i class="pi pi-clock" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}
         </span>
+
+        <!-- Partager en HAUT À DROITE, où l'on cherche cette action : le
+             rapport se lit puis s'envoie à un associé ou à un conseil. Elle
+             était enfouie au pied du document, après l'avertissement légal. -->
+        <span *ngIf="brandReport() && !isSampleReport()" style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem">
+          <button type="button" class="nm-btn-tertiary" (click)="printReport()">
+            <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
+          </button>
+          <button type="button" class="nm-btn-secondary" (click)="openShareMail()">
+            <i class="pi pi-send"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_MAIL' | translate }}
+          </button>
+        </span>
       </div>
+
+      <!-- Envoi par email : destinataires, et rien d'autre. Le lien vers le
+           rapport en ligne part avec, le PDF se télécharge à côté. -->
+      <p-dialog [visible]="showShareMail()" (visibleChange)="showShareMail.set($event)"
+                [modal]="true" [draggable]="false" [style]="{ width: 'min(92vw, 30rem)' }"
+                [header]="'WIZARD.STEP3.REPORT_SHARE_MAIL' | translate">
+        <p style="margin: 0 0 0.75rem; color: var(--nm-app-text-2); font-size: var(--nm-text-ui-sm)">
+          {{ 'WIZARD.STEP3.REPORT_SHARE_HINT' | translate }}
+        </p>
+        <input type="text" class="w-full" [ngModel]="shareEmails()" (ngModelChange)="shareEmails.set($event)"
+               [placeholder]="'WIZARD.STEP3.REPORT_EMAILS_PLACEHOLDER' | translate"
+               style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--nm-app-border); border-radius: var(--nm-radius-sm); background: var(--nm-app-surface); color: var(--nm-app-text)">
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem">
+          <button type="button" class="nm-btn-tertiary" (click)="showShareMail.set(false)">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="nm-btn-primary" [disabled]="shareSending()" (click)="sendShareMail()">
+            <i class="pi" [class.pi-send]="!shareSending()" [class.pi-spin]="shareSending()" [class.pi-spinner]="shareSending()"></i>
+            {{ 'WIZARD.STEP3.REPORT_SHARE_SEND' | translate }}
+          </button>
+        </div>
+      </p-dialog>
 
     <div style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1.25rem">
 

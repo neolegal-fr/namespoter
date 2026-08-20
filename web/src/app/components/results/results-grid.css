@@ -677,3 +677,12 @@
 .rg-refresh .pi {
     font-size: 0.8rem;
 }
+
+
+/* Enveloppe du bouton de réactualisation : elle seule reçoit les événements
+   de souris quand le bouton est désactivé, donc elle seule peut porter
+   l'infobulle qui explique pourquoi. */
+.rg-refresh__wrap {
+    display: inline-flex;
+    flex: none;
+}

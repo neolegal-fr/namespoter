@@ -91,6 +91,27 @@ export class BrandReportController {
    * compteur « 3 contrôles favorables » suffirait à déduire l'essentiel : il
    * n'est pas exposé non plus.
    */
+  /**
+   * Renvoie par email un rapport DÉJÀ acquis.
+   *
+   * Aucun débit : le rapport existe, on ne fait que le retransmettre. Rien
+   * n'est généré ici — si le nom n'a pas de rapport pour ce compte, on répond
+   * 404 plutôt que de produire un document au passage.
+   */
+  @Post('send')
+  async send(
+    @Body() dto: { name?: string; emails?: string[] },
+    @AuthenticatedUser() keycloakUser: { sub: string; email?: string },
+  ) {
+    const report = dto.name ? await this.store.find(keycloakUser.sub, dto.name) : null;
+    if (!report) throw new NotFoundException('Aucun rapport pour ce nom');
+
+    const recipients = dto.emails?.length ? dto.emails : keycloakUser.email;
+    const sent = await this.reportMail.sendReport(recipients, report);
+    this.events.event('brand_report_reshared', { sub: keycloakUser.sub, sent });
+    return { sent };
+  }
+
   @Get('offer')
   async offer(
     @Query('name') name: string,

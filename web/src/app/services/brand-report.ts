@@ -138,6 +138,11 @@ export class BrandReportService {
 
   /** Rapport déjà généré pour ce nom (authentifié) — pour éviter un re-débit. */
   /** Synthèses des noms vérifiés — verdicts déjà payés, pour la grille. */
+  /** Renvoie par email un rapport déjà acquis. Aucun débit côté serveur. */
+  sendByMail(name: string, emails: string[]): Observable<{ sent: boolean }> {
+    return this.http.post<{ sent: boolean }>(`${this.apiUrl}/send`, { name, emails });
+  }
+
   summaries(): Observable<{ summaries: BrandReportSummary[] }> {
     return this.http.get<{ summaries: BrandReportSummary[] }>(`${this.apiUrl}/summaries`);
   }

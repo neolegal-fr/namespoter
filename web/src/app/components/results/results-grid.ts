@@ -265,13 +265,19 @@ interface ExtVerdict {
               } @else {
                 <span class="rg-checked--none">{{ 'WIZARD.STEP3.GRID_CHECKED_UNKNOWN' | translate }}</span>
               }
-              <button type="button" class="rg-refresh"
-                      [disabled]="checkTooRecent(d)"
-                      [attr.aria-label]="('WIZARD.STEP3.GRID_RECHECK_DOMAINS' | translate) + ' — ' + d.name"
-                      [attr.title]="(checkTooRecent(d) ? 'WIZARD.STEP3.GRID_RECHECK_SOON' : 'WIZARD.STEP3.GRID_RECHECK_DOMAINS') | translate"
-                      (click)="summaryOf(d) ? refresh.emit(d.name) : refreshDomains.emit(d.name)">
-                <i class="pi pi-refresh" aria-hidden="true"></i>
-              </button>
+              <!-- Le title est porté par le SPAN, pas par le bouton : un
+                   bouton « disabled » n'émet aucun événement de souris, donc son
+                   infobulle ne s'affiche jamais — l'utilisateur voit une icône
+                   grisée sans savoir pourquoi. -->
+              <span class="rg-refresh__wrap"
+                    [attr.title]="(checkTooRecent(d) ? 'WIZARD.STEP3.GRID_RECHECK_SOON' : 'WIZARD.STEP3.GRID_RECHECK_DOMAINS') | translate">
+                <button type="button" class="rg-refresh"
+                        [disabled]="checkTooRecent(d)"
+                        [attr.aria-label]="((checkTooRecent(d) ? 'WIZARD.STEP3.GRID_RECHECK_SOON' : 'WIZARD.STEP3.GRID_RECHECK_DOMAINS') | translate) + ' — ' + d.name"
+                        (click)="summaryOf(d) ? refresh.emit(d.name) : refreshDomains.emit(d.name)">
+                  <i class="pi pi-refresh" aria-hidden="true"></i>
+                </button>
+              </span>
             </p>
 
             <!-- UNE rangée, toujours de la même hauteur : deux boutons tant que
