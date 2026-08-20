@@ -49,25 +49,6 @@ export class User {
   @Column({ nullable: true, type: 'datetime' })
   lastFreeReset: Date | null;
 
-  /**
-   * Vestiges du rapport offert mensuel, RETIRÉ du produit.
-   *
-   * La règle est redevenue simple : un rapport coûte son tarif, et les 100
-   * crédits mensuels couvrent 50 suggestions plus un rapport. La gratuité
-   * demandait une comptabilité parallèle — période de référence, horodatage,
-   * verrou pessimiste, coût réel mémorisé — pour un avantage que le solde
-   * offrait déjà.
-   *
-   * Les colonnes restent en base : les supprimer imposerait une migration
-   * destructive en production pour gagner deux champs inertes. Plus rien ne
-   * les lit ni ne les écrit.
-   */
-  @Column({ nullable: true, type: 'varchar', length: 7 })
-  freeReportPeriod: string | null;
-
-  @Column({ nullable: true, type: 'datetime' })
-  freeReportUsedAt: Date | null;
-
   @CreateDateColumn({ type: 'datetime' })
   createdAt: Date;
 

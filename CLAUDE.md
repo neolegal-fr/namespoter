@@ -84,9 +84,9 @@ Ce qui subsiste et reste utile :
 
 - `brand_report_record.costCredits` porte le débit **réel** — 0 sur une actualisation,
   déjà payée une fois. L'historique reste juste après un changement de tarif.
-- Les colonnes `user.freeReportPeriod` et `user.freeReportUsedAt` restent en base, inertes :
-  les supprimer imposerait une migration destructive en production pour deux champs que
-  plus rien ne lit.
+- Les colonnes `user.freeReportPeriod` et `user.freeReportUsedAt` ont été **supprimées** :
+  elles n'avaient jamais été déployées en production, la migration qui les créait a donc
+  simplement été amputée plutôt que compensée par un `ALTER … DROP`.
 - `GET /brand-report/offer?name=` décrit l'offre sans verdict : `deepReport.purchased`,
   `priceCredits`, `account.credits`.
 - La confirmation avant débit est **inconditionnelle** : 50 crédits, la moitié de la
