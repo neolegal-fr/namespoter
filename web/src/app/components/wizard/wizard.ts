@@ -873,11 +873,16 @@ export class WizardComponent implements OnInit, OnDestroy {
       { extension: 'net', domain: 'namorama.net', status: 'free' },
       { extension: 'app', domain: 'namorama.app', status: 'unknown' },
     ],
+    // Les SIX plateformes réellement interrogées, comme un vrai rapport. Le
+    // rapport d'exemple sert à savoir ce qu'on achète : en montrer quatre
+    // revenait à annoncer moins que ce qui est livré.
     socials: [
       { platform: 'GitHub', handle: 'namorama', url: 'https://github.com/namorama', status: 'free' },
       { platform: 'LinkedIn', handle: 'namorama', url: 'https://www.linkedin.com/company/namorama', status: 'free' },
-      { platform: 'TikTok', handle: 'namorama', url: 'https://www.tiktok.com/@namorama', status: 'taken' },
       { platform: 'Telegram', handle: 'namorama', url: 'https://t.me/namorama', status: 'free' },
+      { platform: 'TikTok', handle: 'namorama', url: 'https://www.tiktok.com/@namorama', status: 'taken' },
+      { platform: 'X', handle: 'namorama', url: 'https://x.com/namorama', status: 'taken' },
+      { platform: 'YouTube', handle: 'namorama', url: 'https://www.youtube.com/@namorama', status: 'free' },
     ],
     trademark: {
       office: 'INPI',

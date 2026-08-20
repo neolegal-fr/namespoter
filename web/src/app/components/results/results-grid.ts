@@ -495,3 +495,4 @@ export class ResultsGridComponent {
     return this.analysisRenderer()(a);
   }
 }
+

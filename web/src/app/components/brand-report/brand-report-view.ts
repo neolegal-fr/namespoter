@@ -316,3 +316,4 @@ export class BrandReportViewComponent {
     return Object.entries(q.scores).map(([k, v]) => ({ label: this.QUALITY_LABELS[k] ?? k, value: v }));
   }
 }
+

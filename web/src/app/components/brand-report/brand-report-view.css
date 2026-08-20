@@ -167,7 +167,8 @@
   font-size: var(--nm-text-overline-sm);
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  /* Bas de casse, comme partout ailleurs : « LIBRE » et « libre » désignaient
+     le même verdict sur deux écrans voisins. */
   white-space: nowrap;
 }
 
