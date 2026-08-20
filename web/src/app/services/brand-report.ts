@@ -56,7 +56,7 @@ export interface BrandReport {
   disclaimer: string;
   /** Jeton de partage public (présent une fois le rapport mémorisé). */
   shareToken?: string;
-  /** Présents uniquement sur le rapport complet (authentifié). */
+  /** Présents uniquement sur le rapport de marque (authentifié). */
   remainingCredits?: number;
   emailed?: boolean;
   /** true = rapport déjà généré, renvoyé sans nouveau débit. */
@@ -94,7 +94,7 @@ export interface BrandReportSummary {
   score: number | null;
 }
 
-/** Coût affiché du rapport complet (aligné sur BRAND_REPORT_COST côté API). */
+/** Coût affiché du rapport de marque (aligné sur BRAND_REPORT_COST côté API). */
 export const BRAND_REPORT_COST = 50;
 
 @Injectable({ providedIn: 'root' })
@@ -136,7 +136,7 @@ export class BrandReportService {
     return this.http.get<BrandReport>(`${this.apiUrl}/shared/${token}`);
   }
 
-  /** Rapport complet (authentifié, payant ; le token est ajouté par l'intercepteur). */
+  /** Rapport de marque (authentifié, payant ; le token est ajouté par l'intercepteur). */
   full(name: string, options?: { extensions?: string[]; emails?: string[]; force?: boolean }): Observable<BrandReport> {
     return this.http.post<BrandReport>(this.apiUrl, {
       name,

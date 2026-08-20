@@ -460,7 +460,7 @@ export class WizardComponent implements OnInit {
 
   /** Point d'entrée : si le rapport existe déjà, on l'ouvre (sans débit) ; sinon on demande confirmation. */
   /**
-   * « Rapport complet » depuis une carte : ouvre le rapport s'il est acquis,
+   * « rapport de marque » depuis une carte : ouvre le rapport s'il est acquis,
    * sinon le rapport VERROUILLÉ — pas la popup d'achat. Le handoff distingue
    * les deux gestes : vérifier (popup courte) et consulter le rapport (écran
    * qui montre ce qu'on achète).

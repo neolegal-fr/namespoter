@@ -11,7 +11,7 @@ interface LockedCheck {
 }
 
 /**
- * Rapport approfondi — état VERROUILLÉ (avant achat), refonte étape 4.
+ * rapport de marque — état VERROUILLÉ (avant achat), refonte étape 4.
  *
  * Montre la FORME de la réponse, jamais la réponse : c'est le ressort de
  * conversion décrit par le handoff.
