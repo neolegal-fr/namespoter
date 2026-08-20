@@ -8,6 +8,11 @@ import { Project } from '../projects/entities/project.entity';
 /** Quota mensuel de crédits gratuits */
 const FREE_MONTHLY_QUOTA = 100;
 
+/** Mois calendaire courant au format « AAAA-MM » — clé du rapport offert. */
+export function currentPeriod(now: Date = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
 /** Champs recopiés du token Keycloak à chaque appel authentifié. */
 export interface UserProfile {
   email?: string;
@@ -124,6 +129,7 @@ export class UsersService {
     await repo.save(user);
     return user.totalCredits;
   }
+
 
   /** Ajoute des crédits pack (achat ponctuel, permanents). Retourne le User mis à jour. */
   async addExtraCredits(keycloakId: string, amount: number, manager?: EntityManager): Promise<User | null> {

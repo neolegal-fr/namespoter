@@ -1,6 +1,30 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <!--
+    Thème : script SYNCHRONE, avant tout style. Aucun framework ne peut le
+    faire assez tôt, Angular compris : si le mode est lu après le rendu, un
+    utilisateur en préférence sombre voit un éclair blanc à chaque navigation.
+
+    Trois valeurs stockées, pas deux : « light », « dark », ou RIEN. « Système »
+    est l'absence de valeur — enregistrer le mode résolu ferait cesser le suivi
+    de l'OS sans que l'utilisateur l'ait demandé.
+  -->
+  <script>
+    (function () {
+      var m = null;
+      try { m = localStorage.getItem('nm-theme'); } catch (e) { /* stockage bloqué */ }
+      // L'attribut porte toujours le mode RÉSOLU (deux valeurs), le stockage
+      // le CHOIX (trois états, « système » = rien). PrimeNG ne sait basculer
+      // que sur un sélecteur : sans attribut en mode système + OS sombre, ses
+      // composants resteraient clairs au milieu d'une interface sombre.
+      if (m !== 'light' && m !== 'dark') {
+        m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', m);
+    })();
+  </script>
+
   <meta charset="utf-8">
   <title>Générateur de nom de produit, marque ou société — Namorama</title>
   <base href="/">
@@ -80,8 +104,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="favicon-32.png">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <!-- Google tag (gtag.js) + Consent Mode v2 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-0PRN6V9ZL7"></script>
   <script>

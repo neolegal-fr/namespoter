@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Mina Projekt",
+    "TITLE": "Mina projekt",
     "SUBTITLE": "Återuppta dina sökningar där du slutade.",
     "EMPTY": "Inga projekt ännu.",
     "OPEN": "Öppna",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domäner"
     },
     "STEP1": {
-      "TITLE": "Ditt Projekt",
+      "TITLE": "Ditt projekt",
       "PROJECT_NAME_TITLE": "Projektnamn (valfritt)",
       "SUBTITLE": "Beskriv din lösning, din målgrupp och dina värderingar.",
       "PLACEHOLDER": "T.ex.: En plattform för lokal och miljövänlig blomsterleverans...",
@@ -126,7 +126,6 @@
       "BUY_CREDITS_BTN": "Köp poäng",
       "BUY_COL_HEADER": "Köp hos en registrar",
       "NEW_PROJECT_BTN": "Nytt projekt",
-      "COPY_TABLE": "Kopiera tabell",
       "COPIED": "Kopierat!",
       "ANALYSIS_PENDING": "AI-analys pågår…",
       "ANALYSIS_TOGGLE": "Visa namnanalys",

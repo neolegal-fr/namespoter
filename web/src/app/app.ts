@@ -5,6 +5,7 @@ import { ProjectService } from './services/project';
 import { PaymentService, PackType } from './services/payment';
 import { FeedbackService } from './services/feedback';
 import { CookieConsentService } from './services/cookie-consent';
+import { ThemeService } from './services/theme';
 import { KeycloakService } from 'keycloak-angular';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -21,6 +22,13 @@ import { FormsModule } from '@angular/forms';
 
 import { Dialog } from 'primeng/dialog';
 import { Drawer } from 'primeng/drawer';
+
+/** Icône propre à chaque mode, remplacée par une coche sur le mode actif. */
+const THEME_ICONS: Record<'system' | 'light' | 'dark', string> = {
+  system: 'pi pi-desktop',
+  light: 'pi pi-sun',
+  dark: 'pi pi-moon',
+};
 
 @Component({
   selector: 'app-root',
@@ -44,10 +52,14 @@ import { Drawer } from 'primeng/drawer';
   ],
   template: `
     <main style="min-height: 100vh; display: flex; flex-direction: column">
-      <p-menubar styleClass="border-0 border-b border-surface bg-surface-0 px-3 md:px-5 sticky top-0" style="height: 4rem; z-index: 100">
+      <p-menubar [styleClass]="'border-0 px-3 md:px-5 sticky top-0 ' + (isLanding() ? 'nm-menubar-dark' : 'border-b border-surface bg-surface-0')" style="height: 4rem; z-index: 100">
         <ng-template pTemplate="start">
+          <!-- La marque, pas l'icône PrimeIcons « pi-compass » qui lui ressemblait :
+               c'est le même SVG que le favicon et que le thème Keycloak — une
+               seule marque partout. Deux variantes selon le fond du menubar. -->
           <div class="flex align-items-center gap-2 cursor-pointer" (click)="goToHome()">
-            <i class="pi pi-compass text-2xl text-primary"></i>
+            <img [src]="isLanding() ? 'assets/brand/icon-dark.svg' : 'assets/brand/icon.svg'"
+                 alt="" width="24" height="24" aria-hidden="true" style="display:block">
             <span class="brand-wordmark text-xl font-bold text-900">Namorama</span>
           </div>
         </ng-template>
@@ -56,10 +68,18 @@ import { Drawer } from 'primeng/drawer';
           <div class="flex align-items-center gap-2">
 
             <!-- Langue Selector -->
-            <button (click)="langMenu.toggle($event)" class="lang-toggle cursor-pointer border-circle p-2"
-                    [attr.aria-label]="'APP.LANGUAGE' | translate"
-                    style="background: none; border: none; transition: background 0.15s">
-              <span [class]="currentFlagClass" style="font-size: 1.25rem"></span>
+            <!--
+              Le NOM de la langue, dans sa langue — pas un drapeau. Un drapeau
+              désigne un pays, pas une langue : celui de l'Espagne ne dit rien
+              à un hispanophone d'Amérique latine, et l'anglais n'a pas de
+              pays. C'est aussi ce qui permet de supprimer « flag-icons », chargé
+              depuis un CDN tiers dans le <head> — coût de chargement sur la
+              page indexée, et requête vers un tiers avant consentement.
+            -->
+            <button (click)="langMenu.toggle($event)" class="lang-toggle"
+                    [attr.aria-label]="'APP.LANGUAGE' | translate">
+              <i class="pi pi-globe" aria-hidden="true"></i>
+              <span class="lang-toggle__code">{{ currentLangLabel }}</span>
             </button>
             <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body" styleClass="lang-menu"></p-menu>
 
@@ -70,7 +90,7 @@ import { Drawer } from 'primeng/drawer';
                       class="credits-pill"
                       [attr.aria-label]="('APP.CREDITS' | translate) + ': ' + credits()"
                       (click)="triggerCreditDialog()">
-                <i class="pi pi-bolt"></i><span>{{ credits() }}</span>
+                <i class="pi pi-wallet" aria-hidden="true"></i><span>{{ credits() }}</span>
               </button>
 
               <p-button
@@ -167,6 +187,16 @@ import { Drawer } from 'primeng/drawer';
             </button>
           </ng-container>
 
+          <div class="account-sheet__section">{{ 'APP.THEME' | translate }}</div>
+          @for (t of themeChoices; track t.key) {
+            <button type="button" class="account-sheet__row"
+                    [class.account-sheet__row--on]="theme.choice() === t.key"
+                    (click)="theme.set(t.key)">
+              <i [class]="theme.choice() === t.key ? 'pi pi-check' : themeIcon(t.key)"></i>
+              <span>{{ t.label | translate }}</span>
+            </button>
+          }
+
           <div class="account-sheet__section"></div>
           <button type="button" class="account-sheet__row" (click)="sheetLogout()">
             <i class="pi pi-sign-out"></i><span>{{ 'APP.LOGOUT' | translate }}</span>
@@ -174,8 +204,14 @@ import { Drawer } from 'primeng/drawer';
         </nav>
       </p-drawer>
 
-      <div class="flex flex-column align-items-center w-full px-3 py-3 md:py-5" style="flex: 1">
-        <div class="w-full" [style.max-width]="router.url.startsWith('/admin') ? '72rem' : (router.url === '/' ? '64rem' : '44rem')">
+      <!-- L'accueil sort du gabarit commun : son héros est un aplat sombre
+           pleine largeur, et ses sections claires vont de bord à bord. Il porte
+           donc lui-même sa largeur maximale (1200px) et ses marges internes.
+           Les autres routes gardent le conteneur centré. -->
+      <div class="flex flex-column align-items-center w-full"
+           [class.nm-page-pad]="!isLanding() && !isApp()"
+           style="flex: 1">
+        <div class="w-full" [style.max-width]="containerMaxWidth()">
           <router-outlet></router-outlet>
         </div>
       </div>
@@ -370,7 +406,29 @@ import { Drawer } from 'primeng/drawer';
         </div>
       </p-dialog>
 
-      <footer class="mt-8 py-6 border-top-1 border-solid text-center text-400 text-sm" style="background: white">
+      <!-- Le pied de page portait « text-400 » (une nuance décorative : 1,31:1 sur
+           blanc) et un « background: white » en dur, qui l'excluait du thème. -->
+      <footer class="mt-8 py-6 border-top-1 border-solid text-center text-sm"
+              style="background: var(--nm-app-surface); color: var(--nm-app-text-2); border-color: var(--nm-app-border)">
+        <!--
+          Le sélecteur de thème vit dans le menu du compte : ce n'est pas une
+          action fréquente, et la barre de menu doit rester celle des actions
+          du produit. Reste le cas du visiteur sans compte, qui n'a pas ce
+          menu — il le retrouve ici, sur les pages de contenu qui suivent bien
+          le thème (mentions, guides, comparatifs).
+        -->
+        <div *ngIf="!isLoggedIn()" class="theme-switch theme-switch--foot" role="group"
+             [attr.aria-label]="'APP.THEME' | translate">
+          @for (t of themeChoices; track t.key) {
+            <button type="button"
+                    class="theme-switch__btn"
+                    [class.theme-switch__btn--on]="theme.choice() === t.key"
+                    [attr.aria-pressed]="theme.choice() === t.key"
+                    [attr.title]="t.label | translate"
+                    (click)="theme.set(t.key)">{{ t.short | translate }}</button>
+          }
+        </div>
+
         <div class="mb-2 font-bold text-500">Namorama &copy; 2026</div>
         {{ 'APP.FOOTER' | translate }}
         <a href="https://neolegal.fr" target="_blank" rel="noopener" style="color: inherit; font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor">NeoLegal</a>
@@ -401,36 +459,31 @@ export class AppComponent implements OnInit {
   userName = signal('');
   userEmail = signal('');
   
+  /**
+   * DEUX langues proposées, et non dix-neuf.
+   *
+   * Les dix-sept autres n'avaient que 158 des 456 clés : deux tiers de chaque
+   * écran retombaient sur le repli, et l'utilisateur lisait un produit
+   * mi-traduit. Mieux vaut ne pas proposer une langue que la proposer au
+   * tiers — surtout sur des écrans qui facturent et qui portent des verdicts
+   * juridiques.
+   *
+   * Les fichiers restent dans `public/assets/i18n/` : rouvrir une langue une
+   * fois complétée ne coûte qu'une ligne ici et une dans `supportedLangs`.
+   */
   readonly languages = [
-    { label: 'Čeština',    code: 'cs', flag: 'fi fi-cz' },
-    { label: 'Dansk',      code: 'da', flag: 'fi fi-dk' },
-    { label: 'Deutsch',    code: 'de', flag: 'fi fi-de' },
-    { label: 'English',    code: 'en', flag: 'fi fi-gb' },
-    { label: 'Español',    code: 'es', flag: 'fi fi-es' },
-    { label: 'Suomi',      code: 'fi', flag: 'fi fi-fi' },
-    { label: 'Français',   code: 'fr', flag: 'fi fi-fr' },
-    { label: 'Magyar',     code: 'hu', flag: 'fi fi-hu' },
-    { label: 'Italiano',   code: 'it', flag: 'fi fi-it' },
-    { label: 'Nederlands', code: 'nl', flag: 'fi fi-nl' },
-    { label: 'Norsk',      code: 'no', flag: 'fi fi-no' },
-    { label: 'Polski',     code: 'pl', flag: 'fi fi-pl' },
-    { label: 'Português',  code: 'pt', flag: 'fi fi-pt' },
-    { label: 'Română',     code: 'ro', flag: 'fi fi-ro' },
-    { label: 'Svenska',    code: 'sv', flag: 'fi fi-se' },
-    { label: 'Türkçe',     code: 'tr', flag: 'fi fi-tr' },
-    { label: 'Русский',    code: 'ru', flag: 'fi fi-ru' },
-    { label: '日本語',      code: 'ja', flag: 'fi fi-jp' },
-    { label: '中文',        code: 'zh', flag: 'fi fi-cn' },
+    { label: 'Français',   code: 'fr' },
+    { label: 'English',    code: 'en' },
   ];
 
   readonly langMenuItems: MenuItem[] = this.languages.map(l => ({
     label: l.label,
-    icon: l.flag,
     command: () => this.setLang(l.code)
   }));
 
-  get currentFlagClass(): string {
-    return this.languages.find(l => l.code === this.selectedLang)?.flag ?? 'fi fi-fr';
+  /** Nom de la langue courante, dans sa propre langue. */
+  get currentLangLabel(): string {
+    return this.languages.find(l => l.code === this.selectedLang)?.label ?? 'Français';
   }
 
   profileMenuItems: MenuItem[] = [];
@@ -567,7 +620,10 @@ export class AppComponent implements OnInit {
   }
 
   updateProfileMenu() {
-    this.translate.get(['APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT', 'APP.DELETE_ACCOUNT']).subscribe(res => {
+    this.translate.get([
+      'APP.CREDITS', 'APP.LOGOUT', 'APP.MANAGE_ACCOUNT', 'APP.DELETE_ACCOUNT',
+      'APP.THEME', 'APP.THEME_SYSTEM', 'APP.THEME_LIGHT', 'APP.THEME_DARK',
+    ]).subscribe(res => {
       this.profileMenuItems = [
         {
           label: this.userName(),
@@ -594,7 +650,25 @@ export class AppComponent implements OnInit {
               command: () => this.logout()
             }
           ]
-        }
+        },
+        /*
+         * Le thème descend ici depuis la barre de menu : trois états à demeure
+         * dans l'en-tête pour un réglage qu'on touche une fois, cela pesait
+         * autant que « Projets ». Groupe distinct, et non items mêlés au
+         * compte : ce n'est pas une action sur le compte.
+         *
+         * L'état courant se lit à l'icône, qui passe à la coche — un menu
+         * n'ayant pas d'état pressé, il faut le dire dans l'item lui-même.
+         */
+        {
+          label: res['APP.THEME'],
+          items: this.themeChoices.map((t) => ({
+            label: res[t.label],
+            icon: this.theme.choice() === t.key ? 'pi pi-check' : THEME_ICONS[t.key],
+            styleClass: this.theme.choice() === t.key ? 'menu-item--on' : undefined,
+            command: () => { this.theme.set(t.key); this.updateProfileMenu(); },
+          })),
+        },
       ];
       this.cdr.detectChanges();
     });
@@ -673,8 +747,56 @@ export class AppComponent implements OnInit {
     });
   }
 
+  /** Sélecteur de thème — « Système » d'abord, c'est le défaut. */
+  /** Public : le gabarit lit `theme.choice()` et appelle `theme.set()`. */
+  readonly theme = inject(ThemeService);
+
+  themeIcon(key: 'system' | 'light' | 'dark'): string {
+    return THEME_ICONS[key];
+  }
+
+  readonly themeChoices = [
+    { key: 'system' as const, label: 'APP.THEME_SYSTEM', short: 'APP.THEME_SYSTEM_SHORT' },
+    { key: 'light'  as const, label: 'APP.THEME_LIGHT',  short: 'APP.THEME_LIGHT_SHORT' },
+    { key: 'dark'   as const, label: 'APP.THEME_DARK',   short: 'APP.THEME_DARK_SHORT' },
+  ];
+
   goToHome() {
     this.router.navigate(['/']);
+  }
+
+  /**
+   * L'accueil est le seul écran à sortir du gabarit commun : héros sombre
+   * pleine largeur, sections claires de bord à bord, largeur maximale portée
+   * par le composant lui-même.
+   *
+   * Comparaison sur le chemin seul : `router.url` porte les paramètres de
+   * requête, et « / » suivi d'un `?utm_source=…` — le cas de figure de toute
+   * campagne d'acquisition — ne serait sinon plus reconnu comme l'accueil.
+   */
+  /**
+   * Le wizard porte lui-même sa largeur, comme l'accueil.
+   *
+   * Il était enfermé dans le conteneur commun à 44rem (704px) : sur un écran
+   * de 1440px, la grille de résultats n'en occupait donc que la moitié, et
+   * n'affichait que deux colonnes de cartes là où le design en prévoit
+   * quatre — d'où des cartes serrées et une page qui paraît étriquée. Ses
+   * étapes ont des besoins opposés : une colonne étroite se lit mieux pour
+   * décrire un projet, une grille large se compare mieux.
+   */
+  isApp(): boolean {
+    const path = this.router.url.split('?')[0].split('#')[0];
+    return path === '/app' || path.startsWith('/projects/');
+  }
+
+  containerMaxWidth(): string | null {
+    if (this.isLanding() || this.isApp()) return null;
+    return this.router.url.startsWith('/admin') ? '72rem' : '44rem';
+  }
+
+  isLanding(): boolean {
+    const path = this.router.url.split('?')[0].split('#')[0];
+    return path === '/' || path === '/en';
   }
 
   reload() {

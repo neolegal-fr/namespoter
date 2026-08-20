@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -10,7 +11,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-guide-nom-de-produit',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -52,6 +53,8 @@ import { applyContentSeo } from './content-seo';
         URL dédiée (<code>produit.com</code> ou <code>marque.com/produit</code>) renforce le référencement et
         les campagnes. Vérifiez la disponibilité avant l'annonce, pas après.
       </p>
+
+      <app-trois-risques intro="Un produit change de nom moins facilement qu'un site : voici les trois contrôles à passer avant de l'imprimer sur un emballage."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre produit"

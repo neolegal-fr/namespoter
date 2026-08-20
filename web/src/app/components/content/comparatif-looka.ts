@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -11,7 +12,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-comparatif-looka',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -138,6 +139,8 @@ import { applyContentSeo } from './content-seo';
         Beaucoup d'équipes utilisent d'ailleurs les deux&nbsp;: <strong>Namorama pour verrouiller le nom et le
         domaine</strong>, puis un créateur de logo pour l'identité visuelle.
       </p>
+
+      <app-trois-risques intro="Un logo n'a de valeur que si le nom qu'il porte reste le vôtre. Trois contrôles pour s'en assurer."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez d'abord un nom dont le domaine est libre"

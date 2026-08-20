@@ -1,0 +1,697 @@
+/* Grille de résultats — refonte, étape 3.
+ *
+ * L'écran de résultats est sombre dans la maquette. Il est rendu à l'intérieur
+ * du wizard, lui-même sur fond clair : la grille porte donc son propre aplat
+ * sombre et ses propres couleurs de texte, plutôt que de compter sur un
+ * parent.
+ *
+ * Les badges de verdict réutilisent les classes `nm-verdict__state--*` de
+ * `styles/components.css`, communes avec l'accueil : une seule définition des
+ * trois couleurs d'état pour tout le produit.
+ */
+
+/* La grille SUIT LE MODE et n'a plus d'aplat propre.
+ *
+ * Elle posait `background: var(--nm-bg-dark)` sur son :host — un panneau
+ * sombre au milieu d'un wizard clair, la rupture visuelle la plus forte de
+ * l'écran. Les résultats sont du contenu applicatif, pas une signature de
+ * marque : ils prennent donc les jetons de rôle et se fondent dans la page.
+ * C'est l'option 1 du handoff, et ce que montre la maquette « Écrans
+ * applicatifs ».
+ */
+:host {
+  display: block;
+  width: 100%;
+  font-family: var(--nm-font-body);
+  color: var(--nm-app-text);
+}
+
+/* ─── Bandeau de crédits ─────────────────────────────────────────────────
+   Le débit est l'information la plus contestable du produit : elle est donc
+   énoncée avant les résultats, pas en note de bas de page. */
+.rg-credits {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
+  border-radius: var(--nm-radius-lg);
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-app-text-2);
+  text-align: left;
+}
+
+.rg-credits strong {
+  color: var(--nm-app-verdict-free-fg);
+  font-weight: 600;
+}
+
+.rg-credits__sep {
+  width: 1px;
+  height: 16px;
+  background: var(--nm-app-border-strong);
+  flex: none;
+}
+
+/* Les filets verticaux n'ont plus de sens quand les mentions passent à la
+   ligne : ils sépareraient alors des lignes, pas des colonnes. */
+@media (max-width: 720px) {
+  .rg-credits__sep {
+    display: none;
+  }
+
+  .rg-credits {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+/* ─── Filtres ────────────────────────────────────────────────────────────── */
+
+.rg-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.rg-filter {
+  min-height: var(--nm-touch-min);
+  padding: 8px 16px;
+  border: 1px solid var(--nm-app-border);
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-app-surface);
+  color: var(--nm-app-text-2);
+  font-family: inherit;
+  font-size: var(--nm-text-ui-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+
+.rg-filter:hover {
+  border-color: var(--nm-app-border-strong);
+}
+
+.rg-filter--on {
+  background: var(--nm-app-accent-surface);
+  border-color: var(--nm-app-accent-border);
+  color: var(--nm-app-accent-hover);
+}
+
+.rg-filter:focus-visible {
+  outline: 2px solid var(--nm-app-accent-fill);
+  outline-offset: 2px;
+}
+
+.rg-empty {
+  margin: 24px 0;
+  text-align: center;
+  color: var(--nm-app-text-2);
+  font-size: var(--nm-text-ui);
+}
+
+/* ─── Grille ─────────────────────────────────────────────────────────────── */
+
+.rg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--nm-gap-results);
+  text-align: left;
+}
+
+.rg-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
+  border-radius: var(--nm-radius-xl);
+  padding: var(--nm-card-padding);
+  transition: border-color 0.15s;
+}
+
+.rg-card:hover {
+  border-color: var(--nm-app-border-strong);
+}
+
+/* Nom dont TOUTES les extensions demandées sont libres : le cas que
+   l'utilisateur cherche. Il mérite d'être repérable sans lire les lignes. */
+.rg-card--strong {
+  border-color: var(--nm-app-accent-border);
+}
+
+.rg-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  /* Jamais de retour à la ligne : les pouces restent au bout du nom. Ils
+     descendaient en dessous dès qu'un nom était long — « platsvegetauxadomicile »
+     suffit — et l'en-tête gagnait alors la hauteur d'un bouton, décalant toutes
+     les lignes suivantes par rapport aux cartes voisines. */
+  flex-wrap: nowrap;
+  gap: 6px 10px;
+  margin-bottom: 14px;
+  /* Hauteur de DEUX lignes de nom, même quand une seule suffit : sans elle,
+     « navelor » et « platsvegetauxadomicile » ne commencent pas leurs listes
+     à la même hauteur, et les cartes voisines cessent d'être comparables
+     ligne à ligne. */
+  min-height: calc(2 * 1.3 * var(--nm-text-name-card));
+}
+
+.rg-card__id {
+  /* `min-width: 0` : sans lui, un mot long refuse de se replier et pousse les
+     pouces hors de la carte — la règle par défaut d'un élément flex est de ne
+     jamais descendre sous la largeur de son contenu. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rg-card__id {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Capitale initiale sur le NOM seul, jamais sur les domaines listés dessous :
+   un nom de marque se porte comme un nom propre, une adresse s'écrit en bas de
+   casse. `::first-letter` plutôt que `capitalize`, qui mettrait aussi une
+   majuscule après un trait d'union — « Co-Create » au lieu de « Co-create ».
+   Et un traitement d'AFFICHAGE, non une transformation de la donnée : c'est
+   « vertlivre.fr » qu'on achète. */
+.rg-card__name::first-letter {
+  text-transform: uppercase;
+}
+
+.rg-card__name {
+  margin: 0;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-name-card);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-name-card);
+  color: var(--nm-app-text);
+  overflow-wrap: anywhere;
+}
+
+.rg-card__manual {
+  font-size: 12px;
+  color: var(--nm-app-text-2);
+}
+
+/* ─── Verdicts ───────────────────────────────────────────────────────────── */
+
+.rg-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 26px;
+}
+
+/* La ligne réseaux porte deux rangées de pastilles : son libellé s'aligne en
+   haut, pas au centre de la grille. */
+.rg-row:has(.rg-socials) {
+  align-items: flex-start;
+}
+
+.rg-row__label {
+  min-width: 0;
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-app-text-2);
+  overflow-wrap: anywhere;
+}
+
+.rg-row__value {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: var(--nm-radius-xs);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.rg-row__value--pending {
+  color: var(--nm-app-text-2);
+}
+
+.rg-sep {
+  height: 0;
+  margin: 14px 0;
+  border-top: 1px dashed var(--nm-app-border-strong);
+}
+
+/* ─── Palier payant ──────────────────────────────────────────────────────── */
+
+.rg-paid {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-app-text-2);
+}
+
+.rg-paid--done {
+  color: var(--nm-app-accent-hover);
+}
+
+/* ─── Actions ────────────────────────────────────────────────────────────── */
+
+/* Pied de carte : une ligne de date, puis deux boutons de même taille. La
+   composition ne change JAMAIS d'un état à l'autre — c'est ce qui garantit que
+   deux cartes voisines se terminent à la même hauteur. */
+.rg-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* Les deux boutons tiennent CÔTE À CÔTE, jamais l'un sous l'autre : c'est ce
+   qui garde la même hauteur de pied que la carte déjà vérifiée, où le bouton
+   d'achat a disparu. Hauteur fixée, libellé sur une ligne, et chacun libre de
+   se rétrécir (`min-width: 0`) plutôt que de forcer le retour à la ligne. */
+.rg-actions__row {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.rg-actions__row .rg-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--nm-touch-card-btn);
+  padding: 0 10px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.rg-checked {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-app-text-2);
+}
+
+.rg-checked--none {
+  color: var(--nm-app-text-3);
+  font-style: italic;
+}
+
+.rg-btn {
+  flex: 1;
+  min-height: var(--nm-touch-card-btn);
+  padding: 10px 14px;
+  border-radius: var(--nm-radius-sm);
+  font-family: inherit;
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.rg-btn--main {
+  background: transparent;
+  border: 1px solid var(--nm-app-border-strong);
+  color: var(--nm-app-text);
+}
+
+.rg-btn--main:hover {
+  border-color: var(--nm-app-accent-fill);
+  color: var(--nm-app-accent-hover);
+}
+
+.rg-rate {
+  display: flex;
+  gap: 0;
+  flex: none;
+}
+
+/* Pouces SANS cadre.
+ *
+ * Encadrés, deux carrés de 46 px pesaient autant que le nom du domaine
+ * qu'ils accompagnent — alors qu'ils ne servent qu'à affiner les suggestions
+ * suivantes. Le cadre disparaît, la surface tactile reste : le bouton garde
+ * 44 px, seul le dessin s'allège.
+ *
+ * L'état, lui, ne s'allège pas : le glyphe se remplit ET prend la couleur du
+ * verdict. Un pouce cliqué reste reconnaissable sans avoir à le survoler. */
+.rg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--nm-touch-min);
+  height: var(--nm-touch-min);
+  border: none;
+  border-radius: var(--nm-radius-pill);
+  background: transparent;
+  color: var(--nm-app-text-3);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.rg-icon:hover {
+  background: var(--nm-app-surface-alt);
+  color: var(--nm-app-text);
+}
+
+.rg-icon--on {
+  color: var(--nm-app-accent);
+}
+
+.rg-icon--off {
+  color: var(--nm-app-verdict-taken-fg);
+}
+
+.rg-btn:focus-visible,
+.rg-icon:focus-visible {
+  outline: 2px solid var(--nm-app-accent-fill);
+  outline-offset: 2px;
+}
+
+/* ─── Analyse IA ─────────────────────────────────────────────────────────── */
+
+.rg-analysis-pending {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--nm-app-text-2);
+}
+
+.rg-stars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 12px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--nm-app-star);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.rg-stars .pi-star {
+  color: var(--nm-app-text-2);
+}
+
+.rg-stars__chev {
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--nm-app-text-2);
+  transition: transform 0.2s ease;
+}
+
+.rg-analysis {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--nm-app-bg);
+  border: 1px solid var(--nm-app-divider);
+  border-radius: var(--nm-radius-sm);
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-app-text-2);
+}
+
+
+/* ─── Palier payant et état vérifié ──────────────────────────────────────── */
+
+/* Les lignes verrouillées ont exactement la même hauteur et le même alignement
+   que les lignes de verdict : rien ne se déplace après l'achat. C'est ce qui
+   rend comparables un nom vérifié et un nom qui ne l'est pas. */
+.rg-row__value--locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nm-app-text-2);
+}
+
+.rg-rows + .rg-rows {
+  margin-top: 0;
+}
+
+/* Pastilles de réseaux. La couleur ne porte jamais l'information seule : un
+   symbole l'accompagne, et le nom complet est dans `title`. */
+/* Grille de 3 colonnes sur deux rangées, et non un retour à la ligne libre :
+   à six pastilles, une rangée unique déborde d'une carte de 280–380px, et un
+   retour libre déplacerait les lignes suivantes — les cartes cesseraient
+   d'être alignées entre elles. */
+.rg-socials {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 4px 6px;
+  flex: none;
+  justify-items: end;
+}
+
+.rg-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: var(--nm-radius-xs);
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: default;
+}
+
+/* Le logo prend la couleur du verdict porté par la pastille : une seule
+   couleur par pastille, donc aucune concurrence entre l'identité du réseau et
+   son état. */
+.rg-social__logo {
+  width: 12px;
+  height: 12px;
+  font-size: 12px;
+  line-height: 1;
+  flex: none;
+}
+
+.rg-social__mark { font-size: 9px; }
+
+.rg-social--locked { background: var(--nm-app-divider); color: var(--nm-app-text-2); }
+.rg-social--free   { background: var(--nm-app-verdict-free-bg);    color: var(--nm-app-verdict-free-fg); }
+.rg-social--taken  { background: var(--nm-app-verdict-taken-bg);   color: var(--nm-app-verdict-taken-fg); }
+.rg-social--unknown{ background: var(--nm-app-verdict-unknown-bg); color: var(--nm-app-verdict-unknown-fg); }
+
+/* Badge de synthèse : ce qui rend la comparaison lisible d'un coup d'œil.
+   Il remplace le badge de coût une fois le nom vérifié. */
+.rg-synth {
+  align-self: flex-start;
+  margin: 0 0 12px;
+  padding: 3px 10px;
+  border-radius: var(--nm-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rg-synth--ok    { background: var(--nm-app-verdict-free-bg);    color: var(--nm-app-verdict-free-fg); }
+.rg-synth--watch { background: var(--nm-app-verdict-unknown-bg); color: var(--nm-app-verdict-unknown-fg); }
+.rg-synth--risk  { background: var(--nm-app-verdict-taken-bg);   color: var(--nm-app-verdict-taken-fg); }
+
+/* Icône seule : le geste est secondaire, son libellé vit dans le title et
+   dans l'aria-label. Cible tactile préservée par le padding. */
+.rg-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--nm-radius-pill);
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--nm-app-accent-hover);
+  font-family: inherit;
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Le bouton d'achat est l'action principale de la carte : aplat accentué. */
+.rg-btn--buy {
+  flex: 1 1 100%;
+  background: var(--nm-app-accent-fill);
+  border: 1px solid var(--nm-app-accent-fill);
+  color: var(--nm-app-on-accent);
+}
+
+.rg-btn--buy:hover {
+  background: var(--nm-app-accent-hover);
+  border-color: var(--nm-app-accent-hover);
+}
+
+.rg-btn--ghost {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--nm-app-border-strong);
+  color: var(--nm-app-text);
+}
+
+.rg-btn--ghost:hover { border-color: var(--nm-app-border-strong); }
+
+/* Les actions passent à la ligne : le bouton d'achat occupe toute la largeur,
+   les secondaires en dessous. */
+
+
+/* Les pouces vivent dans l'en-tête : ils ne s'étirent pas. */
+.rg-card__head .rg-rate { flex: none; }
+
+/* L'analyse est une ligne : les étoiles s'alignent à droite comme un verdict. */
+.rg-stars {
+  margin-top: 0;
+  flex: none;
+  min-height: var(--nm-touch-min);
+}
+
+/* ─── Pastilles de verdict de la grille ──────────────────────────────────
+   Classes PROPRES à la grille, et non celles de l'accueil.
+   `nm-verdict__state--*` est figé sur la palette sombre : c'est correct dans
+   la démo de l'accueil, qui est un aplat sombre par intention éditoriale.
+   La grille, elle, suit le mode : réutiliser ces classes lui donnait des
+   pastilles noires sur fond clair. */
+.rg-v--free {
+  background: var(--nm-app-verdict-free-bg);
+  color: var(--nm-app-verdict-free-fg);
+}
+
+.rg-v--taken {
+  background: var(--nm-app-verdict-taken-bg);
+  color: var(--nm-app-verdict-taken-fg);
+}
+
+.rg-v--unknown,
+.rg-v--watch {
+  background: var(--nm-app-verdict-unknown-bg);
+  color: var(--nm-app-verdict-unknown-fg);
+}
+
+
+/* Palier verrouillé : cliquable dans son ensemble. Le survol le dit — un
+   cadenas seul se lit comme « interdit », pas comme « cliquez pour ouvrir ». */
+.rg-rows--locked {
+    cursor: pointer;
+    border-radius: var(--nm-radius-sm);
+    transition: background-color 0.15s;
+}
+
+.rg-rows--locked:hover,
+.rg-rows--locked:focus-visible {
+    background: var(--nm-app-surface-alt);
+    outline: none;
+}
+
+.rg-rows--locked:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+/* Icône dans les boutons de pied de carte. */
+.rg-btn .pi {
+    font-size: 0.8rem;
+}
+
+/* Pas encore de synthèse : neutre, jamais un verdict. */
+.rg-synth--none {
+    background: var(--nm-app-badge-bg);
+    color: var(--nm-app-text-2);
+}
+
+
+/* La ligne d'analyse réserve toujours la hauteur du bouton d'étoiles, même
+   quand elle n'affiche qu'un tiret : sinon une carte encore sans analyse
+   remonte de 18 px tout ce qui la suit, et cesse d'être comparable à sa
+   voisine. */
+.rg-row--analysis {
+    min-height: var(--nm-touch-min);
+}
+
+/* La date et son lien tiennent sur une ligne : deux lignes sur une carte et
+   une sur l'autre décalent les pieds. La date s'abrège au besoin, le lien
+   jamais — c'est lui qui se clique. */
+.rg-checked {
+    flex-wrap: nowrap;
+}
+
+.rg-checked > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rg-checked .rg-refresh {
+    white-space: nowrap;
+}
+
+
+/* « Analyser » : une action, pas un verdict — donc discrète, à la place du
+   futur score, et sans cadre pour ne pas concurrencer les deux boutons du
+   pied de carte. */
+.rg-analyse {
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nm-app-accent);
+    font: inherit;
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rg-analyse:hover,
+.rg-analyse:focus-visible {
+    text-decoration: underline;
+}
+
+
+.rg-refresh:hover:not(:disabled) {
+    background: var(--nm-app-surface-alt);
+    color: var(--nm-app-text);
+}
+
+.rg-refresh:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.rg-refresh .pi {
+    font-size: 0.8rem;
+}
+
+
+/* Enveloppe du bouton de réactualisation : elle seule reçoit les événements
+   de souris quand le bouton est désactivé, donc elle seule peut porter
+   l'infobulle qui explique pourquoi. */
+.rg-refresh__wrap {
+    display: inline-flex;
+    flex: none;
+}
+
+/* Séparateur devant la vue des rejetés : les quatre premiers filtres montrent
+   ce qu'on garde, le dernier ce qu'on a écarté. */
+.rg-filters__sep {
+    width: 1px;
+    align-self: stretch;
+    margin: 0 0.25rem;
+    background: var(--nm-app-divider);
+}

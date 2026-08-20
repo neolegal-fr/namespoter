@@ -1,13 +1,14 @@
-import { Component, signal, computed, OnInit, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Subscription, firstValueFrom, of, timeout } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
-import { BrandReportService, BrandReport, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
+import { BrandReportService, BrandReport, ReportLike, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
+import { SAMPLE_REPORT } from '../brand-report/sample-report';
 import { KeycloakService } from 'keycloak-angular';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Steps } from 'primeng/steps';
 import { Card } from 'primeng/card';
 import { Button } from 'primeng/button';
@@ -30,11 +31,17 @@ import { ProjectService } from '../../services/project';
 import { FeedbackService } from '../../services/feedback';
 import { AnalyticsService } from '../../services/analytics';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ResultsGridComponent } from '../results/results-grid';
+import type { BrandReportSummary } from '../../services/brand-report';
+import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
+import { BrandReportViewComponent } from '../brand-report/brand-report-view';
+import { ReserverBoutonComponent } from '../shared/reserver-bouton';
 
 @Component({
   selector: 'app-wizard',
   standalone: true,
   imports: [
+    RouterModule,
     CommonModule,
     FormsModule,
     Steps,
@@ -53,13 +60,18 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     Dialog,
     SplitButton,
     Toast,
-    TranslatePipe
+    TranslatePipe,
+    ResultsGridComponent,
+    BrandReportLockedComponent,
+    BrandReportViewComponent,
+    ReserverBoutonComponent
   ],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
 })
-export class WizardComponent implements OnInit {
+export class WizardComponent implements OnInit, OnDestroy {
   items: MenuItem[] = [];
+
 
   // ─── US-001 : International / Local ───────────────────────
   isLocal = signal(false);
@@ -375,7 +387,6 @@ export class WizardComponent implements OnInit {
   pickBestResult = signal<{ recommended: string; reason: string } | null>(null);
   pickBestCandidates = signal<string[]>([]);
   private pickBestKey = signal<string | null>(null);
-  showDisliked = signal(false);
   likedDomains = computed(() => this.domains().filter(d => d.rating === 'liked'));
 
   pickMenuItems = computed<MenuItem[]>(() => [
@@ -393,44 +404,21 @@ export class WizardComponent implements OnInit {
   ]);
   streamProgress = signal<{ phase: 'generating' | 'checking'; name?: string; checked: number; found: number } | null>(null);
 
-  // ─── US-022 : Buy on registrar ────────────────────
-  readonly REGISTRARS = [
-    {
-      label: 'OVH',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'Namecheap',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.namecheap.com/domains/registration/results.aspx?domain=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'GoDaddy',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.godaddy.com/domainsearch/find?domainToCheck=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'Gandi',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://shop.gandi.net/fr/domain/suggest?search=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-    {
-      label: 'Hostinger',
-      url: (n: string, exts: string[]) => {
-        const d = exts.length === 1 ? `${n}${exts[0]}` : n;
-        return `https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=${d}&utm_source=namorama&utm_medium=referral&utm_campaign=domain_search`;
-      },
-    },
-  ];
+  /**
+   * Ce qu'on va chercher chez le bureau d'enregistrement.
+   *
+   * Une seule extension demandée : on cherche le domaine complet, prêt à
+   * mettre au panier. Plusieurs : le nom seul, et le bureau montre ce qui est
+   * libre — le contraire imposerait un choix d'extension que l'utilisateur n'a
+   * justement pas fait.
+   *
+   * La liste des bureaux, elle, vit dans `app-reserver` : elle est la même
+   * dans tout le produit.
+   */
+  reserveQuery(name: string): string {
+    const exts = this.selectedExtensions();
+    return exts.length === 1 ? `${name}${exts[0]}` : name;
+  }
 
   /** Lien vers la recherche de marque INPI (base Marques) pour un nom donné. */
   inpiUrl(name: string): string {
@@ -452,6 +440,430 @@ export class WizardComponent implements OnInit {
   readonly userEmail = signal('');
 
   /** Point d'entrée : si le rapport existe déjà, on l'ouvre (sans débit) ; sinon on demande confirmation. */
+  /**
+   * « rapport de marque » depuis une carte : ouvre le rapport s'il est acquis,
+   * sinon le rapport VERROUILLÉ — pas la popup d'achat. Le handoff distingue
+   * les deux gestes : vérifier (popup courte) et consulter le rapport (écran
+   * qui montre ce qu'on achète).
+   */
+  /**
+   * Le rapport a une URL : `?rapport=<nom>` sur la route courante.
+   *
+   * Il s'affiche dans un dialogue plein écran, mais c'est un ÉCRAN, pas une
+   * incise : on y reste, on le lit, on le partage. Sans entrée d'historique,
+   * « page précédente » quittait la recherche entière au lieu de revenir aux
+   * résultats, et l'écran n'était pas adressable.
+   *
+   * L'URL est la source de vérité de ce qui est à l'écran : `showReportDialog`
+   * ne se lève et ne retombe que par elle (voir `ngOnInit`).
+   */
+  private static readonly REPORT_PARAM = 'rapport';
+
+  /** Valeur du paramètre pour le rapport d'exemple, qui n'a pas de nom réel. */
+  private static readonly SAMPLE_PARAM = 'exemple';
+
+  /** Vrai si c'est nous qui avons empilé l'entrée d'historique du rapport. */
+  private reportUrlPushed = false;
+
+  /**
+   * Nom dont les données sont DÉJÀ chargées, en attente de l'URL.
+   *
+   * Sans lui, l'écouteur d'URL rechargerait ce que l'appelant vient d'obtenir :
+   * une requête pour rien après chaque génération.
+   */
+  private preloadedReportName: string | null = null;
+
+  /** Affiche un rapport dont les données sont déjà en mémoire. */
+  private showReport(name: string): void {
+    this.preloadedReportName = name;
+    this.pushReportUrl(name);
+  }
+
+  private pushReportUrl(name: string): void {
+    this.reportUrlPushed = true;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [WizardComponent.REPORT_PARAM]: name },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /**
+   * Ferme le rapport.
+   *
+   * Si l'entrée d'historique vient de nous, on la dépile — sinon « page
+   * précédente » rouvrirait le rapport qu'on vient de fermer. Sur une arrivée
+   * directe par l'URL il n'y a rien à dépiler : on retire le paramètre en
+   * remplaçant l'entrée, pour ne pas sortir du site.
+   */
+  closeReport(): void {
+    if (!this.brandReport() && !this.isSampleReport()) this.analytics.track('report_locked_abandoned');
+    if (this.reportUrlPushed) {
+      this.reportUrlPushed = false;
+      this.location.back();
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [WizardComponent.REPORT_PARAM]: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Le dialogue s'est fermé autrement que par le bouton (Échap) : suivre l'URL. */
+  onReportVisibleChange(visible: boolean): void {
+    if (visible) return;
+    if (this.route.snapshot.queryParamMap.get(WizardComponent.REPORT_PARAM)) {
+      this.closeReport();
+    } else {
+      this.showReportDialog.set(false);
+    }
+  }
+
+  /** Applique l'URL : ouvrir le rapport demandé, ou refermer s'il n'y en a plus. */
+  private syncReportFromUrl(param: string | null): void {
+    if (!param) {
+      this.reportUrlPushed = false;
+      this.preloadedReportName = null;
+      this.showReportDialog.set(false);
+      return;
+    }
+    if (param === WizardComponent.SAMPLE_PARAM) {
+      this.loadSampleReport();
+      this.showReportDialog.set(true);
+      this.scrollToTop();
+      return;
+    }
+    if (this.preloadedReportName && this.normName(this.preloadedReportName) === this.normName(param)) {
+      this.preloadedReportName = null;
+      this.showReportDialog.set(true);
+      this.scrollToTop();
+      return;
+    }
+    if (this.showReportDialog() && this.normName(this.brandReportName()) === this.normName(param)) return;
+    this.loadReportInto(param);
+  }
+
+  /**
+   * Ce qu'on sait DÉJÀ du nom, sans rien acheter.
+   *
+   * Les domaines et l'analyse ont été collectés pendant la recherche : les
+   * cacher derrière le paiement revenait à faire payer une page pour y
+   * retrouver ce qu'on avait déjà. La page de rapport les affiche donc
+   * toujours, et le tiers payant — marque et réseaux — s'y ajoute une fois
+   * acquis, à la place qu'il occupera.
+   *
+   * `null` si le nom ne vient pas de la recherche courante (arrivée par lien
+   * direct, ou projet non chargé) : on n'invente pas de données.
+   */
+  partialReport(name: string): ReportLike | null {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    if (!d) return null;
+    const base = d.name.toLowerCase();
+    const domains = this.selectedExtensions().map((ext) => {
+      const state = (d.allExtensions ?? {})[ext];
+      return {
+        extension: ext.replace(/^\./, ''),
+        domain: base + (ext.startsWith('.') ? ext : '.' + ext),
+        status: (state === true ? 'free' : state === false ? 'taken' : 'unknown') as Availability,
+      };
+    });
+    return {
+      name: d.name,
+      handle: base.replace(/[^a-z0-9]/g, ''),
+      domains,
+      // La qualité passe par le MÊME champ que sur un rapport acquis : une
+      // seule donnée, une seule présentation. Elle était rendue à part, en
+      // HTML brut, ce qui donnait deux mises en forme pour la même chose selon
+      // qu'on avait payé.
+      quality: this.qualityFromAnalysis(d.analysis),
+    };
+  }
+
+  /**
+   * Convertit l'analyse stockée (JSON du modèle) en qualité structurée.
+   *
+   * `null` si elle n'a pas encore été calculée, ou si le texte n'est pas du
+   * JSON — les analyses anciennes étaient en texte libre, et on n'invente pas
+   * de notes à partir d'une prose.
+   */
+  private qualityFromAnalysis(analysis: string | null): NameQuality | undefined {
+    if (!analysis) return undefined;
+    try {
+      const j = JSON.parse(analysis);
+      const scores = j?.scores;
+      if (!scores || typeof scores !== 'object') return undefined;
+      const vals = Object.values(scores).filter((n): n is number => typeof n === 'number');
+      if (!vals.length) return undefined;
+      return {
+        score: Math.round((vals.reduce((a, b) => a + b, 0) / vals.length / 5) * 100),
+        scores,
+        comments: j.comments && typeof j.comments === 'object' ? j.comments : undefined,
+        origin: typeof j.origin === 'string' ? j.origin : undefined,
+        strengths: typeof j.strengths === 'string' ? j.strengths : undefined,
+        watchout: typeof j.watchout === 'string' ? j.watchout : undefined,
+      };
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Le projet et son cadre, en tête du rapport.
+   *
+   * Un rapport se relit des semaines plus tard, et se partage à quelqu'un qui
+   * n'était pas là quand la recherche a tourné : sans la description ni les
+   * contraintes, impossible de savoir pourquoi CE nom a été proposé.
+   */
+  reportContext = computed(() => {
+    /*
+     * « Public cible », et non « cadre de la recherche ».
+     *
+     * Le bloc listait la longueur minimale, les extensions et le critère de
+     * disponibilité : des réglages de RECHERCHE, qui n'expliquent rien du nom
+     * une fois le rapport relu. Ce qui compte pour juger un nom, c'est à QUI
+     * il s'adresse — marché, langue, registre — et c'est ce que l'utilisateur
+     * a réellement paramétré à l'étape de cadrage.
+     */
+    const cible: { label: string; value: string }[] = [];
+    const t = (k: string, p?: Record<string, unknown>) => this.translate.instant(k, p) as string;
+
+    cible.push({
+      label: 'WIZARD.STEP3.REPORT_T_MARKET',
+      value: this.isLocal()
+        ? t('WIZARD.STEP3.REPORT_T_MARKET_LOCAL', { pays: (this.effectiveLocale() ?? '').toUpperCase() })
+        : t('WIZARD.STEP3.REPORT_T_MARKET_INTL'),
+    });
+
+    const registres: string[] = [];
+    if (this.descriptiveNames()) registres.push(t('WIZARD.STYLE.DESCRIPTIVE'));
+    if (this.culturalNames()) registres.push(t('WIZARD.STYLE.CULTURAL'));
+    if (registres.length) {
+      cible.push({ label: 'WIZARD.STEP3.REPORT_T_STYLE', value: registres.join(', ') });
+    }
+
+    /*
+     * Ni les références, ni les mots-clés.
+     *
+     * Ce sont des ENTRÉES de la génération, pas des traits du public visé :
+     * les noms qu'on a cités en exemple et les mots qu'on a fournis à l'IA. Le
+     * rapport porte sur UN nom déjà choisi ; savoir qu'on avait écrit « Nike,
+     * Aesop » en inspiration n'aide personne à juger celui-là, et allongeait la
+     * seule section du document qui ne parle pas du nom.
+     */
+
+    return { description: this.description() || undefined, constraints: cible };
+  });
+
+  /**
+   * Les extensions telles qu'elles se lisent dans le titre.
+   *
+   * « .fr et .com » quand chaque nom doit être libre PARTOUT, « .fr ou .com »
+   * quand une seule suffit : deux listes qui n'ont pas la même valeur, et dont
+   * rien ne disait laquelle on regardait.
+   */
+  extensionsPhrase = computed(() => {
+    const exts = this.selectedExtensions();
+    if (exts.length <= 1) return exts.join('');
+    const lien = this.translate.instant(this.matchMode() === 'all' ? 'COMMON.AND' : 'COMMON.OR') as string;
+    return exts.slice(0, -1).join(', ') + ' ' + lien + ' ' + exts[exts.length - 1];
+  });
+
+  /**
+   * Ce qui a été débité pour cette liste, tous postes confondus.
+   *
+   * Somme des débits RÉELS des rapports (0 si offert, tarif d'alors sinon) et
+   * non un nombre de rapports multiplié par le tarif courant : la phrase doit
+   * correspondre à ce qui a quitté le compte.
+   */
+  private reportsDebited = computed(() =>
+    this.domains().reduce((total, d) => {
+      const s = this.reportSummaries().find((x) => x.nameKey === this.normName(d.name));
+      return s ? total + (s.costCredits ?? this.brandReportCost) : total;
+    }, 0),
+  );
+
+  debitedLabel = computed(() => {
+    // Les noms AJOUTÉS À LA MAIN ne sont pas facturés : ils n'ont pas été
+    // générés. Les compter afficherait un débit qui n'a pas eu lieu.
+    const noms = this.domains().filter((d) => !d.isManual).length;
+    const verifs = this.domains().filter((d) =>
+      this.reportSummaries().some((x) => x.nameKey === this.normName(d.name)),
+    ).length;
+    const total = noms + this.reportsDebited();
+    if (total === 0) return '';
+    return this.translate.instant(
+      verifs > 0 ? 'WIZARD.STEP3.DEBITED_MIXED' : 'WIZARD.STEP3.DEBITED_NAMES',
+      { total, noms, verifs, tarif: this.brandReportCost },
+    ) as string;
+  });
+
+  /** Extensions par défaut du chemin « j'ai déjà un nom ». */
+  private readonly EXTENSIONS_PAR_DEFAUT = ['.com', '.fr', '.net', '.org'];
+
+  /**
+   * Entrée directe par un nom : « j'ai une idée, est-elle libre ? »
+   *
+   * Ce visiteur ne veut pas décrire un projet, il veut un verdict. On lui
+   * crée donc un projet portant ce nom, on y ajoute le nom, on contrôle ses
+   * domaines — gratuitement, `recheck` ne débite rien — et on le dépose
+   * directement devant sa réponse, à l'étape des résultats.
+   *
+   * Le projet n'est pas un détail administratif : sans lui, le nom testé
+   * n'existe nulle part une fois l'onglet fermé, et l'utilisateur ne peut ni
+   * y revenir, ni enchaîner sur des suggestions voisines.
+   */
+  /** Un nom est en cours de test : les défauts régionaux ne s'appliquent pas. */
+  private nomEnCours = false;
+
+  /** Ouvrir la vérification dès que le nom est en place. */
+  private verifierApresCreation = false;
+
+  private demarrerDepuisNom(nom: string): void {
+    const propre = nom.trim().toLowerCase().replace(/^\./, '').replace(/\.[a-z]{2,10}$/, '');
+    if (!propre) return;
+
+    this.nomEnCours = true;
+    this.analytics.track('name_test_started');
+    this.loading.set(true);
+    this.loadingKey.set('WIZARD.STEP3.CHECKING');
+    this.selectedExtensions.set([...this.EXTENSIONS_PAR_DEFAUT]);
+
+    this.projectService.createFromName(propre, this.EXTENSIONS_PAR_DEFAUT).subscribe({
+      next: (projet) => {
+        this.projectId.set(projet.id);
+        this.projectName.set(projet.name);
+        this.location.replaceState(`/projects/${projet.id}`);
+        this.newDomainName.set(propre);
+        this.addManualDomain();
+        this.activeIndex.set(2);
+        this.maxActiveIndex.set(2);
+        this.loading.set(false);
+        this.analytics.track('name_test_project_created');
+        this.cdr.detectChanges();
+        if (this.verifierApresCreation) {
+          this.verifierApresCreation = false;
+          this.askBrandReport(propre);
+        }
+      },
+      error: () => { this.loading.set(false); this.cdr.detectChanges(); },
+    });
+  }
+
+  /** Extensions libres pour ce nom — verdicts gratuits, déjà à l'écran. */
+  freeExtensionsOf(name: string): string[] {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    if (!d) return [];
+    return this.selectedExtensions().filter((e) => d.allExtensions?.[e] === true);
+  }
+
+  /** Analyse déjà produite pour ce nom, rendue en HTML (ou null). */
+  partialAnalysis(name: string): SafeHtml | null {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    return d?.analysis ? this.parseAnalysisHtml(d.analysis) : null;
+  }
+
+  /** Note sur 5 lue dans le texte d'analyse — 0 si absente. */
+  partialAnalysisScore(name: string): number {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    const m = d?.analysis?.match(/(\d+(?:[.,]\d+)?)\s*\/\s*5/);
+    return m ? Math.round(parseFloat(m[1].replace(',', '.'))) : 0;
+  }
+
+  /** Charge le rapport d'un nom et l'affiche — chemin de l'arrivée par l'URL. */
+  private loadReportInto(name: string): void {
+    this.brandReportName.set(name);
+    this.brandReportError.set(null);
+    this.isSampleReport.set(false);
+    this.forceRegen.set(false);
+    this.brandReport.set(null);
+    void this.loadReportOffer(name);
+    this.brandReportService.existing(name).subscribe({
+      next: (res) => {
+        if (res?.exists && res.report) {
+          this.markReported(name);
+          this.brandReport.set(res.report);
+        }
+        this.showReportDialog.set(true);
+        this.scrollToTop();
+      },
+      error: () => { this.showReportDialog.set(true); this.scrollToTop(); },
+    });
+  }
+
+  /**
+   * Ouvre le rapport en HAUT de page.
+   *
+   * Il s'affichait à la hauteur de défilement où l'on avait cliqué — souvent
+   * la troisième rangée de cartes — donc au milieu du document, sans son
+   * en-tête ni son nom. Le dialogue plein écran masquait le problème ; une
+   * page ne le masque plus.
+   */
+  // ─── Partage par email d'un rapport déjà acquis ──────────────────────────
+  readonly showShareMail = signal(false);
+  readonly shareEmails = signal('');
+  readonly shareSending = signal(false);
+
+  openShareMail(): void {
+    this.analytics.track('report_share_opened');
+    this.shareEmails.set(this.userEmail() || '');
+    this.showShareMail.set(true);
+  }
+
+  /**
+   * Renvoie le rapport par email. Aucun débit : il existe déjà, on ne fait que
+   * le retransmettre — d'où un endpoint distinct de la génération.
+   */
+  sendShareMail(): void {
+    const emails = this.parseEmails(this.shareEmails());
+    this.shareSending.set(true);
+    this.brandReportService.sendByMail(this.brandReportName(), emails).subscribe({
+      next: (res) => {
+        this.shareSending.set(false);
+        this.showShareMail.set(false);
+        this.messageService.add({
+          severity: res?.sent ? 'success' : 'warn',
+          summary: this.translate.instant(res?.sent ? 'WIZARD.STEP3.REPORT_SHARE_OK' : 'WIZARD.STEP3.REPORT_SHARE_KO'),
+          life: 4000,
+        });
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.shareSending.set(false);
+        this.messageService.add({ severity: 'error', summary: this.translate.instant('WIZARD.STEP3.REPORT_SHARE_KO'), life: 4000 });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  /** Ouvre la boîte d'impression, dont la destination par défaut est le PDF. */
+  printReport(): void {
+    this.analytics.track('report_printed');
+    if (typeof window !== 'undefined') window.print();
+  }
+
+  private scrollToTop(): void {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  openFullReport(name: string): void {
+    this.pushReportUrl(name);
+  }
+
+  /** Charge l'offre du serveur pour ce nom (prix, droit gratuit, solde). */
+  private loadReportOffer(name: string): void {
+    this.reportOffer.set(null);
+    this.brandReportService.offer(name).subscribe({
+      next: (o) => this.reportOffer.set({
+        priceCredits: o.deepReport.priceCredits,
+        credits: o.account.credits,
+      }),
+      error: () => this.reportOffer.set(null),
+    });
+  }
+
   askBrandReport(name: string): void {
     this.brandReportName.set(name);
     this.brandReportError.set(null);
@@ -463,7 +875,7 @@ export class WizardComponent implements OnInit {
         if (res?.exists && res.report) {
           this.markReported(name);
           this.brandReport.set(res.report);
-          this.showReportDialog.set(true);
+          this.showReport(name);
         } else {
           this.openReportConfirm();
         }
@@ -472,8 +884,19 @@ export class WizardComponent implements OnInit {
     });
   }
 
+  /**
+   * Offre du serveur pour le nom courant : acheté, prix, droit gratuit, solde.
+   * Chargée à chaque ouverture de la confirmation : le solde peut avoir bougé
+   * dans un autre onglet. `null` tant que la réponse n'est pas arrivée — la
+   * carte affiche alors le tarif par défaut, jamais un prix deviné.
+   */
+  readonly reportOffer = signal<{ priceCredits: number; credits: number } | null>(null);
+
+
   /** Ouvre la confirmation (coût, solde, destinataires) après avoir chargé l'email du compte. */
   private async openReportConfirm(): Promise<void> {
+    // Offre indisponible : on reste sur le tarif plein, c'est le défaut sûr.
+    this.loadReportOffer(this.brandReportName());
     if (!this.userEmail()) {
       try {
         const profile: any = await this.keycloak.loadUserProfile();
@@ -484,7 +907,11 @@ export class WizardComponent implements OnInit {
     this.showReportConfirm.set(true);
   }
 
-  /** Solde suffisant pour générer le rapport ? */
+  /**
+   * Peut-on lancer le rapport : droit gratuit disponible, OU solde suffisant.
+   * La décision définitive reste au serveur, sous verrou ; ceci ne sert qu'à
+   * ne pas proposer un bouton qui échouera.
+   */
   hasEnoughReportCredits(): boolean {
     return this.userService.creditsValue >= this.brandReportCost;
   }
@@ -497,21 +924,56 @@ export class WizardComponent implements OnInit {
 
   /** Régénérer un rapport en cache (redébite) : repasse par la confirmation. */
   readonly forceRegen = signal(false);
-  regenerateBrandReport(): void {
-    this.forceRegen.set(true);
-    this.showReportDialog.set(false);
-    this.openReportConfirm();
-  }
 
   /** Étape 2 : confirme, ouvre le rapport plein écran, débite et génère. */
   confirmBrandReport(): void {
     if (!this.hasEnoughReportCredits()) { this.openCreditPurchase(); return; }
+    // 50 crédits — la moitié de la réserve mensuelle — partent en un clic : la
+    // confirmation est explicite, et elle l'est toujours. Il n'y a plus de cas
+    // « offert » où la friction n'aurait pas d'objet.
+    if (!this.forceRegen()) {
+      this.confirmationService.confirm({
+        header: this.translate.instant('WIZARD.STEP3.REPORT_CONFIRM_TITLE'),
+        message: this.translate.instant('WIZARD.STEP3.REPORT_DEBIT_CONFIRM', { n: this.brandReportCost }),
+        acceptLabel: this.translate.instant('WIZARD.STEP3.REPORT_CONFIRM_BTN'),
+        rejectLabel: this.translate.instant('COMMON.CANCEL'),
+        accept: () => this.launchBrandReport(),
+      });
+      return;
+    }
+    this.launchBrandReport();
+  }
+
+  private launchBrandReport(): void {
+    // Vérifier vaut approbation : dépenser des crédits sur un nom est le signal
+    // d'intérêt le plus fort du produit, bien plus fiable qu'un clic sur un
+    // pouce. On l'active donc implicitement, et l'IA en tient compte pour les
+    // suggestions suivantes. Le pouce reste cliquable pour se dédire.
+    const target = this.domains().find((d) => this.normName(d.name) === this.normName(this.brandReportName()));
+    if (target && target.rating !== 'liked') this.setRating(target, 'liked');
+
     const emails = this.parseEmails(this.reportEmails());
     const force = this.forceRegen();
     this.showReportConfirm.set(false);
-    this.showReportDialog.set(true);
+    this.showReport(this.brandReportName());
     this.generateBrandReport(this.brandReportName(), emails, force);
     this.forceRegen.set(false);
+  }
+
+  /**
+   * Auto-agrandissement de la zone de description.
+   *
+   * Bornes : 5 lignes au minimum pour que le champ invite à écrire, ~16 au
+   * maximum pour que le bouton d'action reste visible sans défiler. Au-delà,
+   * la zone défile — mais on écrit rarement 16 lignes pour décrire un projet.
+   */
+  autoGrow(event: Event): void {
+    const el = event.target as HTMLTextAreaElement;
+    const line = 24;      // hauteur de ligne effective, en px
+    const min = line * 5;
+    const max = line * 16;
+    el.style.height = 'auto';
+    el.style.height = Math.min(Math.max(el.scrollHeight, min), max) + 'px';
   }
 
   private parseEmails(raw: string): string[] {
@@ -537,13 +999,29 @@ export class WizardComponent implements OnInit {
     this.analytics.track('brand_report_cta_clicked');
     // Timeout client : un traitement qui n'aboutit pas devient une erreur
     // (réessayable) plutôt qu'un chargement infini.
-    this.brandReportService.full(name, { emails, force }).pipe(timeout(90000)).subscribe({
+    // Le contexte part AVEC la génération : c'est le seul moment où le wizard
+    // le connaît. Sans lui, l'email et la relecture perdent le projet.
+    const ctx = this.reportContext();
+    this.brandReportService
+      .full(name, {
+        emails,
+        force,
+        // Les extensions DEMANDÉES, et non la liste par défaut du serveur : le
+        // rapport annonçait la disponibilité de .io, .net et .app à qui n'avait
+        // demandé que .fr et .com — trois verdicts sans objet, et trois lignes
+        // qui font douter du reste.
+        extensions: this.selectedExtensions().map((e) => e.replace(/^\./, '')),
+        context: { description: ctx.description, audience: ctx.constraints.map((c) => ({ label: this.translate.instant(c.label), value: c.value })) },
+      })
+      .pipe(timeout(90000))
+      .subscribe({
       next: (report) => {
         this.isSampleReport.set(false);
         this.brandReport.set(report);
         this.markReported(name);
         if (typeof report.remainingCredits === 'number') {
           this.userService.updateCredits(report.remainingCredits);
+          this.loadReportSummaries();
         }
         this.brandReportLoading.set(false);
       },
@@ -559,10 +1037,6 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  /** URL de réservation d'un domaine chez un registrar donné (extension avec point). */
-  reserveDomainUrl(name: string, extension: string, registrarIndex = 0): string {
-    return this.REGISTRARS[registrarIndex].url(name, [`.${extension}`]);
-  }
 
   // ─── Partage du rapport (Sally #5) ─────────────────────────────────────────
   readonly shareCopied = signal(false);
@@ -604,6 +1078,37 @@ export class WizardComponent implements OnInit {
 
   // ─── Suivi des noms déjà rapportés (lien « Voir le rapport » vs bouton) ────
   readonly reportedNames = signal<Set<string>>(new Set());
+
+  /**
+   * Synthèses des noms vérifiés — verdicts déjà payés, affichés sur les cartes.
+   * C'est ce qui rend plusieurs noms comparables côte à côte dans la grille,
+   * là où l'arbitrage exigeait jusqu'ici d'ouvrir un rapport à la fois.
+   */
+  readonly reportSummaries = signal<BrandReportSummary[]>([]);
+
+  private loadReportSummaries(): void {
+    this.brandReportService.summaries().subscribe({
+      next: (res) => this.reportSummaries.set(res.summaries ?? []),
+      // Sans synthèse, les cartes restent à l'état non vérifié : dégradation
+      // lisible, jamais un verdict inventé.
+      error: () => this.reportSummaries.set([]),
+    });
+  }
+
+  /**
+   * Rafraîchissement : gratuit et sans confirmation — rien n'est débité.
+   * Le serveur borne la fréquence et renvoie le rapport en cache s'il est
+   * déjà à jour.
+   */
+  refreshBrandReport(name: string): void {
+    this.brandReportService.full(name, { force: true }).subscribe({
+      next: () => this.loadReportSummaries(),
+      error: () => this.messageService.add({
+        severity: 'error',
+        summary: this.translate.instant('WIZARD.STEP3.REPORT_ERROR'),
+      }),
+    });
+  }
   private normName(name: string): string { return (name || '').trim().toLowerCase(); }
   hasReport(name: string): boolean { return this.reportedNames().has(this.normName(name)); }
   private markReported(name: string): void {
@@ -612,7 +1117,10 @@ export class WizardComponent implements OnInit {
   /** Charge la liste des noms déjà rapportés (silencieux si non authentifié). */
   loadReportedNames(): void {
     this.brandReportService.mine().subscribe({
-      next: (res) => this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n)))),
+      next: (res) => {
+        this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n))));
+        this.loadReportSummaries();
+      },
       error: () => { /* anonyme ou indisponible : liste vide */ },
     });
   }
@@ -621,45 +1129,16 @@ export class WizardComponent implements OnInit {
   readonly isSampleReport = signal(false);
   showSampleReport(): void {
     this.showReportConfirm.set(false);
+    this.pushReportUrl(WizardComponent.SAMPLE_PARAM);
+  }
+
+  private loadSampleReport(): void {
     this.isSampleReport.set(true);
     this.brandReportName.set('namorama');
     this.brandReportError.set(null);
     this.brandReport.set(this.SAMPLE_REPORT);
-    this.showReportDialog.set(true);
   }
-  readonly SAMPLE_REPORT: BrandReport = {
-    name: 'namorama',
-    handle: 'namorama',
-    domains: [
-      { extension: 'com', domain: 'namorama.com', status: 'taken' },
-      { extension: 'fr', domain: 'namorama.fr', status: 'free' },
-      { extension: 'io', domain: 'namorama.io', status: 'free' },
-      { extension: 'net', domain: 'namorama.net', status: 'free' },
-      { extension: 'app', domain: 'namorama.app', status: 'unknown' },
-    ],
-    socials: [
-      { platform: 'GitHub', handle: 'namorama', url: 'https://github.com/namorama', status: 'free' },
-      { platform: 'LinkedIn', handle: 'namorama', url: 'https://www.linkedin.com/company/namorama', status: 'free' },
-      { platform: 'TikTok', handle: 'namorama', url: 'https://www.tiktok.com/@namorama', status: 'taken' },
-      { platform: 'Telegram', handle: 'namorama', url: 'https://t.me/namorama', status: 'free' },
-    ],
-    trademark: {
-      office: 'INPI',
-      match: 'none',
-      hits: [],
-      deepLink: 'https://data.inpi.fr/search?q=namorama&type=brands',
-    },
-    quality: {
-      score: 82,
-      scores: { memorability: 4, pronunciation: 4, international: 5, seo: 3, distinctiveness: 5 },
-      strengths: 'Court, sonore, international et très distinctif.',
-      watchout: 'Sens peu explicite : à soutenir par un logo et une accroche claire.',
-    },
-    score: 68,
-    generatedAt: new Date().toISOString(),
-    disclaimer:
-      "Signal indicatif de disponibilité. Ne remplace pas une recherche d'antériorité ni l'avis d'un conseil en propriété industrielle.",
-  };
+  readonly SAMPLE_REPORT = SAMPLE_REPORT;
 
   /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */
   reportStatusLabel(s: Availability): string {
@@ -679,17 +1158,7 @@ export class WizardComponent implements OnInit {
     return `WIZARD.STEP3.TM_${(match || 'unknown').toUpperCase()}_EXPLAIN`;
   }
 
-  openReg = signal<string | null>(null);
 
-  toggleReg(name: string, event: MouseEvent) {
-    event.stopPropagation();
-    this.openReg.set(this.openReg() === name ? null : name);
-  }
-
-  @HostListener('document:click')
-  closeReg() {
-    this.openReg.set(null);
-  }
 
   private readonly SEARCH_TIMEOUT_MS = 30_000;
   private searchTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
@@ -699,9 +1168,11 @@ export class WizardComponent implements OnInit {
   filteredDomains = computed(() => {
     const mode = this.matchMode();
     const exts = this.selectedExtensions();
-    const showDisliked = this.showDisliked();
+
     return this.domains().filter(d => {
-      if (!showDisliked && d.rating === 'disliked') return false;
+      // Le tri par notation appartient à la GRILLE, qui porte déjà les filtres
+      // « Favoris » et « Vérifiés ». Ici on ne filtre que sur la recherche
+      // elle-même — extensions et critère de disponibilité.
       if (exts.length === 0) return true;
       // Ignorer les extensions en cours de vérification (null) dans le filtre
       const knownExts = exts.filter(ext => d.allExtensions?.[ext] !== null && d.allExtensions?.[ext] !== undefined);
@@ -749,6 +1220,41 @@ export class WizardComponent implements OnInit {
       this.resetProject();
     });
 
+    /*
+     * `?nom=` : quelqu'un arrive avec une idée à tester.
+     *
+     * Non connecté, on ne peut ni créer de projet ni rien mémoriser : le nom
+     * est mis de côté et repris après la connexion, comme l'état du wizard
+     * l'est déjà avant une redirection.
+     */
+    const nomDemande = (this.route.snapshot.queryParamMap.get('nom') ?? '').trim();
+    // `verifier=1` : l'utilisateur vient de cliquer « vérifier marques et
+    // réseaux » sur le rapport public. Enchaîner sur la popup lui évite de
+    // rechercher le bouton sur une carte qu'il vient à peine de voir arriver.
+    this.verifierApresCreation = this.route.snapshot.queryParamMap.get('verifier') === '1';
+    if (nomDemande) {
+      this.location.replaceState(this.router.url.split('?')[0]);
+      if (this.isLoggedIn()) {
+        this.demarrerDepuisNom(nomDemande);
+      } else {
+        try { localStorage.setItem('nom_a_tester', nomDemande); } catch { /* stockage bloqué */ }
+        this.keycloak.login({ redirectUri: window.location.origin + '/app' });
+        return;
+      }
+    } else if (this.isLoggedIn()) {
+      let enAttente: string | null = null;
+      try { enAttente = localStorage.getItem('nom_a_tester'); } catch { /* stockage bloqué */ }
+      if (enAttente) {
+        try { localStorage.removeItem('nom_a_tester'); } catch { /* stockage bloqué */ }
+        this.demarrerDepuisNom(enAttente);
+      }
+    }
+
+    // Le rapport est un écran adressable : c'est l'URL qui l'ouvre et le ferme.
+    this.route.queryParams.subscribe(qp => {
+      this.syncReportFromUrl(qp[WizardComponent.REPORT_PARAM] ?? null);
+    });
+
     // S'abonner aux changements de paramètres d'URL
     this.route.params.subscribe(params => {
       const id = params['id'];
@@ -758,7 +1264,10 @@ export class WizardComponent implements OnInit {
     });
 
     const savedState = localStorage.getItem('wizard_state');
-    if (!savedState && !this.route.snapshot.params['id']) {
+    // `demarrerDepuisNom` a déjà posé ses extensions : les défauts régionaux
+    // les écrasaient juste après, et la carte sortait en .fr/.com au lieu des
+    // quatre demandées.
+    if (!savedState && !this.route.snapshot.params['id'] && !this.nomEnCours) {
       // Visite fraîche : pré-remplir l'extension locale + options régionales
       // selon la localisation détectée (un état restauré ou un projet priment).
       this.applyRegionalDefaults();
@@ -924,6 +1433,13 @@ export class WizardComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  ngOnDestroy() {
+    // Une recherche en flux survivrait autrement à la navigation : se
+    // désabonner déclenche l'abandon de la requête côté service.
+    this.searchSub?.unsubscribe();
+    this.searchSub = null;
+  }
+
   loadProject(id: string) {
     this.projectService.showDrawer.set(false);
     this.loading.set(true);
@@ -950,6 +1466,7 @@ export class WizardComponent implements OnInit {
         this.domains.set(project.suggestions.map((s: any) => ({
           id: s.id,
           name: s.domainName,
+          checkedAt: s.checkedAt ?? null,
           style: s.style || 'standard',
           allExtensions: s.availability,
           rating: s.rating ?? 'neutral',
@@ -960,6 +1477,11 @@ export class WizardComponent implements OnInit {
         this.activeIndex.set(2);
         this.maxActiveIndex.set(2);
         this.loading.set(false);
+
+        // Un projet rouvert reçoit le même traitement qu'une recherche fraîche :
+        // les noms sans analyse en obtiennent une, en tâche de fond. Le résultat
+        // est mémorisé côté serveur, donc ce coût n'est payé qu'une fois par nom.
+        this.analyseEnFond();
         
         if (this.router.url !== `/projects/${id}`) {
           this.router.navigate(['/projects', id], { replaceUrl: true });
@@ -1059,15 +1581,14 @@ export class WizardComponent implements OnInit {
         // US-005 — déclencher l'analyse IA si liked et pas encore analysé
         if (res.rating === 'liked' && !result.analysis && !result.analysisPending) {
           setTimeout(() => {
-            result.analysisPending = true;
+            this.domains.update(l => l.map(d => d.id === result.id ? { ...d, analysisPending: true } : d));
             this.cdr.detectChanges();
             this.domainService.analyzeName(result.id, this.translate.currentLang() ?? undefined).subscribe({
               next: (r) => {
-                result.analysis = r.analysis;
-                result.analysisPending = false;
+                this.domains.update(l => l.map(d => d.id === result.id ? { ...d, analysis: r.analysis, analysisPending: false } : d));
                 this.cdr.detectChanges();
               },
-              error: () => { result.analysisPending = false; this.cdr.detectChanges(); },
+              error: () => { this.domains.update(l => l.map(d => d.id === result.id ? { ...d, analysisPending: false } : d)); this.cdr.detectChanges(); },
             });
           });
         }
@@ -1173,6 +1694,12 @@ export class WizardComponent implements OnInit {
     const full = Math.round(score);
     return Array.from({ length: 5 }, (_, i) => i < full);
   }
+
+  /** Passé tel quel à la grille de résultats, qui n'a pas de sanitizer. */
+  readonly analysisRenderer = (a: string | null): SafeHtml => this.parseAnalysisHtml(a);
+
+  /** Passée à la grille : elle connaît le JSON comme l'ancien format texte. */
+  readonly analysisScorer = (a: string | null): number => this.parseAnalysisScore(a);
 
   parseAnalysisHtml(analysis: string | null): SafeHtml {
     if (!analysis) return this.sanitizer.bypassSecurityTrustHtml('');
@@ -1295,6 +1822,118 @@ export class WizardComponent implements OnInit {
     }
   }
 
+  /**
+   * Lance l'analyse des noms qui n'en ont pas encore, en tâche de fond.
+   *
+   * Trois à la fois, pas trente : chaque analyse est un appel au modèle, et
+   * les tirer d'un coup allongerait la fin de recherche sans rien afficher
+   * plus tôt. À trois, les premières cartes se remplissent pendant qu'on lit
+   * les premières lignes — et l'ordre suit celui de la liste, donc ce qu'on
+   * regarde arrive en premier.
+   *
+   * Best-effort : un échec laisse la carte sur son bouton « Analyser ». Rien
+   * n'est réessayé automatiquement, un modèle qui refuse deux fois refusera
+   * la troisième.
+   */
+  private analyseEnFond(): void {
+    const file = this.domains().filter((d) => d.id && !d.analysis && !d.analysisPending).map((d) => d.id as string);
+    if (!file.length) return;
+
+    const PARALLELE = 3;
+    let i = 0;
+    const suivant = () => {
+      if (i >= file.length) return;
+      const id = file[i++];
+      this.analyseOne(id, suivant);
+    };
+    for (let n = 0; n < Math.min(PARALLELE, file.length); n++) suivant();
+  }
+
+  /**
+   * Calcule l'analyse d'un nom à la demande.
+   *
+   * Elle se déclenchait jusqu'ici au seul « j'aime », ce qui laissait un tiret
+   * sur toutes les cartes fraîches — lu comme une panne plutôt que comme un
+   * « pas encore ». Elle reste à la demande : c'est un appel au modèle par
+   * nom, et les faire tous d'office coûterait trente appels par recherche pour
+   * une donnée que personne ne lit toujours.
+   */
+  analyseOne(id: string, termine?: () => void): void {
+    const cible = this.domains().find((d) => d.id === id);
+    if (!cible || cible.analysis || cible.analysisPending) { termine?.(); return; }
+
+    // ⚠ Remplacer l'élément, ne jamais le muter : la grille reçoit `domains`
+    // en entrée SIGNAL et n'observe donc que la référence du tableau. Une
+    // mutation en place ne la réveille pas, `detectChanges()` compris — c'est
+    // ainsi qu'une analyse arrivait sans jamais s'afficher.
+    const remplacer = (champs: Record<string, unknown>) =>
+      this.domains.update((list) => list.map((d) => (d.id === id ? { ...d, ...champs } : d)));
+
+    if (!termine) this.analytics.track('name_analysis_requested');
+    remplacer({ analysisPending: true });
+    this.domainService.analyzeName(id, this.translate.currentLang() ?? undefined).subscribe({
+      next: (a) => {
+        remplacer({ analysis: a.analysis, analysisPending: false });
+        // Déplié seulement si l'utilisateur l'a DEMANDÉ : en tâche de fond,
+        // ouvrir trente panneaux derrière son dos serait insupportable.
+        if (!termine) this.expandedAnalysisId.set(id);
+        this.cdr.detectChanges();
+        termine?.();
+      },
+      error: () => { remplacer({ analysisPending: false }); this.cdr.detectChanges(); termine?.(); },
+    });
+  }
+
+  /**
+   * Recontrôle la disponibilité d'UN seul nom.
+   *
+   * Le recontrôle global existait déjà, mais il porte sur toute la liste : le
+   * déclencher pour rafraîchir une carte enverrait trente requêtes aux
+   * registres pour un nom. Même endpoint, un seul nom.
+   */
+  recheckOneName(name: string): void {
+    this.analytics.track('domains_rechecked');
+    const cible = this.domains().find((d) => this.normName(d.name) === this.normName(name));
+    if (!cible || this.selectedExtensions().length === 0) return;
+
+    // Les extensions repassent à `null` — « en cours », et non « indisponible ».
+    this.domains.update((list) =>
+      list.map((d) =>
+        d === cible
+          ? { ...d, allExtensions: Object.fromEntries(this.selectedExtensions().map((e) => [e, null])) }
+          : d,
+      ),
+    );
+    this.cdr.detectChanges();
+
+    this.domainService.recheckDomains([cible.name], this.selectedExtensions()).subscribe({
+      next: (res: any) => {
+        const frais = (res?.domains ?? []).find((x: any) => this.normName(x.name) === this.normName(name));
+        this.domains.update((list) =>
+          list.map((d) =>
+            this.normName(d.name) === this.normName(name)
+              ? { ...d, allExtensions: frais?.allExtensions ?? d.allExtensions, checkedAt: new Date().toISOString() }
+              : d,
+          ),
+        );
+        const enregistrable = this.domains().find((d) => this.normName(d.name) === this.normName(name));
+        if (enregistrable?.id) {
+          this.projectService
+            .updateSuggestionsAvailability([{ id: enregistrable.id, availability: enregistrable.allExtensions }])
+            .subscribe();
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Échec : on remet ce qu'on savait plutôt qu'un écran de points d'interrogation.
+        this.domains.update((list) =>
+          list.map((d) => (d === cible ? cible : d)),
+        );
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
   recheckIfNeeded() {
     if (this.domains().length > 0 && this.selectedExtensions().length > 0) {
       this.recheckDomains();
@@ -1349,9 +1988,6 @@ export class WizardComponent implements OnInit {
     });
   }
 
-  isFullyAvailable(result: any): boolean {
-    return this.selectedExtensions().every(ext => result.allExtensions[ext]);
-  }
 
   private startSearchTimeout() {
     this.clearSearchTimeout();
@@ -1561,25 +2197,16 @@ export class WizardComponent implements OnInit {
                 this.domains.update(list =>
                   list.map(d => d.name === r.name && d.isManual ? { ...d, id: saved.id } : d)
                 );
-                // Persister le rating liked côté serveur puis déclencher l'analyse IA
+                // Le rating « aimé » est persisté, puis l'analyse suit le même
+                // chemin que partout ailleurs.
+                //
+                // Elle avait ici sa TROISIÈME implémentation, qui MUTAIT
+                // l'objet dans le tableau : la grille reçoit `domains` en
+                // entrée signal, une mutation en place ne la réveille pas.
+                // L'analyse était donc bien calculée, jamais affichée — la
+                // carte gardait son bouton « Analyser » pour l'éternité.
                 this.projectService.setRating(saved.id, 'liked').subscribe({
-                  next: () => {
-                    const domain = this.domains().find(d => d.id === saved.id);
-                    if (domain && !domain.analysis && !domain.analysisPending) {
-                      setTimeout(() => {
-                        domain.analysisPending = true;
-                        this.cdr.detectChanges();
-                        this.domainService.analyzeName(saved.id, this.translate.currentLang() ?? undefined).subscribe({
-                          next: (a) => {
-                            domain.analysis = a.analysis;
-                            domain.analysisPending = false;
-                            this.cdr.detectChanges();
-                          },
-                          error: () => { domain.analysisPending = false; this.cdr.detectChanges(); },
-                        });
-                      });
-                    }
-                  },
+                  next: () => this.analyseEnFond(),
                 });
               },
             });
@@ -1587,6 +2214,9 @@ export class WizardComponent implements OnInit {
         }
 
         this.addingDomain.set(false);
+        // Même traitement qu'après une recherche : la qualité du nom est la
+        // première ligne de la carte, elle ne doit pas y rester en attente.
+        this.analyseEnFond();
         this.cdr.detectChanges();
       },
       error: () => {
@@ -1686,6 +2316,13 @@ export class WizardComponent implements OnInit {
               return saved ? { ...d, id: saved.id } : d;
             }));
           }
+
+          // L'analyse part TOUTE SEULE, dès que les identifiants existent.
+          // Elle ne se déclenchait qu'au « j'aime » ou à la vérification :
+          // sur une recherche fraîche, les trente cartes affichaient donc un
+          // appel à l'action là où se trouve maintenant la première ligne de
+          // la carte — la qualité du nom, c'est-à-dire ce que l'outil apporte.
+          this.analyseEnFond();
 
           // Issue #1 — persister les ratings « likés » pendant la recherche (id désormais dispo)
           this.domains().forEach(d => {

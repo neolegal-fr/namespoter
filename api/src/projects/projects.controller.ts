@@ -36,6 +36,39 @@ export class ProjectsController {
     return this.projectsService.remove(id, user);
   }
 
+  /**
+   * Crée un projet à partir d'un NOM, sans description ni recherche.
+   *
+   * C'est le chemin de qui arrive avec un nom en tête : il ne veut pas
+   * décrire un projet, il veut savoir si ce nom est libre. Le projet lui donne
+   * un endroit où retrouver la réponse — sans lui, le nom testé n'existe
+   * nulle part une fois l'onglet fermé.
+   *
+   * Aucun débit : rien n'est généré ici. Le contrôle de disponibilité passe
+   * par `POST /domain/recheck`, gratuit, et la marque reste à acheter.
+   */
+  @Post('from-name')
+  async fromName(
+    @AuthenticatedUser() keycloakUser: any,
+    @Body() body: { name?: string; extensions?: string[] },
+  ) {
+    // `findOrCreate` attend l'IDENTIFIANT, pas l'objet Keycloak : lui passer
+    // l'objet créait un utilisateur fantôme à chaque appel, et le projet
+    // n'appartenait alors à personne de réel — d'où un 404 à l'ajout du nom.
+    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const nom = (body.name ?? '').trim();
+    if (!nom) throw new BadRequestException('Nom manquant');
+
+    const project = await this.projectsService.createOrUpdate(user, {
+      name: nom,
+      description: '',
+      keywords: [],
+      extensions: body.extensions?.length ? body.extensions : ['.com', '.fr', '.net', '.org'],
+      matchMode: 'any',
+    });
+    return project;
+  }
+
   @Post(':id/suggestions')
   async addSuggestion(
     @Param('id', new ParseUUIDPipe()) id: string,

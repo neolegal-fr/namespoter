@@ -1,0 +1,686 @@
+/* Accueil — mise en page propre à l'écran.
+ *
+ * Les primitives partagées (boutons, pilules, puces, badges de verdict) vivent
+ * dans `src/styles/components.css` : les écrans de résultats et de rapport les
+ * emploient aussi, et les dupliquer ici les aurait fait diverger.
+ *
+ * Toutes les valeurs viennent des jetons `--nm-*` posés à l'étape 1 : aucune
+ * couleur ni aucun rayon n'est écrit en dur.
+ */
+
+.nm-landing {
+  font-family: var(--nm-font-body);
+}
+
+/* ═══ Héros ══════════════════════════════════════════════════════════════ */
+
+.nm-hero {
+  background: var(--nm-bg-dark);
+  color: var(--nm-text-dark);
+  padding: 56px var(--nm-section-padding-x) var(--nm-section-padding-y-lg);
+}
+
+.nm-hero__inner {
+  max-width: var(--nm-content-max);
+  margin: 0 auto;
+  display: grid;
+  /* Une colonne par défaut, deux à partir de 900px. Le handoff décrit un
+     `auto-fit / minmax(420px, 1fr)` ; un point de rupture explicite est retenu
+     pour que le repli soit prévisible et testable à 390px comme à 900px. */
+  grid-template-columns: 1fr;
+  gap: var(--nm-gap-hero);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .nm-hero__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nm-hero__col {
+  min-width: 0; /* sans quoi un contenu large empêche la colonne de rétrécir */
+}
+
+.nm-h1 {
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-h1-hero);
+  font-weight: 700;
+  line-height: var(--nm-leading-h1-hero);
+  letter-spacing: var(--nm-tracking-h1-hero);
+  color: var(--nm-text-dark);
+  max-width: 21ch;
+  margin: 0 0 20px;
+}
+
+@media (max-width: 640px) {
+  .nm-h1 {
+    font-size: var(--nm-text-h1-mobile);
+    line-height: var(--nm-leading-h1-mobile);
+    letter-spacing: var(--nm-tracking-h1-mobile);
+  }
+}
+
+.nm-lead {
+  font-size: var(--nm-text-lead);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-dark-2);
+  max-width: 47ch;
+  margin: 0 0 28px;
+}
+
+/* Boutons */
+.nm-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.nm-mentions {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 0;
+  padding: 0;
+  font-size: 13.5px;
+  color: var(--nm-text-dark-3);
+}
+
+/* ═══ Encart de démonstration ════════════════════════════════════════════ */
+
+.nm-browser {
+  background: var(--nm-surface-dark);
+  border: 1px solid var(--nm-border-dark);
+  border-radius: var(--nm-radius-3xl);
+  padding: 8px;
+  box-shadow: var(--nm-shadow-product);
+}
+
+.nm-browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 12px;
+}
+
+.nm-browser__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--nm-radius-pill);
+  background: #2f3a3e;
+  flex: none;
+}
+
+.nm-browser__url {
+  margin-left: 10px;
+  font-size: 12px;
+  color: var(--nm-text-dark-3);
+}
+
+.nm-panel {
+  background: var(--nm-bg-dark);
+  border: 1px solid var(--nm-divider-dark-2);
+  border-radius: var(--nm-radius-lg);
+  padding: 22px 20px;
+}
+
+/* Fil d'étapes */
+.nm-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  row-gap: 10px;
+  margin-bottom: 18px;
+}
+
+.nm-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* La puce reste à 26px, comme la maquette, mais la zone cliquable atteint le
+     plancher tactile de 44px : on agrandit la cible, pas le dessin. */
+  min-height: var(--nm-touch-min);
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--nm-text-dark-3);
+}
+
+.nm-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--nm-radius-pill);
+  border: 1px solid var(--nm-border-dark);
+  background: var(--nm-surface-dark);
+  color: var(--nm-text-dark-3);
+  font-size: 12px;
+  font-weight: 600;
+  flex: none;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nm-step__label {
+  font-size: 13px;
+}
+
+.nm-step--on .nm-step__num {
+  background: var(--nm-accent);
+  border-color: var(--nm-accent);
+  color: var(--nm-on-accent);
+}
+
+.nm-step--on .nm-step__label {
+  color: var(--nm-text-dark);
+}
+
+.nm-step:hover .nm-step__num {
+  border-color: var(--nm-border-dark-hover);
+}
+
+.nm-step:focus-visible {
+  outline: 2px solid var(--nm-accent);
+  outline-offset: 3px;
+  border-radius: var(--nm-radius-xs);
+}
+
+/* Plancher de hauteur : sans lui, l'encart change de taille à chaque étape et
+   toute la page saute sous le curseur.
+   344px et non les 300px du handoff : le volet « domaines », le plus haut avec
+   ses 6 lignes de verdict, mesure 342px. À 300px il débordait le plancher et
+   l'encart gagnait 42px sur cette seule étape — le saut que le plancher est
+   précisément censé supprimer. Mesuré, pas estimé. */
+.nm-panel__body {
+  min-height: 344px;
+}
+
+.nm-quote {
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  background: var(--nm-surface-dark);
+  border-radius: var(--nm-radius-sm);
+  color: var(--nm-text-dark-strong);
+  font-size: var(--nm-text-body-sm);
+  line-height: var(--nm-leading-body);
+}
+
+.nm-note {
+  margin: 12px 0 0;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-dark-3);
+}
+
+/* Lignes de verdict */
+.nm-verdicts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nm-verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--nm-surface-dark);
+  border: 1px solid var(--nm-divider-dark-3);
+  border-radius: var(--nm-radius-sm);
+}
+
+.nm-verdict__name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--nm-font-display);
+  font-weight: 500;
+  font-size: var(--nm-text-body-sm);
+  color: var(--nm-text-dark);
+  overflow-wrap: anywhere;
+}
+
+.nm-verdict__cost {
+  font-size: 12px;
+  color: var(--nm-text-dark-3);
+  white-space: nowrap;
+}
+
+/* Volet « rapport » */
+.nm-report-teaser {
+  padding: 18px;
+  border: 1px solid var(--nm-accent-border-dark);
+  border-radius: var(--nm-radius-lg);
+  background: var(--nm-accent-surface-dark);
+}
+
+.nm-report-teaser__name {
+  margin: 0;
+  font-family: var(--nm-font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-name-card);
+  color: var(--nm-text-dark);
+}
+
+.nm-report-teaser__price {
+  margin: 2px 0 14px;
+  font-size: var(--nm-text-ui);
+  font-weight: 600;
+  color: var(--nm-accent-hover);
+}
+
+.nm-report-teaser__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-text-dark-2);
+}
+
+/* ═══ Sections claires ═══════════════════════════════════════════════════ */
+
+.nm-light {
+  background: var(--nm-bg-light);
+  color: var(--nm-text-light);
+  padding: var(--nm-section-padding-y-lg) var(--nm-section-padding-x);
+}
+
+.nm-section {
+  max-width: var(--nm-content-max);
+  margin: 0 auto;
+  padding-bottom: var(--nm-section-padding-y);
+}
+
+.nm-section:last-child {
+  padding-bottom: 0;
+}
+
+/* Colonne de lecture plus étroite pour la prose, mais alignée à gauche sur
+   les autres sections : centrée, elle décrochait visiblement du reste. */
+.nm-section--narrow > * {
+  max-width: var(--nm-report-max);
+}
+
+.nm-h2 {
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-h2);
+  font-weight: 700;
+  line-height: var(--nm-leading-h2);
+  letter-spacing: var(--nm-tracking-h2);
+  color: var(--nm-text-light);
+  margin: 0 0 14px;
+  max-width: 24ch;
+}
+
+.nm-h2--alt {
+  font-size: var(--nm-text-h2-alt);
+  letter-spacing: var(--nm-tracking-h2-alt);
+  max-width: none;
+}
+
+.nm-section__lead {
+  margin: 0 0 28px;
+  max-width: 52ch;
+  font-size: var(--nm-text-body);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+.nm-prose {
+  margin: 0;
+  font-size: var(--nm-text-body);
+  line-height: var(--nm-leading-body-loose);
+  color: var(--nm-text-light-2);
+}
+
+.nm-prose strong {
+  color: var(--nm-text-on-card);
+}
+
+/* Cartes des 4 contrôles */
+.nm-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--nm-gap-cards);
+}
+
+/* Trois points de contrôle : `auto-fit` casserait la promesse « trois » en
+   deux colonnes plus une orpheline sur les largeurs intermédiaires. */
+.nm-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--nm-gap-cards);
+}
+
+@media (max-width: 860px) {
+  .nm-grid-3 { grid-template-columns: 1fr; }
+}
+
+.nm-section__note {
+  margin: var(--nm-gap-cards) 0 0;
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-light-2);
+}
+
+.nm-card {
+  background: var(--nm-surface-light);
+  border: 1px solid var(--nm-border-light);
+  border-radius: var(--nm-radius-lg);
+  padding: var(--nm-card-padding-lg);
+}
+
+.nm-card__overline {
+  margin: 0 0 10px;
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  color: var(--nm-accent-text-light);
+}
+
+.nm-card__title {
+  margin: 0 0 8px;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-h3);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h3);
+  color: var(--nm-text-light);
+}
+
+.nm-card__text {
+  margin: 0;
+  font-size: var(--nm-text-body-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+/* Tableau comparatif.
+   Le handoff impose des colonnes minimales de 72px : en dessous, « registre en
+   direct » se casse en quatre lignes et la comparaison devient illisible. À
+   390px la grille dépasse donc la largeur de l'écran — elle défile
+   horizontalement dans son propre conteneur plutôt que d'être écrasée, et la
+   page, elle, ne défile jamais latéralement. */
+.nm-table-scroll {
+  overflow-x: auto;
+  /* Le focus clavier ne doit pas être rogné par le conteneur défilant. */
+  padding-bottom: 2px;
+}
+
+.nm-table {
+  min-width: 560px;
+  background: var(--nm-surface-light);
+  border: 1px solid var(--nm-border-light);
+  border-radius: var(--nm-radius-lg);
+  overflow: hidden;
+}
+
+.nm-table__row {
+  display: grid;
+  /* Colonnes minimales de 72px : en dessous, « registre en direct » se casse
+     en quatre lignes et la comparaison devient illisible. */
+  grid-template-columns: minmax(140px, 1.6fr) repeat(3, minmax(72px, 1fr));
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+  border-top: 1px solid var(--nm-divider-light-1);
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-light-2);
+}
+
+.nm-table__row:first-child {
+  border-top: 0;
+}
+
+.nm-table__row:not(.nm-table__row--head):hover {
+  background: #fcfcfa;
+}
+
+.nm-table__row--head {
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  text-transform: uppercase;
+  color: var(--nm-text-light-3);
+}
+
+.nm-table__us {
+  color: var(--nm-accent-text-light);
+  font-weight: 600;
+}
+
+.nm-table__row--head .nm-table__us {
+  color: var(--nm-text-light);
+}
+
+/* FAQ */
+.nm-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.nm-faq__q {
+  margin: 0 0 6px;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-h3);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h3);
+  color: var(--nm-text-light);
+}
+
+.nm-faq__a {
+  margin: 0;
+  font-size: var(--nm-text-body-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-light-2);
+}
+
+/* Liens de guides */
+.nm-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* CTA final */
+.nm-final {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: var(--nm-bg-dark);
+  border-radius: var(--nm-radius-3xl);
+  padding: var(--nm-section-padding-y) 44px;
+}
+
+.nm-final__title {
+  margin: 0 0 8px;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-h2-alt);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h2-alt);
+  color: var(--nm-text-dark);
+}
+
+.nm-final__text {
+  margin: 0;
+  font-size: var(--nm-text-body-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-text-dark-2);
+}
+
+@media (max-width: 640px) {
+  .nm-hero,
+  .nm-light {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .nm-final {
+    padding: 32px 24px;
+  }
+
+  /* Le CTA prend toute la largeur sur mobile : c'est l'action principale. */
+  .nm-cta-row .nm-btn,
+  .nm-final .nm-btn {
+    width: 100%;
+  }
+}
+
+/* Volet « rapport », hors du fil d'étapes : il n'est pas une étape du wizard
+   mais une action depuis une carte. Ni numéro, ni trait de liaison — sinon la
+   démonstration annonce un parcours en quatre temps qui n'existe pas. */
+.nm-steps__aside {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--nm-touch-min);
+  margin-bottom: 14px;
+  padding: 0 12px;
+  border: 1px solid var(--nm-border-dark);
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-surface-dark);
+  color: var(--nm-text-dark-2);
+  font-family: inherit;
+  font-size: var(--nm-text-ui-sm);
+  cursor: pointer;
+}
+
+.nm-steps__aside--on {
+  background: var(--nm-accent-surface-dark);
+  border-color: var(--nm-accent-border-dark);
+  color: var(--nm-accent-hover);
+}
+
+.nm-steps__aside:focus-visible {
+  outline: 2px solid var(--nm-accent);
+  outline-offset: 2px;
+}
+
+/* Le mot qui porte la promesse : « vraiment » libre, et non « libre en .com ».
+ *
+ * Mis en valeur par CONTRASTE DE GRAISSE, pas par l'italique.
+ *
+ * L'italique avait été essayée : Space Grotesk n'en publie aucune, il fallait
+ * emprunter celle d'IBM Plex Sans, et deux dessins de lettres dans un titre de
+ * 60 px se remarquent plus que le mot lui-même — l'emphase attirait l'œil sur
+ * la typographie au lieu du sens.
+ *
+ * Une graisse plus légère au milieu d'un titre gras produit l'effet inverse :
+ * elle crée un creux, et c'est le creux qui se remarque. Même famille, même
+ * couleur, même axe — rien de neuf à l'écran, juste une respiration sur le mot
+ * qui sépare Namorama d'une recherche de nom de domaine.
+ */
+.nm-h1__em {
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* ─── « J'ai déjà un nom » ───────────────────────────────────────────────────
+   Posé sous les trois contrôles, là où l'argument vient d'être fait. Traité
+   comme un encart et non comme un bouton perdu : ce visiteur-là n'est pas de
+   passage, il vient chercher un verdict. */
+.nm-test {
+  margin-top: var(--nm-gap-cards);
+  padding: 20px 22px;
+  border: 1px solid var(--nm-accent-border-light);
+  border-radius: var(--nm-radius-md);
+  background: var(--nm-accent-surface-light);
+}
+
+.nm-test__title {
+  margin: 0 0 4px;
+  font-family: var(--nm-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--nm-text-light);
+}
+
+.nm-test__lead {
+  margin: 0 0 14px;
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-light-2);
+}
+
+.nm-test__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nm-test__row input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  min-height: var(--nm-touch-cta);
+  padding: 0 16px;
+  border: 1px solid var(--nm-border-light-2);
+  border-radius: var(--nm-radius-md);
+  background: var(--nm-surface-light);
+  color: var(--nm-text-light);
+  font-family: var(--nm-font-body);
+  font-size: 16px;
+}
+
+.nm-test__row input:focus-visible {
+  outline: 2px solid var(--nm-accent-text-light);
+  outline-offset: 1px;
+}
+
+.nm-test__btn {
+  flex: none;
+}
+
+/* Le formulaire du CTA final : même geste que l'encart des trois contrôles. */
+.nm-final__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1 1 22rem;
+  justify-content: flex-end;
+}
+
+.nm-final__form input {
+  flex: 1 1 14rem;
+  min-width: 0;
+  min-height: var(--nm-touch-cta);
+  padding: 0 16px;
+  border: 1px solid var(--nm-border-dark-interactive);
+  border-radius: var(--nm-radius-md);
+  background: var(--nm-surface-dark);
+  color: var(--nm-text-dark);
+  font-family: var(--nm-font-body);
+  font-size: 16px;
+}
+
+.nm-final__form input::placeholder { color: var(--nm-text-dark-3); }
+
+.nm-final__form input:focus-visible {
+  outline: 2px solid var(--nm-accent);
+  outline-offset: 1px;
+}
+
+/* Le lien vers l'exemple, sous le panneau de démonstration. */
+.nm-panel__sample {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: var(--nm-text-ui-sm);
+}
+
+.nm-panel__sample a {
+  color: var(--nm-accent-hover);
+  text-decoration: none;
+}
+
+.nm-panel__sample a:hover { text-decoration: underline; }

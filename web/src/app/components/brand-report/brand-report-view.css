@@ -1,0 +1,513 @@
+/* Rapport de marque — état débloqué, refonte étape 4.
+ *
+ * Surface CLAIRE, contrairement à l'accueil et aux résultats : c'est un
+ * document, destiné à être partagé, imprimé et relu. Le fond sombre y passerait
+ * mal à l'impression et en mode sombre de messagerie.
+ *
+ * L'ancien habillage était en indigo/violet (#4f46e5), hérité d'avant la
+ * marque : il est remplacé par l'accent du design, dans sa variante claire
+ * `--nm-accent-on-light` — la variante sombre ne passe pas le contraste AA sur
+ * blanc.
+ */
+
+:host {
+  display: block;
+  font-family: var(--nm-font-body);
+  color: var(--nm-app-text);
+}
+
+.rv {
+  max-width: var(--nm-report-max);
+  margin: 0 auto;
+  background: var(--nm-app-surface);
+  border: 1px solid var(--nm-app-border);
+  border-radius: var(--nm-radius-3xl);
+  overflow: hidden;
+}
+
+/* ─── En-tête ────────────────────────────────────────────────────────────── */
+
+.rv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px var(--nm-card-padding-lg);
+  border-bottom: 1px solid var(--nm-app-divider);
+}
+
+.rv-overline {
+  margin: 0 0 6px;
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  text-transform: uppercase;
+  color: var(--nm-app-text-2);
+}
+
+.rv-name {
+  margin: 0;
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-brand-report);
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h1-mobile);
+  line-height: 1.05;
+  color: var(--nm-app-text);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .rv-name {
+    font-size: 32px;
+  }
+}
+
+/* En haut à DROITE, et sur la même ligne que le nom : c'est là qu'on cherche
+   les actions d'un document. Le nom se replie s'il est long (`min-width: 0`
+   sur son bloc) plutôt que de les pousser dessous. */
+.rv-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  margin-left: auto;
+}
+
+.rv-head > div:first-child {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .rv-head__actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}
+
+/* Badge de synthèse : reprend la paire de couleurs du verdict correspondant. */
+.rv-summary {
+  padding: 8px 14px;
+  border-radius: var(--nm-radius-pill);
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rv-summary--ok {
+  background: var(--nm-app-verdict-free-bg);
+  color: var(--nm-app-verdict-free-fg);
+}
+
+.rv-summary--watch {
+  background: var(--nm-app-verdict-unknown-bg);
+  color: var(--nm-app-verdict-unknown-fg);
+}
+
+.rv-summary--risk {
+  background: var(--nm-app-verdict-taken-bg);
+  color: var(--nm-app-verdict-taken-fg);
+}
+
+/* ─── Sections ───────────────────────────────────────────────────────────── */
+
+.rv-section {
+  padding: 20px var(--nm-card-padding-lg);
+  border-bottom: 1px solid var(--nm-app-divider);
+}
+
+.rv-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.rv-section__title {
+  margin: 0;
+  font-family: var(--nm-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: var(--nm-tracking-h3);
+  color: var(--nm-app-text);
+}
+
+.rv-section__meta {
+  font-size: var(--nm-text-overline);
+  color: var(--nm-app-text-2);
+  white-space: nowrap;
+}
+
+.rv-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--nm-app-divider);
+  font-size: var(--nm-text-ui);
+}
+
+.rv-row:first-of-type {
+  border-top: 0;
+}
+
+.rv-row__label {
+  flex: 1;
+  min-width: 0;
+  color: var(--nm-app-text);
+  overflow-wrap: anywhere;
+}
+
+.rv-row__label a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rv-row__label a:hover {
+  color: var(--nm-app-accent);
+}
+
+.rv-row__note {
+  font-size: var(--nm-text-ui-sm);
+  color: var(--nm-app-text-2);
+  text-align: right;
+}
+
+/* Pastilles de verdict, version surface claire. */
+.rv-badge {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: var(--nm-radius-xs);
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  /* Bas de casse, comme partout ailleurs : « LIBRE » et « libre » désignaient
+     le même verdict sur deux écrans voisins. */
+  white-space: nowrap;
+}
+
+.rv-badge--free {
+  background: var(--nm-app-verdict-free-bg);
+  color: var(--nm-app-verdict-free-fg);
+}
+
+.rv-badge--taken {
+  background: var(--nm-app-verdict-taken-bg);
+  color: var(--nm-app-verdict-taken-fg);
+}
+
+.rv-badge--watch {
+  background: var(--nm-app-verdict-unknown-bg);
+  color: var(--nm-app-verdict-unknown-fg);
+}
+
+.rv-badge--unknown {
+  background: var(--nm-app-divider);
+  color: var(--nm-app-text-2);
+}
+
+.rv-hits {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-app-text-2);
+}
+
+.rv-explain {
+  margin: 10px 0 0;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-app-text-2);
+}
+
+/* ─── Qualité du nom ─────────────────────────────────────────────────────── */
+
+.rv-criteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px 24px;
+}
+
+.rv-criterion {
+  min-width: 0;
+}
+
+.rv-criterion__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.rv-criterion__label {
+  font-size: var(--nm-text-overline-sm);
+  font-weight: 600;
+  letter-spacing: var(--nm-tracking-overline);
+  text-transform: uppercase;
+  color: var(--nm-app-text-2);
+}
+
+.rv-criterion__score {
+  font-size: var(--nm-text-ui-sm);
+  font-weight: 700;
+}
+
+/* Même échelle que les verdicts : le lecteur n'a pas un second code à apprendre. */
+.rv-criterion__score--free  { color: var(--nm-app-verdict-free-fg); }
+.rv-criterion__score--watch { color: var(--nm-app-verdict-unknown-fg); }
+.rv-criterion__score--taken { color: var(--nm-app-verdict-taken-fg); }
+
+.rv-criterion__bar {
+  height: 4px;
+  border-radius: var(--nm-radius-pill);
+  background: var(--nm-app-divider);
+  overflow: hidden;
+}
+
+.rv-criterion__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--nm-radius-pill);
+}
+
+.rv-criterion__fill--free  { background: var(--nm-app-verdict-free-fg); }
+.rv-criterion__fill--watch { background: var(--nm-app-verdict-unknown-fg); }
+.rv-criterion__fill--taken { background: var(--nm-app-verdict-taken-fg); }
+
+.rv-criterion__note {
+  display: block;
+  margin-top: 5px;
+  font-size: var(--nm-text-ui-sm);
+  line-height: 1.45;
+  color: var(--nm-app-text-2);
+}
+
+/* ─── Pied de carte ──────────────────────────────────────────────────────── */
+
+.rv-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px var(--nm-card-padding-lg);
+  background: var(--nm-app-surface-alt);
+}
+
+.rv-disclaimer {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: var(--nm-text-ui-sm);
+  line-height: var(--nm-leading-body);
+  color: var(--nm-app-text-2);
+}
+
+.rv-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--nm-touch-cta);
+  padding: 14px 26px;
+  border-radius: var(--nm-radius-sm);
+  background: var(--nm-app-text);
+  color: var(--nm-app-surface);
+  font-family: var(--nm-font-display);
+  font-size: var(--nm-text-ui);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.rv-cta:hover {
+  background: var(--nm-app-text-2);
+}
+
+.rv-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nm-app-accent);
+  font-weight: 600;
+  font-size: var(--nm-text-ui-sm);
+  text-decoration: none;
+}
+
+.rv-link:hover {
+  color: var(--nm-app-accent-fill-hover);
+}
+
+.rv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+/* Raison technique d'un verdict « non vérifiable » — discrète, factuelle. */
+.rv-note {
+    margin: 0.35rem 0 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-3);
+}
+
+/* Logo de réseau : monochrome, à la couleur du texte. L'état du compte est
+   porté par la pastille de droite — le logo ne dit que « quel réseau ». */
+.rv-social__logo {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+    line-height: 1;
+    margin-right: 0.45rem;
+    vertical-align: -2px;
+    color: var(--nm-app-text-2);
+}
+
+/* Ce que le nom évoque : première ligne de la section qualité, en corps de
+   lecture — c'est une phrase, pas une métadonnée. */
+.rv-origin {
+    margin: 0 0 0.85rem;
+    font-size: var(--nm-text-body-sm);
+    line-height: 1.55;
+    color: var(--nm-app-text);
+}
+
+/* La description du projet, citée telle que l'utilisateur l'a écrite. */
+.rv-quote {
+    margin: 0;
+    padding-left: 0.85rem;
+    border-left: 3px solid var(--nm-app-accent-border);
+    font-size: var(--nm-text-body-sm);
+    line-height: 1.6;
+    color: var(--nm-app-text);
+    white-space: pre-line;
+}
+
+.rv-registrar select {
+    margin-right: 0.5rem;
+    padding: 2px 6px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-xs);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text-2);
+    font: inherit;
+    font-size: var(--nm-text-ui-sm);
+}
+
+/* Ce qui n'a pas de sens sur un papier : réserver, choisir un bureau. */
+@media print {
+    .rv-noprint { display: none !important; }
+}
+
+/* `.rv-actions` et `.rv-refresh` sont définis GLOBALEMENT (styles/components.css)
+   et non ici : ces éléments sont écrits dans le gabarit du wizard et projetés
+   dans cette vue. Un nœud projeté porte l'attribut d'encapsulation du composant
+   qui le DÉCLARE — une règle de cette feuille ne l'atteint donc jamais. C'est
+   ce qui laissait le bouton « actualiser » sans style, en bouton natif gris. */
+
+/* « Réserver » : un bouton, et le choix du bureau dans son menu. Le caret dit
+   qu'il y a un choix derrière, sans l'étaler à l'avance.
+   Sa propre classe, et non un `.rv-link` retouché : les deux autres `.rv-link`
+   du document sont des liens de texte, qui ne doivent pas hériter d'une
+   bordure. Et surtout pas de `font: inherit` — il écraserait la graisse et la
+   taille posées pour `.rv-link`. */
+.rv-reserve {
+    padding: 5px 10px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-surface);
+    font-family: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.rv-reserve:hover {
+    background: var(--nm-app-accent-surface);
+}
+
+.rv-link__caret {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+
+/* ═══ Impression ═══════════════════════════════════════════════════════════
+ *
+ * L'objectif est un document qu'on peut joindre à un dossier, pas une capture
+ * d'écran allongée. Trois choses le décident, et aucune n'est décorative :
+ *
+ *   — ce qui n'a pas de sens sur papier disparaît (réserver, choisir un
+ *     bureau, réactualiser, partager) ;
+ *   — aucune section ne se coupe entre deux pages : un verdict de marque à
+ *     cheval sur une pliure se lit de travers, et un titre orphelin en bas de
+ *     page fait croire à une fin de document ;
+ *   — les couleurs de fond ne sont pas garanties à l'impression (les
+ *     navigateurs les suppriment par défaut), donc chaque pastille reçoit une
+ *     bordure : sans elle, « libre » et « pris » sortent identiques en gris.
+ */
+@media print {
+    .rv {
+        border: 0;
+        box-shadow: none;
+        background: #fff;
+    }
+
+    .rv-head {
+        padding: 0 0 12px;
+        border-bottom: 2px solid #2c3532;
+    }
+
+    .rv-name { font-size: 26pt; }
+
+    /* Jamais de section à cheval sur une pliure, jamais de titre orphelin. */
+    .rv-section {
+        padding: 12px 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .rv-section__title,
+    .rv-section__head {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    .rv-row,
+    .rv-criterion,
+    .rv-hits li {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Les aplats ne survivent pas à l'impression : la bordure porte l'état. */
+    .rv-badge,
+    .nm-verdict {
+        border: 1px solid currentColor;
+        background: transparent !important;
+        font-weight: 600;
+    }
+
+    /* Une URL imprimée doit être lisible : le lien perd son intérêt sur papier,
+       mais son adresse, elle, reste utile pour les notices de marque. */
+    .rv-hits a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #5c6663;
+        word-break: break-all;
+    }
+
+    .rv-foot {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Réactualiser est une ACTION : elle n'a pas de sens sur un papier.
+       (`.rv-refresh` est masqué par la feuille globale — projeté, il échappe à
+       celle-ci.) */
+    .rv-cta { display: none; }
+}

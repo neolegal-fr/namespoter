@@ -5,6 +5,7 @@ import { AppLoggerService } from '../common/logging/app-logger.service';
 import { SocialCheckService } from './social/social-check.service';
 import { TrademarkService } from './trademark/trademark.service';
 import type {
+  ReportContext,
   Availability,
   BrandReport,
   DomainAvailability,
@@ -37,6 +38,8 @@ export interface BrandReportOptions {
   withQuality?: boolean;
   /** Locale pour l'analyse de qualité. */
   locale?: string;
+  /** Projet et public cible, mémorisés avec le rapport (jamais en aperçu). */
+  context?: ReportContext;
 }
 
 @Injectable()
@@ -80,6 +83,8 @@ export class BrandReportService {
       socials,
       trademark: trademarkResult,
       quality,
+      // Jamais en aperçu public : la description du projet n'a pas à sortir.
+      context: preview ? undefined : options.context,
       score: this.score(domains, socials, preview ? null : trademarkResult.match),
       generatedAt: new Date().toISOString(),
       disclaimer: DISCLAIMER,
@@ -110,6 +115,8 @@ export class BrandReportService {
       return {
         score: Math.round((avg / 5) * 100),
         scores,
+        comments: json.comments && typeof json.comments === 'object' ? json.comments : undefined,
+        origin: typeof json.origin === 'string' ? json.origin : undefined,
         strengths: typeof json.strengths === 'string' ? json.strengths : undefined,
         watchout: typeof json.watchout === 'string' ? json.watchout : undefined,
       };

@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Mine Projekter",
+    "TITLE": "Mine projekter",
     "SUBTITLE": "Genoptag dine søgninger der, hvor du slap.",
     "EMPTY": "Ingen projekter endnu.",
     "OPEN": "Åbn",
@@ -79,7 +79,7 @@
       "DOMAINS": "Domæner"
     },
     "STEP1": {
-      "TITLE": "Dit Projekt",
+      "TITLE": "Dit projekt",
       "PROJECT_NAME_TITLE": "Projektnavn (valgfrit)",
       "SUBTITLE": "Beskriv din løsning, din målgruppe og dine værdier.",
       "PLACEHOLDER": "F.eks.: En platform til levering af lokale og miljøvenlige blomster...",
@@ -126,7 +126,6 @@
       "BUY_CREDITS_BTN": "Køb kreditter",
       "BUY_COL_HEADER": "Køb hos en registrar",
       "NEW_PROJECT_BTN": "Nyt projekt",
-      "COPY_TABLE": "Kopiér tabel",
       "COPIED": "Kopieret!",
       "ANALYSIS_PENDING": "AI-analyse i gang…",
       "ANALYSIS_TOGGLE": "Se navneanalyse",

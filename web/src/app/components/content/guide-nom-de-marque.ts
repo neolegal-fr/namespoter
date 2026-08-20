@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -11,7 +12,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-guide-nom-de-marque',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -132,6 +133,8 @@ import { applyContentSeo } from './content-seo';
           coup, communication comprise.
         </li>
       </ol>
+
+      <app-trois-risques intro="Une marque se construit sur trois disponibilités, pas une. Elles ne se valent pas, et l'ordre dans lequel on les néglige décide de ce qu'on risque."></app-trois-risques>
 
       <app-article-cta
         heading="Laissez l'IA générer et vérifier à votre place"

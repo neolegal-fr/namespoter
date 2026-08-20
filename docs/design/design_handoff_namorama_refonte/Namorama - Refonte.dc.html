@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#0b0e10; }
+  a { color:#6ee7a8; text-decoration:none; }
+  a:hover { color:#a7f3cd; }
+  * { box-sizing:border-box; }
+</style>
+</helmet>
+
+<div style="font-family:'IBM Plex Sans',Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; background:#0b0e10; min-height:100vh">
+
+  <div style="position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:8px; padding:12px 20px; background:rgba(11,14,16,.86); backdrop-filter:blur(12px); border-bottom:1px solid #1b2225; flex-wrap:wrap">
+    <span style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#5d6864; margin-right:8px">Écrans</span>
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+      <button onClick="{{ t.pick }}" style="border:1px solid {{ t.bd }}; background:{{ t.bg }}; color:{{ t.fg }}; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 15px; cursor:pointer" style-hover="border-color:#3ddc91">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Home" style="background:#0b0e10; color:#f2f5f3">
+      <header style="display:flex; align-items:center; justify-content:space-between; gap:24px; max-width:1200px; margin:0 auto; padding:22px 28px">
+        <div style="display:flex; align-items:center; gap:10px">
+          <svg viewBox="0 0 24 24" width="27" height="27" style="flex-shrink:0" role="img" aria-label="Namorama">
+            <path fill="#3ddc91" d="M15.94,7.62l-4.88,2a2.63,2.63,0,0,0-1.48,1.48l-2,4.88a.34.34,0,0,0,.19.44.36.36,0,0,0,.25,0l4.88-2a2.63,2.63,0,0,0,1.48-1.48l2-4.88a.34.34,0,0,0-.19-.44A.36.36,0,0,0,15.94,7.62ZM12,13a1,1,0,1,1,1-1A1,1,0,0,1,12,13Z"></path>
+            <path fill="#f2f5f3" d="M12,21a9,9,0,1,1,9-9A9,9,0,0,1,12,21ZM12,4.5A7.5,7.5,0,1,0,19.5,12,7.5,7.5,0,0,0,12,4.5Z"></path>
+          </svg>
+          <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; letter-spacing:-0.02em">namorama</span>
+        </div>
+        <nav style="display:flex; align-items:center; gap:24px; font-size:14.5px; color:#9aa5a0">
+          <a href="#" style="color:#9aa5a0">Guides</a>
+          <a href="#" style="color:#9aa5a0">Comparatifs</a>
+          <a href="#" style="color:#9aa5a0">Tarifs</a>
+          <button style="border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; padding:10px 18px; cursor:pointer" style-hover="border-color:#3ddc91">Connexion</button>
+        </nav>
+      </header>
+
+      <section style="max-width:1200px; margin:0 auto; padding:52px 28px 80px; display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:56px; align-items:center">
+        <div>
+          <div style="display:inline-flex; align-items:center; gap:8px; border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; padding:7px 14px; font-size:12.5px; margin-bottom:26px">
+            <span style="width:6px; height:6px; border-radius:99px; background:#3ddc91"></span>
+            Registres, INPI et réseaux interrogés en direct
+          </div>
+          <h1 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(36px,4.8vw,60px); line-height:1.03; letter-spacing:-0.035em; font-weight:700; margin:0 0 20px; max-width:21ch">
+            Trouvez un nom de <span style="color:#3ddc91">{{ rotating }}</span> vraiment libre
+          </h1>
+          <p style="font-size:18.5px; line-height:1.55; color:#9aa5a0; max-width:47ch; margin:0 0 32px">
+            Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs de noms s'arrêtent au .com — Namorama vérifie aussi l'INPI et l'EUIPO, pour que vous choisissiez un nom que vous pourrez vraiment garder.
+          </p>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:26px">
+            <button onClick="{{ goApp }}" style="border:none; border-radius:10px; background:#3ddc91; color:#062018; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; padding:16px 28px; cursor:pointer" style-hover="background:#6ee7a8">Trouver mon nom</button>
+            <button onClick="{{ goReport }}" style="border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:15.5px; padding:16px 24px; cursor:pointer" style-hover="border-color:#4a5459">Voir un rapport de marque</button>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:22px; font-size:13.5px; color:#6d7873">
+            <span>100 crédits offerts chaque mois</span><span>≈ 50 suggestions vérifiées + 1 rapport</span><span>Sans abonnement</span>
+          </div>
+        </div>
+
+        <div style="background:#12171a; border:1px solid #232b2f; border-radius:18px; padding:8px; box-shadow:0 40px 80px -40px rgba(0,0,0,.8)">
+          <div style="display:flex; align-items:center; gap:7px; padding:10px 12px 14px">
+            <span style="width:9px;height:9px;border-radius:99px;background:#2f3a3e"></span>
+            <span style="width:9px;height:9px;border-radius:99px;background:#2f3a3e"></span>
+            <span style="width:9px;height:9px;border-radius:99px;background:#2f3a3e"></span>
+            <span style="margin-left:8px; font-size:12px; color:#6d7873">namorama.com/app</span>
+          </div>
+          <div style="background:#0b0e10; border:1px solid #1e2528; border-radius:12px; padding:22px 20px 20px">
+            <div style="display:flex; align-items:center; gap:0; margin-bottom:22px; flex-wrap:wrap; row-gap:10px">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+                <div onClick="{{ s.pick }}" style="display:flex; align-items:center; gap:9px; cursor:pointer; flex:1">
+                  <span style="display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:99px; font-size:12.5px; font-weight:600; flex-shrink:0; background:{{ s.bg }}; color:{{ s.fg }}; border:1px solid {{ s.bd }}">{{ s.n }}</span>
+                  <span style="font-size:13px; color:{{ s.labelColor }}; white-space:nowrap">{{ s.label }}</span>
+                  <span style="flex:1; height:1px; background:#232b2f; min-width:10px"></span>
+                </div>
+              </sc-for>
+            </div>
+
+            <p style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:#6d7873; margin:0 0 12px">{{ paneTitle }}</p>
+            <div style="display:flex; flex-direction:column; gap:8px; min-height:300px">
+              <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#12171a; border:1px solid #232b2f; border-radius:10px; padding:16px; font-size:15px; line-height:1.5; color:#c9d3ce">
+                  une place de marché de vélos reconditionnés, livrés montés, garantis deux ans
+                </div>
+                <p style="font-size:13px; color:#6d7873; margin:6px 0 0; line-height:1.5">L'IA reformule, repère les acteurs déjà présents et en déduit votre univers de marque.</p>
+                <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:10px">
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:12.5px; padding:6px 12px">reconditionné</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:12.5px; padding:6px 12px">mobilité douce</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:12.5px; padding:6px 12px">seconde main</span>
+                  <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:12.5px; padding:6px 12px">+ ajouter</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-wrap:wrap; gap:7px">
+                  <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:13px; padding:8px 13px">court (2 syllabes)</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:13px; padding:8px 13px">inventé</span>
+                  <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:13px; padding:8px 13px">.com + .fr</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:13px; padding:8px 13px">évocateur</span>
+                </div>
+                <p style="font-size:13px; color:#6d7873; margin:14px 0 0; line-height:1.5">Déjà pris dans votre secteur — l'IA les évite&nbsp;: Upway, Loewi, Cyclofix.</p>
+                <div style="margin-top:14px; border-top:1px solid #1e2528; padding-top:14px; display:flex; align-items:center; justify-content:space-between">
+                  <span style="font-size:13.5px; color:#9aa5a0">Classes INPI surveillées</span>
+                  <span style="font-family:'Space Grotesk',sans-serif; font-size:13.5px; color:#f2f5f3">12 · 35 · 37</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ results }}" as="r" hint-placeholder-count="6">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; background:#12171a; border:1px solid #232b2f; border-radius:10px; padding:13px 15px">
+                    <span style="font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; letter-spacing:-0.01em; color:#f2f5f3">{{ r.name }}</span>
+                    <span style="display:flex; align-items:center; gap:7px">
+                      <span style="font-size:12px; padding:4px 9px; border-radius:6px; background:{{ r.bg }}; color:{{ r.fg }}">{{ r.verdict }}</span>
+                      <span style="font-size:12px; color:#6d7873">{{ r.extra }}</span>
+                    </span>
+                  </div>
+                </sc-for>
+                <p style="font-size:12.5px; color:#6d7873; margin:8px 0 0; line-height:1.5">1 crédit par suggestion retenue, quel que soit le nombre d'extensions vérifiées.</p>
+              </sc-if>
+              <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px solid #23474b; background:#0f1b1c; border-radius:12px; padding:18px">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px">
+                    <span style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.02em; color:#f2f5f3">Roulio</span>
+                    <span style="font-size:12px; padding:5px 10px; border-radius:6px; background:#12171a; color:#6ee7a8">50 crédits</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:9px">
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#9aa5a0">Marque INPI · cl. 12, 35, 37</span><span style="color:#6ee7a8">aucun dépôt</span></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#9aa5a0">Marque EUIPO</span><span style="color:#6ee7a8">aucun dépôt</span></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#9aa5a0">Instagram, LinkedIn, TikTok</span><span style="color:#6ee7a8">libres</span></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#9aa5a0">X · @roulio</span><span style="color:#e08a8a">pris</span></div>
+                  </div>
+                  <p style="font-size:12.5px; color:#6d7873; margin:14px 0 0; line-height:1.5">Facturé une seule fois par nom. Le rapport reste dans votre projet, exportable en PDF.</p>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:#f4f6f5; color:#0b0e10">
+        <div style="max-width:1200px; margin:0 auto; padding:72px 28px 0">
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,3.6vw,42px); line-height:1.05; letter-spacing:-0.03em; margin:0 0 12px; max-width:26ch">Le .com est libre. La marque, elle, est déposée depuis 2019.</h2>
+          <p style="font-size:17.5px; color:#5c6663; max-width:56ch; margin:0 0 40px; line-height:1.55">C'est la mauvaise surprise que Namorama vous évite. Chaque nom passe quatre contrôles, pas un.</p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; padding-bottom:8px">
+            <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:26px 24px">
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:13px; color:#0d9a63; letter-spacing:0.08em; margin-bottom:14px">01 — DOMAINE</div>
+              <h3 style="font-family:'Space Grotesk',sans-serif; font-size:18px; margin:0 0 10px; letter-spacing:-0.01em">Trois états, pas deux</h3>
+              <p style="margin:0; font-size:15px; line-height:1.55; color:#5c6663">Libre, pris, ou invérifiable. Un registre en panne ne se déguise jamais en bonne nouvelle.</p>
+            </div>
+            <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:26px 24px">
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:13px; color:#0d9a63; letter-spacing:0.08em; margin-bottom:14px">02 — INPI</div>
+              <h3 style="font-family:'Space Grotesk',sans-serif; font-size:18px; margin:0 0 10px; letter-spacing:-0.01em">Marques françaises et UE</h3>
+              <p style="margin:0; font-size:15px; line-height:1.55; color:#5c6663">Recherche d'antériorité à l'INPI et à l'EUIPO, sur les classes de Nice qui vous concernent. La marque UE couvre les 27 États membres.</p>
+            </div>
+            <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:26px 24px">
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:13px; color:#0d9a63; letter-spacing:0.08em; margin-bottom:14px">03 — RÉSEAUX</div>
+              <h3 style="font-family:'Space Grotesk',sans-serif; font-size:18px; margin:0 0 10px; letter-spacing:-0.01em">Le pseudo suit le nom</h3>
+              <p style="margin:0; font-size:15px; line-height:1.55; color:#5c6663">Instagram, LinkedIn, X, TikTok : un nom dont le handle est pris coûte cher en notoriété.</p>
+            </div>
+            <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:26px 24px">
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:13px; color:#0d9a63; letter-spacing:0.08em; margin-bottom:14px">04 — EUROPE</div>
+              <h3 style="font-family:'Space Grotesk',sans-serif; font-size:18px; margin:0 0 10px; letter-spacing:-0.01em">Pensé pour le .fr</h3>
+              <p style="margin:0; font-size:15px; line-height:1.55; color:#5c6663">Noms prononçables en français, extensions européennes en premier, données hébergées en UE.</p>
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ showCompare }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:1200px; margin:0 auto; padding:64px 28px 0">
+          <div style="background:#fff; border:1px solid #e3e7e5; border-radius:16px; overflow:hidden">
+            <div style="display:grid; grid-template-columns:minmax(140px,1.6fr) repeat(3,minmax(72px,1fr)); align-items:center; padding:18px 24px; border-bottom:1px solid #eef1f0">
+              <span style="font-size:12.5px; letter-spacing:0.09em; text-transform:uppercase; color:#8a938f">Ce que vous obtenez</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; text-align:center">Namorama</span>
+              <span style="font-size:14px; color:#8a938f; text-align:center">Générateurs IA</span>
+              <span style="font-size:14px; color:#8a938f; text-align:center">Registrars</span>
+            </div>
+            <sc-for list="{{ compare }}" as="c" hint-placeholder-count="5">
+              <div style="display:grid; grid-template-columns:minmax(140px,1.6fr) repeat(3,minmax(72px,1fr)); align-items:center; padding:15px 24px; border-bottom:1px solid #f2f4f3">
+                <span style="font-size:15.5px; color:#2c3532">{{ c.label }}</span>
+                <span style="text-align:center; font-size:14px; font-weight:600; color:#0d9a63">{{ c.us }}</span>
+                <span style="text-align:center; font-size:14px; color:#9aa5a0">{{ c.gen }}</span>
+                <span style="text-align:center; font-size:14px; color:#9aa5a0">{{ c.reg }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ showGuides }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:1200px; margin:0 auto; padding:64px 28px 0">
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(24px,3vw,34px); letter-spacing:-0.025em; margin:0 0 8px">Guides de naming par secteur</h2>
+          <p style="font-size:16.5px; color:#5c6663; margin:0 0 24px; max-width:54ch; line-height:1.55">Les pages que Google indexe, et par lesquelles vos futurs clients arrivent.</p>
+          <div style="display:flex; flex-wrap:wrap; gap:10px">
+            <sc-for list="{{ guides }}" as="g" hint-placeholder-count="8">
+              <a href="#" style="display:inline-flex; align-items:center; min-height:44px; padding:0 18px; border:1px solid #dde2e0; border-radius:999px; background:#fff; color:#2c3532; font-size:14.5px">{{ g }}</a>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <div style="max-width:1200px; margin:0 auto; padding:76px 28px 96px">
+          <div style="background:#0b0e10; color:#f2f5f3; border-radius:18px; padding:52px 44px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:26px">
+            <div>
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(26px,3.4vw,38px); line-height:1.06; letter-spacing:-0.03em; margin:0 0 10px">Votre nom est encore libre</h2>
+              <p style="margin:0; font-size:16px; color:#9aa5a0">100 crédits offerts chaque mois : environ 50 suggestions vérifiées, et un rapport approfondi.</p>
+            </div>
+            <button onClick="{{ goApp }}" style="border:none; border-radius:10px; background:#3ddc91; color:#062018; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; padding:17px 30px; cursor:pointer" style-hover="background:#6ee7a8">Lancer une recherche gratuite</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Résultats" style="background:#0b0e10; color:#f2f5f3; min-height:100vh">
+      <div style="max-width:1200px; margin:0 auto; padding:28px 28px 80px">
+        <div style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px">
+          <div>
+            <p style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:#6d7873; margin:0 0 8px">Recherche · vélos reconditionnés</p>
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:34px; letter-spacing:-0.03em; margin:0">21 domaines libres sur 9 noms</h1>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-size:13.5px; color:#6d7873">91 crédits restants</span>
+            <button style="border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:9px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:11px 18px; cursor:pointer" style-hover="border-color:#4a5459">Exporter</button>
+            <button style="border:none; background:#3ddc91; color:#062018; border-radius:9px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; padding:12px 20px; cursor:pointer" style-hover="background:#6ee7a8">Générer 12 de plus</button>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; background:#12171a; border:1px solid #232b2f; border-radius:12px; padding:14px 18px; margin-bottom:20px">
+          <span style="font-size:13.5px; color:#c9d3ce"><strong style="color:#6ee7a8; font-weight:600">9 crédits</strong> débités — 1 par suggestion retenue</span>
+          <span style="width:1px; height:16px; background:#2a3236"></span>
+          <span style="font-size:13.5px; color:#6d7873">Une suggestion hors critères n'est jamais facturée</span>
+          <span style="width:1px; height:16px; background:#2a3236"></span>
+          <span style="font-size:13.5px; color:#6d7873">Rapport approfondi : 50 crédits par nom</span>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+            <button onClick="{{ f.pick }}" style="border:1px solid {{ f.bd }}; background:{{ f.bg }}; color:{{ f.fg }}; border-radius:999px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 15px; cursor:pointer">{{ f.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="9">
+            <div style="background:#12171a; border:1px solid {{ c.border }}; border-radius:14px; padding:20px" style-hover="border-color:#3a4448">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px">
+                <div>
+                  <div style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.02em">{{ c.name }}</div>
+                  <div style="font-size:13px; color:#6d7873; margin-top:4px">{{ c.why }}</div>
+                </div>
+                <span style="font-size:11.5px; padding:5px 9px; border-radius:6px; background:{{ c.scoreBg }}; color:{{ c.scoreFg }}; white-space:nowrap">{{ c.score }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:7px">
+                <sc-for list="{{ c.checks }}" as="k" hint-placeholder-count="4">
+                  <div style="display:flex; align-items:center; justify-content:space-between; font-size:13.5px">
+                    <span style="color:#9aa5a0">{{ k.label }}</span>
+                    <span style="color:{{ k.color }}">{{ k.value }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:14px; padding-top:13px; border-top:1px dashed #2a3236; display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="display:flex; align-items:center; gap:7px; font-size:13px; color:{{ c.deepFg }}">
+                  <sc-if value="{{ c.locked }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px; color:#6d7873">🔒</span></sc-if>
+                  {{ c.deepLabel }}
+                </span>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:12px">
+                <button onClick="{{ goReport }}" style="flex:1; border:1px solid {{ c.deepBd }}; background:{{ c.deepBg }}; color:#f2f5f3; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:11px 0; cursor:pointer" style-hover="border-color:#3ddc91">{{ c.cta }}</button>
+                <button style="flex:1; border:none; background:#1c2b26; color:#6ee7a8; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:11px 0; cursor:pointer" style-hover="background:#24382f">Réserver</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isReport }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Rapport de marque" style="background:#f4f6f5; color:#0b0e10; min-height:100vh">
+      <div style="max-width:920px; margin:0 auto; padding:36px 28px 90px">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px">
+          <span style="font-size:12px; letter-spacing:0.11em; text-transform:uppercase; color:#8a938f; margin-right:4px">Aperçu</span>
+          <sc-for list="{{ reportModes }}" as="m" hint-placeholder-count="2">
+            <button onClick="{{ m.pick }}" style="border:1px solid {{ m.bd }}; background:{{ m.bg }}; color:{{ m.fg }}; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 15px; cursor:pointer">{{ m.label }}</button>
+          </sc-for>
+          <sc-if value="{{ reportLocked }}" hint-placeholder-val="{{ false }}">
+            <span style="width:1px; height:18px; background:#dde2e0; margin:0 4px"></span>
+            <sc-for list="{{ freeToggle }}" as="m" hint-placeholder-count="2">
+              <button onClick="{{ m.pick }}" style="border:1px solid {{ m.bd }}; background:{{ m.bg }}; color:{{ m.fg }}; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 15px; cursor:pointer">{{ m.label }}</button>
+            </sc-for>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ reportLocked }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff; border:1px solid #e3e7e5; border-radius:18px; overflow:hidden; margin-bottom:28px">
+            <div style="padding:34px 38px; border-bottom:1px solid #eef1f0">
+              <p style="font-size:12px; letter-spacing:0.11em; text-transform:uppercase; color:#8a938f; margin:0 0 10px">Rapport approfondi · non débloqué</p>
+              <h1 style="font-family:'Space Grotesk',sans-serif; font-size:46px; letter-spacing:-0.03em; margin:0 0 10px">Roulio</h1>
+              <p style="margin:0; font-size:16px; color:#5c6663; max-width:56ch; line-height:1.55">Cette suggestion a déjà été retenue et vérifiée (1 crédit). Le rapport approfondi ajoute la recherche d'antériorité INPI et EUIPO, et les pseudos sur 4 réseaux.</p>
+            </div>
+            <div style="padding:26px 38px; border-bottom:1px solid #eef1f0">
+              <sc-for list="{{ lockedRows }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 0; border-top:1px solid #f2f4f3">
+                  <span style="font-size:15px; color:#2c3532">{{ r.label }}</span>
+                  <span style="display:flex; align-items:center; gap:9px; font-size:13.5px; color:#a3aba7">
+                    <span aria-hidden="true" style="display:block; height:11px; border-radius:6px; background:linear-gradient(90deg,#e8ebea,#dfe3e2); width:{{ r.w }}"></span>
+                    <span style="font-size:12px">🔒</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:28px 38px; background:#fbfcfb; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px">
+              <sc-if value="{{ freeAvailable }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <p style="margin:0 0 4px; font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700">50 crédits <span style="font-weight:400; font-size:15px; color:#0d7a63">— offert ce mois-ci</span></p>
+                  <p style="margin:0; font-size:14px; color:#5c6663">Un rapport approfondi offert chaque mois. Ensuite, 50 crédits par nom.</p>
+                </div>
+                <button onClick="{{ unlockReport }}" style="border:none; background:#0d9a63; color:#fff; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; padding:15px 26px; cursor:pointer" style-hover="background:#0b8355">Débloquer gratuitement</button>
+              </sc-if>
+              <sc-if value="{{ freeUsed }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <p style="margin:0 0 4px; font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700">50 crédits</p>
+                  <p style="margin:0; font-size:14px; color:#5c6663">Votre rapport offert d'août a été utilisé. Prochain rapport offert le 1er septembre.</p>
+                </div>
+                <button onClick="{{ unlockReport }}" style="border:none; background:#0b0e10; color:#f2f5f3; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; padding:15px 26px; cursor:pointer" style-hover="background:#1c2b26">Débloquer — 50 crédits</button>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ reportUnlocked }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff; border:1px solid #e3e7e5; border-radius:18px; overflow:hidden">
+          <div style="padding:34px 38px; border-bottom:1px solid #eef1f0; display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:20px">
+            <div>
+              <p style="font-size:12px; letter-spacing:0.11em; text-transform:uppercase; color:#8a938f; margin:0 0 10px">Rapport approfondi · 50 crédits · 18 août 2026, 18:22</p>
+              <h1 style="font-family:'Space Grotesk',sans-serif; font-size:46px; letter-spacing:-0.03em; margin:0">Roulio</h1>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px">
+              <span style="background:#e8f7ef; color:#0d7a4e; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600">Aucun blocage identifié</span>
+              <button style="border:1px solid #dde2e0; background:#fff; color:#2c3532; border-radius:9px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:11px 18px; cursor:pointer" style-hover="border-color:#0d9a63">PDF</button>
+            </div>
+          </div>
+
+          <sc-for list="{{ reportSections }}" as="sec" hint-placeholder-count="4">
+            <div style="padding:26px 38px; border-bottom:1px solid #f2f4f3">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:14px">
+                <h2 style="font-family:'Space Grotesk',sans-serif; font-size:17px; letter-spacing:-0.01em; margin:0">{{ sec.title }}</h2>
+                <span style="font-size:12.5px; color:#8a938f">{{ sec.meta }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:0">
+                <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid #f2f4f3">
+                    <span style="font-size:15px; color:#2c3532">{{ r.label }}</span>
+                    <span style="display:flex; align-items:center; gap:10px">
+                      <span style="font-size:13px; color:#8a938f">{{ r.note }}</span>
+                      <span style="font-size:12.5px; font-weight:600; padding:5px 11px; border-radius:6px; background:{{ r.bg }}; color:{{ r.fg }}; white-space:nowrap">{{ r.verdict }}</span>
+                    </span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+
+          <div style="padding:28px 38px; background:#fbfcfb; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px">
+            <p style="margin:0; font-size:14px; color:#5c6663; max-width:56ch; line-height:1.55">Ce rapport est une recherche d'antériorité automatisée, pas un avis juridique. Il couvre les marques françaises (INPI) et de l'Union européenne (EUIPO), identiques et proches, sur les classes sélectionnées — pas les registres nationaux des autres États membres.</p>
+            <button style="border:none; background:#0b0e10; color:#f2f5f3; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; padding:15px 26px; cursor:pointer" style-hover="background:#1c2b26">Réserver roulio.com — 13 €</button>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Mobile" style="background:#12171a; padding:40px 28px 80px">
+      <div style="display:flex; flex-wrap:wrap; gap:28px; justify-content:center; align-items:flex-start">
+
+        <div style="width:390px; background:#0b0e10; border:1px solid #232b2f; border-radius:34px; padding:14px; box-shadow:0 40px 80px -40px rgba(0,0,0,.9)">
+          <div style="background:#0b0e10; border-radius:24px; overflow:hidden; color:#f2f5f3">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px 10px; font-size:12px; color:#6d7873">
+              <span>9:41</span><span>Namorama</span>
+            </div>
+            <div style="padding:8px 18px 26px">
+              <div style="display:inline-flex; align-items:center; gap:7px; border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; padding:6px 12px; font-size:11.5px; margin-bottom:18px">
+                <span style="width:5px;height:5px;border-radius:99px;background:#3ddc91"></span>Registres + INPI en direct
+              </div>
+              <h1 style="font-family:'Space Grotesk',sans-serif; font-size:33px; line-height:1.06; letter-spacing:-0.03em; margin:0 0 14px">Trouvez un nom de <span style="color:#3ddc91">{{ rotating }}</span> vraiment libre</h1>
+              <p style="font-size:15.5px; line-height:1.55; color:#9aa5a0; margin:0 0 22px">Domaine, réseaux sociaux, et aucune marque déposée. Les générateurs s'arrêtent au .com.</p>
+              <button style="width:100%; min-height:52px; border:none; border-radius:12px; background:#3ddc91; color:#062018; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; cursor:pointer">Trouver mon nom</button>
+              <p style="font-size:12.5px; color:#6d7873; text-align:center; margin:12px 0 22px">100 crédits / mois · 50 suggestions + 1 rapport</p>
+              <div style="background:#12171a; border:1px solid #232b2f; border-radius:14px; padding:16px">
+                <p style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#6d7873; margin:0 0 12px">Exemple de verdict</p>
+                <div style="display:flex; flex-direction:column; gap:9px">
+                  <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#c9d3ce">roulio.com</span><span style="color:#6ee7a8">libre</span></div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#c9d3ce">roulio.fr</span><span style="color:#6ee7a8">libre</span></div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; font-size:14px"><span style="color:#c9d3ce">roulio.eu</span><span style="color:#6ee7a8">libre</span></div>
+                </div>
+                <div style="margin-top:12px; padding-top:11px; border-top:1px dashed #2a3236; display:flex; align-items:center; justify-content:space-between; font-size:13px">
+                  <span style="color:#9aa5a0">🔒 Réseaux + INPI</span><span style="color:#6d7873">50 crédits</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="width:390px; background:#0b0e10; border:1px solid #232b2f; border-radius:34px; padding:14px; box-shadow:0 40px 80px -40px rgba(0,0,0,.9)">
+          <div style="background:#0b0e10; border-radius:24px; overflow:hidden; color:#f2f5f3">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px 10px; font-size:12px; color:#6d7873">
+              <span>9:41</span><span>Recherche</span>
+            </div>
+            <div style="padding:8px 18px 22px">
+              <p style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#6d7873; margin:0 0 12px">Étape {{ mStep }} sur 4 — {{ mStepLabel }}</p>
+              <div style="display:flex; gap:6px; margin-bottom:18px">
+                <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+                  <div onClick="{{ s.pick }}" style="flex:1; height:4px; border-radius:99px; background:{{ s.barBg }}; cursor:pointer"></div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#12171a; border:1px solid #232b2f; border-radius:12px; padding:15px; font-size:15px; line-height:1.5; color:#c9d3ce; min-height:150px">une place de marché de vélos reconditionnés, livrés montés, garantis deux ans</div>
+              </sc-if>
+              <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-wrap:wrap; gap:7px; min-height:150px; align-content:flex-start">
+                  <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:13px; padding:9px 13px">court</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:13px; padding:9px 13px">inventé</span>
+                  <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:13px; padding:9px 13px">.com + .fr</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:13px; padding:9px 13px">évocateur</span>
+                  <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:13px; padding:9px 13px">INPI 12 · 35 · 37</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; flex-direction:column; gap:8px; min-height:150px">
+                  <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:#12171a; border:1px solid #232b2f; border-radius:10px; padding:12px 14px">
+                      <span style="font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; letter-spacing:-0.01em">{{ r.name }}</span>
+                      <span style="font-size:11.5px; padding:4px 9px; border-radius:6px; background:{{ r.bg }}; color:{{ r.fg }}; white-space:nowrap">{{ r.verdict }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <button onClick="{{ mNext }}" style="width:100%; min-height:52px; margin-top:16px; border:none; border-radius:12px; background:#3ddc91; color:#062018; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; cursor:pointer">{{ mCta }}</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="width:390px; background:#0b0e10; border:1px solid #232b2f; border-radius:34px; padding:14px; box-shadow:0 40px 80px -40px rgba(0,0,0,.9)">
+          <div style="background:#0b0e10; border-radius:24px; overflow:hidden; color:#f2f5f3">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px 10px; font-size:12px; color:#6d7873">
+              <span>9:41</span><span>Résultats</span>
+            </div>
+            <div style="padding:8px 18px 18px">
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:22px; letter-spacing:-0.02em; margin:0 0 4px">21 domaines libres</h2>
+              <p style="font-size:13px; color:#6d7873; margin:0 0 16px">9 crédits débités · 91 restants</p>
+              <div style="display:flex; gap:7px; overflow:hidden; margin-bottom:16px">
+                <span style="border:1px solid #23474b; background:#0f1b1c; color:#6ee7a8; border-radius:999px; font-size:12.5px; padding:9px 13px; white-space:nowrap">Tout libre</span>
+                <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:12.5px; padding:9px 13px; white-space:nowrap">.com</span>
+                <span style="border:1px solid #263033; background:#12171a; color:#9aa5a0; border-radius:999px; font-size:12.5px; padding:9px 13px; white-space:nowrap">Favoris</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:10px">
+                <sc-for list="{{ mobileCards }}" as="c" hint-placeholder-count="4">
+                  <div style="background:#12171a; border:1px solid #232b2f; border-radius:14px; padding:15px 16px">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px">
+                      <span style="font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700; letter-spacing:-0.02em">{{ c.name }}</span>
+                      <span style="font-size:11.5px; padding:5px 9px; border-radius:6px; background:{{ c.scoreBg }}; color:{{ c.scoreFg }}">{{ c.score }}</span>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13px; color:#9aa5a0">
+                      <span>.com <span style="color:{{ c.comColor }}">{{ c.com }}</span></span>
+                      <span>.fr <span style="color:{{ c.frColor }}">{{ c.fr }}</span></span>
+                      <span>.eu <span style="color:{{ c.euColor }}">{{ c.eu }}</span></span>
+                    </div>
+                    <button style="width:100%; min-height:46px; margin-top:13px; border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:10px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer">🔒 Approfondir — 50 crédits</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex; border-top:1px solid #1b2225; background:#0e1315">
+              <div style="flex:1; min-height:56px; display:flex; align-items:center; justify-content:center; font-size:12.5px; color:#3ddc91">Rechercher</div>
+              <div style="flex:1; min-height:56px; display:flex; align-items:center; justify-content:center; font-size:12.5px; color:#6d7873">Projets</div>
+              <div style="flex:1; min-height:56px; display:flex; align-items:center; justify-content:center; font-size:12.5px; color:#6d7873">Compte</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isNotes }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Notes" style="background:#f4f6f5; color:#0b0e10; min-height:100vh">
+      <div style="max-width:800px; margin:0 auto; padding:48px 28px 96px">
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:38px; letter-spacing:-0.03em; margin:0 0 10px">Pourquoi le trafic ne vient pas</h1>
+        <p style="font-size:17px; color:#5c6663; line-height:1.6; margin:0 0 36px; max-width:58ch">Le design n'amène pas de visiteurs à lui seul. Voici ce que la refonte change, et ce qui doit suivre côté acquisition.</p>
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="5">
+          <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:24px 26px; margin-bottom:14px">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px">
+              <span style="font-size:11.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:5px 10px; border-radius:6px; background:{{ n.bg }}; color:{{ n.fg }}">{{ n.tag }}</span>
+              <h2 style="font-family:'Space Grotesk',sans-serif; font-size:19px; letter-spacing:-0.015em; margin:0">{{ n.title }}</h2>
+            </div>
+            <p style="margin:0; font-size:15.5px; line-height:1.6; color:#5c6663">{{ n.body }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showCompare&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Accueil&quot;},&quot;showGuides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Accueil&quot;}}">
+class Component extends DCLogic {
+  state = { screen: 'home', step: 3, filter: 'Tout libre', word: 0, unlocked: true, freeUsed: false };
+
+  componentDidMount() {
+    this._t = setInterval(() => this.setState(s => ({ word: (s.word + 1) % 3 })), 2000);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+
+  renderVals() {
+    const sc = this.state.screen;
+    const set = (k) => () => this.setState({ screen: k });
+    const s = this.state.step;
+    const free = { bg: '#0f1b1c', fg: '#6ee7a8' };
+    const taken = { bg: '#1a1416', fg: '#e08a8a' };
+    const unk = { bg: '#1c1810', fg: '#e0b96e' };
+    const ok = '#6ee7a8', no = '#e08a8a', warn = '#e0b96e';
+
+    const tabDefs = [['home', 'Accueil'], ['app', 'Résultats'], ['report', 'Rapport de marque'], ['mobile', 'Mobile'], ['notes', 'Notes & acquisition']];
+
+    const mk = (name, why, score, high, checks, unlocked) => ({
+      name, why, score,
+      scoreBg: high ? '#0f1b1c' : '#171c1f', scoreFg: high ? '#6ee7a8' : '#9aa5a0',
+      border: high ? '#23474b' : '#232b2f',
+      checks,
+      unlocked: !!unlocked,
+      locked: !unlocked,
+      deepLabel: unlocked ? 'Rapport approfondi acheté' : 'Réseaux + INPI — 50 crédits',
+      deepFg: unlocked ? '#6ee7a8' : '#9aa5a0',
+      deepBg: unlocked ? '#0f1b1c' : '#12171a',
+      deepBd: unlocked ? '#23474b' : '#2a3236',
+      cta: unlocked ? 'Ouvrir le rapport' : 'Approfondir'
+    });
+    const chk = (label, value, color) => ({ label, value, color });
+
+    return {
+      tabs: tabDefs.map(([k, label]) => ({
+        label, pick: set(k),
+        bg: sc === k ? '#3ddc91' : 'transparent',
+        fg: sc === k ? '#062018' : '#9aa5a0',
+        bd: sc === k ? '#3ddc91' : '#2a3236'
+      })),
+      rotating: ['produit', 'marque', 'société'][this.state.word],
+      showCompare: this.props.showCompare ?? true,
+      showGuides: this.props.showGuides ?? true,
+      isHome: sc === 'home', isApp: sc === 'app', isReport: sc === 'report',
+      isMobile: sc === 'mobile', isNotes: sc === 'notes',
+      goApp: set('app'), goReport: set('report'),
+
+      paneTitle: { 1: 'Étape 1 — votre projet en une phrase', 2: 'Étape 2 — style et extensions', 3: 'Étape 3 — suggestions retenues · 1 crédit chacune', 4: 'Étape 4 — rapport approfondi · 50 crédits' }[s],
+      isStep1: s === 1, isStep2: s === 2, isStep3: s === 3, isStep4: s === 4,
+      steps: [1, 2, 3, 4].map(n => ({
+        n, label: ['Décrire', 'Cadrer', 'Domaines', 'Rapport'][n - 1],
+        bg: n === s ? '#3ddc91' : '#12171a',
+        fg: n === s ? '#062018' : '#6d7873',
+        bd: n === s ? '#3ddc91' : '#232b2f',
+        labelColor: n === s ? '#f2f5f3' : '#6d7873',
+        barBg: n <= s ? '#3ddc91' : '#232b2f',
+        pick: () => this.setState({ step: n })
+      })),
+      mStep: s,
+      mStepLabel: ['Décrire', 'Cadrer', 'Domaines', 'Rapport'][s - 1],
+      mCta: { 1: 'Continuer', 2: 'Chercher les domaines', 3: 'Approfondir un nom', 4: 'Recommencer' }[s],
+      mNext: () => this.setState({ step: s === 4 ? 1 : s + 1 }),
+      results: [
+        { name: 'roulio.com', verdict: 'libre', extra: '1 crédit', ...free },
+        { name: 'bikara.com', verdict: 'libre', extra: '1 crédit', ...free },
+        { name: 'sprocco.com', verdict: 'libre', extra: '1 crédit', ...free },
+        { name: 'cyclique.fr', verdict: 'libre', extra: '1 crédit', ...free },
+        { name: 'pedalo.com', verdict: 'pris', extra: 'non facturé', ...taken },
+        { name: 'moyeu.ch', verdict: 'non vérifiable', extra: 'non facturé', ...unk }
+      ],
+
+      compare: [
+        { label: 'Noms générés par IA', us: 'oui', gen: 'oui', reg: '—' },
+        { label: 'Disponibilité du domaine', us: 'registre en direct', gen: 'estimée', reg: 'oui' },
+        { label: 'Antériorité de marque INPI / EUIPO', us: 'incluse', gen: '—', reg: '—' },
+        { label: 'Pseudos réseaux sociaux', us: 'inclus', gen: '—', reg: '—' },
+        { label: 'État « invérifiable » signalé', us: 'oui', gen: '—', reg: '—' },
+        { label: 'Sans abonnement', us: 'oui', gen: 'rarement', reg: 'oui' }
+      ],
+      guides: ['Nom de startup SaaS', 'Nom de marque cosmétique', 'Nom d\'agence', 'Nom de boutique en ligne', 'Nom court inventé', 'Nom de startup IA', 'Nom d\'application mobile', 'Nom de restaurant', 'Classes INPI : le guide', 'Vérifier une marque avant de déposer'],
+
+      filters: ['Tout libre', '.com + .fr libres', 'Rapport acheté', 'Favoris'].map(label => ({
+        label, pick: () => this.setState({ filter: label }),
+        bg: this.state.filter === label ? '#0f1b1c' : '#12171a',
+        fg: this.state.filter === label ? '#6ee7a8' : '#9aa5a0',
+        bd: this.state.filter === label ? '#23474b' : '#263033'
+      })),
+      cards: [
+        mk('Roulio', 'roue + suffixe latin', '3 crédits', true, [chk('roulio.com', 'libre', ok), chk('roulio.fr', 'libre', ok), chk('roulio.eu', 'libre', ok), chk('roulio.ch', 'non vérifiable', warn)], true),
+        mk('Bikara', 'bike + sonorité douce', '3 crédits', true, [chk('bikara.com', 'libre', ok), chk('bikara.fr', 'libre', ok), chk('bikara.eu', 'libre', ok), chk('bikara.io', 'pris', no)]),
+        mk('Sprocco', 'sprocket, italianisé', '2 crédits', true, [chk('sprocco.com', 'libre', ok), chk('sprocco.fr', 'libre', ok), chk('sprocco.eu', 'pris', no), chk('sprocco.io', 'pris', no)]),
+        mk('Cyclique', 'le cycle, la circularité', '1 crédit', false, [chk('cyclique.com', 'pris', no), chk('cyclique.fr', 'libre', ok), chk('cyclique.eu', 'pris', no), chk('cyclique.io', 'pris', no)]),
+        mk('Vélorama', 'vélo + panorama', '2 crédits', false, [chk('velorama.com', 'pris', no), chk('velorama.fr', 'libre', ok), chk('velorama.eu', 'libre', ok), chk('velorama.io', 'pris', no)]),
+        mk('Moyeu', 'le cœur de la roue', '1 crédit', false, [chk('moyeu.com', 'pris', no), chk('moyeu.fr', 'libre', ok), chk('moyeu.eu', 'pris', no), chk('moyeu.ch', 'non vérifiable', warn)]),
+        mk('Nervio', 'nerf, réactivité', '4 crédits', true, [chk('nervio.com', 'libre', ok), chk('nervio.fr', 'libre', ok), chk('nervio.eu', 'libre', ok), chk('nervio.io', 'libre', ok)]),
+        mk('Ourvo', 'court, sans référent', '3 crédits', true, [chk('ourvo.com', 'libre', ok), chk('ourvo.fr', 'libre', ok), chk('ourvo.eu', 'libre', ok), chk('ourvo.io', 'pris', no)]),
+        mk('Kabano', 'sonorité ouverte', '2 crédits', false, [chk('kabano.com', 'libre', ok), chk('kabano.fr', 'libre', ok), chk('kabano.eu', 'pris', no), chk('kabano.io', 'pris', no)])
+      ],
+
+      reportLocked: !this.state.unlocked,
+      reportUnlocked: this.state.unlocked,
+      unlockReport: () => this.setState({ unlocked: true }),
+      reportModes: [['Avant achat', false], ['Après achat', true]].map(([label, v]) => ({
+        label, pick: () => this.setState({ unlocked: v }),
+        bg: this.state.unlocked === v ? '#0d9a63' : '#fff',
+        fg: this.state.unlocked === v ? '#fff' : '#5c6663',
+        bd: this.state.unlocked === v ? '#0d9a63' : '#dde2e0'
+      })),
+      freeUsed: this.state.freeUsed,
+      freeAvailable: !this.state.freeUsed,
+      freeToggle: [['Rapport offert dispo.', false], ['Offert déjà utilisé', true]].map(([label, v]) => ({
+        label, pick: () => this.setState({ freeUsed: v }),
+        bg: this.state.freeUsed === v ? '#0d9a63' : '#fff',
+        fg: this.state.freeUsed === v ? '#fff' : '#5c6663',
+        bd: this.state.freeUsed === v ? '#0d9a63' : '#dde2e0'
+      })),
+      lockedRows: [
+        { label: 'Marques françaises — INPI', w: '132px' },
+        { label: 'Marques européennes — EUIPO', w: '104px' },
+        { label: 'Instagram, LinkedIn, TikTok', w: '148px' },
+        { label: 'X · @roulio', w: '88px' }
+      ],
+      reportSections: [
+        { title: 'Noms de domaine', meta: 'RDAP · 18:22:04', rows: [
+          { label: 'roulio.com', note: '13 € / an', verdict: 'LIBRE', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'roulio.fr', note: '8 € / an', verdict: 'LIBRE', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'roulio.eu', note: '9 € / an', verdict: 'LIBRE', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'roulio.ch', note: 'registre injoignable', verdict: 'NON VÉRIFIABLE', bg: '#fdf3e3', fg: '#9a6a12' }
+        ]},
+        { title: 'Marques françaises — INPI', meta: 'classes 12, 35, 37', rows: [
+          { label: 'Marque identique « Roulio »', note: 'aucune occurrence', verdict: 'AUCUN DÉPÔT', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'Marques proches phonétiquement', note: 'Roulyo (cl. 25, hors secteur)', verdict: 'SANS RISQUE', bg: '#e8f7ef', fg: '#0d7a4e' }
+        ]},
+        { title: 'Marques européennes — EUIPO', meta: 'classes 12, 35, 37', rows: [
+          { label: 'Marque identique « Roulio »', note: 'aucune occurrence', verdict: 'AUCUN DÉPÔT', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'Marques proches', note: 'Roulez (cl. 39, transport)', verdict: 'À SURVEILLER', bg: '#fdf3e3', fg: '#9a6a12' }
+        ]},
+        { title: 'Réseaux sociaux', meta: '4 plateformes', rows: [
+          { label: 'Instagram · @roulio', note: '', verdict: 'LIBRE', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'LinkedIn · /company/roulio', note: '', verdict: 'LIBRE', bg: '#e8f7ef', fg: '#0d7a4e' },
+          { label: 'X · @roulio', note: 'compte inactif depuis 2016', verdict: 'PRIS', bg: '#fbecec', fg: '#a33b3b' },
+          { label: 'TikTok · @roulio', note: '', verdict: 'LIBRE', bg: '#e8f7ef', fg: '#0d7a4e' }
+        ]}
+      ],
+
+      mobileCards: [
+        { name: 'Roulio', score: '3 crédits', scoreBg: '#0f1b1c', scoreFg: '#6ee7a8', com: 'libre', comColor: ok, fr: 'libre', frColor: ok, eu: 'libre', euColor: ok },
+        { name: 'Bikara', score: '3 crédits', scoreBg: '#0f1b1c', scoreFg: '#6ee7a8', com: 'libre', comColor: ok, fr: 'libre', frColor: ok, eu: 'libre', euColor: ok },
+        { name: 'Cyclique', score: '1 crédit', scoreBg: '#171c1f', scoreFg: '#9aa5a0', com: 'pris', comColor: no, fr: 'libre', frColor: ok, eu: 'pris', euColor: no },
+        { name: 'Moyeu', score: '1 crédit', scoreBg: '#171c1f', scoreFg: '#9aa5a0', com: 'pris', comColor: no, fr: 'libre', frColor: ok, eu: 'pris', euColor: no }
+      ],
+
+      notes: [
+        { tag: 'Positionnement', bg: '#e8f7ef', fg: '#0d7a4e', title: 'Le H1 ne vous compare plus à Namelix', body: 'Votre ancien titre promettait ce que dix outils gratuits promettent déjà. Le nouveau met en avant la seule chose qu\'aucun d\'eux ne fait : la vérification INPI et EUIPO. C\'est aussi ce qui justifie un nom français et un prix.' },
+        { tag: 'Conversion', bg: '#e8f7ef', fg: '#0d7a4e', title: 'La home montre le produit', body: 'Le wizard en quatre étapes est visible dès le premier écran, avec de vrais verdicts. On ne demande plus au visiteur de cliquer pour comprendre ce qu\'il achète — c\'est le levier de conversion le plus fiable sur une landing d\'outil.' },
+        { tag: 'SEO', bg: '#eef2fb', fg: '#3b5aa3', title: 'Les guides sectoriels sont votre trafic', body: 'Les requêtes « nom de startup SaaS », « vérifier une marque INPI », « classes de Nice » ont du volume et peu de bons résultats français. Une page par guide, chacune terminant sur une recherche pré-remplie, alimente durablement le produit. C\'est le chantier n°1 hors design.' },
+        { tag: 'SEO', bg: '#eef2fb', fg: '#3b5aa3', title: 'Une page indexable par recherche publique', body: 'Chaque rapport de marque anonymisé peut devenir une page publique « Roulio est-il disponible ? ». Des milliers de pages longue traîne générées par l\'usage réel, sans rédaction.' },
+        { tag: 'Produit', bg: '#fdf3e3', fg: '#9a6a12', title: 'Un essai sans compte, sanctuarisé', body: 'La première recherche doit aboutir à des noms vérifiés sans inscription. Le compte se demande au moment de sauvegarder ou d\'exporter — pas avant d\'avoir prouvé la valeur.' },
+        { tag: 'Acquisition', bg: '#fdf3e3', fg: '#9a6a12', title: 'Le rapport de marque est partageable', body: 'Un PDF ou un lien propre, avec votre marque dessus, circule entre associés et investisseurs. C\'est votre boucle virale la moins chère, à condition que le partage soit un bouton visible.' },
+        { tag: 'Monétisation', bg: '#f0ecfb', fg: '#5b46a3', title: 'Le verrou doit montrer ce qu\'il cache', body: 'Sur l\'écran Rapport, basculez entre « Avant achat » et « Après achat ». Les lignes floutées nomment les contrôles sans livrer le verdict : c\'est ce qui fait dépenser les 50 crédits, bien plus qu\'un descriptif de fonctionnalité. À 50 crédits, le rapport engage la moitié de la réserve mensuelle : le verrou doit donc être très convaincant, et le premier rapport du mois annoncé comme offert.' },
+        { tag: 'Monétisation', bg: '#f0ecfb', fg: '#5b46a3', title: 'Dire comment le crédit est compté', body: 'Le bandeau affiche « 1 crédit par suggestion retenue, quel que soit le nombre d\'extensions ». C\'est ce qui rassure vraiment : le prix ne dépend pas du nombre de vérifications lancées, donc ajouter une extension ne coûte rien. Une grille tarifaire ne dirait pas cela aussi bien.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

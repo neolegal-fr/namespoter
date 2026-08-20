@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -11,7 +12,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-generateur-nom-ecommerce',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -50,6 +51,8 @@ import { applyContentSeo } from './content-seo';
         (<code>.com</code>, <code>.fr</code>, <code>.net</code>…) pour que vous ne perdiez pas de temps sur des
         noms déjà pris.
       </p>
+
+      <app-trois-risques intro="Une boutique en ligne vit de sa visibilité : ces trois contrôles décident de qui la trouve, et sous quel nom."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre boutique en ligne"

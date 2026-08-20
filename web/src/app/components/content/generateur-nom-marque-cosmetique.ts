@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -11,7 +12,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-generateur-nom-marque-cosmetique',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -45,6 +46,8 @@ import { applyContentSeo } from './content-seo';
         <strong>et vérifie en direct</strong> quelles extensions sont réellement disponibles — vous ne tombez
         plus amoureux d'un nom déjà pris.
       </p>
+
+      <app-trois-risques intro="La cosmétique est un secteur très déposé : ces trois contrôles y sont moins optionnels qu'ailleurs."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre marque beauté"

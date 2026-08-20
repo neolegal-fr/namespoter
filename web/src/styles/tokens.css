@@ -1,0 +1,190 @@
+/* Design tokens de la refonte — étape 1 du handoff.
+ *
+ * Pourquoi des custom properties et non Tailwind : le handoff et CLAUDE.md
+ * annoncent Tailwind, mais il n'est pas installé dans ce projet. Les classes
+ * utilitaires des gabarits (`mt-8`, `mb-3`, `flex`…) viennent de PrimeFlex 4,
+ * qui les déclare en `!important` et sur une échelle différente — PrimeFlex
+ * `.mt-8` vaut 5rem quand Tailwind vaut 2rem. Les installer côte à côte
+ * changerait silencieusement l'existant ET empêcherait les nouvelles classes
+ * Tailwind de s'appliquer. Les variables CSS sont par ailleurs déjà le mode de
+ * fonctionnement du projet (`--p-primary-color`, `--p-surface-*`).
+ *
+ * Nommage : préfixe `--nm-`, pour ne jamais entrer en collision avec les
+ * jetons PrimeNG (`--p-`).
+ *
+ * La refonte n'est pas « un thème clair et un thème sombre » : l'accueil et
+ * les résultats sont sombres, le rapport est clair, dans la même session. Les
+ * jetons sont donc nommés par SURFACE (`-dark` / `-light`), pas par mode, et
+ * `darkModeSelector` reste désactivé côté PrimeNG.
+ */
+
+:root {
+  /* ─── Surfaces sombres (accueil, résultats) ──────────────────────────── */
+  --nm-bg-dark: #0b0e10;
+  --nm-surface-dark: #12171a;
+  --nm-surface-dark-alt: #0e1315;
+
+  --nm-border-dark: #232b2f;
+  --nm-border-dark-interactive: #2a3236;
+  --nm-border-dark-hover: #3a4448;
+
+  /* Trois valeurs distinctes dans le design, du plus discret au plus marqué. */
+  --nm-divider-dark-1: #1b2225;
+  --nm-divider-dark-2: #1e2528;
+  --nm-divider-dark-3: #263033;
+
+  --nm-text-dark: #f2f5f3;
+  --nm-text-dark-2: #9aa5a0;
+  --nm-text-dark-3: #828d88;  /* 5,64:1 sur le fond sombre — #6d7873 n'était qu'à 4,23 */
+  --nm-text-dark-strong: #c9d3ce;
+
+  /* ─── Accent ─────────────────────────────────────────────────────────────
+   * Deux variantes non interchangeables. `--nm-accent` (#3ddc91) ne passe PAS
+   * le contraste AA sur fond blanc : sur surface claire, utiliser
+   * `--nm-accent-on-light`. Le handoff en fait un point explicite pour le
+   * thème Keycloak, qui est sur fond clair.
+   */
+  --nm-accent: #3ddc91;
+  --nm-accent-hover: #6ee7a8;
+  --nm-accent-on-light: #0d9a63;
+  --nm-accent-on-light-hover: #0b8355;
+  --nm-on-accent: #062018;
+
+  --nm-accent-surface-dark: #0f1b1c;
+  --nm-accent-border-dark: #23474b;
+
+  /* Pendants CLAIRS des deux précédents. Le handoff signalait qu'il manquait
+     une bordure de carte accentuée sur fond clair : elle était recopiée en dur
+     (#c9e9d8) dans les maquettes. La surface reprend celle du verdict
+     « libre », dont elle est dérivée. */
+  /* Vert de TEXTE sur surface claire : 5,37:1 sur blanc, 4,85:1 sur la
+     surface accentuée. Distinct de --nm-accent-on-light, réservé aux bordures
+     et aux aplats décoratifs, qui n'atteint que 3,61:1. */
+  --nm-accent-text-light: #0d7a4e;
+  --nm-accent-surface-light: #e8f7ef;
+  --nm-accent-border-light: #c9e9d8;
+  --nm-accent-ghost-bg: #1c2b26;
+  --nm-accent-ghost-bg-hover: #24382f;
+
+  /* ─── Surfaces claires (rapport, sections de la landing) ─────────────── */
+  --nm-bg-light: #f4f6f5;
+  --nm-surface-light: #ffffff;
+  --nm-surface-light-alt: #fbfcfb;
+
+  --nm-border-light: #e3e7e5;
+  --nm-border-light-2: #dde2e0;
+  --nm-divider-light-1: #eef1f0;
+  --nm-divider-light-2: #f2f4f3;
+
+  --nm-text-light: #0b0e10;
+  --nm-text-light-2: #5c6663;
+  --nm-text-light-3: #6a7470;  /* 4,83:1 sur blanc — #8a938f n'était qu'à 3,16 */
+  --nm-text-on-card: #2c3532;
+
+  /* ─── Verdicts de disponibilité ──────────────────────────────────────────
+   * Trois états, jamais deux : libre, pris, et NON VÉRIFIABLE. Ce dernier a
+   * sa propre paire de couleurs parce qu'il ne doit se confondre ni avec
+   * « libre » ni avec « pris » — c'est la règle de fond documentée dans
+   * CLAUDE.md, et elle doit rester lisible à l'œil, pas seulement en base.
+   */
+  --nm-verdict-free-dark-fg: #6ee7a8;
+  --nm-verdict-free-dark-bg: #0f1b1c;
+  --nm-verdict-taken-dark-fg: #e08a8a;
+  --nm-verdict-taken-dark-bg: #1a1416;
+  --nm-verdict-unknown-dark-fg: #e0b96e;
+  --nm-verdict-unknown-dark-bg: #1c1810;
+
+  --nm-verdict-free-light-fg: #0d7a4e;
+  --nm-verdict-free-light-bg: #e8f7ef;
+  --nm-verdict-taken-light-fg: #a33b3b;
+  --nm-verdict-taken-light-bg: #fbecec;
+  --nm-verdict-watch-light-fg: #9a6a12;
+  --nm-verdict-watch-light-bg: #fdf3e3;
+
+  /* Badges de la page de notes internes — hors production, mais le handoff
+     les liste comme jetons ; les déclarer évite qu'ils soient réinventés. */
+  --nm-badge-seo-fg: #3b5aa3;
+  --nm-badge-seo-bg: #eef2fb;
+  --nm-badge-monetisation-fg: #5b46a3;
+  --nm-badge-monetisation-bg: #f0ecfb;
+
+  /* ─── Typographie ────────────────────────────────────────────────────────
+   * Space Grotesk pour les titres, chiffres et noms de marque ; IBM Plex Sans
+   * pour le texte courant et l'interface. Les piles de repli comptent
+   * réellement : ni l'une ni l'autre ne couvre `ja` et `zh`, et le rendu s'y
+   * fait entièrement en police système.
+   */
+  --nm-font-display: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --nm-font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Échelle de tailles. Les valeurs fluides sont reprises telles quelles du
+     handoff : elles portent leur propre responsive, sans point de rupture. */
+  --nm-text-h1-hero: clamp(36px, 4.8vw, 60px);
+  --nm-text-h1-screen: 34px;
+  --nm-text-h1-mobile: 33px;
+  --nm-text-brand-report: 46px;
+  --nm-text-h2: clamp(28px, 3.6vw, 42px);
+  --nm-text-h2-alt: clamp(24px, 3vw, 34px);
+  --nm-text-h3: 18px;
+  --nm-text-name-card: 22px;
+  --nm-text-lead: 18.5px;
+  --nm-text-body: 16.5px;
+  --nm-text-body-sm: 15px;
+  --nm-text-ui: 14.5px;
+  --nm-text-ui-sm: 13px;
+  --nm-text-overline: 12.5px;
+  --nm-text-overline-sm: 11px;
+
+  --nm-leading-h1-hero: 1.03;
+  --nm-leading-h1-mobile: 1.06;
+  --nm-leading-h2: 1.05;
+  --nm-leading-body: 1.55;
+  --nm-leading-body-loose: 1.6;
+
+  --nm-tracking-h1-hero: -0.035em;
+  --nm-tracking-h1-mobile: -0.03em;
+  --nm-tracking-h2: -0.03em;
+  --nm-tracking-h2-alt: -0.025em;
+  --nm-tracking-h3: -0.01em;
+  --nm-tracking-name-card: -0.02em;
+  --nm-tracking-overline: 0.08em;
+  --nm-tracking-overline-wide: 0.14em;
+
+  /* ─── Rayons ─────────────────────────────────────────────────────────── */
+  --nm-radius-xs: 6px;    /* badges, puces de verdict */
+  --nm-radius-sm: 8px;    /* boutons, champs */
+  --nm-radius-md: 10px;   /* CTA */
+  --nm-radius-lg: 12px;   /* cartes */
+  --nm-radius-xl: 14px;   /* cartes de résultats */
+  --nm-radius-2xl: 16px;  /* grands blocs */
+  --nm-radius-3xl: 18px;  /* encart produit, carte de rapport */
+  --nm-radius-phone: 34px;
+  --nm-radius-pill: 999px;
+
+  /* ─── Espacements et gabarit ─────────────────────────────────────────── */
+  --nm-card-padding: 20px;
+  --nm-card-padding-lg: 26px;
+  --nm-section-padding-y: 52px;
+  --nm-section-padding-y-lg: 88px;
+  --nm-section-padding-x: 28px;
+
+  --nm-gap-results: 14px;   /* grille de cartes de résultats */
+  --nm-gap-cards: 20px;     /* grille de cartes d'arguments */
+  --nm-gap-hero: 56px;
+
+  --nm-content-max: 1200px; /* accueil, résultats */
+  --nm-report-max: 920px;   /* rapport */
+  --nm-notes-max: 800px;    /* notes internes */
+
+  /* ─── Ombres ─────────────────────────────────────────────────────────── */
+  --nm-shadow-product: 0 40px 80px -40px rgba(0, 0, 0, 0.8);
+  --nm-shadow-phone: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+
+  /* ─── Cibles tactiles ────────────────────────────────────────────────────
+   * Planchers, pas des hauteurs fixes : un bouton peut être plus grand,
+   * jamais plus petit. 44px est le minimum d'accessibilité.
+   */
+  --nm-touch-min: 44px;
+  --nm-touch-card-btn: 46px;
+  --nm-touch-cta: 52px;
+}

@@ -3,5 +3,9 @@ Disallow: /admin
 Disallow: /payment/
 Disallow: /app
 Disallow: /projects/
+# `/report?name=` ouvre un espace d'URL infini — un nom arbitraire par page,
+# au contenu quasi identique. La page qui doit se référencer sur ce sujet est
+# /verifier-disponibilite-nom-de-marque, qui porte le contenu éditorial.
+Disallow: /report
 
 Sitemap: https://namorama.com/sitemap.xml

@@ -35,7 +35,7 @@
     "CANCEL": "Cancel"
   },
   "PROJECTS": {
-    "TITLE": "Omat Projektit",
+    "TITLE": "Omat projektit",
     "SUBTITLE": "Jatka hakujasi siitä mihin jäit.",
     "EMPTY": "Ei projekteja vielä.",
     "OPEN": "Avaa",
@@ -126,7 +126,6 @@
       "BUY_CREDITS_BTN": "Osta krediittejä",
       "BUY_COL_HEADER": "Osta rekisteröijältä",
       "NEW_PROJECT_BTN": "Uusi projekti",
-      "COPY_TABLE": "Kopioi taulukko",
       "COPIED": "Kopioitu!",
       "ANALYSIS_PENDING": "Tekoälyanalyysi käynnissä…",
       "ANALYSIS_TOGGLE": "Näytä nimianalyysi",

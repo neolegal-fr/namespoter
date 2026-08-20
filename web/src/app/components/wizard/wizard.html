@@ -1,4 +1,10 @@
-<div class="w-full">
+<!--
+  Le wizard porte sa propre largeur : UN conteneur de 1200px pour les trois
+  étapes, la carte ne change jamais de taille d'une étape à l'autre. Ce sont
+  les contenus qui diffèrent — les formulaires gardent une colonne de lecture
+  de 45rem, la grille de résultats prend toute la largeur.
+-->
+<div class="w-full wizard-shell" [class.wizard-shell--report]="showReportDialog()">
 
   <!-- ─── Landing page (visiteurs non connectés) ─────────── -->
   <div *ngIf="showLanding()" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2rem; padding: 2rem 0">
@@ -14,7 +20,7 @@
     <!-- Bénéfices -->
     <div style="display: flex; flex-direction: column; gap: 0.875rem; max-width: 28rem; width: 100%; text-align: left">
       <div *ngFor="let b of landingBenefits" style="display: flex; align-items: flex-start; gap: 0.75rem">
-        <i [class]="b.icon" style="color: var(--p-primary-color); font-size: 1.1rem; margin-top: 0.15rem; flex-shrink: 0"></i>
+        <i [class]="b.icon" style="color: var(--nm-app-accent); font-size: 1.1rem; margin-top: 0.15rem; flex-shrink: 0"></i>
         <div>
           <span class="font-semibold text-900">{{ b.titleKey | translate }}</span>
           <span class="text-500"> — {{ b.descKey | translate }}</span>
@@ -35,14 +41,19 @@
   </div>
 
   <!-- ─── Wizard ───────────────────────────────────────────── -->
-  <p-card *ngIf="!showLanding()" styleClass="md:p-5">
-    <div class="w-full mb-5" style="text-align: center" *ngIf="activeIndex() > 0">
+  <p-card *ngIf="!showLanding() && !showReportDialog()" styleClass="md:p-5">
+    <!-- En-tête de projet CONSTANT sur les trois étapes : il apparaissait aux
+         étapes 2 et 3 et disparaissait à l'étape 1, pour le même projet et la
+         même URL. Et il était en accent, plus gros que le titre de l'écran :
+         l'accent vert est réservé aux éléments actionnables et aux verdicts,
+         sinon il cesse de vouloir dire quelque chose. -->
+    <div class="w-full mb-5" style="text-align: center">
       <!-- Affichage du nom avec clic pour éditer -->
       <div *ngIf="!isEditingName()"
            (click)="isEditingName.set(true)"
            class="edit-name-trigger cursor-pointer"
            style="display: inline-flex; align-items: center; gap: 0.75rem; max-width: calc(100vw - 2rem); overflow: hidden">
-        <h1 class="font-bold text-primary" style="margin: 0; font-size: clamp(1.5rem, 7vw, 2.5rem); text-transform: uppercase; font-weight: 900; letter-spacing: -0.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+        <h1 class="wizard-project-title">
           {{ projectName() || ('WIZARD.STEPS.' + (activeIndex() === 0 ? 'DESCRIPTION' : activeIndex() === 1 ? 'KEYWORDS' : 'DOMAINS') | translate) }}
         </h1>
         <i class="pi pi-pencil text-lg text-400" style="flex-shrink: 0; opacity: 0; transition: opacity 0.2s ease"></i>
@@ -71,12 +82,18 @@
           <h2 class="font-bold text-900" style="font-size: 1.5rem; margin: 0 0 0.375rem 0">{{ 'WIZARD.STEP1.TITLE' | translate }}</h2>
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP1.SUBTITLE' | translate }}</p>
         </div>
+        <!--
+          Auto-agrandissement : la hauteur fixe coupait le texte en milieu de
+          ligne et imposait un défilement interne, dans un champ qu'on relit en
+          l'écrivant. La poignée de redimensionnement native disparaît — elle
+          proposait de réparer à la main un défaut qui ne devrait pas exister.
+        -->
         <textarea
           pInputTextarea
           [(ngModel)]="description"
           rows="5"
-          class="w-full border-round-md"
-          style="text-align: left; resize: vertical"
+          class="w-full border-round-md wizard-textarea"
+          (input)="autoGrow($event)"
           [placeholder]="'WIZARD.STEP1.PLACEHOLDER' | translate">
         </textarea>
 
@@ -98,17 +115,32 @@
           </p-button>
         </div>
 
-        <div *ngIf="refinedDescription()" class="mt-4 p-3 border-left-4 border-solid border-round" style="max-width: 48rem; width: 100%; text-align: left; background: #eff6ff; border-color: #3b82f6">
-          <h4 class="font-bold mb-2" style="color: #1d4ed8">{{ 'WIZARD.STEP1.SUGGESTION_TITLE' | translate }}</h4>
+        <!-- L'autre entrée du produit, à hauteur de la première étape.
+             Qui arrive avec un nom en tête n'a rien à décrire : le faire
+             passer par une description de projet, une génération et trente
+             suggestions pour atteindre le nom qu'il voulait tester, c'est lui
+             demander de payer un détour. C'est pourtant le visiteur le plus
+             engagé — et celui pour qui le risque de marque est le plus proche. -->
+        <p class="wizard-alt">
+          {{ 'WIZARD.STEP1.HAVE_NAME' | translate }}
+          <a class="nm-link" routerLink="/verifier-disponibilite-nom-de-marque">{{ 'WIZARD.STEP1.HAVE_NAME_CTA' | translate }}</a>
+        </p>
+
+        <div *ngIf="refinedDescription()" class="mt-4 p-3 border-left-4 border-solid border-round" style="max-width: 48rem; width: 100%; text-align: left; background: var(--nm-app-accent-surface); border-color: var(--nm-app-accent)">
+          <h4 class="font-bold mb-2" style="color: var(--nm-app-accent)">{{ 'WIZARD.STEP1.SUGGESTION_TITLE' | translate }}</h4>
           <p class="font-italic text-800" style="white-space: pre-line">{{ refinedDescription() }}</p>
           <div class="mt-2 text-right">
-             <p-button [label]="'WIZARD.STEP1.USE_VERSION' | translate" severity="info" size="small" (onClick)="description.set(refinedDescription()); refinedDescription.set('')"></p-button>
+             <p-button [label]="'WIZARD.STEP1.USE_VERSION' | translate" size="small" (onClick)="description.set(refinedDescription()); refinedDescription.set('')"></p-button>
           </div>
         </div>
 
-        <div *ngIf="isLoggedIn()" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--p-surface-50); border: 1px solid var(--p-surface-200); font-size: 0.8rem; color: var(--p-surface-500); text-align: center">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--p-primary-color); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
-        </div>
+        <!-- Ligne discrète, pas un encadré : le bloc de signalement était un
+             pavé bordé au texte entièrement souligné en gras vert — plus
+             visible que l'action principale de l'écran. Un seul segment est un
+             lien, le reste est du texte courant. -->
+        <p *ngIf="isLoggedIn()" class="feedback-line">
+          <button type="button" class="nm-link" (click)="openFeedback()">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}</button>{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}
+        </p>
       </div>
 
       <!-- Étape 2 : Mots-clés + configuration -->
@@ -118,89 +150,44 @@
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP2.SUBTITLE' | translate }}</p>
         </div>
 
-        <!-- #3 / #4 : inspirations — ce qui existe déjà sur le marché + noms aimés -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
-          <h4 class="section-label">{{ 'WIZARD.STEP2.INSPIRATION_TITLE' | translate }}</h4>
-
-          <!-- Liste du marché, notable ligne par ligne -->
-          <div *ngIf="competitorsLoading() || competitors().length > 0"
-               style="background: var(--p-surface-50); border: 1px solid var(--p-surface-200); border-radius: 0.625rem; padding: 0.75rem 0.875rem">
-            <button type="button"
-                    (click)="showCompetitors.set(!showCompetitors())"
-                    style="background: none; border: none; padding: 0; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; text-align: left">
-              <i class="pi pi-compass" style="font-size: 0.85rem; color: var(--p-primary-color); flex-shrink: 0"></i>
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--p-surface-700)">{{ 'WIZARD.STEP2.MARKET_TITLE' | translate }}</span>
-              <i *ngIf="competitorsLoading()" class="pi pi-spin pi-spinner" style="font-size: 0.75rem; color: var(--p-surface-400)"></i>
-              <span *ngIf="!competitorsLoading()" style="font-size: 0.75rem; color: var(--p-surface-400)">({{ competitors().length }})</span>
-              <span *ngIf="!competitorsLoading() && competitorsSource() === 'web'"
-                    style="font-size: 0.68rem; font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 999px; background: #dcfce7; color: #15803d; white-space: nowrap">
-                <i class="pi pi-globe" style="font-size: 0.6rem"></i> {{ 'WIZARD.STEP2.MARKET_LIVE_BADGE' | translate }}
-              </span>
-              <i class="pi pi-chevron-down" style="font-size: 0.7rem; color: var(--p-surface-400); margin-left: auto; transition: transform 0.2s ease"
-                 [style.transform]="showCompetitors() ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
-            </button>
-
-            <p *ngIf="competitorsLoading()" style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: var(--p-surface-400)">
-              {{ 'WIZARD.STEP2.MARKET_LOADING' | translate }}
-            </p>
-
-            <div *ngIf="showCompetitors() && competitors().length > 0" style="margin-top: 0.625rem; display: flex; flex-direction: column; gap: 0.25rem">
-              <p style="margin: 0 0 0.25rem 0; font-size: 0.75rem; color: var(--p-surface-500); line-height: 1.45">
-                {{ 'WIZARD.STEP2.MARKET_INSTRUCTION' | translate }}
-              </p>
-
-              <div *ngFor="let c of competitors()"
-                   style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.2rem 0"
-                   [style.opacity]="competitorRating(c.domain) === 'disliked' ? 0.5 : 1">
-                <button type="button"
-                        (click)="setCompetitorRating(c.domain, 'liked')"
-                        style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
-                        [pTooltip]="'WIZARD.STEP2.MARKET_LIKE' | translate" tooltipPosition="top">
-                  <i class="pi" [class.pi-thumbs-up-fill]="competitorRating(c.domain) === 'liked'" [class.pi-thumbs-up]="competitorRating(c.domain) !== 'liked'"
-                     [style.color]="competitorRating(c.domain) === 'liked' ? '#16a34a' : '#d1d5db'"></i>
-                </button>
-                <button type="button"
-                        (click)="setCompetitorRating(c.domain, 'disliked')"
-                        style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
-                        [pTooltip]="'WIZARD.STEP2.MARKET_DISLIKE' | translate" tooltipPosition="top">
-                  <i class="pi" [class.pi-thumbs-down-fill]="competitorRating(c.domain) === 'disliked'" [class.pi-thumbs-down]="competitorRating(c.domain) !== 'disliked'"
-                     [style.color]="competitorRating(c.domain) === 'disliked' ? '#ef4444' : '#d1d5db'"></i>
-                </button>
-                <a [href]="'https://' + c.domain" target="_blank" rel="noopener noreferrer"
-                   style="font-family: monospace; font-weight: 700; color: var(--p-primary-color); text-decoration: none; flex-shrink: 0"
-                   [style.text-decoration]="competitorRating(c.domain) === 'disliked' ? 'line-through' : 'none'">{{ c.domain }}</a>
-                <span style="color: var(--p-surface-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ c.note }}</span>
-              </div>
-
-              <p style="margin: 0.5rem 0 0 0; font-size: 0.72rem; color: var(--p-surface-400); line-height: 1.45">
-                {{ (competitorsSource() === 'web' ? 'WIZARD.STEP2.MARKET_NOTE_WEB' : 'WIZARD.STEP2.MARKET_NOTE') | translate }}
-              </p>
+        <!-- 1. EXTENSIONS — le premier réglage du cadrage.
+             Elles vivaient au-dessus des RÉSULTATS : il fallait donc voir une
+             liste pour découvrir qu'on pouvait la changer, et chaque
+             changement relançait la vérification de tout ce qui était déjà à
+             l'écran. Un paramètre qui décide des résultats n'a pas sa place
+             dans les résultats. -->
+        <div class="extensions-bar wizard-field">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
+            <h4 class="section-label" style="margin: 0; white-space: nowrap">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1">
+              <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
+            </div>
+            <div style="display: flex; gap: 0.375rem; align-items: center; flex-shrink: 0">
+              <input pInputText [(ngModel)]="newExtension" [placeholder]="'WIZARD.STEP2.EXTENSIONS_PLACEHOLDER' | translate" style="width: 9rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
+              <p-button icon="pi pi-plus" size="small" severity="secondary" [outlined]="true" (onClick)="addExtension()" [loading]="recheckLoading()" [attr.aria-label]="'WIZARD.STEP2.EXTENSIONS_ADD' | translate"></p-button>
             </div>
           </div>
-
-          <!-- Ajout libre de noms appréciés / rejetés -->
-          <div style="display: flex; align-items: center; gap: 0.5rem">
-            <i class="pi pi-thumbs-up" style="font-size: 0.85rem; color: #16a34a; flex-shrink: 0"></i>
-            <input pInputText
-                   [(ngModel)]="likedExamplesInput"
-                   [placeholder]="'WIZARD.STEP2.LIKED_EXAMPLES_PLACEHOLDER' | translate"
-                   style="flex: 1; min-width: 0; font-size: 0.9rem">
+          <!-- Argument à énoncer ICI, près du sélecteur, et pas seulement dans
+               les mentions de crédits : c'est ce qui lève l'autocensure qui
+               pousse à ne vérifier que le .com. -->
+          <div style="margin-top: 0.5rem; font-size: 0.8125rem; color: var(--nm-app-text-2)">
+            {{ 'WIZARD.STEP2.EXTENSIONS_FREE_NOTE' | translate }}
           </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem">
-            <i class="pi pi-thumbs-down" style="font-size: 0.85rem; color: #ef4444; flex-shrink: 0"></i>
-            <input pInputText
-                   [(ngModel)]="dislikedExamplesInput"
-                   [placeholder]="'WIZARD.STEP2.DISLIKED_EXAMPLES_PLACEHOLDER' | translate"
-                   style="flex: 1; min-width: 0; font-size: 0.9rem">
+          <div *ngIf="selectedExtensions().length > 1" style="margin-top: 0.625rem">
+            <p-selectButton [options]="matchOptions()" [(ngModel)]="matchMode" styleClass="select-btn-full"></p-selectButton>
+            <div *ngIf="matchMode() === 'all'" style="margin-top: 0.375rem; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">
+              {{ 'WIZARD.STEP2.MATCH_ALL_HINT' | translate }}
+            </div>
           </div>
-          <span class="text-500" style="font-size: 0.75rem">{{ 'WIZARD.STEP2.EXAMPLES_HINT' | translate }}</span>
+          <div *ngIf="recheckLoading()" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--nm-app-text-2)">
+            <i class="pi pi-spin pi-spinner" style="margin-right: 0.375rem"></i>{{ 'WIZARD.RECHECKING' | translate }}
+          </div>
         </div>
 
-        <!-- Mots-clés -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.75rem">
           <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem">
             <h4 class="section-label">{{ 'WIZARD.STEP2.KEYWORDS_TITLE' | translate }}</h4>
-            <span [style.color]="keywordsFull() ? '#ef4444' : ''" class="text-500" style="font-size: 0.75rem; flex-shrink: 0">
+            <span [style.color]="keywordsFull() ? 'var(--nm-app-verdict-taken-fg)' : ''" class="text-500" style="font-size: var(--nm-text-ui-sm); flex-shrink: 0">
               {{ 'WIZARD.STEP2.KEYWORDS_COUNT' | translate:{ n: keywords().length, max: MAX_KEYWORDS } }}
             </span>
           </div>
@@ -211,11 +198,11 @@
           <div class="chips-container">
             <p-chip *ngFor="let keyword of keywords()" [label]="keyword" [removable]="true" (onRemove)="removeKeyword(keyword)"></p-chip>
           </div>
-          <span *ngIf="keywordsFull()" class="text-500" style="font-size: 0.75rem">{{ 'WIZARD.STEP2.KEYWORDS_FULL' | translate:{ max: MAX_KEYWORDS } }}</span>
+          <span *ngIf="keywordsFull()" class="text-500" style="font-size: var(--nm-text-ui-sm)">{{ 'WIZARD.STEP2.KEYWORDS_FULL' | translate:{ max: MAX_KEYWORDS } }}</span>
         </div>
 
         <!-- Cible internationale ou locale -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.TARGET_TITLE' | translate }}</h4>
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
             <p-selectButton
@@ -239,22 +226,22 @@
         </div>
 
         <!-- US-032 : Styles de noms (local seulement) -->
-        <div *ngIf="isLocal()" style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+        <div *ngIf="isLocal()" class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.NAMING_STYLES_TITLE' | translate }}</h4>
           <label style="display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.9rem">
             <input type="checkbox" [checked]="descriptiveNames()" (change)="descriptiveNames.set($any($event.target).checked)"
-                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--p-primary-color); flex-shrink: 0">
+                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--nm-app-accent); flex-shrink: 0">
             {{ 'WIZARD.STEP2.DESCRIPTIVE_TOGGLE' | translate }}
           </label>
           <label style="display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.9rem">
             <input type="checkbox" [checked]="culturalNames()" (change)="culturalNames.set($any($event.target).checked)"
-                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--p-primary-color); flex-shrink: 0">
+                   style="width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--nm-app-accent); flex-shrink: 0">
             {{ 'WIZARD.STEP2.CULTURAL_TOGGLE' | translate }}
           </label>
         </div>
 
         <!-- #1 : Longueur minimale des noms générés -->
-        <div style="width: 100%; max-width: 32rem; text-align: left; display: flex; flex-direction: column; gap: 0.5rem">
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.5rem">
           <h4 class="section-label">{{ 'WIZARD.STEP2.MIN_LENGTH_TITLE' | translate }}</h4>
           <p-selectButton
             [options]="MIN_LENGTH_OPTIONS"
@@ -269,15 +256,15 @@
 
           <!-- Avertissement chiffré : part de .com déjà déposés à cette longueur -->
           <div *ngIf="isRiskyLength()"
-               style="display: flex; align-items: flex-start; gap: 0.5rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.78rem; color: #92400e; line-height: 1.45">
+               style="display: flex; align-items: flex-start; gap: 0.5rem; background: var(--nm-app-verdict-unknown-bg); border: 1px solid var(--nm-app-verdict-unknown-bg); border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.78rem; color: var(--nm-app-verdict-unknown-fg); line-height: 1.45">
             <i class="pi pi-exclamation-triangle" style="font-size: 0.85rem; margin-top: 0.1rem; flex-shrink: 0"></i>
             <span>{{ 'WIZARD.STEP2.MIN_LENGTH_WARNING' | translate:{ n: minNameLength(), pct: takenRate() } }}</span>
           </div>
 
           <!-- Contraintes déduites de la description libre -->
           <div *ngIf="minLengthFromBrief() || briefAvoidWords().length > 0 || briefReferenceBrands().length > 0"
-               style="font-size: 0.75rem; color: var(--p-surface-500); line-height: 1.5">
-            <i class="pi pi-sparkles" style="font-size: 0.7rem; margin-right: 0.3rem"></i>
+               style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); line-height: 1.5">
+            <i class="pi pi-sparkles" style="font-size: var(--nm-text-ui-sm); margin-right: 0.3rem"></i>
             <span>{{ 'WIZARD.STEP2.DETECTED_FROM_BRIEF' | translate }}</span>
             <span *ngIf="minLengthFromBrief()"> {{ 'WIZARD.STEP2.DETECTED_LENGTH' | translate:{ n: minLengthFromBrief() } }}</span>
             <span *ngIf="briefAvoidWords().length > 0"> · {{ 'WIZARD.STEP2.DETECTED_AVOID' | translate:{ words: briefAvoidWords().join(', ') } }}</span>
@@ -285,57 +272,154 @@
           </div>
         </div>
 
-        <div class="flex mt-3" style="width: 100%; max-width: 32rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
+        <!-- #3 / #4 : inspirations — ce qui existe déjà sur le marché + noms aimés -->
+        <div class="wizard-field" style=" text-align: left; display: flex; flex-direction: column; gap: 0.625rem">
+          <h4 class="section-label">{{ 'WIZARD.STEP2.INSPIRATION_TITLE' | translate }}</h4>
+
+          <!-- Liste du marché, notable ligne par ligne -->
+          <div *ngIf="competitorsLoading() || competitors().length > 0"
+               style="background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); border-radius: 0.625rem; padding: 0.75rem 0.875rem">
+            <button type="button"
+                    (click)="showCompetitors.set(!showCompetitors())"
+                    style="background: none; border: none; padding: 0; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; text-align: left">
+              <i class="pi pi-compass" style="font-size: 0.85rem; color: var(--nm-app-accent); flex-shrink: 0"></i>
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--nm-app-text)">{{ 'WIZARD.STEP2.MARKET_TITLE' | translate }}</span>
+              <i *ngIf="competitorsLoading()" class="pi pi-spin pi-spinner" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)"></i>
+              <span *ngIf="!competitorsLoading()" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">({{ competitors().length }})</span>
+              <span *ngIf="!competitorsLoading() && competitorsSource() === 'web'"
+                    style="font-size: var(--nm-text-ui-sm); font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--nm-app-verdict-free-bg); color: var(--nm-app-verdict-free-fg); white-space: nowrap">
+                <i class="pi pi-globe" style="font-size: 0.6rem"></i> {{ 'WIZARD.STEP2.MARKET_LIVE_BADGE' | translate }}
+              </span>
+              <i class="pi pi-chevron-down" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); margin-left: auto; transition: transform 0.2s ease"
+                 [style.transform]="showCompetitors() ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
+            </button>
+
+            <p *ngIf="competitorsLoading()" style="margin: 0.5rem 0 0 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">
+              {{ 'WIZARD.STEP2.MARKET_LOADING' | translate }}
+            </p>
+
+            <div *ngIf="showCompetitors() && competitors().length > 0" style="margin-top: 0.625rem; display: flex; flex-direction: column; gap: 0.25rem">
+              <p style="margin: 0 0 0.25rem 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); line-height: 1.45">
+                {{ 'WIZARD.STEP2.MARKET_INSTRUCTION' | translate }}
+              </p>
+
+              <div *ngFor="let c of competitors()"
+                   style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.2rem 0"
+                   [style.opacity]="competitorRating(c.domain) === 'disliked' ? 0.5 : 1">
+                <button type="button"
+                        (click)="setCompetitorRating(c.domain, 'liked')"
+                        style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
+                        [pTooltip]="'WIZARD.STEP2.MARKET_LIKE' | translate" tooltipPosition="top">
+                  <i class="pi" [class.pi-thumbs-up-fill]="competitorRating(c.domain) === 'liked'" [class.pi-thumbs-up]="competitorRating(c.domain) !== 'liked'"
+                     [style.color]="competitorRating(c.domain) === 'liked' ? 'var(--nm-app-verdict-free-fg)' : 'var(--nm-app-border-strong)'"></i>
+                </button>
+                <button type="button"
+                        (click)="setCompetitorRating(c.domain, 'disliked')"
+                        style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; font-size: 0.95rem"
+                        [pTooltip]="'WIZARD.STEP2.MARKET_DISLIKE' | translate" tooltipPosition="top">
+                  <i class="pi" [class.pi-thumbs-down-fill]="competitorRating(c.domain) === 'disliked'" [class.pi-thumbs-down]="competitorRating(c.domain) !== 'disliked'"
+                     [style.color]="competitorRating(c.domain) === 'disliked' ? 'var(--nm-app-verdict-taken-fg)' : 'var(--nm-app-border-strong)'"></i>
+                </button>
+                <a [href]="'https://' + c.domain" target="_blank" rel="noopener noreferrer"
+                   style="font-family: var(--nm-font-display); font-weight: 700; color: var(--nm-app-accent); text-decoration: none; flex-shrink: 0"
+                   [style.text-decoration]="competitorRating(c.domain) === 'disliked' ? 'line-through' : 'none'">{{ c.domain }}</a>
+                <span style="color: var(--nm-app-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ c.note }}</span>
+              </div>
+
+              <p style="margin: 0.5rem 0 0 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); line-height: 1.45">
+                {{ (competitorsSource() === 'web' ? 'WIZARD.STEP2.MARKET_NOTE_WEB' : 'WIZARD.STEP2.MARKET_NOTE') | translate }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Ajout libre de noms appréciés / rejetés -->
+          <!--
+            Libellés texte, et non des pouces : les pouces sont des BOUTONS de
+            notation sur les cartes de résultats. Employés ici comme étiquettes
+            de champ, ils donnent à croire qu'on peut cliquer dessus.
+          -->
+          <div class="inspiration-field">
+            <label class="inspiration-field__label" for="liked-examples">{{ 'WIZARD.STEP2.LIKED_EXAMPLES_LABEL' | translate }}</label>
+            <input pInputText id="liked-examples"
+                   [(ngModel)]="likedExamplesInput"
+                   [placeholder]="'WIZARD.STEP2.LIKED_EXAMPLES_PLACEHOLDER' | translate">
+          </div>
+          <div class="inspiration-field">
+            <label class="inspiration-field__label" for="disliked-examples">{{ 'WIZARD.STEP2.DISLIKED_EXAMPLES_LABEL' | translate }}</label>
+            <input pInputText id="disliked-examples"
+                   [(ngModel)]="dislikedExamplesInput"
+                   [placeholder]="'WIZARD.STEP2.DISLIKED_EXAMPLES_PLACEHOLDER' | translate">
+          </div>
+          <span class="text-500" style="font-size: var(--nm-text-ui-sm)">{{ 'WIZARD.STEP2.EXAMPLES_HINT' | translate }}</span>
+        </div>
+
+        <!-- Mots-clés -->
+        <div class="flex mt-3" class="wizard-field" style=" justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
+          <!-- « Continuer vers les extensions » nommait un écran qui n'existe
+               plus. Le libellé nomme maintenant l'ACTION, et elle diffère selon
+               qu'il y a déjà des noms ou non : lancer une recherche coûte des
+               crédits, revoir une liste déjà payée n'en coûte aucun. -->
           <p-button
-            [label]="'WIZARD.STEP2.NEXT_BTN' | translate"
-            icon="pi pi-arrow-right"
+            [label]="(domains().length > 0 ? 'WIZARD.STEP2.SEE_RESULTS_BTN' : 'WIZARD.STEP2.SEARCH_BTN') | translate"
+            [icon]="domains().length > 0 ? 'pi pi-arrow-right' : 'pi pi-search'"
             [disabled]="keywords().length === 0"
             (onClick)="goToExtensions()">
           </p-button>
         </div>
 
-        <div *ngIf="isLoggedIn()" style="margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--p-surface-50); border: 1px solid var(--p-surface-200); font-size: 0.8rem; color: var(--p-surface-500); text-align: center">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--p-primary-color); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
-        </div>
+        <!-- Ligne discrète, pas un encadré : le bloc de signalement était un
+             pavé bordé au texte entièrement souligné en gras vert — plus
+             visible que l'action principale de l'écran. Un seul segment est un
+             lien, le reste est du texte courant. -->
+        <p *ngIf="isLoggedIn()" class="feedback-line">
+          <button type="button" class="nm-link" (click)="openFeedback()">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}</button>{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}
+        </p>
       </div>
 
       <!-- Étape 3 : Extensions + Recherche + Résultats -->
       <div *ngIf="activeIndex() === 2" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem">
 
-        <!-- Extensions -->
-        <div class="extensions-bar" style="width: 100%; max-width: 36rem">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap">
-            <h4 class="section-label" style="margin: 0; white-space: nowrap">{{ 'WIZARD.STEP2.EXTENSIONS_TITLE' | translate }}</h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1">
-              <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
-            </div>
-            <div style="display: flex; gap: 0.375rem; align-items: center; flex-shrink: 0">
-              <input pInputText [(ngModel)]="newExtension" placeholder=".io .fr net" style="width: 9rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
-              <p-button icon="pi pi-plus" size="small" (onClick)="addExtension()" [loading]="recheckLoading()"></p-button>
-            </div>
-          </div>
-          <div *ngIf="selectedExtensions().length > 1" style="margin-top: 0.625rem">
-            <p-selectButton [options]="matchOptions()" [(ngModel)]="matchMode" styleClass="select-btn-full"></p-selectButton>
-            <div *ngIf="matchMode() === 'all'" style="margin-top: 0.375rem; font-size: 0.75rem; color: var(--p-surface-500)">
-              {{ 'WIZARD.STEP2.MATCH_ALL_HINT' | translate }}
-            </div>
-          </div>
-          <div *ngIf="recheckLoading()" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--p-surface-500)">
-            <i class="pi pi-spin pi-spinner" style="margin-right: 0.375rem"></i>{{ 'WIZARD.RECHECKING' | translate }}
-          </div>
-        </div>
-
         <!-- Résultats -->
         <ng-container *ngIf="domains().length > 0">
-          <h2 class="font-bold" style="font-size: 1.5rem; margin: 0; color: #16a34a">{{ 'WIZARD.STEP3.TITLE' | translate:{ extensions: selectedExtensions().join(', ') } }}</h2>
-          <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP3.SUBTITLE' | translate }}</p>
+          <!-- Le titre énonce le CRITÈRE, pas seulement le décompte : « et »
+               quand chaque nom doit être libre partout, « ou » quand une seule
+               extension suffit. C'est la différence entre deux listes qui n'ont
+               pas la même valeur, et elle était invisible. -->
+          <h2 class="font-bold" style="font-size: 1.5rem; margin: 0; color: var(--nm-app-verdict-free-fg)">
+            {{ 'WIZARD.STEP3.TITLE' | translate:{ n: domains().length, extensions: extensionsPhrase() } }}
+          </h2>
+          <!-- Le débit sous le titre, en petit : il doit être lisible sans
+               jamais concurrencer le résultat qu'on est venu voir. -->
+          @if (debitedLabel()) {
+            <p class="wizard-debit">{{ debitedLabel() }}</p>
+          }
 
-          <div *ngIf="totalChecked() > 0 && domains().length < 10" class="p-2 border-left-4 border-solid border-round text-sm font-italic" style="width: 100%; max-width: 36rem; background: #fffbeb; border-color: #f59e0b; color: #92400e; text-align: left">
+          <!-- Le rebond : le nom testé est pris, ou ne convient pas.
+               « 10 suggestions de plus » ne peut rien produire sans projet
+               décrit — proposer le bouton sans la description enverrait l'IA
+               générer à l'aveugle. On renvoie donc à l'étape 1, où la
+               description manque, plutôt que de faire semblant. -->
+          @if (domains().length === 1 && domains()[0].isManual) {
+            <p class="wizard-alt">
+              {{ 'WIZARD.STEP3.PIVOT' | translate }}
+              <button type="button" class="nm-link" (click)="activeIndex.set(0)">{{ 'WIZARD.STEP3.PIVOT_CTA' | translate }}</button>
+            </p>
+          }
+
+          <div *ngIf="totalChecked() > 0 && domains().length < 10" class="p-2 border-left-4 border-solid border-round text-sm font-italic wizard-row" style="background: var(--nm-app-verdict-unknown-bg); border-color: var(--nm-app-verdict-unknown-fg); color: var(--nm-app-verdict-unknown-fg); text-align: left">
             {{ 'WIZARD.STEP3.NOTE' | translate:{ total: totalChecked(), count: domains().length } }}
           </div>
 
-          <div style="width: 100%; max-width: 36rem; display: flex; justify-content: space-between; align-items: center">
+          <div class="wizard-row" style="display: flex; justify-content: space-between; align-items: center">
+            <!--
+              Trois actions de MÊME RANG au-dessus de la liste, donc trois
+              boutons tertiaires identiques. Elles avaient trois traitements —
+              bouton encadré à icône ampoule ambre, lien à entonnoir, lien à
+              icône — sans qu'aucune hiérarchie ne le justifie. Et l'ampoule
+              ambre introduisait une quatrième couleur d'accent, alors que
+              l'ambre est une couleur de VERDICT dans ce produit.
+            -->
             <p-splitButton *ngIf="filteredDomains().length >= 2"
               [label]="'WIZARD.STEP3.PICK_BEST_BTN' | translate"
               icon="pi pi-lightbulb"
@@ -345,124 +429,57 @@
               (onClick)="helpMePick('all')"
               appendTo="body">
             </p-splitButton>
-            <button type="button" (click)="copyTable()" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--p-surface-400); display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0; transition: color 0.15s; margin-left: auto" class="copy-table-btn">
-              <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'" [style.color]="copiedDomain() === 'table' ? '#16a34a' : null"></i>
-              <span>{{ (copiedDomain() === 'table' ? 'WIZARD.STEP3.COPIED' : 'WIZARD.STEP3.COPY_TABLE') | translate }}</span>
+
+            <!-- Rétabli ici : ce bouton vivait dans l'en-tête du tableau, que la
+                 refonte remplace par des cartes. Sans lui, les noms rejetés
+                 deviennent définitivement invisibles. -->
+
+            <button type="button" class="nm-btn-tertiary" (click)="copyTable()">
+              <i class="pi" [class.pi-check]="copiedDomain() === 'table'" [class.pi-copy]="copiedDomain() !== 'table'"></i>
+              <span>{{ (copiedDomain() === 'table' ? 'WIZARD.STEP3.COPIED' : 'WIZARD.STEP3.COPY_RESULTS') | translate }}</span>
             </button>
           </div>
 
-          <div class="border-1 border-solid border-round-lg shadow-1 overflow-x-auto" style="width: 100%; max-width: 36rem; background: white">
-            <p-table [value]="filteredDomains()" styleClass="p-datatable-sm" [tableStyle]="{'width': '100%'}">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th style="background: var(--p-surface-50); min-width: 100px">
-                    Nom de domaine
-                    <button type="button"
-                      (click)="showDisliked.set(!showDisliked()); $event.stopPropagation()"
-                      style="background: none; border: none; cursor: pointer; margin-left: 0.4rem; padding: 0; vertical-align: middle; opacity: 0.55"
-                      [pTooltip]="(showDisliked() ? ('WIZARD.STEP3.FILTER_HIDE_DISLIKED' | translate) : ('WIZARD.STEP3.FILTER_SHOW_ALL' | translate))"
-                      tooltipPosition="top">
-                      <i class="pi" [class.pi-filter]="!showDisliked()" [class.pi-filter-slash]="showDisliked()" style="font-size: 0.75rem"></i>
-                    </button>
-                  </th>
-                  <th *ngFor="let ext of selectedExtensions()" class="text-center px-1" style="background: var(--p-surface-50)">{{ ext }}</th>
-                  <th class="text-center" style="background: var(--p-surface-50); width: 1px; white-space: nowrap; padding: 0.5rem 0.75rem">
-                    <i class="pi pi-shopping-cart" style="font-size: 0.8rem; color: var(--p-surface-400)" [pTooltip]="'WIZARD.STEP3.BUY_COL_HEADER' | translate" tooltipPosition="top"></i>
-                  </th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-result>
-                <tr class="domain-row">
-                  <td class="font-bold text-sm py-2 px-2" style="font-family: monospace">
-                    <div style="display: flex; align-items: center; gap: 0.75rem">
-                      <button type="button"
-                        (click)="setRating(result, result.rating === 'liked' ? 'neutral' : 'liked'); $event.stopPropagation()"
-                        style="background: none; border: none; cursor: pointer; font-size: 1.1rem; flex-shrink: 0; padding: 0"
-                        [pTooltip]="'WIZARD.STEP3.RATE_LIKED' | translate" tooltipPosition="top">
-                        <i class="pi" [class.pi-thumbs-up-fill]="result.rating === 'liked'" [class.pi-thumbs-up]="result.rating !== 'liked'"
-                           style="color: #d1d5db"></i>
-                      </button>
-                      <button type="button"
-                        (click)="setRating(result, result.rating === 'disliked' ? 'neutral' : 'disliked'); $event.stopPropagation()"
-                        style="background: none; border: none; cursor: pointer; font-size: 1.1rem; flex-shrink: 0; padding: 0"
-                        [pTooltip]="'WIZARD.STEP3.RATE_DISLIKED' | translate" tooltipPosition="top">
-                        <i class="pi" [class.pi-thumbs-down-fill]="result.rating === 'disliked'" [class.pi-thumbs-down]="result.rating !== 'disliked'"
-                           style="color: #d1d5db"></i>
-                      </button>
-                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap" [style.color]="isFullyAvailable(result) ? '#16a34a' : null">{{ result.name }}</span>
-                      <span *ngIf="isLocal() && result.style && result.style !== 'standard'"
-                            style="font-size: 0.68rem; padding: 0.1rem 0.4rem; border-radius: 999px; font-family: sans-serif; font-weight: 500; white-space: nowrap; flex-shrink: 0; line-height: 1.5"
-                            [style.background]="result.style === 'descriptive' ? '#dbeafe' : '#fef3c7'"
-                            [style.color]="result.style === 'descriptive' ? '#1e40af' : '#92400e'">
-                        {{ (result.style === 'descriptive' ? 'WIZARD.STYLE.DESCRIPTIVE' : 'WIZARD.STYLE.CULTURAL') | translate }}
-                      </span>
-                      <i *ngIf="result.isManual" class="pi pi-pencil" style="font-size: 0.7rem; color: #9ca3af; flex-shrink: 0" [pTooltip]="'WIZARD.STEP3.MANUAL_TOOLTIP' | translate" tooltipPosition="top"></i>
-                      <!-- US-005 — note en étoiles (spinner pendant le calcul, étoiles une fois dispo) -->
-                      <i *ngIf="result.analysisPending" class="pi pi-spin pi-spinner" style="font-size: 0.75rem; color: #f59e0b; flex-shrink: 0" [pTooltip]="'WIZARD.STEP3.ANALYSIS_PENDING' | translate" tooltipPosition="top"></i>
-                      <button *ngIf="result.rating === 'liked' && result.analysis && !result.analysisPending" type="button"
-                              (click)="toggleAnalysis(result.id); $event.stopPropagation()"
-                              style="background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; display: flex; align-items: center; gap: 3px"
-                              [pTooltip]="'WIZARD.STEP3.ANALYSIS_TOGGLE' | translate" tooltipPosition="top">
-                        <i *ngFor="let filled of getStarArray(parseAnalysisScore(result.analysis))"
-                           class="pi"
-                           [class.pi-star-fill]="filled"
-                           [class.pi-star]="!filled"
-                           [style.color]="filled ? '#f59e0b' : '#d1d5db'"
-                           style="font-size: 0.8rem"></i>
-                        <i class="pi pi-chevron-down" style="font-size: 0.65rem; color: #9ca3af; margin-left: 2px; transition: transform 0.2s ease"
-                           [style.transform]="expandedAnalysisId() === result.id ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
-                      </button>
-                    </div>
-                  </td>
-                  <td *ngFor="let ext of selectedExtensions()" class="text-center px-1" style="vertical-align: top; padding-top: 0.6rem">
-                    <i *ngIf="result.allExtensions[ext] === true" class="pi pi-check text-lg font-bold" [style.color]="isFullyAvailable(result) ? '#16a34a' : '#22c55e'" title="Disponible"></i>
-                    <i *ngIf="result.allExtensions[ext] === undefined" class="pi pi-spin pi-spinner text-base" style="color: #9ca3af" title="Vérification..."></i>
-                    <i *ngIf="result.allExtensions[ext] === null" class="pi pi-question-circle text-base" style="color: #9ca3af" title="Disponibilité non vérifiable pour cette extension"></i>
-                    <i *ngIf="result.allExtensions[ext] === false" class="pi pi-times text-red-400 text-base" title="Indisponible"></i>
-                  </td>
-                  <!-- Rapport de disponibilité de marque (US-054) — remplace l'ancien bouton registrar -->
-                  <td style="width: 1px; white-space: nowrap; padding: 0.25rem 0.5rem; vertical-align: top; padding-top: 0.5rem">
-                    <!-- Déjà généré : un lien explicite, pas un bouton payant -->
-                    <a *ngIf="hasReport(result.name)" class="report-link" (click)="askBrandReport(result.name); $event.stopPropagation()"
-                       [pTooltip]="'WIZARD.STEP3.REPORT_VIEW_HINT' | translate" tooltipPosition="left">
-                      <i class="pi pi-file-check"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_VIEW' | translate }}</span>
-                    </a>
-                    <button *ngIf="!hasReport(result.name)" type="button" class="report-btn" (click)="askBrandReport(result.name); $event.stopPropagation()"
-                            [pTooltip]="'WIZARD.STEP3.REPORT_HINT' | translate" tooltipPosition="left">
-                      <i class="pi pi-verified"></i><span class="report-btn__label"> {{ 'WIZARD.STEP3.REPORT_SHORT' | translate }}</span>
-                    </button>
-                  </td>
-                </tr>
-                <!-- Panneau d'analyse pleine largeur -->
-                <tr *ngIf="result.analysis && expandedAnalysisId() === result.id" class="analysis-row">
-                  <td [attr.colspan]="selectedExtensions().length + 2"
-                      style="padding: 0 0.5rem 0.75rem 0.5rem; border-top: none">
-                    <div style="padding: 0.875rem 1rem; background: white; font-family: sans-serif;"
-                         [innerHTML]="parseAnalysisHtml(result.analysis)"></div>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
+          <!-- Grille de cartes (refonte, étape 3). Remplace la matrice
+               noms × extensions. La logique reste dans le wizard : le
+               composant ne reçoit que des données et remonte des événements. -->
+          <div class="wizard-row wizard-row--wide">
+            <app-results-grid
+              [domains]="filteredDomains()"
+              [extensions]="selectedExtensions()"
+              [summaries]="reportSummaries()"
+              [reportCost]="brandReportCost"
+              [expandedAnalysisId]="expandedAnalysisId()"
+              [analysisRenderer]="analysisRenderer"
+              [analysisScorer]="analysisScorer"
+              (rate)="setRating($event.result, $event.rating)"
+              (verify)="askBrandReport($event)"
+              (refresh)="refreshBrandReport($event)"
+              (refreshDomains)="recheckOneName($event)"
+              (analyse)="analyseOne($event)"
+              (openReport)="openFullReport($event)"
+              (toggleAnalysis)="toggleAnalysis($event)">
+            </app-results-grid>
           </div>
 
         </ng-container>
 
         <!-- Progression du streaming -->
-        <div *ngIf="streamProgress()" style="width: 100%; max-width: 36rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 0.5rem; padding: 0.875rem 1rem; text-align: left">
+        <div *ngIf="streamProgress()" class="wizard-row" style="background: var(--nm-app-accent-surface); border: 1px solid var(--nm-app-accent-border); border-radius: 0.5rem; padding: 0.875rem 1rem; text-align: left">
           <div style="display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.375rem">
-            <i class="pi pi-spin pi-spinner" style="color: #0284c7; font-size: 0.9rem; flex-shrink: 0"></i>
-            <span style="font-size: 0.875rem; font-weight: 600; color: #0369a1">
+            <i class="pi pi-spin pi-spinner" style="color: var(--nm-app-accent); font-size: 0.9rem; flex-shrink: 0"></i>
+            <span style="font-size: 0.875rem; font-weight: 600; color: var(--nm-app-accent)">
               <ng-container *ngIf="streamProgress()!.phase === 'generating'">{{ 'WIZARD.STREAM.GENERATING' | translate }}</ng-container>
               <ng-container *ngIf="streamProgress()!.phase === 'checking'">{{ 'WIZARD.STREAM.CHECKING' | translate:{ name: streamProgress()!.name } }}</ng-container>
             </span>
           </div>
-          <p style="font-size: 0.78rem; color: #0369a1; margin: 0">
+          <p style="font-size: 0.78rem; color: var(--nm-app-accent); margin: 0">
             {{ 'WIZARD.STREAM.PROGRESS' | translate:{ checked: streamProgress()!.checked, found: streamProgress()!.found } }}
           </p>
         </div>
 
         <!-- Saisie manuelle d'un nom -->
-        <div *ngIf="domains().length > 0 && projectId()" style="width: 100%; max-width: 36rem; display: flex; gap: 0.5rem; align-items: center">
+        <div *ngIf="domains().length > 0 && projectId()" class="wizard-row" style="display: flex; gap: 0.5rem; align-items: center">
           <input pInputText
                  [(ngModel)]="newDomainName"
                  (keydown.enter)="addManualDomain()"
@@ -481,12 +498,12 @@
 
         <!-- #2 : rien trouvé — proposer d'assouplir la longueur ou de poursuivre -->
         <div *ngIf="domains().length === 0 && !loading() && (showNoResultHelp() || totalChecked() > 0)"
-             style="width: 100%; max-width: 36rem; text-align: left; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.625rem; padding: 1rem 1.125rem">
+             class="wizard-row" style="text-align: left; background: var(--nm-app-verdict-unknown-bg); border: 1px solid var(--nm-app-verdict-unknown-bg); border-radius: 0.625rem; padding: 1rem 1.125rem">
           <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem">
-            <i class="pi pi-info-circle" style="color: #d97706; font-size: 0.9rem"></i>
-            <span style="font-weight: 700; color: #92400e; font-size: 0.92rem">{{ 'WIZARD.STEP3.NO_RESULTS_TITLE' | translate }}</span>
+            <i class="pi pi-info-circle" style="color: var(--nm-app-verdict-unknown-fg); font-size: 0.9rem"></i>
+            <span style="font-weight: 700; color: var(--nm-app-verdict-unknown-fg); font-size: 0.92rem">{{ 'WIZARD.STEP3.NO_RESULTS_TITLE' | translate }}</span>
           </div>
-          <p style="margin: 0 0 0.875rem 0; font-size: 0.82rem; color: #b45309; line-height: 1.5">
+          <p style="margin: 0 0 0.875rem 0; font-size: 0.82rem; color: var(--nm-app-verdict-unknown-fg); line-height: 1.5">
             {{ (isRiskyLength() ? 'WIZARD.STEP3.NO_RESULTS_SHORT' : 'WIZARD.STEP3.NO_RESULTS_EXPLAIN') | translate:{ n: minNameLength() } }}
           </p>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
@@ -507,20 +524,14 @@
         </div>
 
         <!-- Boutons de navigation -->
-        <div class="flex" style="width: 100%; max-width: 36rem; justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
+        <div class="flex wizard-row" style="justify-content: space-between; flex-wrap: wrap; row-gap: 0.5rem">
           <p-button [label]="'WIZARD.STEP2.BACK_BTN' | translate" icon="pi pi-arrow-left" severity="secondary" (onClick)="prevStep()"></p-button>
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem">
             <!-- Boutons sur la même ligne -->
             <div class="nav-btn-row" style="display: flex; gap: 0.5rem; align-items: stretch">
-              <p-splitButton *ngIf="filteredDomains().length >= 2"
-                [label]="'WIZARD.STEP3.PICK_BEST_BTN' | translate"
-                icon="pi pi-lightbulb"
-                [model]="pickMenuItems()"
-                severity="secondary"
-                styleClass="pick-btn"
-                (onClick)="helpMePick('all')"
-                appendTo="body">
-              </p-splitButton>
+              <!-- « Aide-moi à choisir » n'apparaît qu'UNE fois, au-dessus de la
+                   grille : le doublon vivait ici, avec le même libellé, la même
+                   icône et la même action. -->
               <!-- Initial search (no domains yet) -->
               <p-button
                 *ngIf="domains().length === 0 && !loading()"
@@ -538,13 +549,21 @@
                 severity="danger"
                 (onClick)="cancelSearch()">
               </p-button>
-              <!-- More suggestions (domains already shown) -->
+              <!-- Générer des alternatives suppose de savoir ce qu'on nomme.
+                   Un projet créé depuis un nom seul n'a ni description ni
+                   mots-clés : le bouton produirait des noms tirés du vide. Il
+                   renvoie donc à l'étape qui manque, et le dit. -->
               <ng-container *ngIf="domains().length > 0 && !loading()">
+                <p-button *ngIf="!description()"
+                  [label]="'WIZARD.STEP3.SETUP_FIRST_BTN' | translate"
+                  icon="pi pi-pencil"
+                  (onClick)="activeIndex.set(0)">
+                </p-button>
+                <ng-container *ngIf="description()">
                 <ng-container *ngIf="(userService.credits$ | async) as totalCredits; else zeroCreditsBlock">
                   <p-button
                     [label]="'WIZARD.STEP3.MORE_BTN' | translate"
                     icon="pi pi-plus-circle"
-                    severity="info"
                     (onClick)="findDomains(true)">
                   </p-button>
                 </ng-container>
@@ -556,13 +575,14 @@
                     (onClick)="projectService.showCreditDialog.set(true)">
                   </p-button>
                 </ng-template>
+                </ng-container>
               </ng-container>
             </div>
             <!-- Label crédits sous les boutons -->
             <ng-container *ngIf="domains().length > 0">
               <ng-container *ngIf="(userService.credits$ | async) as totalCredits">
                 <span (click)="projectService.showCreditDialog.set(true)"
-                      style="font-size: 0.75rem; color: var(--p-surface-400); cursor: pointer; text-decoration: underline; text-decoration-style: dotted">
+                      style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); cursor: pointer">
                   {{ 'WIZARD.STEP3.CREDITS_LEFT' | translate : { n: totalCredits } }}
                 </span>
               </ng-container>
@@ -570,34 +590,62 @@
           </div>
         </div>
 
-        <div *ngIf="isLoggedIn() && domains().length > 0" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--p-surface-50); border: 1px solid var(--p-surface-200); font-size: 0.8rem; color: var(--p-surface-500); text-align: center; width: 100%">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--p-primary-color); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
+        <div *ngIf="isLoggedIn() && domains().length > 0" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center; width: 100%">
+          <button type="button" class="nm-link" (click)="openFeedback()">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}</button>{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}
         </div>
       </div>
     </div>
   </p-card>
 
   <!-- Volet des projets sécurisé -->
-  <p-drawer [visible]="projectService.showDrawer()" (visibleChange)="projectService.showDrawer.set($event)" [header]="'PROJECTS.TITLE' | translate" position="left" [style]="{ width: 'min(25rem, 90vw)' }" [dismissible]="true" [modal]="false">
-    <p style="color: #9ca3af; margin-bottom: 1.5rem; font-size: 0.875rem">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
+  <!--
+    Tiroir des projets.
+    `modal` à true : PrimeNG pose alors le voile d'assombrissement, ferme sur
+    Échap et piège le focus. Il était à false — le fond restait clair et
+    cliquable, et le tiroir recouvrait partiellement l'en-tête, coupant le logo.
+  -->
+  <p-drawer [visible]="projectService.showDrawer()"
+            (visibleChange)="projectService.showDrawer.set($event)"
+            [header]="'PROJECTS.TITLE' | translate"
+            position="left"
+            [style]="{ width: 'min(25rem, 90vw)' }"
+            [dismissible]="true"
+            [modal]="true"
+            styleClass="projects-drawer">
+    <p class="projects-drawer__intro">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
 
-    <div style="display: flex; flex-direction: column; gap: 0.5rem">
-      <div *ngFor="let project of projectService.projects()"
-           class="project-item"
-           (click)="loadProject(project.id)"
-           [pTooltip]="project.description" tooltipPosition="bottom" [appendTo]="'body'">
-        <div style="flex: 1; overflow: hidden; min-width: 0">
-          <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ project.name }}</div>
-          <div class="project-item-date" style="font-size: 0.72rem; color: var(--p-surface-400); margin-top: 0.1rem">{{ project.updatedAt | date:'d MMM yyyy' }}</div>
-        </div>
+    <div class="projects-list">
+      <!--
+        La ligne ENTIÈRE est le lien : le chevron « > » qui l'accompagnait
+        n'ajoutait rien et prenait la place d'une information utile.
+      -->
+      <div *ngFor="let project of projectService.projects()" class="project-item">
+        <button type="button" class="project-item__open" (click)="loadProject(project.id)">
+          <span class="project-item__name">{{ project.name }}</span>
+          <!--
+            Deuxième niveau : la date NE SUFFIT PAS à distinguer des homonymes.
+            Trois « Bidora » créés le même jour ne sont pas choisissables ; le
+            début de la description, lui, les sépare.
+          -->
+          <span class="project-item__meta">
+            {{ project.updatedAt | date:'d MMM yyyy' }}
+            <span *ngIf="project.description">· {{ project.description | slice:0:60 }}</span>
+          </span>
+        </button>
 
-        <div style="display: flex; align-items: center; gap: 0.5rem">
-          <p-button icon="pi pi-trash" [text]="true" severity="danger" (onClick)="deleteProject($event, project.id)" size="small"></p-button>
-          <i class="pi pi-chevron-right" style="font-size: 0.75rem; color: #9ca3af; flex-shrink: 0"></i>
-        </div>
+        <!--
+          La corbeille était l'élément le plus visible de chaque ligne : rouge
+          plein, à côté d'un nom en gris. Elle devient discrète et ne rougit
+          qu'au survol — une suppression ne s'annonce pas, elle se confirme.
+        -->
+        <button type="button" class="project-item__delete"
+                (click)="deleteProject($event, project.id)"
+                [attr.aria-label]="('PROJECTS.DELETE' | translate) + ' — ' + project.name">
+          <i class="pi pi-trash" aria-hidden="true"></i>
+        </button>
       </div>
 
-      <div *ngIf="projectService.projects().length === 0" style="text-align: center; padding: 2.5rem 0; color: #9ca3af">
+      <div *ngIf="projectService.projects().length === 0" class="projects-drawer__empty">
         {{ 'PROJECTS.EMPTY' | translate }}
       </div>
     </div>
@@ -615,7 +663,7 @@
     <!-- Chargement -->
     <div *ngIf="pickBestLoading()" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1.5rem 0">
       <p-progressSpinner [style]="{ width: '3rem', height: '3rem' }"></p-progressSpinner>
-      <p style="color: #6b7280; font-size: 0.9rem; margin: 0">{{ 'WIZARD.STEP3.PICK_LOADING' | translate }}</p>
+      <p style="color: var(--nm-app-text-2); font-size: 0.9rem; margin: 0">{{ 'WIZARD.STEP3.PICK_LOADING' | translate }}</p>
     </div>
 
     <!-- Résultat -->
@@ -624,13 +672,13 @@
       <!-- Trophée + nom recommandé -->
       <div style="text-align: center">
         <div style="font-size: 2.5rem; margin-bottom: 0.375rem">🏆</div>
-        <div style="font-family: monospace; font-size: 1.75rem; font-weight: 900; color: #16a34a; letter-spacing: -0.03em">{{ result.recommended }}</div>
+        <div style="font-family: var(--nm-font-display); font-size: 1.75rem; font-weight: 900; color: var(--nm-app-verdict-free-fg); letter-spacing: -0.03em">{{ result.recommended }}</div>
         <!-- Extensions disponibles pour le nom recommandé -->
         <ng-container *ngIf="getDomainByName(result.recommended) as rec">
           <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 0.375rem; flex-wrap: wrap">
-            <span *ngFor="let ext of selectedExtensions()" style="font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 9999px"
-                  [style.background]="rec.allExtensions[ext] === true ? '#dcfce7' : rec.allExtensions[ext] === false ? '#fee2e2' : '#f3f4f6'"
-                  [style.color]="rec.allExtensions[ext] === true ? '#16a34a' : rec.allExtensions[ext] === false ? '#ef4444' : '#6b7280'">
+            <span *ngFor="let ext of selectedExtensions()" style="font-size: var(--nm-text-ui-sm); padding: 0.1rem 0.5rem; border-radius: 9999px"
+                  [style.background]="rec.allExtensions[ext] === true ? 'var(--nm-app-verdict-free-bg)' : rec.allExtensions[ext] === false ? 'var(--nm-app-verdict-taken-bg)' : 'var(--nm-bg-light)'"
+                  [style.color]="rec.allExtensions[ext] === true ? 'var(--nm-app-verdict-free-fg)' : rec.allExtensions[ext] === false ? 'var(--nm-app-verdict-taken-fg)' : 'var(--nm-app-text-2)'">
               {{ ext }}
             </span>
           </div>
@@ -638,7 +686,7 @@
           <div *ngIf="parseAnalysisScore(rec.analysis) > 0" style="margin-top: 0.375rem; display: flex; justify-content: center; gap: 2px">
             <i *ngFor="let filled of getStarArray(parseAnalysisScore(rec.analysis))"
                class="pi" [class.pi-star-fill]="filled" [class.pi-star]="!filled"
-               [style.color]="filled ? '#f59e0b' : '#d1d5db'" style="font-size: 1rem"></i>
+               [style.color]="filled ? 'var(--nm-app-verdict-unknown-fg)' : 'var(--nm-app-border-strong)'" style="font-size: 1rem"></i>
           </div>
         </ng-container>
 
@@ -648,12 +696,12 @@
             <i class="pi pi-verified" style="font-size: 0.8rem"></i>
             {{ 'WIZARD.STEP3.REPORT_CTA' | translate }} · {{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}
           </button>
-          <p style="margin: 0.4rem 0 0; font-size: 0.72rem; color: #9ca3af">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
+          <p style="margin: 0.4rem 0 0; font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2)">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
         </div>
       </div>
 
       <!-- Justification -->
-      <p style="color: #374151; line-height: 1.65; text-align: center; margin: 0; font-size: 0.92rem">{{ result.reason }}</p>
+      <p style="color: var(--nm-app-text); line-height: 1.65; text-align: center; margin: 0; font-size: 0.92rem">{{ result.reason }}</p>
 
       <!-- Bouton copier + CTA achat -->
       <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%">
@@ -666,28 +714,31 @@
         </p-button>
 
         <!-- Urgence achat -->
-        <div style="width: 100%; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.625rem; padding: 0.875rem 1rem; text-align: center">
-          <div style="font-weight: 700; font-size: 0.92rem; color: #92400e; margin-bottom: 0.25rem">
+        <div style="width: 100%; background: var(--nm-app-verdict-unknown-bg); border: 1px solid var(--nm-app-verdict-unknown-bg); border-radius: 0.625rem; padding: 0.875rem 1rem; text-align: center">
+          <div style="font-weight: 700; font-size: 0.92rem; color: var(--nm-app-verdict-unknown-fg); margin-bottom: 0.25rem">
             {{ 'WIZARD.STEP3.PICK_URGENCY_TITLE' | translate }}
           </div>
-          <div style="font-size: 0.8rem; color: #b45309; margin-bottom: 0.75rem; line-height: 1.45">
+          <div style="font-size: 0.8rem; color: var(--nm-app-verdict-unknown-fg); margin-bottom: 0.75rem; line-height: 1.45">
             {{ 'WIZARD.STEP3.PICK_URGENCY_SUB' | translate }}
           </div>
-          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap">
-            <a *ngFor="let r of REGISTRARS" [href]="r.url(result.recommended, selectedExtensions())" target="_blank" rel="noopener noreferrer" class="reg-link-btn">
-              <i class="pi pi-shopping-cart" style="font-size: 0.72rem"></i> {{ r.label }}
-            </a>
+          <!-- Un bouton, et les bureaux dans son menu — comme partout ailleurs.
+               Les cinq liens alignés demandaient « chez qui ? » avant même que
+               l'utilisateur ait dit « je réserve ». -->
+          <div style="display: flex; justify-content: center">
+            <app-reserver [query]="reserveQuery(result.recommended)"
+                          [label]="reserveQuery(result.recommended)"
+                          variant="cta" campaign="pick_best"></app-reserver>
           </div>
         </div>
       </div>
 
       <!-- Autres candidats -->
-      <div *ngIf="pickBestCandidates().length > 1" style="width: 100%; border-top: 1px solid var(--p-surface-200); padding-top: 1rem">
-        <p style="font-size: 0.75rem; color: #9ca3af; margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em">{{ 'WIZARD.STEP3.PICK_OTHER' | translate }}</p>
+      <div *ngIf="pickBestCandidates().length > 1" style="width: 100%; border-top: 1px solid var(--nm-app-border); padding-top: 1rem">
+        <p style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em">{{ 'WIZARD.STEP3.PICK_OTHER' | translate }}</p>
         <div style="display: flex; flex-wrap: wrap; gap: 0.375rem">
           <ng-container *ngFor="let name of pickBestCandidates()">
             <span *ngIf="name !== result.recommended"
-                  style="font-family: monospace; font-size: 0.82rem; padding: 0.2rem 0.625rem; border-radius: 9999px; background: var(--p-surface-100); color: #6b7280">
+                  style="font-family: var(--nm-font-display); font-size: 0.82rem; padding: 0.2rem 0.625rem; border-radius: 9999px; background: var(--nm-app-bg); color: var(--nm-app-text-2)">
               {{ name }}
             </span>
           </ng-container>
@@ -701,80 +752,109 @@
   <p-dialog
     [visible]="showReportConfirm()"
     (visibleChange)="showReportConfirm.set($event)"
-    [header]="('WIZARD.STEP3.REPORT_CONFIRM_TITLE' | translate) + ' — ' + brandReportName()"
+    [header]="'WIZARD.STEP3.VERIFY_TITLE' | translate:{ name: brandReportName() }"
     [modal]="true"
-    [style]="{ width: 'min(94vw, 30rem)' }"
-    [contentStyle]="{ padding: '1.25rem' }">
+    [style]="{ width: 'min(94vw, 46rem)' }"
+    [contentStyle]="{ padding: '1.25rem', background: 'var(--nm-app-bg)' }">
 
     <div style="display: flex; flex-direction: column; gap: 1rem">
-      <p style="margin: 0; font-size: 0.9rem; color: #374151">{{ 'WIZARD.STEP3.REPORT_HINT' | translate }}</p>
+
+      <!--
+        Popup de vérification (maquette « Cartes — palier payant », option 2A).
+        Elle porte la pédagogie que la carte ne peut pas porter : le risque
+        réel d'abord, puis la liste exacte de ce qui est couvert. Le prix
+        n'apparaît qu'ICI, en pied — jamais sur le bouton de la carte, où il
+        arrêterait un utilisateur qui ne sait pas encore ce qu'il achète.
+      -->
+      <p class="vd-risk">{{ 'WIZARD.STEP3.VERIFY_RISK' | translate }}</p>
+
+      <p class="vd-what">{{ 'WIZARD.STEP3.VERIFY_WHAT' | translate }}</p>
+      <ul class="vd-list">
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_INPI' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_INPI_D' | translate }}</span></li>
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_EUIPO' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_EUIPO_D' | translate }}</span></li>
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_SOCIALS' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_SOCIALS_D' | translate }}</span></li>
+        <li><i class="pi pi-check"></i><span><strong>{{ 'WIZARD.STEP3.VERIFY_REFRESH' | translate }}</strong><br>{{ 'WIZARD.STEP3.VERIFY_REFRESH_D' | translate }}</span></li>
+      </ul>
+
+      <!-- Le tarif en pied, après le contexte : sur un bouton de carte, il
+           arrête avant d'avoir expliqué ce qu'on achète. -->
+      <div class="vd-foot">
+        <p class="vd-price"><strong>{{ 'WIZARD.STEP3.VERIFY_PRICE' | translate:{ n: brandReportCost } }}</strong></p>
+        @if (hasEnoughReportCredits()) {
+          <button type="button" class="vd-go" (click)="confirmBrandReport()">{{ 'WIZARD.STEP3.VERIFY_GO' | translate }}</button>
+        } @else {
+          <button type="button" class="vd-go vd-go--topup" (click)="openCreditPurchase()">{{ 'WIZARD.STEP3.LOCKED_TOPUP' | translate }}</button>
+        }
+      </div>
+
       <a class="report-link" style="align-self: flex-start" (click)="showSampleReport()">
         <i class="pi pi-eye"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_LINK' | translate }}
       </a>
 
-      <!-- Coût + solde -->
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem; background: #f3f4f6; border-radius: 8px; font-size: 0.9rem">
-        <span>{{ 'WIZARD.STEP3.REPORT_COST_LABEL' | translate }}</span>
-        <strong>{{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }}</strong>
-      </div>
-
-      <!-- Crédits insuffisants -->
-      <div *ngIf="!hasEnoughReportCredits()" style="text-align: center">
-        <p style="color: #dc2626; font-size: 0.85rem; margin: 0 0 0.6rem">{{ 'WIZARD.STEP3.REPORT_NO_CREDITS' | translate }}</p>
-        <button type="button" class="report-cta" (click)="openCreditPurchase()">
-          <i class="pi pi-shopping-cart" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.BUY_CREDITS_BTN' | translate }}
-        </button>
-      </div>
-
       <!-- Destinataires email -->
       <div *ngIf="hasEnoughReportCredits()">
-        <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem">
+        <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--nm-app-text); margin-bottom: 0.35rem">
           {{ 'WIZARD.STEP3.REPORT_EMAILS_LABEL' | translate }}
         </label>
         <input type="text" pInputText [ngModel]="reportEmails()" (ngModelChange)="reportEmails.set($event)"
                style="width: 100%" [placeholder]="'WIZARD.STEP3.REPORT_EMAILS_PLACEHOLDER' | translate" />
-        <small style="color: #9ca3af; font-size: 0.72rem">{{ 'WIZARD.STEP3.REPORT_EMAILS_HINT' | translate }}</small>
+        <small style="color: var(--nm-app-text-2); font-size: var(--nm-text-ui-sm)">{{ 'WIZARD.STEP3.REPORT_EMAILS_HINT' | translate }}</small>
       </div>
     </div>
 
     <ng-template pTemplate="footer">
       <button type="button" class="p-button p-button-text" (click)="showReportConfirm.set(false)"
-              style="background: none; border: 0; color: #6b7280; cursor: pointer; padding: 0.5rem 0.9rem">
+              style="background: none; border: 0; color: var(--nm-app-text-2); cursor: pointer; padding: 0.5rem 0.9rem">
         {{ 'COMMON.CANCEL' | translate }}
-      </button>
-      <button *ngIf="hasEnoughReportCredits()" type="button" class="report-cta" (click)="confirmBrandReport()">
-        <i class="pi pi-verified" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_CONFIRM_BTN' | translate }}
       </button>
     </ng-template>
   </p-dialog>
 
   <!-- ─── Dialog "Rapport de disponibilité de marque" (plein écran) (US-054) ─ -->
-  <p-dialog
-    [visible]="showReportDialog()"
-    (visibleChange)="showReportDialog.set($event)"
-    [modal]="true"
-    [draggable]="false"
-    [style]="{ width: '100vw', height: '100vh', maxHeight: '100vh' }"
-    [contentStyle]="{ padding: '0', background: '#f8fafc' }">
-
+  <!-- ─── Rapport complet : une PAGE, pas une modale ────────────────────────
+       Il s'affichait dans un dialogue plein écran, qui recouvrait la barre de
+       navigation : on ne pouvait plus ni changer de projet, ni voir son solde,
+       ni revenir à l'accueil sans fermer le rapport. C'est pourtant un écran
+       où l'on reste — il porte d'ailleurs sa propre URL depuis hier. Il prend
+       donc simplement la place du wizard, sous la barre, et le fil d'étapes
+       s'efface le temps de la lecture. -->
+  <div *ngIf="showReportDialog()" class="report-page">
     <!-- En-tête : retour à la liste + nom + badge « déjà généré » -->
-    <ng-template pTemplate="header">
       <div style="display: flex; align-items: center; gap: 0.85rem; width: 100%">
-        <button type="button" class="report-back" (click)="showReportDialog.set(false)">
+        <button type="button" class="report-back" (click)="closeReport()">
           <i class="pi pi-arrow-left"></i> {{ 'WIZARD.STEP3.REPORT_BACK' | translate }}
         </button>
-        <span style="font-weight: 800; font-size: 1.05rem; font-family: monospace">{{ brandReportName() }}</span>
+        <span style="font-weight: 800; font-size: 1.05rem; font-family: var(--nm-font-display)">{{ brandReportName() }}</span>
         <span *ngIf="brandReport()?.cached" class="report-cached-badge">
-          <i class="pi pi-clock" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}
+          <i class="pi pi-clock" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}
         </span>
       </div>
-    </ng-template>
+
+      <!-- Envoi par email : destinataires, et rien d'autre. Le lien vers le
+           rapport en ligne part avec, le PDF se télécharge à côté. -->
+      <p-dialog [visible]="showShareMail()" (visibleChange)="showShareMail.set($event)"
+                [modal]="true" [draggable]="false" [style]="{ width: 'min(92vw, 30rem)' }"
+                [header]="'WIZARD.STEP3.REPORT_SHARE_MAIL' | translate">
+        <p style="margin: 0 0 0.75rem; color: var(--nm-app-text-2); font-size: var(--nm-text-ui-sm)">
+          {{ 'WIZARD.STEP3.REPORT_SHARE_HINT' | translate }}
+        </p>
+        <input type="text" class="w-full" [ngModel]="shareEmails()" (ngModelChange)="shareEmails.set($event)"
+               [placeholder]="'WIZARD.STEP3.REPORT_EMAILS_PLACEHOLDER' | translate"
+               style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--nm-app-border); border-radius: var(--nm-radius-sm); background: var(--nm-app-surface); color: var(--nm-app-text)">
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem">
+          <button type="button" class="nm-btn-tertiary" (click)="showShareMail.set(false)">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="nm-btn-primary" [disabled]="shareSending()" (click)="sendShareMail()">
+            <i class="pi" [class.pi-send]="!shareSending()" [class.pi-spin]="shareSending()" [class.pi-spinner]="shareSending()"></i>
+            {{ 'WIZARD.STEP3.REPORT_SHARE_SEND' | translate }}
+          </button>
+        </div>
+      </p-dialog>
 
     <div style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1.25rem">
 
       <!-- Chargement : skeleton par section (perception de rapidité) -->
       <div *ngIf="brandReportLoading()" style="display: flex; flex-direction: column; gap: 1rem">
-        <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 0 0 0.5rem">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}<br><span style="font-size: 0.78rem; color: #9ca3af">{{ 'WIZARD.STEP3.REPORT_LOADING_HINT' | translate }}</span></p>
+        <p style="text-align: center; color: var(--nm-app-text-2); font-size: 0.9rem; margin: 0 0 0.5rem">{{ 'WIZARD.STEP3.REPORT_LOADING' | translate }}<br><span style="font-size: 0.78rem; color: var(--nm-app-text-2)">{{ 'WIZARD.STEP3.REPORT_LOADING_HINT' | translate }}</span></p>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap">
           <div class="sk-block" style="flex: 1 1 160px; height: 84px"></div>
           <div class="sk-block" style="flex: 1 1 160px; height: 84px"></div>
@@ -786,151 +866,125 @@
 
       <!-- Erreur + réessayer (gratuit) -->
       <div *ngIf="!brandReportLoading() && brandReportError()" style="text-align: center; margin: 2rem 0">
-        <p style="color: #dc2626; font-size: 0.9rem; margin: 0 0 0.75rem">{{ brandReportError() }}</p>
+        <p style="color: var(--nm-app-verdict-taken-fg); font-size: 0.9rem; margin: 0 0 0.75rem">{{ brandReportError() }}</p>
         <button type="button" class="report-cta" (click)="retryBrandReport()">
           <i class="pi pi-refresh" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_RETRY' | translate }}
         </button>
       </div>
 
       <!-- Résultat -->
-      <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem">
+      <!-- Nom pas encore vérifié : LA MÊME PAGE, avec ce qu'on sait déjà —
+           domaines et analyse du nom, collectés pendant la recherche — et, à
+           la place exacte où marque et réseaux s'afficheront, la proposition
+           de les débloquer. Le bloc verrouillé ne reçoit toujours que le nom,
+           le prix et le droit gratuit : aucun verdict payant n'atteint le
+           navigateur avant l'achat. -->
+      <div *ngIf="!brandReportLoading() && !brandReport()" style="padding: 1.5rem 1rem">
+        <app-brand-report-view
+          *ngIf="partialReport(brandReportName()) as partial; else lockedOnly"
+          [report]="partial"
+          [context]="reportContext()"
+          [locked]="true">
+          <!-- Mêmes actions d'en-tête que sur un rapport acquis : le document
+               s'imprime déjà (domaines et qualité y sont). « Partager » attend
+               en revanche qu'il y ait un rapport à envoyer — l'endpoint
+               retransmet un document mémorisé, il n'en fabrique pas. -->
+          <span actions class="rv-actions">
+            <button type="button" class="nm-btn-tertiary" (click)="printReport()">
+              <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
+            </button>
+          </span>
+          <app-brand-report-locked locked
+            [embedded]="true"
+            [name]="brandReportName()"
+            [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
+            [domainsChecked]="selectedExtensions().length"
+            [freeExtensions]="freeExtensionsOf(brandReportName())"
+            [canAfford]="hasEnoughReportCredits()"
+            (unlock)="confirmBrandReport()"
+            (topUp)="openCreditPurchase()">
+          </app-brand-report-locked>
+        </app-brand-report-view>
 
-        <!-- Bannière exemple -->
-        <div *ngIf="isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.7rem 1rem; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px">
-          <span style="font-size: 0.88rem; color: #3730a3"><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
-          <button type="button" class="report-cta" (click)="showReportDialog.set(false)">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
+        <!-- Nom venu d'ailleurs (lien direct, projet non chargé) : rien de
+             collecté à montrer, donc le palier payant seul. -->
+        <ng-template #lockedOnly>
+          <app-brand-report-locked
+            [name]="brandReportName()"
+            [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
+            [domainsChecked]="selectedExtensions().length"
+            [freeExtensions]="freeExtensionsOf(brandReportName())"
+            [canAfford]="hasEnoughReportCredits()"
+            (unlock)="confirmBrandReport()"
+            (topUp)="openCreditPurchase()">
+          </app-brand-report-locked>
+        </ng-template>
+      </div>
+
+      <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem 1rem 2rem">
+
+        <!-- Bandeau « exemple » : ce rapport-ci n'est pas celui de l'utilisateur. -->
+        <div *ngIf="isSampleReport()" class="report-sample-banner">
+          <span><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
+          <button type="button" class="nm-btn-primary" (click)="closeReport()">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
         </div>
 
-        <!-- Barre cache : date + régénérer -->
-        <div *ngIf="!isSampleReport()" style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; font-size: 0.78rem; color: #9ca3af">
-          <span><i class="pi pi-clock" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.REPORT_GENERATED_ON' | translate }} {{ formatReportDate(report.generatedAt) }}<span *ngIf="report.cached"> · {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}</span></span>
-          <a *ngIf="report.cached" class="report-link" (click)="regenerateBrandReport()"><i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.REPORT_REGENERATE' | translate }} ({{ brandReportCost }} {{ 'WIZARD.STEP3.REPORT_CREDITS' | translate }})</a>
-        </div>
-
-        <!-- Action héro : réserver le meilleur domaine libre -->
-        <div *ngIf="heroFreeDomain(report) as hero" class="report-hero">
-          <div>
-            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em; opacity: .85">{{ 'WIZARD.STEP3.REPORT_HERO_LABEL' | translate }}</div>
-            <div style="font-family: monospace; font-size: 1.25rem; font-weight: 800; margin-top: 0.15rem">{{ hero.domain }}</div>
-          </div>
-          <a [href]="reserveDomainUrl(report.name, hero.extension, 0)" target="_blank" rel="noopener noreferrer" class="report-hero__btn">
-            <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
-          </a>
-        </div>
-
-        <!-- Scores en tête -->
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap">
-          <div class="report-score-card">
-            <div class="report-score-num" [style.color]="report.score >= 66 ? '#16a34a' : report.score >= 33 ? '#d97706' : '#dc2626'">{{ report.score }}<span style="font-size: 0.9rem; color: #9ca3af">/100</span></div>
-            <div class="report-score-lbl">{{ 'WIZARD.STEP3.REPORT_AVAILABILITY' | translate }}</div>
-          </div>
-          <div *ngIf="report.quality as q" class="report-score-card">
-            <div class="report-score-num" [style.color]="q.score >= 66 ? '#16a34a' : q.score >= 33 ? '#d97706' : '#dc2626'">{{ q.score }}<span style="font-size: 0.9rem; color: #9ca3af">/100</span></div>
-            <div class="report-score-lbl">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</div>
-          </div>
-        </div>
-
-        <!-- Marque -->
-        <div class="report-card">
-          <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK' | translate }}</h3>
-          <div style="font-size: 0.9rem">
-            <span [ngSwitch]="report.trademark.match" style="font-weight: 600">
-              <span *ngSwitchCase="'none'" style="color: #16a34a"><i class="pi pi-check-circle"></i> {{ 'WIZARD.STEP3.TM_NONE_HEAD' | translate }}</span>
-              <span *ngSwitchCase="'exact'" style="color: #dc2626"><i class="pi pi-times-circle"></i> {{ 'WIZARD.STEP3.TM_EXACT_HEAD' | translate }}</span>
-              <span *ngSwitchCase="'similar'" style="color: #d97706"><i class="pi pi-exclamation-triangle"></i> {{ 'WIZARD.STEP3.TM_SIMILAR_HEAD' | translate }}</span>
-              <span *ngSwitchDefault style="color: #9ca3af"><i class="pi pi-question-circle"></i> {{ 'WIZARD.STEP3.TM_UNKNOWN_HEAD' | translate }}</span>
-            </span>
-
-            <!-- Explication concrète + prochaines actions -->
-            <p [innerHTML]="tmExplainKey(report.trademark.match) | translate" style="margin: 0.5rem 0 0; color: #4b5563; font-size: 0.85rem; line-height: 1.55"></p>
-
-            <ul *ngIf="report.trademark.hits.length" style="margin: 0.6rem 0 0.3rem; padding-left: 1.1rem; color: #4b5563; font-size: 0.84rem">
-              <li *ngFor="let h of report.trademark.hits.slice(0, 8)" style="margin: 0.15rem 0">
-                {{ h.name }} <span style="color: #9ca3af">({{ h.collection }}<span *ngIf="h.classes.length"> · classes {{ h.classes.join(', ') }}</span><span *ngIf="h.status"> · {{ h.status }}</span>)</span>
-                <a *ngIf="h.noticeUrl" [href]="h.noticeUrl" target="_blank" rel="noopener noreferrer" class="check-link" style="font-size: 0.7rem; margin-left: 0.3rem">notice</a>
-              </li>
-            </ul>
-
-            <!-- Actions marque : déposer (si libre/proche) + recherche officielle (proéminente si indisponible) -->
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.7rem">
-              <a *ngIf="report.trademark.match === 'none' || report.trademark.match === 'similar'" [href]="INPI_DEPOSIT_URL" target="_blank" rel="noopener noreferrer" class="report-cta">
-                <i class="pi pi-shield" style="font-size: 0.8rem"></i> {{ 'WIZARD.STEP3.REPORT_DEPOSIT' | translate }}
-              </a>
-              <a [href]="report.trademark.deepLink" target="_blank" rel="noopener noreferrer"
-                 [ngClass]="report.trademark.match === 'unknown' ? 'report-cta' : 'check-link'" style="font-size: 0.82rem">
-                <i class="pi pi-search" style="font-size: 0.75rem"></i> {{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }}
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Domaines + Réseaux -->
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap">
-          <div class="report-card" style="flex: 1 1 300px">
-            <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_DOMAINS' | translate }}</h3>
-            <div *ngFor="let d of report.domains" style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid #f1f3f5">
-              <span style="font-family: monospace">{{ d.domain }}</span>
-              <span style="display: flex; align-items: center; gap: 0.6rem">
-                <!-- Réserver chez plusieurs registrars (ancien bouton, enrichi) -->
-                <div *ngIf="d.status === 'free'" class="reg-split" (click)="$event.stopPropagation()">
-                  <a [href]="reserveDomainUrl(report.name, d.extension, 0)" target="_blank" rel="noopener noreferrer" class="reg-split__main">
-                    <i class="pi pi-shopping-cart"></i><span class="reg-label"> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}</span>
-                  </a>
-                  <button type="button" class="reg-split__toggle" (click)="toggleReg(d.domain, $event)">
-                    <i class="pi pi-chevron-down"></i>
-                  </button>
-                  <div *ngIf="openReg() === d.domain" class="reg-split__menu">
-                    <a *ngFor="let r of REGISTRARS; let i = index" [href]="reserveDomainUrl(report.name, d.extension, i)" target="_blank" rel="noopener noreferrer" class="reg-split__item">
-                      {{ r.label }}
-                    </a>
-                  </div>
-                </div>
-                <span [style.background]="reportStatusColor(d.status)" style="color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(d.status) | translate }}</span>
-              </span>
-            </div>
-          </div>
-
-          <div class="report-card" style="flex: 1 1 240px">
-            <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
-            <div *ngFor="let s of report.socials" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid #f1f3f5">
-              <a [href]="s.url" target="_blank" rel="noopener noreferrer" style="color: #374151; text-decoration: none">{{ s.platform }}<span *ngIf="s.planned" style="color: #9ca3af; font-size: 0.7rem"> ({{ 'WIZARD.STEP3.SOCIAL_SOON' | translate }})</span></a>
-              <span [style.background]="reportStatusColor(s.status)" style="color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; border-radius: 9999px">{{ statusKey(s.status) | translate }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Qualité du nom -->
-        <div *ngIf="report.quality as q" class="report-card">
-          <h3 class="report-card__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem">
-            <div *ngFor="let c of qualityCriteria(q)" style="display: flex; justify-content: space-between; gap: 1rem; min-width: 180px; font-size: 0.86rem; padding: 0.2rem 0">
-              <span>{{ c.label }}</span>
-              <span style="color: #6b7280; font-weight: 600">{{ c.value }}/5</span>
-            </div>
-          </div>
-          <p *ngIf="q.strengths" style="margin: 0.6rem 0 0; font-size: 0.85rem"><strong style="color: #16a34a">{{ 'WIZARD.STEP3.REPORT_STRENGTHS' | translate }} :</strong> {{ q.strengths }}</p>
-          <p *ngIf="q.watchout" style="margin: 0.3rem 0 0; font-size: 0.85rem"><strong style="color: #d97706">{{ 'WIZARD.STEP3.REPORT_WATCHOUT' | translate }} :</strong> {{ q.watchout }}</p>
-        </div>
-
-        <p *ngIf="report.emailed" style="margin: 0; font-size: 0.82rem; color: #16a34a"><i class="pi pi-envelope" style="font-size: 0.75rem"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}</p>
-
-        <!-- Partager le rapport (lien public en lecture seule) -->
-        <div *ngIf="report.shareToken && !isSampleReport()" style="display: flex; align-items: center; gap: 0.6rem">
-          <a class="report-link" (click)="copyShareLink(report)"><i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}</a>
-          <span *ngIf="shareCopied()" style="font-size: 0.78rem; color: #16a34a"><i class="pi pi-check" style="font-size: 0.7rem"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_COPIED' | translate }}</span>
-        </div>
-
-        <p style="margin: 0; padding: 0.7rem 0.85rem; background: #f1f5f9; border-radius: 8px; font-size: 0.74rem; color: #6b7280">{{ report.disclaimer }}</p>
-
-        <!-- Retour à la liste (bas de page aussi, pour ne pas remonter) -->
-        <div style="text-align: center; margin-top: 0.5rem">
-          <button type="button" class="report-back" (click)="showReportDialog.set(false)">
-            <i class="pi pi-arrow-left"></i> {{ 'WIZARD.STEP3.REPORT_BACK' | translate }}
+        <!--
+          UN seul composant de rapport, partagé avec la page publique et la page
+          de partage. Le wizard en dupliquait 199 lignes : c'est pour cela que le
+          rapport n'affichait pas ce que la carte promettait — pas de section
+          EUIPO, une autre échelle de verdicts, un autre pied de page. Le
+          composant porte le document ; le wizard ne garde que les actions qui
+          lui appartiennent (partage, actualisation, envoi par e-mail).
+        -->
+        <!-- Projet non initialisé : le rapport n'a ni description ni public
+             cible, et aucune suggestion voisine n'est possible. On propose de
+             compléter, à l'endroit où le manque se voit. -->
+        <div *ngIf="!reportContext().description" class="report-seed">
+          <span>{{ 'WIZARD.STEP3.SEED_PROJECT' | translate }}</span>
+          <button type="button" class="nm-btn-secondary" (click)="closeReport(); activeIndex.set(0)">
+            {{ 'WIZARD.STEP3.SEED_PROJECT_CTA' | translate }}
           </button>
+        </div>
+
+        <app-brand-report-view [report]="report" [context]="reportContext()">
+          <button refresh type="button" class="rv-refresh"
+                  *ngIf="!isSampleReport()"
+                  [attr.title]="'WIZARD.STEP3.GRID_REFRESH' | translate"
+                  [attr.aria-label]="'WIZARD.STEP3.GRID_REFRESH' | translate"
+                  (click)="refreshBrandReport(report.name)">
+            <i class="pi pi-refresh" aria-hidden="true"></i>
+          </button>
+          <span actions *ngIf="!isSampleReport()" class="rv-actions">
+            <button type="button" class="nm-btn-tertiary" (click)="printReport()">
+              <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
+            </button>
+            <button type="button" class="nm-btn-secondary" (click)="openShareMail()">
+              <i class="pi pi-send"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_MAIL' | translate }}
+            </button>
+          </span>
+        </app-brand-report-view>
+
+        <!-- Ce qui reste ici n'existe nulle part ailleurs : le lien de partage.
+             La date, le PDF et l'actualisation vivent en tête du document, où
+             on les cherche ; les répéter en pied donnait deux commandes pour
+             un seul geste, et deux dates pour une seule génération. -->
+        <div class="report-actions">
+          <button type="button" class="nm-btn-tertiary" (click)="copyShareLink(report)">
+            <i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}
+          </button>
+          <span *ngIf="shareCopied()" class="report-actions__ok">
+            <i class="pi pi-check"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_COPIED' | translate }}
+          </span>
+
+          <span *ngIf="report.emailed" class="report-actions__ok">
+            <i class="pi pi-envelope"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}
+          </span>
         </div>
       </div>
     </div>
-  </p-dialog>
+
+  </div>
 
   <p-confirmDialog></p-confirmDialog>
   <p-toast></p-toast>
@@ -939,7 +993,9 @@
   <div *ngIf="loading() && !streamProgress()" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 50; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px)">
      <div style="text-align: center">
         <p-progressSpinner></p-progressSpinner>
-        <p class="mt-3 font-semibold" style="color: #2563eb">{{ loadingKey() | translate }}</p>
+        <p class="mt-3 font-semibold" style="color: var(--nm-app-accent)">{{ loadingKey() | translate }}</p>
      </div>
   </div>
 </div>
+
+

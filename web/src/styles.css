@@ -2,6 +2,13 @@
 @import "primeicons/primeicons.css";
 @import "vanilla-cookieconsent/dist/cookieconsent.css";
 
+/* Refonte — étape 1. Les @import doivent précéder toute règle : garder ces
+   deux lignes ici, et non plus bas dans le fichier. */
+@import "./styles/fonts.css";
+@import "./styles/tokens.css";
+@import "./styles/theme.css";
+@import "./styles/components.css";
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -9,16 +16,17 @@
 
 body {
     margin: 0;
-    font-family: var(--font-family, sans-serif);
+    /* Police du corps : IBM Plex Sans, avec sa pile de repli. */
+    font-family: var(--nm-font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: var(--p-surface-100, #f3f4f6);
+    /* Suit le mode : c'est le fond de toutes les routes applicatives. Les
+       surfaces éditoriales (héros, CTA final) posent leur propre aplat par
+       dessus et ne bougent donc pas. */
+    background-color: var(--nm-app-bg);
+    color: var(--nm-app-text);
 }
 
-/* ─── Bouton "Aide moi à choisir" — icône ambre ─── */
-.pick-btn .pi-lightbulb {
-    color: #f59e0b !important;
-}
 
 /* ─── Mot tournant du H1 (produit / marque / société) ─────────────
    Les trois mots occupent la MÊME cellule de grille : la largeur se cale sur
@@ -315,54 +323,66 @@ body {
 
 /* ─── Stepper ────────────────────────────────────── */
 
-/* Cercle de l'étape */
+/* Un seul rendu d'état, sur les trois étapes : le fil changeait d'aspect
+   entre l'étape 1 (puce blanche, chiffre vert) et les étapes 2–3 (puce
+   pleine) — le même composant, dans le même parcours. */
 .p-steps .p-steps-item .p-steps-number {
     width: 2.25rem;
     height: 2.25rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border: 2px solid var(--p-surface-300);
-    background: white;
-    color: var(--p-surface-500);
+    /* Jamais `text-3` : le AA échoue sur les deux surfaces. */
+    border: 2px solid var(--nm-app-border-strong);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text-2);
     transition: all 0.2s ease;
 }
 
-/* Étape active */
+/* Étape courante : puce pleine. */
 .p-steps .p-steps-item.p-highlight .p-steps-number {
-    background: var(--p-primary-color);
-    border-color: var(--p-primary-color);
-    color: white;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--p-primary-color) 20%, transparent);
+    background: var(--nm-app-accent-fill);
+    border-color: var(--nm-app-accent-fill);
+    color: var(--nm-app-on-accent);
+    box-shadow: 0 0 0 4px var(--nm-app-accent-surface);
 }
 
-/* Label de l'étape active */
 .p-steps .p-steps-item.p-highlight .p-steps-title {
-    color: var(--p-primary-color);
+    color: var(--nm-app-accent);
     font-weight: 600;
 }
 
-/* Labels des autres étapes */
+/* Étape franchie : puce contourée, accent — distincte de « à venir ». */
+.p-steps .p-steps-item.p-steps-item-visited .p-steps-number {
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
+    background: var(--nm-app-surface);
+}
+
 .p-steps .p-steps-title {
     font-size: 0.8rem;
     margin-top: 0.4rem;
-    color: var(--p-surface-500);
+    color: var(--nm-app-text-2);
 }
 
-/* Ligne de connexion */
 .p-steps .p-steps-item:before {
-    border-top-color: var(--p-surface-200);
+    border-top-color: var(--nm-app-border);
 }
 
-/* ─── Bouton IA (indigo) ─────────────────────────── */
+/* ─── Bouton « Reformuler avec l'IA » ─────────────
+   Était en indigo #6366f1, à côté du bouton vert : deux couleurs de marque
+   concurrentes sur la seule ligne d'action de l'écran, et l'indigo attirait
+   l'œil davantage que l'action principale. L'IA n'est pas une marque à part
+   dans ce produit — c'est une action secondaire. */
 .btn-ai.p-button {
-    background: #6366f1;
-    border-color: #6366f1;
-    color: white;
+    background: transparent;
+    border-color: var(--nm-app-border-strong);
+    color: var(--nm-app-text);
 }
 
 .btn-ai.p-button:hover {
-    background: #4f46e5 !important;
-    border-color: #4f46e5 !important;
+    background: transparent;
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
 }
 
 /* ─── Pages de contenu / articles SEO ─────────────── */
@@ -408,7 +428,7 @@ body {
     margin-bottom: 0.5rem;
 }
 .article a {
-    color: var(--p-primary-700, #047857);
+    color: var(--nm-app-accent);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
@@ -438,3 +458,228 @@ body {
 }
 .article .compare .yes { color: var(--p-primary-600, #059669); font-weight: 600; }
 .article .compare .no { color: var(--p-surface-400); }
+
+/* Sous 640px, les colonnes de ces comparatifs ne tiennent pas : le tableau
+   débordait de ~100px et c'est la PAGE qui défilait latéralement. Il devient
+   son propre conteneur défilant, avec une largeur plancher qui préserve la
+   lisibilité des colonnes — écraser le texte rendrait la comparaison inutile.
+   Traité en CSS plutôt qu'en enveloppant les tableaux : les quatre pages de
+   comparatif partagent cette classe. */
+@media (max-width: 640px) {
+    .article .compare {
+        display: block;
+        overflow-x: auto;
+        min-width: 0;
+    }
+
+    .article .compare tbody,
+    .article .compare thead {
+        display: table;
+        width: 100%;
+        min-width: 30rem;
+    }
+}
+
+/* Marges du conteneur de page, hors accueil. L'accueil s'en dispense : son
+   héros est un aplat pleine largeur et ses sections vont de bord à bord.
+   Une classe plutôt qu'un binding `[class]` : « md:py-5 » contient un
+   deux-points, que la syntaxe `[class.x]` d'Angular ne peut pas porter. */
+.nm-page-pad {
+    padding: 0.75rem 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .nm-page-pad {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+/* ─── Menubar sur l'accueil ──────────────────────────────────────────────
+   Le héros est un aplat sombre : une barre claire posée dessus coupe la page
+   en deux. Elle passe donc en sombre sur cette seule route, sans bordure
+   basse, pour se fondre dans le héros.
+   `!important` : PrimeNG applique ses propres fonds sur `.p-menubar`, et une
+   simple classe utilitaire ne les emporte pas. */
+/* La barre de l'accueil est une SURFACE SOMBRE, quel que soit le mode : elle
+   se fond dans le héros. Elle redéfinit donc les rôles pour ce qu'elle
+   contient, au lieu de recolorer ses éléments un par un — sinon chaque
+   nouveau bouton hérite des couleurs du mode clair sur un fond noir. C'est ce
+   qui rendait « Français » et « Projets » illisibles en mode clair (3,26:1).
+   Les jetons `--p-*` sont repris de même : PrimeNG ne connaît pas les nôtres. */
+.nm-menubar-dark.p-menubar {
+    background: var(--nm-bg-dark) !important;
+    border: 0 !important;
+
+    --nm-app-surface: var(--nm-surface-dark);
+    --nm-app-surface-alt: var(--nm-surface-dark-alt);
+    --nm-app-border: var(--nm-border-dark);
+    --nm-app-border-strong: var(--nm-border-dark-interactive);
+    --nm-app-text: var(--nm-text-dark);
+    --nm-app-text-2: var(--nm-text-dark-2);
+    --nm-app-text-3: var(--nm-text-dark-3);
+    --nm-app-accent: var(--nm-accent);
+    --nm-app-accent-hover: var(--nm-accent-hover);
+    --nm-app-accent-surface: var(--nm-accent-surface-dark);
+    --nm-app-accent-border: var(--nm-accent-border-dark);
+    --nm-app-badge-bg: var(--nm-divider-dark-3);
+    --nm-app-badge-fg: var(--nm-text-dark-2);
+
+    --p-text-color: var(--nm-text-dark);
+    --p-text-muted-color: var(--nm-text-dark-2);
+    --p-text-hover-color: var(--nm-text-dark);
+    --p-text-hover-muted-color: var(--nm-text-dark-2);
+    --p-button-text-secondary-color: var(--nm-text-dark);
+    --p-button-text-secondary-hover-background: var(--nm-surface-dark);
+    --p-content-hover-background: var(--nm-surface-dark);
+}
+
+.nm-menubar-dark .brand-wordmark,
+.nm-menubar-dark .p-menubar-item-link {
+    color: var(--nm-text-dark) !important;
+}
+
+.nm-menubar-dark .lang-toggle:hover {
+    background: var(--nm-surface-dark) !important;
+}
+
+/* Bouton de connexion : 38px de haut, sous le plancher tactile de 44px, alors
+   que c'est l'action principale du menubar et qu'il est présent sur chaque
+   page. `!important` : PrimeNG fixe ses propres hauteurs sur `.p-button`. */
+.p-menubar .p-button {
+    min-height: var(--nm-touch-min) !important;
+}
+
+/* Menubar hors accueil : suit le mode. Sur l'accueil il reste sombre, fondu
+   dans le héros — une signature éditoriale, pas un mode. */
+.p-menubar:not(.nm-menubar-dark) {
+    background: var(--nm-app-surface) !important;
+    border-color: var(--nm-app-border) !important;
+}
+
+.p-menubar:not(.nm-menubar-dark) .brand-wordmark {
+    color: var(--nm-app-text) !important;
+}
+
+/* Sélecteur de thème : trois états, l'actif prend l'accent du mode courant. */
+.theme-switch {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-pill);
+    background: var(--nm-app-surface-alt);
+}
+
+.theme-switch__btn {
+    min-height: 32px;
+    padding: 0 0.625rem;
+    border: 0;
+    border-radius: var(--nm-radius-pill);
+    background: none;
+    color: var(--nm-app-text-2);
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.theme-switch__btn--on {
+    background: var(--nm-app-accent-surface);
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}
+
+.theme-switch__btn:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+    /* Le menubar est déjà chargé sur mobile : le sélecteur y prend trop de
+       place pour une action rare. Il reste dans le tiroir du compte. */
+    .theme-switch { display: none; }
+}
+
+/* Sélecteur de langue : le nom de la langue, pas un drapeau. */
+.lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: var(--nm-touch-min);
+    padding: 0 0.625rem;
+    border: 0;
+    border-radius: var(--nm-radius-pill);
+    background: none;
+    color: var(--nm-app-text-2);
+    font-family: inherit;
+    font-size: var(--nm-text-ui-sm);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.lang-toggle:hover {
+    background: var(--nm-app-surface-alt);
+    color: var(--nm-app-text);
+}
+
+.lang-toggle:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+    /* Sur mobile, le globe suffit : le menubar est déjà chargé. */
+    .lang-toggle__code { display: none; }
+}
+
+/* Mode actif dans le menu du compte : la coche le dit déjà, l'accent le
+   confirme sans avoir à comparer les trois lignes. */
+.p-menu .menu-item--on .p-menu-item-link,
+.p-menu .menu-item--on .p-menu-item-icon {
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}
+
+/* Le sélecteur de thème du pied de page : même primitive que dans la barre,
+   simplement centrée sous le texte légal. */
+.theme-switch--foot {
+    display: inline-flex;
+    margin: 0 0 0.75rem;
+}
+
+.account-sheet__row--on {
+    color: var(--nm-app-accent);
+    font-weight: 600;
+}
+
+
+/* ═══ Impression ═══════════════════════════════════════════════════════════
+ *
+ * Ce qu'on imprime est un DOCUMENT, pas une capture d'écran de l'application.
+ * Le chrome disparaît donc : barre de navigation, pied de site, notifications.
+ * Un rapport joint à un dossier ne commence pas par un menu.
+ *
+ * `@page` fixe les marges et neutralise les en-têtes du navigateur (URL, date,
+ * pagination), qui doublonneraient avec ceux du document.
+ */
+@page {
+    size: A4;
+    margin: 16mm 14mm;
+}
+
+@media print {
+    .p-menubar,
+    .p-toast,
+    .p-drawer-mask,
+    /* Actions du rapport projetées depuis le wizard : hors de portée de la
+       feuille du composant, donc masquées ici. */
+    .rv-refresh,
+    .rv-actions,
+    body > footer,
+    footer.mt-8 {
+        display: none !important;
+    }
+
+    html, body {
+        background: #fff !important;
+    }
+}

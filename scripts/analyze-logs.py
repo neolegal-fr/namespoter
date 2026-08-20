@@ -47,6 +47,23 @@ FUNNEL = [
     ("client_error", "Erreur JavaScript subie"),
 ]
 
+# Parcours « j'ai déjà un nom » : de la page publique au projet.
+# Il ne passe par AUCUNE des étapes du tunnel ci-dessus — le suivre avec les
+# mêmes repères donnerait un entonnoir vide et un chemin invisible.
+NAME_FUNNEL = [
+    ("public_report_requested", "Nom saisi sur la page publique"),
+    ("public_report_shown", "Verdict domaines affiché"),
+    ("public_report_failed", "Vérification publique en échec"),
+    ("public_report_sample_viewed", "Exemple de rapport consulté"),
+    ("public_report_signup_clicked", "A cliqué « créer mon compte »"),
+    ("public_report_verify_clicked", "A cliqué « vérifier marques et réseaux »"),
+    ("public_report_project_clicked", "A demandé des suggestions"),
+    ("name_test_started", "Création de projet lancée"),
+    ("name_test_project_created", "Projet créé depuis le nom"),
+    ("name_test_failed", "Création de projet en échec"),
+    ("report_locked_abandoned", "A quitté le rapport sans acheter"),
+]
+
 # Issues possibles d'une demande de rapport, dans l'ordre d'apparition.
 REPORT_OUTCOMES = [
     ("brand_report_generated", "produits"),
@@ -236,6 +253,80 @@ def http(rows):
         print(f"  {sum(statuses.values()):6}  {route:42} {detail}")
 
 
+def quota(rows):
+    """Évolution du quota INPI dans le temps — et donc, à l'usage, sa période.
+
+    La passerelle ne dit nulle part quand son compteur repart : pas d'en-tête
+    `x-rate-limit-reset`, rien dans l'OpenAPI, rien dans la documentation. La
+    seule façon de connaître la période est de regarder QUAND la valeur remonte.
+    D'où l'affichage chronologique, avec la remontée signalée explicitement.
+    """
+    obs = [r for r in rows if r.get("context") == "trademark_quota_observed"]
+    if not obs:
+        print("Aucune observation de quota INPI.")
+        print("Le compteur n'est lu que sur les appels de diffusion (recherche, notice) :")
+        print("aucune trace signifie qu'aucun rapport de marque n'a été produit sur la période.")
+        return
+
+    print(f"Quota INPI — {len(obs)} appels observés\n")
+    print(f"{'horodatage':<22} {'appel':<8} {'restant':>8}  {'Mo restants':>12}")
+    prev = None
+    resets = []
+    for r in obs:
+        rem = r.get("remaining")
+        by = r.get("bytesRemaining")
+        mo = f"{by / 1_000_000:.1f}" if isinstance(by, (int, float)) else "-"
+        flag = ""
+        if prev is not None and isinstance(rem, int) and rem > prev[1]:
+            flag = f"  ← REMISE À ZÉRO (dernier appel : {prev[0]})"
+            resets.append((prev[0], str(r.get("ts"))[:19]))
+        print(f"{str(r.get('ts'))[:19]:<22} {str(r.get('endpoint')):<8} {str(rem):>8}  {mo:>12}{flag}")
+        if isinstance(rem, int):
+            prev = (str(r.get("ts"))[:19], rem)
+
+    print()
+    if resets:
+        print("Remises à zéro observées (la période tombe entre ces deux bornes) :")
+        for before, after in resets:
+            print(f"  après {before}  →  avant {after}")
+    else:
+        print("Aucune remise à zéro observée : la période dépasse l'intervalle couvert ici.")
+
+    low = [r for r in rows if r.get("context") == "trademark_quota_low"]
+    if low:
+        print(f"\n{len(low)} alerte(s) « quota presque épuisé » — dernière : {str(low[-1].get('ts'))[:19]}")
+
+
+def nom(rows):
+    """Parcours de qui arrive avec un nom en tête.
+
+    Distinct du tunnel de génération : ce visiteur ne décrit pas de projet, il
+    veut un verdict. Le suivre avec les repères de l'autre entonnoir donnerait
+    une colonne vide et un chemin invisible.
+    """
+    total = {}
+    for cle, libelle in NAME_FUNNEL:
+        total[cle] = sum(1 for r in rows if r.get("context") == cle)
+
+    print("Parcours « j'ai déjà un nom »\n")
+    depart = total.get("public_report_requested", 0)
+    for cle, libelle in NAME_FUNNEL:
+        n = total[cle]
+        part = f"{100 * n / depart:5.1f} %" if depart else "     —"
+        print(f"  {libelle:<44} {n:>6}  {part}")
+
+    if depart:
+        crees = total.get("name_test_project_created", 0)
+        print(f"\nDe la saisie au projet créé : {100 * crees / depart:.1f} %")
+        perdus = depart - total.get("public_report_shown", 0)
+        if perdus > 0:
+            print(f"⚠ {perdus} saisie(s) sans verdict affiché — vérifier `public_report_failed`.")
+
+    abandons = total.get("report_locked_abandoned", 0)
+    if abandons:
+        print(f"\n{abandons} départ(s) du rapport sans achat : c'est là que le prix se discute.")
+
+
 def raw(rows):
     for r in rows[-30:]:
         print(json.dumps(r, ensure_ascii=False)[:220])
@@ -245,6 +336,8 @@ MODES = {
     "errors": errors,
     "funnel": funnel,
     "rapports": rapports,
+    "quota": quota,
+    "nom": nom,
     "slow": slow,
     "http": http,
     "raw": raw,

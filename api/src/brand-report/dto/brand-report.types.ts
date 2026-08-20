@@ -53,11 +53,42 @@ export interface NameQuality {
   score: number;
   /** Notes par critère (memorability, pronunciation, international, seo, distinctiveness). */
   scores: Record<string, number>;
+  /**
+   * Une phrase par critère : POURQUOI cette note.
+   *
+   * « International 2/5 » ne se discute pas, ne s'améliore pas et ne se
+   * défend pas devant un associé. « Sens peu transparent hors du français »,
+   * si. Le modèle les produisait déjà ; elles étaient jetées à la lecture.
+   */
+  comments?: Record<string, string>;
+  /**
+   * Comment le nom est construit et ce qu'il évoque, en une phrase.
+   *
+   * Les cinq notes disent si le nom est BON ; elles ne disent pas ce qu'il
+   * VEUT DIRE. Devant « Verdalya », la première question n'est pas « 4/5 en
+   * mémorabilité ? » mais « ça vient d'où ? » — sans quoi on ne sait pas
+   * défendre le nom devant un associé.
+   */
+  origin?: string;
   strengths?: string;
   watchout?: string;
 }
 
 /** Rapport complet consommé par l'affichage, le PDF (US-053) et l'email. */
+/**
+ * Le projet et son public, tels que l'utilisateur les a posés.
+ *
+ * Mémorisés AVEC le rapport : sans eux, relu des semaines plus tard ou reçu
+ * par mail, le document ne dit pas pourquoi ce nom-là a été proposé.
+ *
+ * ⚠ Jamais rendus sur la page de partage publique : le lien se transfère, et
+ * la description du projet n'a pas à voyager avec.
+ */
+export interface ReportContext {
+  description?: string;
+  audience?: { label: string; value: string }[];
+}
+
 export interface BrandReport {
   name: string;
   handle: string;
@@ -66,6 +97,8 @@ export interface BrandReport {
   trademark: TrademarkResult;
   /** Qualité du nom (présente sur le rapport complet, pas sur l'aperçu). */
   quality?: NameQuality;
+  /** Contexte du projet, pour la relecture et l'email. */
+  context?: ReportContext;
   /** Synthèse 0-100. Les items `unknown` n'améliorent jamais le score. */
   score: number;
   generatedAt: string; // ISO 8601
@@ -73,4 +106,34 @@ export interface BrandReport {
   disclaimer: string;
   /** Jeton de partage public (présent une fois le rapport mémorisé). */
   shareToken?: string;
+}
+
+/**
+ * Synthèse d'un nom déjà vérifié, pour la grille de résultats.
+ *
+ * Ne contient que des données ACQUISES : un nom non vérifié n'a pas de
+ * synthèse, donc rien ne fuit avant achat. C'est la relecture d'un rapport
+ * payé, pas un aperçu gratuit.
+ */
+export interface BrandReportSummary {
+  /** Nom normalisé (minuscules, sans espaces autour) — clé de rapprochement. */
+  nameKey: string;
+  verifiedAt: string | null;
+  /** Verdict de marque, commun aux deux offices (l'API n'en produit qu'un). */
+  trademark: 'none' | 'exact' | 'similar' | 'unknown';
+  /** Des dépôts trouvés relèvent-ils de cet office ? */
+  inpiHits: boolean;
+  euipoHits: boolean;
+  socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
+  score: number | null;
+  /**
+   * Crédits RÉELLEMENT débités pour ce rapport — 0 s'il a consommé le rapport
+   * offert du mois, sinon le tarif en vigueur au moment de l'achat.
+   *
+   * Exposé pour que l'écran de résultats puisse annoncer un total honnête :
+   * multiplier le nombre de rapports par le tarif COURANT donnerait un chiffre
+   * faux après un changement de prix, et ferait payer sur l'écran un rapport
+   * qui était offert. `null` sur les enregistrements antérieurs à la colonne.
+   */
+  costCredits: number | null;
 }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -15,7 +16,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-generateur-nom-produit',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -111,6 +112,8 @@ import { applyContentSeo } from './content-seo';
           classe), et les pseudos réseaux sociaux.</li>
         <li><strong>Sans faux ami à l'international</strong> si vous visez plusieurs marchés.</li>
       </ul>
+
+      <app-trois-risques intro="Avant de faire fabriquer un emballage, trois contrôles — le dernier est celui qui coûte le plus cher à rattraper."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre produit"

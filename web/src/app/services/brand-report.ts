@@ -40,8 +40,33 @@ export interface TrademarkResult {
 export interface NameQuality {
   score: number; // 0-100
   scores: Record<string, number>; // critère -> note 1-5
+  /** Une phrase par critère : pourquoi cette note. */
+  comments?: Record<string, string>;
+  /** Comment le nom est construit et ce qu'il évoque, en une phrase. */
+  origin?: string;
   strengths?: string;
   watchout?: string;
+}
+
+/**
+ * Ce que la page de rapport sait afficher.
+ *
+ * Un `BrandReport` complet en est un cas particulier. L'autre cas est la page
+ * AVANT achat : on y connaît déjà les domaines et l'analyse du nom — ils ont
+ * été collectés pendant la recherche — mais ni les marques ni les réseaux.
+ * D'où les champs facultatifs : ils décrivent une page qui se remplit, pas un
+ * document amputé.
+ */
+export interface ReportLike {
+  name: string;
+  handle: string;
+  domains: DomainAvailability[];
+  socials?: SocialAvailability[];
+  trademark?: TrademarkResult;
+  quality?: NameQuality;
+  generatedAt?: string;
+  disclaimer?: string;
+  cached?: boolean;
 }
 
 export interface BrandReport {
@@ -56,14 +81,45 @@ export interface BrandReport {
   disclaimer: string;
   /** Jeton de partage public (présent une fois le rapport mémorisé). */
   shareToken?: string;
-  /** Présents uniquement sur le rapport complet (authentifié). */
+  /** Présents uniquement sur le rapport de marque (authentifié). */
   remainingCredits?: number;
   emailed?: boolean;
   /** true = rapport déjà généré, renvoyé sans nouveau débit. */
   cached?: boolean;
+  /** Crédits réellement débités — 0 sur une actualisation, déjà payée. */
+  costCredits?: number;
 }
 
-/** Coût affiché du rapport complet (aligné sur BRAND_REPORT_COST côté API). */
+/**
+ * Ce que le serveur dit de l'offre pour un nom, AVANT achat. Aucun verdict :
+ * seulement de quoi afficher le bon libellé et le bon bouton.
+ */
+export interface BrandReportOffer {
+  deepReport: {
+    purchased: boolean;
+    priceCredits: number;
+  };
+  account: { credits: number };
+}
+
+
+/**
+ * Synthèse d'un nom déjà vérifié, affichée sur sa carte de résultat.
+ * N'existe que pour les noms dont le rapport est acquis.
+ */
+export interface BrandReportSummary {
+  nameKey: string;
+  verifiedAt: string | null;
+  trademark: 'none' | 'exact' | 'similar' | 'unknown';
+  inpiHits: boolean;
+  euipoHits: boolean;
+  socials: { platform: string; status: 'free' | 'taken' | 'unknown' }[];
+  score: number | null;
+  /** Crédits réellement débités au moment de l'achat. */
+  costCredits: number | null;
+}
+
+/** Coût affiché du rapport de marque (aligné sur BRAND_REPORT_COST côté API). */
 export const BRAND_REPORT_COST = 50;
 
 @Injectable({ providedIn: 'root' })
@@ -81,6 +137,21 @@ export class BrandReportService {
   }
 
   /** Rapport déjà généré pour ce nom (authentifié) — pour éviter un re-débit. */
+  /** Synthèses des noms vérifiés — verdicts déjà payés, pour la grille. */
+  /** Renvoie par email un rapport déjà acquis. Aucun débit côté serveur. */
+  sendByMail(name: string, emails: string[]): Observable<{ sent: boolean }> {
+    return this.http.post<{ sent: boolean }>(`${this.apiUrl}/send`, { name, emails });
+  }
+
+  summaries(): Observable<{ summaries: BrandReportSummary[] }> {
+    return this.http.get<{ summaries: BrandReportSummary[] }>(`${this.apiUrl}/summaries`);
+  }
+
+  /** État de l'offre pour un nom : acheté, prix, droit gratuit, solde. Sans verdict. */
+  offer(name: string): Observable<BrandReportOffer> {
+    return this.http.get<BrandReportOffer>(`${this.apiUrl}/offer`, { params: { name } });
+  }
+
   existing(name: string): Observable<{ exists: boolean; report?: BrandReport }> {
     return this.http.get<{ exists: boolean; report?: BrandReport }>(`${this.apiUrl}/existing`, { params: { name } });
   }
@@ -95,13 +166,23 @@ export class BrandReportService {
     return this.http.get<BrandReport>(`${this.apiUrl}/shared/${token}`);
   }
 
-  /** Rapport complet (authentifié, payant ; le token est ajouté par l'intercepteur). */
-  full(name: string, options?: { extensions?: string[]; emails?: string[]; force?: boolean }): Observable<BrandReport> {
+  /** Rapport de marque (authentifié, payant ; le token est ajouté par l'intercepteur). */
+  full(
+    name: string,
+    options?: {
+      extensions?: string[];
+      emails?: string[];
+      force?: boolean;
+      /** Projet et public cible : mémorisés AVEC le rapport, pour la relecture et l'email. */
+      context?: { description?: string; audience?: { label: string; value: string }[] };
+    },
+  ): Observable<BrandReport> {
     return this.http.post<BrandReport>(this.apiUrl, {
       name,
       ...(options?.extensions ? { extensions: options.extensions } : {}),
       ...(options?.emails?.length ? { emails: options.emails } : {}),
       ...(options?.force ? { force: true } : {}),
+      ...(options?.context ? { context: options.context } : {}),
     });
   }
 }

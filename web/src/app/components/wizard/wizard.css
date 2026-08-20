@@ -56,7 +56,7 @@
 
 /* Hover sur les lignes du tableau de domaines */
 .domain-row:hover {
-    background: var(--p-surface-50, #f9fafb);
+    background: var(--nm-app-surface-alt);
 }
 
 /* Ligne d'analyse pleine largeur : pas de bordure haute, pas de padding superflu */
@@ -69,8 +69,8 @@
 .reg-split {
     position: relative;
     display: inline-flex;
-    border: 1px solid var(--p-surface-300);
-    border-radius: 0.25rem;
+    border: 1px solid var(--nm-app-border-strong);
+    border-radius: var(--nm-radius-sm);
     overflow: visible;
 }
 .reg-split__main {
@@ -78,40 +78,40 @@
     align-items: center;
     gap: 0.3rem;
     padding: 0.2rem 0.5rem;
-    font-size: 0.72rem;
+    font-size: var(--nm-text-ui-sm);
     font-weight: 600;
-    color: var(--p-surface-600);
-    background: white;
+    color: var(--nm-app-text-2);
+    background: var(--nm-app-surface);
     text-decoration: none;
-    border-right: 1px solid var(--p-surface-300);
+    border-right: 1px solid var(--nm-app-border-strong);
     white-space: nowrap;
 }
 .reg-split__main:hover {
-    background: var(--p-surface-100);
-    color: var(--p-surface-800);
+    background: var(--nm-app-bg);
+    color: var(--nm-app-text);
 }
 .reg-split__toggle {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.35rem;
-    background: white;
+    padding: 0.5rem 0.75rem; min-height: var(--nm-touch-min);
+    background: var(--nm-app-surface);
     border: none;
     cursor: pointer;
-    color: var(--p-surface-500);
+    color: var(--nm-app-text-2);
     font-size: 0.6rem;
 }
 .reg-split__toggle:hover {
-    background: var(--p-surface-100);
-    color: var(--p-surface-700);
+    background: var(--nm-app-bg);
+    color: var(--nm-app-text);
 }
 .reg-split__menu {
     position: absolute;
     top: 100%;
     right: 0;
     margin-top: 0.25rem;
-    background: white;
-    border: 1px solid var(--p-surface-300);
-    border-radius: 0.25rem;
+    background: var(--nm-app-surface);
+    border: 1px solid var(--nm-app-border-strong);
+    border-radius: var(--nm-radius-sm);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     z-index: 9999;
     min-width: 100%;
@@ -122,48 +122,29 @@
     display: block;
     padding: 0.4rem 0.75rem;
     font-size: 0.78rem;
-    color: var(--p-surface-700);
+    color: var(--nm-app-text);
     text-decoration: none;
     white-space: nowrap;
 }
 .reg-split__item:hover {
-    background: var(--p-surface-100);
-}
-
-/* ─── liens registrar dans le dialog pick ── */
-.reg-link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border: 1px solid #fde68a;
-    border-radius: 0.25rem;
-    background: #fffbeb;
-    color: #92400e;
-    text-decoration: none;
-}
-.reg-link-btn:hover {
-    background: #fef3c7;
-    border-color: #f59e0b;
+    background: var(--nm-app-bg);
 }
 
 /* Hover sur le bouton copier tableau */
 .copy-table-btn:hover {
-    color: var(--p-primary-color) !important;
+    color: var(--nm-app-accent) !important;
 }
 
 /* ─── Titres de section (étape 2) ───────────────── */
 .section-label {
     margin: 0;
     padding-left: 0.625rem;
-    border-left: 3px solid var(--p-primary-color);
+    border-left: 3px solid var(--nm-app-accent);
     font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--p-surface-600);
+    color: var(--nm-app-text-2);
 }
 
 /* ─── Zone de chips ─────────────────────────────── */
@@ -173,16 +154,14 @@
     gap: 0.5rem;
     padding: 0.625rem;
     border-radius: 0.5rem;
-    background: var(--p-surface-50);
+    background: var(--nm-app-surface-alt);
     min-height: 3rem;
-    max-height: 9rem;
-    overflow-y: auto;
 }
 
 /* ─── Bandeau extensions (étape 3) ─────────────── */
 .extensions-bar {
-    background: var(--p-surface-50);
-    border: 1px solid var(--p-surface-200);
+    background: var(--nm-app-surface-alt);
+    border: 1px solid var(--nm-app-border);
     border-radius: 0.625rem;
     padding: 0.75rem 1rem;
     text-align: left;
@@ -205,17 +184,17 @@
     align-items: center;
     gap: 0.2rem;
     padding: 0.12rem 0.5rem;
-    border: 1px solid var(--p-surface-200, #e5e7eb);
+    border: 1px solid var(--nm-app-border);
     border-radius: 9999px;
-    color: var(--p-surface-600, #4b5563);
+    color: var(--nm-app-text-2);
     text-decoration: none;
     white-space: nowrap;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 .check-link:hover {
-    border-color: var(--p-primary-300, #6ee7b7);
-    color: var(--p-primary-700, #047857);
-    background: var(--p-primary-50, #ecfdf5);
+    border-color: var(--nm-app-accent-border);
+    color: var(--nm-app-accent);
+    background: var(--nm-app-verdict-free-bg);
 }
 
 .report-cta {
@@ -225,15 +204,15 @@
     padding: 0.55rem 1.1rem;
     border: 0;
     border-radius: 9999px;
-    background: #4f46e5;
-    color: #fff;
+    background: var(--nm-app-accent-fill);
+    color: var(--nm-app-on-accent);
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
 }
 .report-cta:hover {
-    background: #4338ca;
+    background: var(--nm-app-accent-fill-hover);
 }
 .report-cta:active {
     transform: translateY(1px);
@@ -245,10 +224,10 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.7rem;
-    border: 1px solid #4f46e5;
+    border: 1px solid var(--nm-app-accent);
     border-radius: 8px;
-    background: #4f46e5;
-    color: #fff;
+    background: var(--nm-app-accent-fill);
+    color: var(--nm-app-on-accent);
     font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
@@ -256,7 +235,7 @@
     transition: background 0.15s;
 }
 .report-btn:hover {
-    background: #4338ca;
+    background: var(--nm-app-accent-fill-hover);
 }
 .report-btn i {
     font-size: 0.85rem;
@@ -273,18 +252,18 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.4rem 0.85rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--nm-app-border);
     border-radius: 9999px;
-    background: #fff;
-    color: #4f46e5;
+    background: var(--nm-app-surface);
+    color: var(--nm-app-accent);
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 }
 .report-back:hover {
-    background: #eef2ff;
-    border-color: #c7d2fe;
+    background: var(--nm-app-accent-surface);
+    border-color: var(--nm-app-accent-border);
 }
 .report-cached-badge {
     display: inline-flex;
@@ -292,29 +271,29 @@
     gap: 0.3rem;
     padding: 0.15rem 0.6rem;
     border-radius: 9999px;
-    background: #fef3c7;
-    color: #92400e;
-    font-size: 0.72rem;
+    background: var(--nm-app-verdict-unknown-bg);
+    color: var(--nm-app-verdict-unknown-fg);
+    font-size: var(--nm-text-ui-sm);
     font-weight: 600;
 }
 .report-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--nm-app-surface);
+    border: 1px solid var(--nm-app-border);
     border-radius: 12px;
     padding: 1rem 1.1rem;
 }
 .report-card__title {
-    font-size: 0.72rem;
+    font-size: var(--nm-text-ui-sm);
     font-weight: 700;
-    color: #6b7280;
+    color: var(--nm-app-text-2);
     text-transform: uppercase;
     letter-spacing: .05em;
     margin: 0 0 0.5rem;
 }
 .report-score-card {
     flex: 1 1 160px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--nm-app-surface);
+    border: 1px solid var(--nm-app-border);
     border-radius: 12px;
     padding: 0.9rem 1rem;
     text-align: center;
@@ -325,8 +304,8 @@
     line-height: 1;
 }
 .report-score-lbl {
-    font-size: 0.72rem;
-    color: #6b7280;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
     text-transform: uppercase;
     letter-spacing: .04em;
     margin-top: 0.25rem;
@@ -337,7 +316,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    color: #4f46e5;
+    color: var(--nm-app-accent);
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
@@ -355,8 +334,8 @@
     flex-wrap: wrap;
     padding: 1rem 1.2rem;
     border-radius: 12px;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: #fff;
+    background: linear-gradient(135deg, var(--nm-app-accent), var(--nm-app-accent));
+    color: var(--nm-app-on-accent);
 }
 .report-hero__btn {
     display: inline-flex;
@@ -364,22 +343,471 @@
     gap: 0.4rem;
     padding: 0.6rem 1.1rem;
     border-radius: 9999px;
-    background: #fff;
-    color: #4f46e5;
+    background: var(--nm-app-surface);
+    color: var(--nm-app-accent);
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
 }
-.report-hero__btn:hover { background: #eef2ff; }
+.report-hero__btn:hover { background: var(--nm-app-accent-surface); }
 
 /* Skeleton de chargement */
 .sk-block {
     border-radius: 12px;
-    background: linear-gradient(90deg, #eef1f4 25%, #e2e6ea 37%, #eef1f4 63%);
+    background: linear-gradient(90deg, var(--nm-app-divider) 25%, var(--nm-app-border) 37%, var(--nm-app-divider) 63%);
     background-size: 400% 100%;
     animation: sk-shimmer 1.4s ease infinite;
 }
 @keyframes sk-shimmer {
     0% { background-position: 100% 50%; }
     100% { background-position: 0 50%; }
+}
+
+/* ─── Popup de vérification (option 2A) ───────────────────────────────────
+   Elle porte la pédagogie que la carte ne peut pas porter. Le prix n'apparaît
+   qu'en pied, après le contexte. */
+.vd-risk {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--nm-app-text-2);
+}
+
+.vd-what {
+    margin: 0 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nm-app-text-2);
+}
+
+.vd-list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.vd-list li {
+    display: flex;
+    gap: 0.625rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--nm-app-text-2);
+}
+
+.vd-list strong { color: var(--nm-app-text); font-weight: 600; }
+.vd-list .pi-check { color: var(--nm-app-accent); font-size: 0.8rem; margin-top: 0.2rem; flex: none; }
+
+.vd-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--nm-app-divider);
+}
+
+.vd-price { margin: 0; font-size: 0.9rem; color: var(--nm-app-text-2); }
+.vd-price strong { color: var(--nm-app-accent); font-family: var(--nm-font-display); }
+
+.vd-go {
+    min-height: var(--nm-touch-cta);
+    padding: 0.875rem 1.5rem;
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-accent-fill);
+    color: var(--nm-app-on-accent);
+    font-family: var(--nm-font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vd-go:hover { background: var(--nm-app-accent-fill-hover); }
+.vd-go--topup { background: var(--nm-app-text); }
+
+/* ─── Largeur du wizard ───────────────────────────────────────────────────
+   UN conteneur, 1200px, pour les trois étapes : la carte blanche ne change
+   jamais de largeur d'une étape à l'autre. Elle passait de ~880px à ~1400px
+   entre l'étape 2 et l'étape 3, et la page « sautait » au milieu du parcours.
+
+   Ce sont les CONTENUS qui diffèrent, pas le cadre : les formulaires gardent
+   une colonne de lecture de 720px à l'intérieur du conteneur, la grille de
+   résultats en occupe toute la largeur. */
+.wizard-shell {
+    max-width: var(--nm-content-max);
+    margin: 0 auto;
+}
+
+/* Colonne de lecture des étapes 1 et 2, et des rangées de l'étape 3 qui ne
+   sont pas la grille (bandeau de crédits, filtres, navigation). */
+.wizard-row {
+    width: 100%;
+    max-width: 45rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Les blocs de l'étape de cadrage.
+ *
+ * Ils étaient bornés à 32rem (512 px) écrits en dur, sept fois. Sur un écran
+ * large, cela donnait une colonne étroite perdue au milieu du vide — et les
+ * mots-clés, qui sont des pastilles, s'y empilaient sur quinze rangs. Ils
+ * suivent maintenant la colonne de lecture des autres étapes : une seule
+ * largeur pour tout le wizard, définie à un seul endroit. */
+.wizard-field {
+    width: 100%;
+    max-width: 45rem;
+}
+
+/* La grille, elle, prend tout le conteneur : c'est ce qui la rend comparable. */
+.wizard-row--wide {
+    max-width: none;
+}
+
+/* ─── En-tête de projet ───────────────────────────────────────────────────
+   Casse d'origine, pas de capitales forcées : « Repro », pas « REPRO ». Les
+   capitales cassent les noms accentués et écrasent les noms courts.
+   Couleur de texte et non accent : l'accent est réservé à ce qui se clique et
+   aux verdicts. Et 24px, pour rester sous le titre d'étape dans la
+   hiérarchie — il était plus gros que lui. */
+.wizard-project-title {
+    margin: 0;
+    font-family: var(--nm-font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: var(--nm-tracking-h3);
+    color: var(--nm-app-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── Actions du rapport ──────────────────────────────────────────────────
+   Le document est rendu par `app-brand-report-view` ; le wizard ne garde en
+   pied que ce qui n'existe pas en tête — le lien de partage. */
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    max-width: var(--nm-report-max);
+    margin: 0 auto;
+    padding: 0 0.25rem;
+}
+
+
+.report-actions__ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-verdict-free-fg);
+}
+
+.report-sample-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: var(--nm-report-max);
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--nm-app-accent-border);
+    border-radius: var(--nm-radius-lg);
+    background: var(--nm-app-accent-surface);
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text);
+}
+
+/* « Aide-moi à choisir » ressort d'un cran : secondaire contouré, pas une
+   couleur nouvelle. L'ampoule perd son ambre — l'ambre est une couleur de
+   verdict dans ce produit, pas un ornement. */
+.pick-btn.p-splitbutton .p-button {
+    min-height: var(--nm-touch-min);
+    background: transparent;
+    border-color: var(--nm-app-border-strong);
+    color: var(--nm-app-text);
+}
+
+.pick-btn.p-splitbutton .p-button:hover {
+    background: var(--nm-app-surface-alt);
+    border-color: var(--nm-app-accent);
+    color: var(--nm-app-accent);
+}
+
+.pick-btn .pi-lightbulb {
+    color: inherit !important;
+}
+
+/* ─── Tiroir des projets ─────────────────────────────────────────────────── */
+
+.projects-drawer__intro {
+    margin: 0 0 1.25rem;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}
+
+.projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.project-item {
+    display: flex;
+    align-items: stretch;
+    gap: 0.25rem;
+    border-radius: var(--nm-radius-sm);
+}
+
+.project-item:hover {
+    background: var(--nm-app-surface-alt);
+}
+
+/* La ligne entière est le lien, et elle atteint le plancher tactile. */
+.project-item__open {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-height: var(--nm-touch-min);
+    padding: 0.5rem 0.625rem;
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.project-item__name {
+    font-size: var(--nm-text-ui);
+    font-weight: 600;
+    color: var(--nm-app-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-item__meta {
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Discrète au repos, rouge au survol et au focus seulement. Cible 44×44. */
+.project-item__delete {
+    flex: none;
+    width: var(--nm-touch-min);
+    min-height: var(--nm-touch-min);
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: none;
+    color: var(--nm-app-text-2);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.project-item__delete:hover,
+.project-item__delete:focus-visible {
+    color: var(--nm-app-verdict-taken-fg);
+    background: var(--nm-app-verdict-taken-bg);
+}
+
+.project-item__open:focus-visible,
+.project-item__delete:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: -2px;
+}
+
+.projects-drawer__empty {
+    padding: 2.5rem 0;
+    text-align: center;
+    color: var(--nm-app-text-2);
+}
+
+/* Voile : PrimeNG le pose avec `modal`, on le cale sur la teinte du design. */
+.p-drawer-mask {
+    background: rgba(11, 14, 16, 0.45) !important;
+}
+
+/* ─── Champs de l'étape 1 et 2 ───────────────────────────────────────────── */
+
+/* Auto-agrandissement piloté en TS ; la poignée native disparaît — elle
+   proposait de réparer à la main un défaut qui ne devrait pas exister. */
+.wizard-textarea {
+    resize: none;
+    overflow-y: auto;
+    min-height: 7.5rem;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.inspiration-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.inspiration-field__label {
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+    color: var(--nm-app-text-2);
+}
+
+.inspiration-field input {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+/* Croix de suppression des chips : 24px de cible dans une ligne de 44px. La
+   zone de chips ne défile plus — c'est la carte qui défile, un défilement
+   imbriqué se manipule mal et cache la moitié des mots-clés. */
+.chips-container .p-chip {
+    min-height: 2rem;
+}
+
+.chips-container .p-chip-remove-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--nm-radius-pill);
+}
+
+.chips-container .p-chip-remove-icon:hover {
+    background: var(--nm-app-border);
+}
+
+/* Ligne de signalement : discrète, sous la carte. */
+.feedback-line {
+    margin: 1rem 0 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+    text-align: center;
+}
+
+.feedback-line .nm-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+}
+
+/* Point 24 — l'étape 1 laissait une grande carte presque vide, puis un long
+   fond gris jusqu'au pied de page. La carte prend la hauteur de son contenu ;
+   c'est la ZONE qui garde une hauteur minimale, ce qui fait remonter le pied
+   de page sans étirer une surface blanche pour rien. */
+/* Le wizard n'est plus une CARTE posée sur la page : il EST la page.
+ *
+ * Le cadre blanc arrondi datait d'avant la refonte, quand chaque écran était
+ * un panneau. L'accueil, lui, pose ses sections à même le fond — et le wizard
+ * s'ouvre juste après lui. Deux traitements pour deux moitiés du même produit,
+ * séparées par un clic, se remarquent.
+ *
+ * En pratique le cadre n'apportait rien : il fait toute la largeur du
+ * conteneur et toute la hauteur du contenu, donc il ne délimite rien qu'on ne
+ * voie déjà. Ce qui doit être encadré l'est individuellement — les cartes de
+ * résultats, le panneau d'extensions, le rapport.
+ */
+.wizard-shell .p-card {
+    height: auto;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.wizard-shell .p-card > .p-card-body {
+    min-height: 22rem;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* ─── Rapport complet : une page, pas une modale ────────────────────────────
+   La barre de navigation reste visible au-dessus — c'est tout l'objet du
+   changement. La colonne reprend la largeur de lecture du document. */
+.report-page {
+    width: 100%;
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 1.25rem 0 2.5rem;
+}
+
+.report-page__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+
+/* ═══ Impression du rapport ════════════════════════════════════════════════
+   Les règles qui concernent le CHROME de la page (barre, pied de site) vivent
+   dans styles.css : elles visent des éléments hors de cette vue, que
+   l'encapsulation de composant ne peut pas atteindre. Ici, seulement ce qui
+   appartient au wizard. */
+@media print {
+    .report-page__bar,
+    .report-back,
+    .report-actions,
+    /* Le nom du projet, répété au-dessus du nom du rapport : deux titres
+       différents en tête de document, dont un qui ne le concerne pas. */
+    .wizard-project-title {
+        display: none !important;
+    }
+
+    .report-page {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .wizard-shell {
+        max-width: none;
+    }
+}
+
+/* Le débit, sous le titre des résultats : lisible, jamais concurrent du
+   résultat qu'on est venu voir. */
+.wizard-debit {
+    margin: 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}
+
+/* L'autre entrée : discrète, mais à hauteur de la première étape — pas au
+   pied de page, où on ne la lit qu'après avoir renoncé. */
+.wizard-alt {
+    margin: 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}
+
+/* Rapport d'un projet non initialisé : l'invitation à le décrire, au-dessus
+   du document — c'est là que le manque se remarque. */
+.report-seed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.875rem 1.125rem;
+    border: 1px solid var(--nm-app-accent-border);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-accent-surface);
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text);
 }

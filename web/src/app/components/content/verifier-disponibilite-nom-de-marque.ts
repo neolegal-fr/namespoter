@@ -1,9 +1,10 @@
 import { Component, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { KeycloakService } from 'keycloak-angular';
 import { timeout } from 'rxjs';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 import { BrandReportViewComponent } from '../brand-report/brand-report-view';
@@ -21,7 +22,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
 @Component({
   selector: 'app-verifier-disponibilite-nom-de-marque',
   standalone: true,
-  imports: [RouterModule, FormsModule, ArticleCtaComponent, BrandReportViewComponent],
+  imports: [TroisRisquesComponent, RouterModule, FormsModule, ArticleCtaComponent, BrandReportViewComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -80,7 +81,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
           </div>
         }
 
-        <!-- Rapport complet (avec marque) -->
+        <!-- Rapport complet -->
         @if (fullReport(); as fr) {
           <div style="margin-top: 1.5rem">
             <app-brand-report-view [report]="fr"></app-brand-report-view>
@@ -125,6 +126,8 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
         un associé ou votre avocat.
       </p>
 
+      <app-trois-risques intro="« Disponible » ne veut pas dire la même chose selon ce qu'on vérifie. Ces trois contrôles couvrent trois risques distincts."></app-trois-risques>
+
       <app-article-cta
         heading="Vérifiez votre nom de marque maintenant"
         subheading="Domaine, réseaux sociaux et marque déposée (INPI + EUIPO) en un seul rapport."
@@ -143,7 +146,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
     .checker { margin: 1.5rem 0 2rem; padding: 1.25rem; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; }
     .checker-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .checker-row input { flex: 1 1 200px; padding: 0.6rem 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
-    .checker-row button { padding: 0.6rem 1.2rem; border: 0; border-radius: 8px; background: #6366f1; color: #fff; font-weight: 600; cursor: pointer; }
+    .checker-row button { padding: 0.6rem 1.2rem; border: 0; border-radius: 8px; background: var(--nm-app-accent-fill); color: var(--nm-app-on-accent); font-weight: 600; cursor: pointer; }
     .checker-row button:disabled { opacity: .6; cursor: default; }
     .checker-error { color: #dc2626; margin: 0.75rem 0 0; }
     .checker-result { margin-top: 1rem; }
@@ -157,6 +160,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
   `],
 })
 export class VerifierDisponibiliteMarqueComponent {
+  private readonly router = inject(Router);
   private readonly reports = inject(BrandReportService);
 
   readonly query = signal('');
@@ -165,7 +169,7 @@ export class VerifierDisponibiliteMarqueComponent {
   readonly error = signal<string | null>(null);
   readonly cost = BRAND_REPORT_COST;
 
-  // Rapport complet (avec marque) pour un nom saisi — nécessite un compte + crédits.
+  // Rapport complet pour un nom saisi — nécessite un compte + crédits.
   private keycloak?: KeycloakService;
   readonly isLoggedIn = signal(false);
   readonly fullLoading = signal(false);
@@ -186,7 +190,7 @@ export class VerifierDisponibiliteMarqueComponent {
     }
   }
 
-  /** Génère le rapport complet (avec marque) pour le nom saisi. */
+  /** Génère le Rapport complet pour le nom saisi. */
   getFullReport(): void {
     const name = this.query().trim();
     if (!name || this.fullLoading()) return;
@@ -211,7 +215,23 @@ export class VerifierDisponibiliteMarqueComponent {
     });
   }
 
+  /**
+   * Le contrôle inline part vers le rapport public.
+   *
+   * Il avait son propre aperçu — un seul domaine, trois réseaux, et un rendu
+   * qui ne ressemblait à aucun autre écran du produit. Deux pages disaient
+   * donc la même chose de deux façons. Celle-ci garde son contenu éditorial,
+   * qui est sa raison d'être, et confie la réponse à la page qui sait la
+   * donner : quatre extensions, la même mise en forme que le rapport acheté,
+   * et la suite proposée au bon moment.
+   */
   check(): void {
+    const name = this.query().trim();
+    if (!name) return;
+    void this.router.navigate(['/report'], { queryParams: { name } });
+  }
+
+  private checkAncien(): void {
     const name = this.query().trim();
     if (!name || this.loading()) return;
     this.loading.set(true);

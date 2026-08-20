@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -11,7 +12,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-generateur-nom-startup-ia',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -47,6 +48,8 @@ import { applyContentSeo } from './content-seo';
         <code>.com</code>, <code>.io</code> et l'extension de votre choix. Vous ne repartez qu'avec des noms
         réellement enregistrables aujourd'hui.
       </p>
+
+      <app-trois-risques intro="L'IA propose vite. Ces trois contrôles disent lequel de ses noms tiendra dans deux ans."></app-trois-risques>
 
       <app-article-cta
         heading="Nommez votre startup IA"

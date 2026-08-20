@@ -1,13 +1,26 @@
 import type { Availability, BrandReport, SocialAvailability, DomainAvailability } from './dto/brand-report.types';
 
 /**
- * Rendu du rapport en document HTML autonome — sert à la fois de corps d'email
- * et de pièce jointe (imprimable en PDF depuis le navigateur). Pur et sans
- * dépendance : pas de moteur PDF ajouté (cf. décision US-053).
+ * Rendu du rapport en document HTML autonome — corps d'email et pièce jointe.
+ * Pur et sans dépendance : pas de moteur PDF ajouté (cf. décision US-053).
+ *
+ * ⚠ Ce document doit être LE MÊME que la page, pas un cousin.
+ *
+ * Il en divergeait sur tout ce qui se remarque : un autre titre (« rapport de
+ * disponibilité » contre « rapport complet »), un autre ordre (réseaux avant
+ * marques), un autre vocabulaire (« Libre » / « Pris » / « ? » contre
+ * « libre » / « pris » / « non vérifiable »), et des pastilles pleines à texte
+ * blanc que la charte proscrit. Recevoir par mail un document qui ne ressemble
+ * pas à celui qu'on vient de lire fait douter que ce soit le même.
+ *
+ * Les couleurs sont donc celles des jetons clairs du produit, écrites en dur :
+ * un client de messagerie ignore les variables CSS.
  */
 
-const STATUS_LABEL: Record<Availability, string> = { free: 'Libre', taken: 'Pris', unknown: '?' };
-const STATUS_COLOR: Record<Availability, string> = { free: '#16a34a', taken: '#dc2626', unknown: '#9ca3af' };
+const STATUS_LABEL: Record<Availability, string> = { free: 'libre', taken: 'pris', unknown: 'non vérifiable' };
+/** Paires fond + texte des verdicts, reprises de `--nm-app-verdict-*` clair. */
+const STATUS_BG: Record<Availability, string> = { free: '#e8f7ef', taken: '#fdeaea', unknown: '#fdf3e3' };
+const STATUS_FG: Record<Availability, string> = { free: '#0b6b45', taken: '#a32020', unknown: '#8a5a12' };
 const COLLECTION_LABEL: Record<string, string> = { FR: 'INPI (FR)', EU: 'EUIPO (UE)', WO: 'OMPI (int.)' };
 
 function esc(s: string): string {
@@ -15,7 +28,7 @@ function esc(s: string): string {
 }
 
 function badge(status: Availability): string {
-  return `<span style="display:inline-block;padding:2px 10px;border-radius:9999px;font-size:12px;font-weight:600;color:#fff;background:${STATUS_COLOR[status]}">${STATUS_LABEL[status]}</span>`;
+  return `<span style="display:inline-block;padding:3px 9px;border-radius:6px;font-size:12px;font-weight:500;color:${STATUS_FG[status]};background:${STATUS_BG[status]}">${STATUS_LABEL[status]}</span>`;
 }
 
 function domainsRows(domains: DomainAvailability[]): string {
@@ -27,8 +40,9 @@ function domainsRows(domains: DomainAvailability[]): string {
 function socialsRows(socials: SocialAvailability[]): string {
   return socials
     .map((s) => {
-      const label = s.planned ? `${esc(s.platform)} <span style="color:#9ca3af;font-size:11px">(bientôt)</span>` : esc(s.platform);
-      return `<tr><td style="padding:6px 0">${label} · <a href="${esc(s.url)}" style="color:#6366f1">@${esc(s.handle)}</a></td><td style="text-align:right">${badge(s.status)}</td></tr>`;
+      // Aucune ligne « bientôt » : une plateforme non interrogée ne figure pas
+      // dans un rapport payé, page comme email.
+      return `<tr><td style="padding:6px 0">${esc(s.platform)} · <a href="${esc(s.url)}" style="color:#0d7a4e">@${esc(s.handle)}</a></td><td style="text-align:right">${badge(s.status)}</td></tr>`;
     })
     .join('');
 }
@@ -47,12 +61,12 @@ function trademarkBlock(report: BrandReport): string {
       const coll = h.collection ? COLLECTION_LABEL[h.collection] ?? h.collection : '—';
       const classes = h.classes.length ? ` · classes ${h.classes.join(', ')}` : '';
       const status = h.status ? ` · ${esc(h.status)}` : '';
-      const link = h.noticeUrl ? `<a href="${esc(h.noticeUrl)}" style="color:#6366f1">notice</a>` : '';
+      const link = h.noticeUrl ? `<a href="${esc(h.noticeUrl)}" style="color:#0d7a4e">notice</a>` : '';
       return `<li style="margin:4px 0">${esc(h.name)} <span style="color:#6b7280">(${coll}${classes}${status})</span> ${link}</li>`;
     })
     .join('');
   return `<p style="margin:0 0 8px">${head[tm.match]}</p>${hits ? `<ul style="margin:8px 0;padding-left:18px">${hits}</ul>` : ''}
-    <p style="font-size:12px"><a href="${esc(tm.deepLink)}" style="color:#6366f1">Recherche officielle INPI →</a></p>`;
+    <p style="font-size:12px"><a href="${esc(tm.deepLink)}" style="color:#0d7a4e">Consulter la base INPI →</a></p>`;
 }
 
 const QUALITY_CRITERIA: Record<string, string> = {
@@ -71,7 +85,8 @@ function qualityBlock(report: BrandReport): string {
     .join('');
   const strengths = q.strengths ? `<p style="margin:6px 0 0;font-size:13px"><strong style="color:#16a34a">Forces :</strong> ${esc(q.strengths)}</p>` : '';
   const watchout = q.watchout ? `<p style="margin:4px 0 0;font-size:13px"><strong style="color:#d97706">Vigilance :</strong> ${esc(q.watchout)}</p>` : '';
-  return `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Qualité du nom <span style="color:#6b7280;font-weight:400">— ${q.score}/100</span></h2>
+  const origine = q.origin ? `<p style="margin:0 0 10px;font-size:14px;line-height:1.55">${esc(q.origin)}</p>` : '';
+  return `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Qualité du nom <span style="color:#6a7470;font-weight:400">— ${q.score}/100</span></h2>${origine}
     <table style="width:100%;border-collapse:collapse;font-size:14px">${rows}</table>${strengths}${watchout}`;
 }
 
@@ -79,40 +94,47 @@ function section(title: string, inner: string): string {
   return `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">${title}</h2><table style="width:100%;border-collapse:collapse;font-size:14px">${inner}</table>`;
 }
 
-/** Document HTML complet du rapport. */
+/** Document HTML complet du rapport, dans l'ordre exact de la page. */
 export function renderReportHtml(report: BrandReport): string {
-  const scoreColor = report.score >= 66 ? '#16a34a' : report.score >= 33 ? '#d97706' : '#dc2626';
   const date = new Date(report.generatedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const ctx = report.context;
+  const projet = ctx?.description
+    ? `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Le projet</h2>
+       <p style="margin:0;padding-left:12px;border-left:3px solid #c9e9d8;font-size:14px;line-height:1.6;white-space:pre-line">${esc(ctx.description)}</p>`
+    : '';
+  const cible = ctx?.audience?.length
+    ? `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Public cible</h2>
+       <table style="width:100%;border-collapse:collapse;font-size:14px">` +
+      ctx.audience
+        .map((a) => `<tr><td style="padding:4px 0;color:#5c6663">${esc(a.label)}</td><td style="text-align:right;font-weight:600">${esc(a.value)}</td></tr>`)
+        .join('') +
+      `</table>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rapport de disponibilité — ${esc(report.name)}</title></head>
-<body style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:32px 20px;color:#1f2937;background:#fff">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-    <div>
-      <div style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Rapport de disponibilité de marque</div>
-      <h1 style="font-size:26px;margin:4px 0 0">${esc(report.name)}</h1>
-    </div>
-    <div style="text-align:center">
-      <div style="font-size:34px;font-weight:800;color:${scoreColor};line-height:1">${report.score}<span style="font-size:16px;color:#9ca3af">/100</span></div>
-      <div style="font-size:11px;color:#6b7280">score de disponibilité</div>
-    </div>
-  </div>
+<title>Rapport complet — ${esc(report.name)}</title></head>
+<body style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:32px 20px;color:#2c3532;background:#fff">
+  <div style="font-size:12px;color:#6a7470;text-transform:uppercase;letter-spacing:.05em">Rapport complet · ${date}</div>
+  <h1 style="font-size:30px;margin:4px 0 0;letter-spacing:-.01em">${esc(report.name)}</h1>
 
+  ${projet}
+  ${cible}
   ${qualityBlock(report)}
   ${section('Noms de domaine', domainsRows(report.domains))}
-  ${section('Réseaux sociaux', socialsRows(report.socials))}
-  <h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Marque déposée</h2>
+  <h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Marques françaises (INPI), de l'Union européenne (EUIPO) et internationales (OMPI)</h2>
   ${trademarkBlock(report)}
+  ${report.socials.length ? section('Réseaux sociaux', socialsRows(report.socials)) : ''}
 
-  <p style="margin:28px 0 8px;padding:12px 14px;background:#f3f4f6;border-radius:8px;font-size:12px;color:#6b7280">
+  <p style="margin:28px 0 8px;padding:12px 14px;background:#f4f6f5;border-radius:8px;font-size:12px;color:#5c6663">
     ${esc(report.disclaimer)}
   </p>
-  <p style="font-size:11px;color:#9ca3af">Généré le ${date} par Namorama.</p>
+  <p style="font-size:11px;color:#6a7470">Généré le ${date} par Namorama.</p>
 </body></html>`;
 }
 
 /** Nom de fichier de la pièce jointe. */
 export function reportFileName(report: BrandReport): string {
   const slug = report.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'marque';
-  return `rapport-disponibilite-${slug}.html`;
+  return `rapport-complet-${slug}.html`;
 }

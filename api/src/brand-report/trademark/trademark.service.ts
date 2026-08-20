@@ -10,10 +10,33 @@ const SEARCH_URL = `${BASE}/services/apidiffusion/api/marques/search`;
 const REQUEST_TIMEOUT_MS = 15000;
 
 /**
- * Chaque notice = un appel HTTP de plus (et le quota INPI tourne à ~100/période).
- * On n'enrichit donc les classes que pour un petit nombre de dépôts pertinents.
+ * Chaque notice consomme une unité de quota, exactement comme une recherche.
+ *
+ * Mesuré le 20/08/2026 sur le compte de production, en lisant les en-têtes que
+ * la passerelle renvoie : `x-rate-limit-remaining` (100 unités) et
+ * `x-size-limit-remaining` (~50 Mo). Une recherche fait −1, une notice fait −1
+ * aussi — ce n'est donc pas « la recherche coûte, l'enrichissement est gratuit ».
+ *
+ * Conséquence directe sur le plafond : un rapport coûte jusqu'à
+ * 1 + MAX_NOTICE_FETCHES unités, soit 6 — donc **au plus ~16 rapports par
+ * période**, tous comptes confondus, puisqu'il n'y a qu'un compte INPI.
+ *
+ * La DURÉE de la période n'est écrite nulle part : ni dans les en-têtes (aucun
+ * `x-rate-limit-reset` ni `Retry-After`), ni dans l'OpenAPI de la passerelle,
+ * ni dans la documentation publique de l'INPI. Constaté seulement qu'elle
+ * dépasse la dizaine de minutes : trois appels espacés de sept minutes se sont
+ * cumulés sans réinitialisation.
  */
 const MAX_NOTICE_FETCHES = 5;
+
+/**
+ * Seuil d'alerte sur le quota restant : moins de deux rapports possibles.
+ *
+ * Le manque de quota ne casse rien de visible — il fait juste retomber le
+ * volet marque sur « non vérifiable », dans un rapport facturé 50 crédits.
+ * C'est exactement le genre de panne qu'il faut voir venir.
+ */
+const QUOTA_WARN_BELOW = 2 * (1 + MAX_NOTICE_FETCHES);
 
 /** ukey préfixe → code de collection lisible. */
 const COLLECTION_CODE: Record<string, TrademarkHit['collection']> = {
@@ -50,6 +73,12 @@ export class TrademarkService {
   async check(name: string): Promise<TrademarkResult> {
     const deepLink = this.deepLink(name);
     if (!this.username || !this.password) {
+      // Journalisé, et pas seulement retourné : sans identifiants, TOUS les
+      // rapports sortent « non vérifiable » sur le volet marque — pour 50
+      // crédits. Une panne de configuration en production doit apparaître dans
+      // `python3 - errors`, pas seulement dans un rapport que personne ne relit.
+      this.events.warn('INPI_USERNAME/INPI_PASSWORD absents : volet marque non vérifiable', 'trademark_check_unconfigured');
+      this.events.event('trademark_check_unconfigured');
       return { office: 'INPI', match: 'unknown', hits: [], deepLink, note: 'Vérification INPI non configurée.' };
     }
     try {
@@ -127,9 +156,49 @@ export class TrademarkService {
 
       const res = await fetch(url, { ...init, headers, redirect: 'manual', signal: abort.signal });
       jar.absorb(res.headers.getSetCookie?.() ?? []);
+      this.trackQuota(url, res);
       return res;
     } finally {
       clearTimeout(timer);
+    }
+  }
+
+  /**
+   * Journalise le quota restant, à chaque appel qui l'expose.
+   *
+   * La passerelle renvoie `x-rate-limit-remaining` (sur 100) et
+   * `x-size-limit-remaining` (~50 Mo) sur les appels de diffusion — recherche
+   * et notice, pas sur l'authentification. Aucun en-tête ne dit quand le
+   * compteur repart : la seule façon de connaître la période est de suivre sa
+   * valeur dans le temps, d'où cette trace à chaque appel.
+   *
+   * Ce n'est pas du « au cas où » : le compteur est partagé par tout le
+   * produit (un seul compte INPI) et un rapport en consomme jusqu'à six.
+   *
+   * Best-effort, comme toute écriture de journal : une trace ne doit jamais
+   * faire échouer la requête qu'elle observe.
+   */
+  private trackQuota(url: string, res: Response): void {
+    try {
+      // `Number(null)` vaut 0, pas NaN : sans ce test d'absence, un appel SANS
+      // quota (authentification, login) serait journalisé comme « 0 restant »,
+      // c'est-à-dire comme une panne.
+      const remaining = num(res.headers.get('x-rate-limit-remaining'));
+      if (remaining === null) return;
+      const bytes = num(res.headers.get('x-size-limit-remaining'));
+      this.events.event('trademark_quota_observed', {
+        endpoint: url.includes('/search') ? 'search' : 'notice',
+        remaining,
+        ...(bytes === null ? {} : { bytesRemaining: bytes }),
+      });
+      if (remaining < QUOTA_WARN_BELOW) {
+        this.events.warn(
+          `Quota INPI presque épuisé : ${remaining} appels restants (un rapport en consomme jusqu'à ${1 + MAX_NOTICE_FETCHES})`,
+          'trademark_quota_low',
+        );
+      }
+    } catch {
+      // Une trace ne casse pas une requête.
     }
   }
 
@@ -225,6 +294,13 @@ export class TrademarkService {
   private sanitize(name: string): string {
     return name.replace(/[[\]=]/g, ' ').trim();
   }
+}
+
+/** En-tête numérique, ou `null` s'il est absent ou illisible. */
+function num(raw: string | null): number | null {
+  if (raw === null || raw.trim() === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
 }
 
 interface FieldEntry {

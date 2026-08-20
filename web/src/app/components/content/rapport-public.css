@@ -1,0 +1,85 @@
+/* Rapport public — même largeur de lecture que le rapport authentifié. */
+.rp {
+    width: 100%;
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+.rp-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    margin-bottom: 1.5rem;
+}
+
+.rp-form input {
+    flex: 1 1 18rem;
+    min-width: 0;
+    min-height: var(--nm-touch-cta);
+    padding: 0 1rem;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-md);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text);
+    font-family: var(--nm-font-body);
+    font-size: 16px;
+}
+
+.rp-form input:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: 1px;
+}
+
+.rp-form .nm-btn-primary {
+    flex: none;
+    min-height: var(--nm-touch-cta);
+    padding: 0 1.5rem;
+}
+
+.rp-state {
+    margin: 2rem 0;
+    text-align: center;
+    color: var(--nm-app-text-2);
+}
+
+.rp-state--ko {
+    color: var(--nm-app-verdict-taken-fg);
+}
+
+/* L'invitation à en dire plus : elle vient APRÈS la réponse, jamais avant. */
+.rp-more {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-md);
+    background: var(--nm-app-surface-alt);
+    text-align: center;
+}
+
+.rp-more__title {
+    margin: 0 0 0.35rem;
+    font-family: var(--nm-font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--nm-app-text);
+}
+
+.rp-more__lead {
+    margin: 0 0 1rem;
+    font-size: var(--nm-text-ui);
+    color: var(--nm-app-text-2);
+}
+
+/* Bandeau d'exemple : franc, pas décoratif. Un exemple pris pour un résultat
+   est pire qu'aucun exemple. */
+.rp-sample {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--nm-app-verdict-unknown-fg);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-verdict-unknown-bg);
+    color: var(--nm-app-verdict-unknown-fg);
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+}

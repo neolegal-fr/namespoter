@@ -64,6 +64,34 @@ c'est-à-dire précisément là où elle est dangereuse.
 > `DB_SYNCHRONIZE` sur le serveur : la base y porte des comptes et des paiements, et la
 > synchronisation supprime ou retype des colonnes sans relecture.
 
+Les scripts SQL à appliquer vivent dans `api/migrations/`, datés, idempotents
+(`ADD COLUMN IF NOT EXISTS`), avec la commande d'application et le retour arrière en
+en-tête. **Ordre impératif : appliquer le SQL avant de déployer l'image qui en dépend.**
+
+### Tarification du rapport de marque
+
+Une règle, une seule : **un rapport coûte `BRAND_REPORT_COST` crédits**. Les 100 crédits
+offerts chaque mois couvrent environ 50 suggestions de domaines et un rapport — de quoi
+essayer le produit sans mécanique supplémentaire à expliquer.
+
+Le **rapport offert mensuel a été retiré** (20/08/2026). Il demandait une comptabilité
+parallèle : période de référence, horodatage de consommation, verrou pessimiste pour
+éviter qu'une double requête n'obtienne deux gratuités, coût réel mémorisé sur chaque
+enregistrement, et un champ `freeThisMonth` que le front devait interroger avant
+d'afficher un prix. Tout cela pour un avantage que le solde mensuel accordait déjà.
+
+Ce qui subsiste et reste utile :
+
+- `brand_report_record.costCredits` porte le débit **réel** — 0 sur une actualisation,
+  déjà payée une fois. L'historique reste juste après un changement de tarif.
+- Les colonnes `user.freeReportPeriod` et `user.freeReportUsedAt` ont été **supprimées** :
+  elles n'avaient jamais été déployées en production, la migration qui les créait a donc
+  simplement été amputée plutôt que compensée par un `ALTER … DROP`.
+- `GET /brand-report/offer?name=` décrit l'offre sans verdict : `deepReport.purchased`,
+  `priceCredits`, `account.credits`.
+- La confirmation avant débit est **inconditionnelle** : 50 crédits, la moitié de la
+  réserve mensuelle, partent en un clic.
+
 ### Système de crédits
 - 1 suggestion de domaine = 1 crédit
 - Crédits initiaux : 100
@@ -131,6 +159,17 @@ Les logs servent à répondre à deux questions : **quelle erreur un utilisateur
 
 `snake_case`, verbe au passé, préfixé par le domaine : `search_started`, `search_completed`, `search_blocked_no_credits`, `wizard_step_viewed`, `login_required_before_search`, `client_error`. Ajouter un événement quand il répond à une question qu'on se pose vraiment — pas « au cas où ».
 
+Deux parcours coexistent et ne partagent aucun repère, d'où deux entonnoirs :
+
+- **générer un nom** (`python3 - funnel`) : décrire → cadrer → chercher → vérifier ;
+- **tester un nom qu'on a** (`python3 - nom`) : `public_report_requested` →
+  `public_report_shown` → `name_test_project_created`, avec les deux sorties possibles
+  (`public_report_signup_clicked` pour approfondir, `public_report_project_clicked` pour
+  chercher autre chose).
+
+`report_locked_abandoned` mérite une mention à part : il marque un départ du rapport sans
+achat. C'est le seul endroit où le prix se discute vraiment, et le seul moyen de le voir.
+
 ### Parcours utilisateur
 
 Deux canaux complémentaires :
@@ -153,6 +192,12 @@ ssh namorama-prod "python3 - errors" < scripts/analyze-logs.py
 
 # Rapports de marque : demandes, issues, et détail par compte (sub)
 ssh namorama-prod "python3 - rapports" < scripts/analyze-logs.py
+
+# Quota INPI : évolution du compteur dans le temps, et remises à zéro
+ssh namorama-prod "python3 - quota"    < scripts/analyze-logs.py
+
+# Parcours « j'ai déjà un nom » : de la page publique au projet créé
+ssh namorama-prod "python3 - nom"      < scripts/analyze-logs.py
 
 # Requêtes les plus lentes / codes de statut par route / lignes brutes
 ssh namorama-prod "python3 - slow"   < scripts/analyze-logs.py
@@ -182,3 +227,24 @@ Deux sources, volontairement distinctes — elles ne mesurent pas la même chose
 - **Admin de l'app** : les rapports **produits**, lus en base (`brand_report_record`). KPI période + total, et une colonne « Rapports » par utilisateur. Un compte supprimé ne compte plus (jointure sur le `sub`).
 
 > L'admin affichera toujours un chiffre ≤ celui des logs : un rapport bloqué faute de crédits est une demande, pas un rapport.
+
+### Quota INPI
+
+Le volet marque d'un rapport s'appuie sur **un seul compte INPI**, partagé par tout le
+produit. La passerelle expose ce qu'il en reste à chaque appel de diffusion :
+`x-rate-limit-remaining` (sur **100**) et `x-size-limit-remaining` (~**50 Mo**).
+
+- Une **notice coûte une unité au même titre qu'une recherche** — mesuré, pas supposé.
+  Un rapport en consomme donc jusqu'à **6** (1 recherche + `MAX_NOTICE_FETCHES`), soit
+  **au plus ~16 rapports par période**.
+- **La durée de la période n'est documentée nulle part** : aucun `x-rate-limit-reset`,
+  rien dans l'OpenAPI de la passerelle ni dans la documentation publique de l'INPI.
+  C'est pourquoi chaque appel journalise `trademark_quota_observed` : `python3 - quota`
+  affiche la suite chronologique et **signale les remontées du compteur**, ce qui encadre
+  la période entre deux bornes observées.
+- Sous 12 appels restants, `trademark_quota_low` passe en `warn` : le manque de quota ne
+  casse rien de visible, il fait retomber le volet marque sur « non vérifiable » dans un
+  rapport pourtant facturé.
+
+> Ne jamais partager ce compte avec le développement local : les tests videraient le
+> quota de la production. Un second compte INPI, ou le message « non configurée ».

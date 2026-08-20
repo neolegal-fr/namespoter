@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#eceeed; }
+  a { color:#0d7a4e; text-decoration:none; }
+  a:hover { color:#0b8355; }
+  * { box-sizing:border-box; }
+</style>
+</helmet>
+
+<div style="font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif; -webkit-font-smoothing:antialiased; background:#eceeed; min-height:100vh; padding:44px 32px 90px">
+
+  <div style="max-width:1400px; margin:0 auto 36px">
+    <h1 style="font-family:'Space Grotesk',sans-serif; font-size:34px; letter-spacing:-0.03em; margin:0 0 12px; color:#0b0e10">Thème clair, sombre, ou celui du système</h1>
+    <p style="font-size:16.5px; line-height:1.6; color:#4a534f; margin:0 0 14px; max-width:78ch">
+      Votre système de jetons dit aujourd'hui, en commentaire dans <code style="font-family:'Space Grotesk',monospace">tokens.css</code> : « la refonte n'est pas un thème clair et un thème sombre ». Les jetons sont nommés par <strong>surface</strong> — <code style="font-family:'Space Grotesk',monospace">-dark</code>, <code style="font-family:'Space Grotesk',monospace">-light</code> — et non par mode. C'est une bonne décision, et elle reste valable : elle empêche juste de basculer quoi que ce soit tel quel.
+    </p>
+    <p style="font-size:16.5px; line-height:1.6; color:#4a534f; margin:0; max-width:78ch">
+      La solution n'est pas de renommer les jetons, mais d'ajouter une couche au-dessus : des jetons de <strong>rôle</strong> qui pointent, selon le mode, vers la palette claire ou la palette sombre. Les surfaces choisies pour des raisons éditoriales, elles, ne bougent jamais.
+    </p>
+  </div>
+
+  <div style="max-width:1400px; margin:0 auto 32px; background:#fff; border:1px solid #dcdfde; border-radius:18px; padding:26px 28px">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:21px; letter-spacing:-0.02em; margin:0 0 8px; color:#0b0e10">Ce qui bascule, ce qui ne bascule pas</h2>
+    <p style="font-size:15px; line-height:1.6; color:#5c6663; margin:0 0 22px; max-width:74ch">La distinction est la décision de conception la plus importante ici — plus que le choix des couleurs.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px">
+      <div style="background:#e8f7ef; border:1px solid #c9e9d8; border-radius:14px; padding:22px 24px">
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:16px; margin:0 0 12px; color:#0b5c3e">Suit le mode</h3>
+        <ul style="margin:0; padding-left:20px; font-size:14.5px; line-height:1.7; color:#0b5c3e">
+          <li>Le wizard, ses 3 étapes et ses champs</li>
+          <li>La grille de résultats et ses cartes</li>
+          <li>Le tiroir des projets</li>
+          <li>Les dialogues : choix assisté, achat, crédits</li>
+          <li>Le rapport approfondi, verrouillé et complet</li>
+          <li>Les pages de guides et le contenu SEO</li>
+        </ul>
+      </div>
+      <div style="background:#0b0e10; border:1px solid #232b2f; border-radius:14px; padding:22px 24px">
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:16px; margin:0 0 12px; color:#3ddc91">Reste sombre, toujours</h3>
+        <ul style="margin:0; padding-left:20px; font-size:14.5px; line-height:1.7; color:#9aa5a0">
+          <li>Le héros de la page d'accueil</li>
+          <li>Le bloc d'appel à l'action final</li>
+          <li>L'encart de démonstration produit</li>
+        </ul>
+        <p style="margin:14px 0 0; font-size:13.5px; line-height:1.6; color:#9aa5a0">Ces surfaces sont une signature de marque, pas un mode. Un visiteur en préférence claire doit voir le même héros que les autres — c'est ce qui rend la page reconnaissable, et ce que font la plupart des sites qui ont un héros sombre assumé.</p>
+      </div>
+      <div style="background:#fdf3e3; border:1px solid #f0e2c4; border-radius:14px; padding:22px 24px">
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:16px; margin:0 0 12px; color:#8a5a12">Reste clair, toujours</h3>
+        <ul style="margin:0; padding-left:20px; font-size:14.5px; line-height:1.7; color:#8a5a12">
+          <li>Le rapport exporté en PDF</li>
+          <li>Les e-mails transactionnels</li>
+          <li>Les écrans Keycloak</li>
+        </ul>
+        <p style="margin:14px 0 0; font-size:13.5px; line-height:1.6; color:#9a6a12">Un PDF sombre est impossible à imprimer. Les clients de messagerie ignorent les variables CSS et appliquent leur propre inversion. Keycloak est servi hors de l'application : il ne connaît ni votre localStorage ni votre choix.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1400px; margin:0 auto 32px">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:21px; letter-spacing:-0.02em; margin:0 0 6px; color:#0b0e10">Le sélecteur — trois états, pas deux</h2>
+    <p style="font-size:15px; line-height:1.6; color:#5c6663; margin:0 0 18px; max-width:74ch">« Système » doit être un état à part entière, et l'état par défaut. Une simple bascule clair/sombre force l'utilisateur à choisir, puis cesse de suivre son OS quand il passe en mode nuit le soir.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:24px">
+      <div style="flex:1 1 320px; background:#fff; border:1px solid #dcdfde; border-radius:14px; padding:22px 24px">
+        <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#5c6663; margin:0 0 14px; font-weight:600">Sur fond clair</p>
+        <div style="display:inline-flex; border:1px solid #dde2e0; border-radius:10px; overflow:hidden; background:#fff">
+          <button style="min-height:44px; padding:0 16px; border:none; background:#0d7a4e; color:#fff; font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer">Système</button>
+          <button style="min-height:44px; padding:0 16px; border:none; border-left:1px solid #dde2e0; background:#fff; color:#5c6663; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="color:#0b0e10">Clair</button>
+          <button style="min-height:44px; padding:0 16px; border:none; border-left:1px solid #dde2e0; background:#fff; color:#5c6663; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="color:#0b0e10">Sombre</button>
+        </div>
+        <p style="font-size:13.5px; line-height:1.6; color:#5c6663; margin:16px 0 0">Dans le menu du compte, à côté de la langue. Pas dans la barre principale : ce n'est pas une action fréquente.</p>
+      </div>
+      <div style="flex:1 1 320px; background:#0b0e10; border:1px solid #232b2f; border-radius:14px; padding:22px 24px">
+        <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#9aa5a0; margin:0 0 14px; font-weight:600">Sur fond sombre</p>
+        <div style="display:inline-flex; border:1px solid #2a3236; border-radius:10px; overflow:hidden; background:#12171a">
+          <button style="min-height:44px; padding:0 16px; border:none; background:#3ddc91; color:#062018; font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer">Système</button>
+          <button style="min-height:44px; padding:0 16px; border:none; border-left:1px solid #2a3236; background:transparent; color:#9aa5a0; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="color:#f2f5f3">Clair</button>
+          <button style="min-height:44px; padding:0 16px; border:none; border-left:1px solid #2a3236; background:transparent; color:#9aa5a0; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer" style-hover="color:#f2f5f3">Sombre</button>
+        </div>
+        <p style="font-size:13.5px; line-height:1.6; color:#9aa5a0; margin:16px 0 0">L'état actif utilise l'accent du mode courant : <code style="font-family:'Space Grotesk',monospace">#0d7a4e</code> sur clair, <code style="font-family:'Space Grotesk',monospace">#3ddc91</code> sur sombre. Ce sont deux jetons distincts, non interchangeables. Sur clair, le vert de remplissage est plus foncé que le vert d'origine (<code style="font-family:'Space Grotesk',monospace">#0d9a63</code>) : blanc sur ce dernier ne passe pas le contraste AA.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1400px; margin:0 auto 32px">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:21px; letter-spacing:-0.02em; margin:0 0 6px; color:#0b0e10">Le même composant, dans les deux modes</h2>
+    <p style="font-size:15px; line-height:1.6; color:#5c6663; margin:0 0 14px; max-width:74ch">La carte de <code style="font-family:'Space Grotesk',monospace">app-results-grid</code>, redessinée d'après <code style="font-family:'Space Grotesk',monospace">results-grid.css</code> : nom, badge de coût, lignes de verdict, étoiles d'analyse, filet pointillé, palier payant, puis un bouton pleine largeur et deux boutons de notation de 46px. Rien ne change de place — seuls les jetons de rôle changent de valeur.</p>
+    <div style="background:#fdf3e3; border:1px solid #f0e2c4; border-radius:12px; padding:16px 18px; margin-bottom:18px; max-width:96ch">
+      <p style="margin:0; font-size:14.5px; line-height:1.6; color:#8a5a12"><strong>Décision à prendre.</strong> Aujourd'hui, ce composant est sombre <em>dans les deux cas</em> : <code style="font-family:'Space Grotesk',monospace">:host</code> porte <code style="font-family:'Space Grotesk',monospace">background: var(--nm-bg-dark)</code>, un panneau sombre posé dans un wizard clair. C'est précisément l'incohérence visible aujourd'hui. Ma recommandation : que la grille <strong>suive le mode</strong> et abandonne son aplat propre — les résultats sont du contenu applicatif, pas une signature de marque. Si vous préférez la garder sombre en permanence, elle devient une exception à documenter, et le reste du wizard doit alors passer en sombre avec elle.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(430px,1fr)); gap:20px">
+
+      <div style="background:#f4f6f5; border:1px solid #dcdfde; border-radius:18px; padding:22px; overflow:hidden">
+        <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#5c6663; margin:0 0 16px; font-weight:600">Mode clair</p>
+
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff; border:1px solid #e3e7e5; border-radius:12px; padding:13px 15px; margin-bottom:14px">
+          <span style="font-size:13px; color:#2c3532"><strong style="color:#0d7a4e; font-weight:600">9 crédits</strong> débités</span>
+          <span style="width:1px; height:15px; background:#e3e7e5"></span>
+          <span style="font-size:13px; color:#5c6663">Rapport : 50 crédits</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="background:#fff; border:1px solid #e3e7e5; border-radius:14px; padding:20px">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:6px 10px; margin-bottom:14px">
+              <div style="flex:1 1 auto; display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0">
+                <span style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.02em; color:#0b0e10; overflow-wrap:anywhere">Roulio</span>
+                <span style="padding:2px 8px; border-radius:999px; background:#eef1f0; color:#5c6663; font-size:11px; white-space:nowrap">ajouté</span>
+              </div>
+            </div>
+            <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px">
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="font-size:13px; color:#5c6663; overflow-wrap:anywhere">roulio.com</span>
+                <span style="flex:none; padding:2px 8px; border-radius:6px; font-size:12px; background:#e8f7ef; color:#0d7a4e">libre</span>
+              </li>
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="font-size:13px; color:#5c6663; overflow-wrap:anywhere">roulio.io</span>
+                <span style="flex:none; padding:2px 8px; border-radius:6px; font-size:12px; background:#fbecec; color:#a33b3b">pris</span>
+              </li>
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="font-size:13px; color:#5c6663; overflow-wrap:anywhere">roulio.ch</span>
+                <span style="flex:none; padding:2px 8px; border-radius:6px; font-size:12px; background:#fdf3e3; color:#9a6a12">non vérifiable</span>
+              </li>
+            </ul>
+            <button style="display:flex; align-items:center; gap:3px; margin-top:12px; padding:0; background:none; border:0; cursor:pointer; font-size:13px; color:#f59e0b">
+              ★★★★<span style="color:#5c6663">★</span>
+              <span style="margin-left:4px; font-size:11px; color:#5c6663">▾</span>
+            </button>
+            <div style="height:0; margin:14px 0; border-top:1px dashed #dde2e0"></div>
+            <div style="display:flex; align-items:center; gap:8px; margin:0 0 14px; font-size:13px; color:#5c6663">
+              <span>🔒</span><span>INPI, EUIPO et 4 réseaux — 50 crédits</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px">
+              <button style="flex:1; min-height:46px; padding:10px 14px; border:1px solid #dde2e0; background:transparent; color:#0b0e10; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer" style-hover="border-color:#0d7a4e; color:#0d7a4e">Vérifier la marque</button>
+              <span style="display:flex; gap:4px; flex:none">
+                <button style="display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border:1px solid #c9e9d8; border-radius:8px; background:transparent; color:#0d7a4e; cursor:pointer" aria-label="J'aime ce nom">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></svg>
+                </button>
+                <button style="display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border:1px solid #dde2e0; border-radius:8px; background:transparent; color:#5c6663; cursor:pointer" style-hover="color:#a33b3b" aria-label="Je n'aime pas ce nom">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><g transform="rotate(180 12 12)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></g></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <div style="background:#fff; border:1px solid #c9e9d8; border-radius:14px; padding:16px 18px">
+            <p style="margin:0 0 10px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#0d7a4e; font-weight:600">Variante « toutes libres »</p>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 10px">
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.02em; color:#0b0e10">Bikara</span>
+              <span style="flex:none; padding:2px 8px; border-radius:999px; background:#e8f7ef; color:#0d7a4e; font-size:11px; white-space:nowrap">toutes libres</span>
+            </div>
+            <p style="margin:8px 0 0; font-size:12.5px; line-height:1.5; color:#5c6663">.com · .fr · .eu — les trois libres. C'est le seul cas où la carte prend la bordure et le badge accentués.</p>
+          </div>
+
+          <div style="background:#fbfcfb; border:1px solid #e3e7e5; border-radius:12px; padding:14px 16px">
+            <p style="margin:0 0 8px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#5c6663; font-weight:600">Champ de saisie</p>
+            <div style="min-height:44px; display:flex; align-items:center; padding:0 14px; border:1px solid #dde2e0; border-radius:8px; background:#fff; font-size:14.5px; color:#5c6663">Ajouter un mot-clé…</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#0b0e10; border:1px solid #232b2f; border-radius:18px; padding:22px; overflow:hidden">
+        <p style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#9aa5a0; margin:0 0 16px; font-weight:600">Mode sombre</p>
+
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#12171a; border:1px solid #232b2f; border-radius:12px; padding:13px 15px; margin-bottom:14px">
+          <span style="font-size:13px; color:#c9d3ce"><strong style="color:#6ee7a8; font-weight:600">9 crédits</strong> débités</span>
+          <span style="width:1px; height:15px; background:#2a3236"></span>
+          <span style="font-size:13px; color:#9aa5a0">Rapport : 50 crédits</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="background:#12171a; border:1px solid #232b2f; border-radius:14px; padding:20px">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:6px 10px; margin-bottom:14px">
+              <div style="flex:1 1 auto; display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0">
+                <span style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.02em; color:#f2f5f3; overflow-wrap:anywhere">Roulio</span>
+                <span style="padding:2px 8px; border-radius:999px; background:#263033; color:#9aa5a0; font-size:11px; white-space:nowrap">ajouté</span>
+              </div>
+            </div>
+            <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px">
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="font-size:13px; color:#9aa5a0; overflow-wrap:anywhere">roulio.com</span>
+                <span style="flex:none; padding:2px 8px; border-radius:6px; font-size:12px; background:#0f1b1c; color:#6ee7a8">libre</span>
+              </li>
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="font-size:13px; color:#9aa5a0; overflow-wrap:anywhere">roulio.io</span>
+                <span style="flex:none; padding:2px 8px; border-radius:6px; font-size:12px; background:#1a1416; color:#e08a8a">pris</span>
+              </li>
+              <li style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+                <span style="font-size:13px; color:#9aa5a0; overflow-wrap:anywhere">roulio.ch</span>
+                <span style="flex:none; padding:2px 8px; border-radius:6px; font-size:12px; background:#1c1810; color:#e0b96e">non vérifiable</span>
+              </li>
+            </ul>
+            <button style="display:flex; align-items:center; gap:3px; margin-top:12px; padding:0; background:none; border:0; cursor:pointer; font-size:13px; color:#f59e0b">
+              ★★★★<span style="color:#9aa5a0">★</span>
+              <span style="margin-left:4px; font-size:11px; color:#9aa5a0">▾</span>
+            </button>
+            <div style="height:0; margin:14px 0; border-top:1px dashed #2a3236"></div>
+            <div style="display:flex; align-items:center; gap:8px; margin:0 0 14px; font-size:13px; color:#9aa5a0">
+              <span>🔒</span><span>INPI, EUIPO et 4 réseaux — 50 crédits</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px">
+              <button style="flex:1; min-height:46px; padding:10px 14px; border:1px solid #2a3236; background:transparent; color:#f2f5f3; border-radius:8px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer" style-hover="border-color:#3ddc91; color:#6ee7a8">Vérifier la marque</button>
+              <span style="display:flex; gap:4px; flex:none">
+                <button style="display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border:1px solid #23474b; border-radius:8px; background:transparent; color:#3ddc91; cursor:pointer" aria-label="J'aime ce nom">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></svg>
+                </button>
+                <button style="display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; border:1px solid #2a3236; border-radius:8px; background:transparent; color:#9aa5a0; cursor:pointer" style-hover="color:#e08a8a" aria-label="Je n'aime pas ce nom">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><g transform="rotate(180 12 12)"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"></path></g></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <div style="background:#12171a; border:1px solid #23474b; border-radius:14px; padding:16px 18px">
+            <p style="margin:0 0 10px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#6ee7a8; font-weight:600">Variante « toutes libres »</p>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 10px">
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.02em; color:#f2f5f3">Bikara</span>
+              <span style="flex:none; padding:2px 8px; border-radius:999px; background:#0f1b1c; color:#6ee7a8; font-size:11px; white-space:nowrap">toutes libres</span>
+            </div>
+            <p style="margin:8px 0 0; font-size:12.5px; line-height:1.5; color:#9aa5a0">.com · .fr · .eu — les trois libres. C'est le seul cas où la carte prend la bordure et le badge accentués.</p>
+          </div>
+
+          <div style="background:#0e1315; border:1px solid #232b2f; border-radius:12px; padding:14px 16px">
+            <p style="margin:0 0 8px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#9aa5a0; font-weight:600">Champ de saisie</p>
+            <div style="min-height:44px; display:flex; align-items:center; padding:0 14px; border:1px solid #2a3236; border-radius:8px; background:#0b0e10; font-size:14.5px; color:#9aa5a0">Ajouter un mot-clé…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1400px; margin:0 auto 32px; background:#fff; border:1px solid #dcdfde; border-radius:18px; overflow:hidden">
+    <div style="padding:24px 28px 18px">
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:21px; letter-spacing:-0.02em; margin:0 0 6px; color:#0b0e10">Les jetons de rôle à ajouter</h2>
+      <p style="font-size:15px; line-height:1.6; color:#5c6663; margin:0; max-width:74ch">Une seule couche nouvelle. Les jetons de palette existants ne changent pas de nom et ne sont pas supprimés : ils deviennent les valeurs vers lesquelles les rôles pointent.</p>
+    </div>
+    <div style="overflow-x:auto">
+      <div style="min-width:680px">
+        <div style="display:grid; grid-template-columns:minmax(210px,1.4fr) minmax(150px,1fr) minmax(150px,1fr); gap:14px; padding:12px 28px; background:#fbfcfb; border-top:1px solid #eef1f0; border-bottom:1px solid #eef1f0">
+          <span style="font-size:11px; letter-spacing:0.09em; text-transform:uppercase; color:#5c6663; font-weight:600">Jeton de rôle</span>
+          <span style="font-size:11px; letter-spacing:0.09em; text-transform:uppercase; color:#5c6663; font-weight:600">Mode clair</span>
+          <span style="font-size:11px; letter-spacing:0.09em; text-transform:uppercase; color:#5c6663; font-weight:600">Mode sombre</span>
+        </div>
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="14">
+          <div style="display:grid; grid-template-columns:minmax(210px,1.4fr) minmax(150px,1fr) minmax(150px,1fr); gap:14px; align-items:center; padding:11px 28px; border-bottom:1px solid #f2f4f3">
+            <span style="font-family:'Space Grotesk',monospace; font-size:13px; color:#0b0e10; overflow-wrap:anywhere">{{ r.role }}</span>
+            <span style="display:flex; align-items:center; gap:9px; font-family:'Space Grotesk',monospace; font-size:12.5px; color:#5c6663">
+              <span style="width:15px; height:15px; border-radius:4px; border:1px solid #dde2e0; background:{{ r.lightSwatch }}; flex:none"></span>
+              {{ r.light }}
+            </span>
+            <span style="display:flex; align-items:center; gap:9px; font-family:'Space Grotesk',monospace; font-size:12.5px; color:#5c6663">
+              <span style="width:15px; height:15px; border-radius:4px; border:1px solid #dde2e0; background:{{ r.darkSwatch }}; flex:none"></span>
+              {{ r.dark }}
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:18px 28px; background:#fdf3e3; border-top:1px solid #f0e2c4">
+      <p style="margin:0 0 10px; font-size:14px; line-height:1.6; color:#8a5a12"><strong>La bordure accentuée n'est pas un habillage de carte</strong> — <code style="font-family:'Space Grotesk',monospace">.rg-card--strong</code> et <code style="font-family:'Space Grotesk',monospace">.rg-cost--accent</code> signifient « toutes les extensions demandées sont libres ». C'est le signal que l'utilisateur cherche du regard : ne jamais l'appliquer à une carte aux verdicts mixtes. Les deux cartes de gauche ci-dessus sont donc en bordure neutre, et la variante accentuée est montrée à part.</p>
+      <p style="margin:0; font-size:14px; line-height:1.6; color:#8a5a12"><strong>Un jeton manque à votre palette</strong> — la bordure d'une carte accentuée sur fond clair. J'ai employé <code style="font-family:'Space Grotesk',monospace">#c9e9d8</code> dans les maquettes, dérivé de <code style="font-family:'Space Grotesk',monospace">--nm-verdict-free-light-bg</code>. À nommer explicitement (par exemple <code style="font-family:'Space Grotesk',monospace">--nm-accent-border-light</code>) plutôt qu'à recopier dans les composants.</p>
+    </div>
+  </div>
+
+  <div style="max-width:1400px; margin:0 auto">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:21px; letter-spacing:-0.02em; margin:0 0 18px; color:#0b0e10">Les cinq pièges de l'implémentation</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:16px">
+      <sc-for list="{{ pitfalls }}" as="p" hint-placeholder-count="5">
+        <div style="background:#fff; border:1px solid #dcdfde; border-radius:14px; padding:22px 24px">
+          <div style="display:flex; align-items:center; gap:11px; margin-bottom:10px">
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:#0d7a4e; background:#e8f7ef; border-radius:6px; padding:4px 9px; flex:none">{{ p.num }}</span>
+            <h3 style="font-family:'Space Grotesk',sans-serif; font-size:16.5px; letter-spacing:-0.015em; margin:0; color:#0b0e10">{{ p.title }}</h3>
+          </div>
+          <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5c6663">{{ p.body }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1000}}">
+class Component extends DCLogic {
+  renderVals() {
+    const role = (r, light, dark, ls, ds) => ({
+      role: r, light, dark,
+      lightSwatch: ls || light,
+      darkSwatch: ds || dark
+    });
+
+    return {
+      roles: [
+        role('--nm-app-bg', '#f4f6f5', '#0b0e10'),
+        role('--nm-app-surface', '#ffffff', '#12171a'),
+        role('--nm-app-surface-alt', '#fbfcfb', '#0e1315'),
+        role('--nm-app-border', '#e3e7e5', '#232b2f'),
+        role('--nm-app-border-strong', '#dde2e0', '#2a3236'),
+        role('--nm-app-divider', '#eef1f0', '#1b2225'),
+        role('--nm-app-text', '#0b0e10', '#f2f5f3'),
+        role('--nm-app-text-2', '#5c6663', '#9aa5a0'),
+        role('--nm-app-text-3', '#8a938f', '#6d7873'),
+        role('--nm-app-accent', '#0d7a4e', '#3ddc91'),
+        role('--nm-app-accent-hover', '#0a6b44', '#6ee7a8'),
+        role('--nm-app-accent-flat (aplat sans texte)', '#0d9a63', '#3ddc91'),
+        role('--nm-app-on-accent', '#ffffff', '#062018'),
+        role('--nm-app-accent-surface', '#e8f7ef', '#0f1b1c'),
+        role('--nm-app-accent-border', '#c9e9d8', '#23474b'),
+        role('--nm-app-badge-bg', '#eef1f0', '#263033'),
+        role('--nm-app-badge-fg', '#8a938f', '#6d7873'),
+        role('--nm-app-verdict-free-fg', '#0d7a4e', '#6ee7a8'),
+        role('--nm-app-verdict-free-bg', '#e8f7ef', '#0f1b1c'),
+        role('--nm-app-verdict-taken-fg', '#a33b3b', '#e08a8a'),
+        role('--nm-app-verdict-taken-bg', '#fbecec', '#1a1416'),
+        role('--nm-app-verdict-unknown-fg', '#9a6a12', '#e0b96e'),
+        role('--nm-app-verdict-unknown-bg', '#fdf3e3', '#1c1810')
+      ],
+
+      pitfalls: [
+        { num: '01', title: 'Le flash blanc au chargement', body: 'Si le mode est lu après le rendu, l\'utilisateur en préférence sombre voit un éclair blanc à chaque navigation. Il faut un script synchrone minuscule dans le <head>, avant tout style : il lit le choix stocké, sinon la préférence système, et pose l\'attribut sur <html>. Aucun framework ne peut le faire assez tôt — pas même Angular.' },
+        { num: '02', title: 'Trois valeurs stockées, pas deux', body: 'Ne stockez que « light », « dark » ou rien du tout. « Système » est l\'absence de valeur : si vous enregistrez le mode résolu au moment du choix, l\'utilisateur cesse de suivre son OS sans l\'avoir demandé. Et écoutez les changements de prefers-color-scheme en direct : l\'OS bascule le soir, la page ouverte doit suivre.' },
+        { num: '03', title: 'color-scheme, pas seulement les couleurs', body: 'Déclarez la propriété CSS color-scheme sur la racine. Sans elle, le navigateur garde ses champs de formulaire, ses barres de défilement et ses menus déroulants natifs en clair — des rectangles blancs au milieu d\'une interface sombre, sur les écrans qui comptent le plus de champs.' },
+        { num: '04', title: 'PrimeNG doit basculer aussi', body: 'darkModeSelector est désactivé dans votre configuration. Les composants PrimeNG — select, dialog, drawer, chips, tooltip — resteront clairs quoi que fassent vos jetons. Il faut l\'activer sur le même attribut de racine que le vôtre, sinon vous aurez deux thèmes superposés.' },
+        { num: '05', title: 'Le rapport imprimé et les e-mails', body: 'Forcez le rapport en surfaces claires dans une media query d\'impression, et n\'utilisez aucun jeton de rôle dans les e-mails : leurs styles sont en ligne et figés. Keycloak, servi séparément, ne connaît pas votre choix — laissez-le en clair plutôt que d\'ajouter un cookie partagé pour un gain nul.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -81,6 +81,7 @@ export class ProjectsService {
         project,
         domainName: d.name,
         availability: d.allExtensions,
+        checkedAt: new Date(),
         style: d.style || 'standard',
       }),
     );
@@ -107,7 +108,7 @@ export class ProjectsService {
           relations: { project: { user: true } },
         });
         if (!suggestion) return; // silently skip suggestions that don't belong to the user
-        await this.suggestionsRepository.update(id, { availability });
+        await this.suggestionsRepository.update(id, { availability, checkedAt: new Date() });
       })
     );
   }
@@ -129,7 +130,7 @@ export class ProjectsService {
     });
     if (existing) return existing;
 
-    const suggestion = this.suggestionsRepository.create({ project, domainName, availability });
+    const suggestion = this.suggestionsRepository.create({ project, domainName, availability, checkedAt: new Date() });
     return this.suggestionsRepository.save(suggestion);
   }
 
