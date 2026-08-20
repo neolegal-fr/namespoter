@@ -6,6 +6,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
 import { BrandReportService, BrandReport, ReportLike, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
+import { SAMPLE_REPORT } from '../brand-report/sample-report';
 import { KeycloakService } from 'keycloak-angular';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Steps } from 'primeng/steps';
@@ -1151,44 +1152,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.brandReportError.set(null);
     this.brandReport.set(this.SAMPLE_REPORT);
   }
-  readonly SAMPLE_REPORT: BrandReport = {
-    name: 'namorama',
-    handle: 'namorama',
-    domains: [
-      { extension: 'com', domain: 'namorama.com', status: 'taken' },
-      { extension: 'fr', domain: 'namorama.fr', status: 'free' },
-      { extension: 'io', domain: 'namorama.io', status: 'free' },
-      { extension: 'net', domain: 'namorama.net', status: 'free' },
-      { extension: 'app', domain: 'namorama.app', status: 'unknown' },
-    ],
-    // Les SIX plateformes réellement interrogées, comme un vrai rapport. Le
-    // rapport d'exemple sert à savoir ce qu'on achète : en montrer quatre
-    // revenait à annoncer moins que ce qui est livré.
-    socials: [
-      { platform: 'GitHub', handle: 'namorama', url: 'https://github.com/namorama', status: 'free' },
-      { platform: 'LinkedIn', handle: 'namorama', url: 'https://www.linkedin.com/company/namorama', status: 'free' },
-      { platform: 'Telegram', handle: 'namorama', url: 'https://t.me/namorama', status: 'free' },
-      { platform: 'TikTok', handle: 'namorama', url: 'https://www.tiktok.com/@namorama', status: 'taken' },
-      { platform: 'X', handle: 'namorama', url: 'https://x.com/namorama', status: 'taken' },
-      { platform: 'YouTube', handle: 'namorama', url: 'https://www.youtube.com/@namorama', status: 'free' },
-    ],
-    trademark: {
-      office: 'INPI',
-      match: 'none',
-      hits: [],
-      deepLink: 'https://data.inpi.fr/search?q=namorama&type=brands',
-    },
-    quality: {
-      score: 82,
-      scores: { memorability: 4, pronunciation: 4, international: 5, seo: 3, distinctiveness: 5 },
-      strengths: 'Court, sonore, international et très distinctif.',
-      watchout: 'Sens peu explicite : à soutenir par un logo et une accroche claire.',
-    },
-    score: 68,
-    generatedAt: new Date().toISOString(),
-    disclaimer:
-      "Signal indicatif de disponibilité. Ne remplace pas une recherche d'antériorité ni l'avis d'un conseil en propriété industrielle.",
-  };
+  readonly SAMPLE_REPORT = SAMPLE_REPORT;
 
   /** Libellé/couleur d'un statut de disponibilité pour l'affichage du rapport. */
   reportStatusLabel(s: Availability): string {

@@ -670,3 +670,17 @@
   outline: 2px solid var(--nm-accent);
   outline-offset: 1px;
 }
+
+/* Le lien vers l'exemple, sous le panneau de démonstration. */
+.nm-panel__sample {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: var(--nm-text-ui-sm);
+}
+
+.nm-panel__sample a {
+  color: var(--nm-accent-hover);
+  text-decoration: none;
+}
+
+.nm-panel__sample a:hover { text-decoration: underline; }

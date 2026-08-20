@@ -7,6 +7,7 @@ import { DomainService } from '../../services/domain';
 import { BrandReportViewComponent } from '../brand-report/brand-report-view';
 import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
 import { BRAND_REPORT_COST, ReportLike, Availability } from '../../services/brand-report';
+import { SAMPLE_REPORT } from '../brand-report/sample-report';
 import { AnalyticsService } from '../../services/analytics';
 
 /**
@@ -40,7 +41,21 @@ import { AnalyticsService } from '../../services/analytics';
         <button type="submit" class="nm-btn-primary">{{ 'PUBLIC_REPORT.CHECK' | translate }}</button>
       </form>
 
-      @if (chargement()) {
+      @if (exemple()) {
+        <!-- Exemple COMPLET, verdicts compris : c'est le seul moyen de montrer
+             ce qu'on achète sans le donner. Le bandeau dit franchement que ce
+             n'est pas le nom du visiteur — un exemple pris pour un résultat
+             est pire qu'aucun exemple. -->
+        <p class="rp-sample">{{ 'PUBLIC_REPORT.SAMPLE_BANNER' | translate }}</p>
+        <app-brand-report-view [report]="echantillon"></app-brand-report-view>
+        <section class="rp-more">
+          <h2 class="rp-more__title">{{ 'PUBLIC_REPORT.SAMPLE_TITLE' | translate }}</h2>
+          <p class="rp-more__lead">{{ 'PUBLIC_REPORT.SAMPLE_LEAD' | translate }}</p>
+          <button type="button" class="nm-btn-primary" (click)="quitterExemple()">
+            {{ 'PUBLIC_REPORT.SAMPLE_CTA' | translate }}
+          </button>
+        </section>
+      } @else if (chargement()) {
         <p class="rp-state">{{ 'PUBLIC_REPORT.LOADING' | translate }}</p>
       } @else if (erreur()) {
         <p class="rp-state rp-state--ko">{{ 'PUBLIC_REPORT.ERROR' | translate }}</p>
@@ -96,6 +111,9 @@ export class RapportPublicComponent implements OnInit {
   private readonly EXTENSIONS = ['.com', '.fr', '.net', '.org'];
 
   readonly cout = BRAND_REPORT_COST;
+  /** `?exemple=1` : le rapport de démonstration, complet et gratuit. */
+  readonly exemple = signal(false);
+  readonly echantillon = SAMPLE_REPORT;
   readonly nom = signal('');
   readonly rapport = signal<ReportLike | null>(null);
   readonly chargement = signal(false);
@@ -112,6 +130,11 @@ export class RapportPublicComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.get('exemple') === '1') {
+      this.exemple.set(true);
+      this.analytics.track('public_report_sample_viewed');
+      return;
+    }
     const demande = (this.route.snapshot.queryParamMap.get('name') ?? '').trim();
     if (demande) this.lancer(demande);
   }
@@ -154,6 +177,12 @@ export class RapportPublicComponent implements OnInit {
       },
       error: () => { this.erreur.set(true); this.chargement.set(false); },
     });
+  }
+
+  /** Quitter l'exemple pour son propre nom : le champ reste en haut de page. */
+  quitterExemple(): void {
+    this.exemple.set(false);
+    void this.router.navigate([], { relativeTo: this.route, queryParams: {} });
   }
 
   extensionsLibres(): string[] {

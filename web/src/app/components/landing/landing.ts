@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { applyContentSeo } from '../content/content-seo';
@@ -84,7 +84,9 @@ import { applyContentSeo } from '../content/content-seo';
                 <span class="nm-browser__url">namorama.com/app</span>
               </div>
 
-              <div class="nm-panel">
+              <div class="nm-panel"
+                   (mouseenter)="figerDemo()" (mouseleave)="reprendreDemo()"
+                   (focusin)="figerDemo()">
                 <div class="nm-steps">
                   @for (s of steps; track s.n) {
                     <button type="button"
@@ -92,7 +94,7 @@ import { applyContentSeo } from '../content/content-seo';
                             [class.nm-step--on]="step() === s.n"
                             [attr.aria-pressed]="step() === s.n"
                             aria-controls="nm-demo-panel"
-                            (click)="step.set(s.n)">
+                            (click)="choisirEtape(s.n)">
                       <span class="nm-step__num">{{ s.n }}</span>
                       <span class="nm-step__label">{{ s.label | translate }}</span>
                     </button>
@@ -165,6 +167,13 @@ import { applyContentSeo } from '../content/content-seo';
                     }
                   }
                 </div>
+
+                <!-- Le vrai document, pas une maquette : quatre volets ne
+                     remplacent pas la vue d'un rapport entier, verdicts
+                     compris. Public, donc lisible sans compte. -->
+                <p class="nm-panel__sample">
+                  <a routerLink="/report" [queryParams]="{ exemple: 1 }">{{ 'HOME.SEE_SAMPLE' | translate }}</a>
+                </p>
               </div>
             </div>
           </div>
@@ -294,7 +303,7 @@ import { applyContentSeo } from '../content/content-seo';
   `,
   styleUrl: './landing.css',
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit, OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -348,6 +357,52 @@ export class LandingComponent {
    * étape, marque et réseaux, qui le distingue. Les libellés des trois
    * premières restent ceux du wizard, mot pour mot.
    */
+  /**
+   * Le fil défile SEUL, une étape toutes les cinq secondes.
+   *
+   * Quatre onglets muets supposent qu'on clique pour comprendre ; or on ne
+   * clique pas sur une démonstration qu'on n'a pas encore comprise. Le
+   * défilement montre le parcours sans rien demander.
+   *
+   * Il s'arrête dès qu'on survole, qu'on tabule dedans ou qu'on choisit une
+   * étape : à partir de là c'est le visiteur qui pilote, et rien ne doit
+   * bouger sous son curseur. Il ne démarre pas du tout si le système demande
+   * moins d'animations.
+   */
+  private minuterie?: ReturnType<typeof setInterval>;
+  private pilotageManuel = false;
+
+  ngOnInit(): void {
+    this.demarrerDemo();
+  }
+
+  ngOnDestroy(): void {
+    this.figerDemo();
+  }
+
+  private demarrerDemo(): void {
+    if (typeof window === 'undefined' || this.pilotageManuel) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    this.minuterie ??= setInterval(() => {
+      this.step.update((n) => (n % this.steps.length) + 1);
+    }, 5000);
+  }
+
+  figerDemo(): void {
+    if (this.minuterie) { clearInterval(this.minuterie); this.minuterie = undefined; }
+  }
+
+  reprendreDemo(): void {
+    this.demarrerDemo();
+  }
+
+  /** Un clic vaut prise en main : le défilement ne reprend plus. */
+  choisirEtape(n: number): void {
+    this.pilotageManuel = true;
+    this.figerDemo();
+    this.step.set(n);
+  }
+
   readonly steps = [
     { n: 1, label: 'WIZARD.STEPS.DESCRIPTION' },
     { n: 2, label: 'WIZARD.STEPS.KEYWORDS' },

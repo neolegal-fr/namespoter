@@ -506,7 +506,8 @@
     "HAVE_NAME_TITLE": "Vous avez déjà une idée de nom ?",
     "HAVE_NAME_LEAD": "Testez-la maintenant : les domaines et l'analyse du nom sont gratuits, la recherche d'antériorité se débloque ensuite.",
     "HAVE_NAME_PLACEHOLDER": "Le nom que vous avez en tête",
-    "HAVE_NAME_BTN": "Vérifier ce nom"
+    "HAVE_NAME_BTN": "Vérifier ce nom",
+    "SEE_SAMPLE": "Voir un exemple de rapport complet →"
   },
   "PUBLIC_REPORT": {
     "PLACEHOLDER": "Le nom que vous voulez tester",
@@ -515,6 +516,10 @@
     "ERROR": "La vérification a échoué. Réessayez dans un instant.",
     "MORE_TITLE": "Vous cherchez d'autres noms ?",
     "MORE_LEAD": "Décrivez votre projet en une phrase : l'IA propose des noms libres, adaptés à votre marché, et vérifie chacun d'eux.",
-    "MORE_CTA": "Obtenir des suggestions"
+    "MORE_CTA": "Obtenir des suggestions",
+    "SAMPLE_BANNER": "Exemple de rapport complet, sur le nom « namorama ». Ce n'est pas votre nom.",
+    "SAMPLE_TITLE": "Le même, sur votre nom",
+    "SAMPLE_LEAD": "Saisissez le nom que vous avez en tête : les domaines sont vérifiés gratuitement, marques et réseaux se débloquent ensuite.",
+    "SAMPLE_CTA": "Vérifier mon nom"
   }
 }

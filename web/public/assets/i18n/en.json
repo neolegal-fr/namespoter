@@ -506,7 +506,8 @@
     "HAVE_NAME_TITLE": "Already have a name in mind?",
     "HAVE_NAME_LEAD": "Test it now: domains and the name analysis are free, the prior-art search unlocks afterwards.",
     "HAVE_NAME_PLACEHOLDER": "The name you have in mind",
-    "HAVE_NAME_BTN": "Check this name"
+    "HAVE_NAME_BTN": "Check this name",
+    "SEE_SAMPLE": "See a sample full report →"
   },
   "PUBLIC_REPORT": {
     "PLACEHOLDER": "The name you want to test",
@@ -515,6 +516,10 @@
     "ERROR": "The check failed. Try again in a moment.",
     "MORE_TITLE": "Looking for other names?",
     "MORE_LEAD": "Describe your project in one sentence: the AI suggests free names suited to your market, and checks each of them.",
-    "MORE_CTA": "Get suggestions"
+    "MORE_CTA": "Get suggestions",
+    "SAMPLE_BANNER": "Sample full report, on the name “namorama”. This is not your name.",
+    "SAMPLE_TITLE": "The same, on your name",
+    "SAMPLE_LEAD": "Enter the name you have in mind: domains are checked for free, trademarks and handles unlock afterwards.",
+    "SAMPLE_CTA": "Check my name"
   }
 }
