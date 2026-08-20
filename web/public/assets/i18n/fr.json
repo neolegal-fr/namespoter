@@ -104,9 +104,10 @@
   "WIZARD": {
     "STEPS": {
       "DESCRIPTION": "Description",
-      "KEYWORDS": "Configuration",
+      "KEYWORDS": "Cadrage",
       "EXTENSIONS": "Extensions",
-      "DOMAINS": "Domaines"
+      "DOMAINS": "Domaines",
+      "BRAND": "Marque et réseaux"
     },
     "STEP1": {
       "TITLE": "Votre projet",
@@ -411,7 +412,7 @@
     "OVERLINE_1": "Étape 1 — votre projet en une phrase",
     "OVERLINE_2": "Étape 2 — cadrer le style et les contraintes",
     "OVERLINE_3": "Étape 3 — suggestions retenues · 1 crédit chacune",
-    "OVERLINE_4": "Rapport de marque · 50 crédits",
+    "OVERLINE_4": "Étape 4 — marque, réseaux et rapport",
     "DEMO_QUOTE": "« Des vélos reconditionnés, vendus en ligne, livrés montés. »",
     "DEMO_NOTE_1": "L'IA reformule votre projet, puis en extrait les mots qui portent le nom.",
     "DEMO_CHIP_ADD": "+ ajouter",
@@ -425,21 +426,18 @@
     "DEMO_NOTE_3": "1 crédit par suggestion retenue, quel que soit le nombre d'extensions vérifiées.",
     "DEMO_PRICE": "50 crédits",
     "DEMO_CHECKS": "Marques françaises — INPI|Marques européennes — EUIPO|Pseudos sur 6 réseaux|Rapport partageable",
-    "DEMO_NOTE_4": "Facturé une seule fois par nom. Le rapport reste dans votre projet, exportable en PDF.",
+    "DEMO_NOTE_4": "Depuis un nom retenu, en un geste. Facturé une seule fois par nom — le premier rapport de chaque mois est offert.",
     "CONTROLS_H2": "Le .com est libre. La marque, elle, est déposée depuis 2019.",
-    "CONTROLS_LEAD": "C'est la mauvaise surprise que Namorama vous évite. Chaque nom passe quatre contrôles, pas un.",
-    "C1_OVER": "01 — DOMAINE",
+    "CONTROLS_LEAD": "C'est la mauvaise surprise que Namorama vous évite. Chaque nom passe trois contrôles, pas un.",
+    "C1_OVER": "01 — DOMAINES",
     "C1_TITLE": "Trois états, pas deux",
     "C1_TEXT": "Libre, pris, ou invérifiable. Un registre en panne ne se déguise jamais en bonne nouvelle.",
-    "C2_OVER": "02 — INPI",
-    "C2_TITLE": "Marques françaises et UE",
-    "C2_TEXT": "Recherche d'antériorité à l'INPI et à l'EUIPO, sur les classes de Nice qui vous concernent. La marque UE couvre les 27 États membres.",
-    "C3_OVER": "03 — RÉSEAUX",
-    "C3_TITLE": "Le pseudo suit le nom",
-    "C3_TEXT": "GitHub, LinkedIn, X, TikTok, Telegram, YouTube : un nom dont le pseudo est pris coûte cher en notoriété.",
-    "C4_OVER": "04 — EUROPE",
-    "C4_TITLE": "Pensé pour le .fr",
-    "C4_TEXT": "Noms prononçables en français, extensions européennes en premier, données hébergées en UE.",
+    "C2_OVER": "02 — RÉSEAUX SOCIAUX",
+    "C2_TITLE": "Le pseudo suit le nom",
+    "C2_TEXT": "GitHub, LinkedIn, X, TikTok, Telegram, YouTube : un nom dont le pseudo est pris coûte cher en notoriété.",
+    "C3_OVER": "03 — MARQUES DÉPOSÉES",
+    "C3_TITLE": "INPI, EUIPO et OMPI",
+    "C3_TEXT": "Recherche d'antériorité dans les trois registres, sur les classes de Nice qui vous concernent. La marque UE couvre les 27 États membres.",
     "CMP_LABEL": "Comparatif des générateurs de noms",
     "CMP_HEAD": "Ce que vous obtenez",
     "CMP_US": "Namorama",
@@ -465,6 +463,12 @@
     "FINAL_CTA": "Lancer une recherche gratuite",
     "H1_B_PRE": "",
     "H1_B_EM": "vraiment",
-    "H1_B_POST": "libre"
+    "H1_B_POST": "libre",
+    "CONTROLS_NOTE": "Pensé pour le marché français : noms prononçables en français, extensions européennes en premier, données hébergées dans l'Union européenne.",
+    "DEMO_REPORT_DOM": "Domaines",
+    "DEMO_REPORT_SOC": "Réseaux",
+    "DEMO_REPORT_TM": "Marques",
+    "DEMO_REPORT_SCORE": "Qualité du nom",
+    "DEMO_TM_NONE": "aucun dépôt identique"
   }
 }

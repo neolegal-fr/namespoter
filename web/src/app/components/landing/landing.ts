@@ -102,16 +102,6 @@ import { applyContentSeo } from '../content/content-seo';
 
                 <p class="nm-overline">{{ ('HOME.OVERLINE_' + step()) | translate }}</p>
 
-                <!-- Le rapport n'est pas une étape : il se montre à part, sans
-                     numéro ni trait de liaison avec le fil. -->
-                <button type="button" class="nm-steps__aside"
-                        [class.nm-steps__aside--on]="step() === 4"
-                        [attr.aria-pressed]="step() === 4"
-                        (click)="step.set(step() === 4 ? 3 : 4)">
-                  <i class="pi pi-file-check" aria-hidden="true"></i>
-                  {{ 'HOME.STEP_4' | translate }}
-                </button>
-
                 <!-- Hauteur plancher : sans elle, la page saute à chaque
                      changement d'étape, les volets n'ayant pas la même taille. -->
                 <div id="nm-demo-panel" class="nm-panel__body">
@@ -135,22 +125,41 @@ import { applyContentSeo } from '../content/content-seo';
                       <p class="nm-note">{{ 'HOME.DEMO_NOTE_2B' | translate }}</p>
                     }
                     @case (3) {
-                      <ul class="nm-verdicts">
-                        @for (d of demoDomains; track d.name) {
-                          <li class="nm-verdict">
-                            <span class="nm-verdict__name">{{ d.name }}</span>
-                            <span class="nm-verdict__state" [class]="'nm-verdict__state--' + d.state">{{ d.label | translate }}</span>
-                          </li>
+                      <!-- Des CARTES, comme dans le produit : un nom y porte
+                           plusieurs extensions à la fois. La liste plate qui
+                           les précédait donnait à croire qu'on vérifiait un
+                           domaine, pas un nom. -->
+                      <div class="nm-democards">
+                        @for (c of demoCards; track c.name) {
+                          <div class="nm-democard">
+                            <p class="nm-democard__name">{{ c.name }}</p>
+                            @for (e of c.ext; track e.dom) {
+                              <div class="nm-democard__row">
+                                <span>{{ e.dom }}</span>
+                                <span class="nm-verdict__state" [class]="'nm-verdict__state--' + e.state">{{ e.label | translate }}</span>
+                              </div>
+                            }
+                          </div>
                         }
-                      </ul>
+                      </div>
                       <p class="nm-note">{{ 'HOME.DEMO_NOTE_3' | translate }}</p>
                     }
                     @case (4) {
+                      <!-- Le MODÈLE du rapport, pas son prix : ce qu'on achète
+                           se montre, il ne s'annonce pas. -->
                       <div class="nm-report-teaser">
                         <p class="nm-report-teaser__name">roulio</p>
-                        <p class="nm-report-teaser__price">{{ 'HOME.DEMO_PRICE' | translate }}</p>
-                        <ul class="nm-report-teaser__list">
-                          @for (c of chips('HOME.DEMO_CHECKS'); track c) { <li>{{ c }}</li> }
+                        <ul class="nm-report-teaser__lines">
+                          @for (l of reportLines; track l.key) {
+                            <li>
+                              <span>{{ l.key | translate }}</span>
+                              <span class="nm-verdict__state" [class]="'nm-verdict__state--' + l.state">{{ l.value | translate }}</span>
+                            </li>
+                          }
+                          <li>
+                            <span>{{ 'HOME.DEMO_REPORT_SCORE' | translate }}</span>
+                            <span class="nm-report-teaser__score">78/100</span>
+                          </li>
                         </ul>
                         <p class="nm-note">{{ 'HOME.DEMO_NOTE_4' | translate }}</p>
                       </div>
@@ -167,11 +176,11 @@ import { applyContentSeo } from '../content/content-seo';
       <!-- ═══ Sections claires ═══════════════════════════════════════════ -->
       <div class="nm-light">
 
-        <!-- Les 4 contrôles -->
+        <!-- Les trois points de contrôle -->
         <section class="nm-section">
           <h2 class="nm-h2">{{ 'HOME.CONTROLS_H2' | translate }}</h2>
           <p class="nm-section__lead">{{ 'HOME.CONTROLS_LEAD' | translate }}</p>
-          <div class="nm-grid-4">
+          <div class="nm-grid-3">
             @for (c of controls; track c.overline) {
               <div class="nm-card">
                 <p class="nm-card__overline">{{ c.overline | translate }}</p>
@@ -180,6 +189,9 @@ import { applyContentSeo } from '../content/content-seo';
               </div>
             }
           </div>
+          <!-- Ce qui n'est pas un contrôle mais compte quand même : dit en une
+               ligne, sous la grille, plutôt que déguisé en quatrième carte. -->
+          <p class="nm-section__note">{{ 'HOME.CONTROLS_NOTE' | translate }}</p>
         </section>
 
         <!-- Comparatif -->
@@ -300,10 +312,20 @@ export class LandingComponent {
    * Le rapport n'est pas une étape du wizard — c'est une action depuis une
    * carte. Il sort donc du fil, et se montre en volet supplémentaire.
    */
+  /*
+   * QUATRE étapes, alors que le fil du wizard n'en montre que trois.
+   *
+   * Ce n'est pas un écart : le wizard décrit la GÉNÉRATION, l'accueil décrit
+   * le PRODUIT. S'arrêter aux domaines sur la page qui vend laisserait croire
+   * que Namorama fait ce que font les registrars — or c'est la quatrième
+   * étape, marque et réseaux, qui le distingue. Les libellés des trois
+   * premières restent ceux du wizard, mot pour mot.
+   */
   readonly steps = [
     { n: 1, label: 'WIZARD.STEPS.DESCRIPTION' },
     { n: 2, label: 'WIZARD.STEPS.KEYWORDS' },
     { n: 3, label: 'WIZARD.STEPS.DOMAINS' },
+    { n: 4, label: 'WIZARD.STEPS.BRAND' },
   ];
 
   /** Listes courtes stockées en une clé, séparées par « | » — évite 20 clés de plus. */
@@ -328,6 +350,26 @@ export class LandingComponent {
    * suggestion retenue vaut 1 crédit, qu'on en vérifie une ou cinq — afficher
    * « 1 crédit » en face de chaque domaine libre suggérait l'inverse.
    */
+  /** Étape 3 : trois cartes, chacune portant ses extensions. */
+  readonly demoCards = [
+    { name: 'roulio',   ext: [{ dom: 'roulio.com',   state: 'free',    label: 'HOME.DEMO_FREE' },
+                              { dom: 'roulio.fr',    state: 'free',    label: 'HOME.DEMO_FREE' }] },
+    { name: 'bikara',   ext: [{ dom: 'bikara.com',   state: 'free',    label: 'HOME.DEMO_FREE' },
+                              { dom: 'bikara.fr',    state: 'taken',   label: 'HOME.DEMO_TAKEN' }] },
+    { name: 'cyclique', ext: [{ dom: 'cyclique.fr',  state: 'free',    label: 'HOME.DEMO_FREE' },
+                              { dom: 'cyclique.ch',  state: 'unknown', label: 'HOME.DEMO_UNKNOWN' }] },
+  ];
+
+  /** Étape 4 : les trois volets du rapport, dans l'ordre du document. */
+  readonly reportLines = [
+    { key: 'HOME.DEMO_REPORT_DOM', value: 'HOME.DEMO_FREE',    state: 'free' },
+    { key: 'HOME.DEMO_REPORT_SOC', value: 'HOME.DEMO_FREE',    state: 'free' },
+    // Le volet marque montre un résultat, pas une panne : « non vérifiable »
+    // est déjà démontré à l'étape 3, sur une extension. L'afficher ici
+    // reviendrait à vendre le rapport en annonçant qu'il ne conclut pas.
+    { key: 'HOME.DEMO_REPORT_TM',  value: 'HOME.DEMO_TM_NONE', state: 'free' },
+  ];
+
   readonly demoDomains = [
     { name: 'roulio.com',  state: 'free',    label: 'HOME.DEMO_FREE' },
     { name: 'bikara.com',  state: 'free',    label: 'HOME.DEMO_FREE' },
@@ -337,7 +379,13 @@ export class LandingComponent {
     { name: 'moyeu.ch',    state: 'unknown', label: 'HOME.DEMO_UNKNOWN' },
   ];
 
-  readonly controls = [1, 2, 3, 4].map((i) => ({
+  /*
+   * TROIS contrôles, et non quatre. Le quatrième — « 04 — EUROPE » — n'était
+   * pas un contrôle mais un positionnement : rien n'y était vérifié. Rangé
+   * parmi les vérifications, il affaiblissait les trois autres. Son contenu
+   * descend en note sous la grille.
+   */
+  readonly controls = [1, 2, 3].map((i) => ({
     overline: `HOME.C${i}_OVER`,
     title: `HOME.C${i}_TITLE`,
     text: `HOME.C${i}_TEXT`,
@@ -359,3 +407,4 @@ export class LandingComponent {
     { path: '/guides',                                 label: 'Tous les guides' },
   ];
 }
+

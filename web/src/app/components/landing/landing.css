@@ -356,6 +356,24 @@
   gap: var(--nm-gap-cards);
 }
 
+/* Trois points de contrôle : `auto-fit` casserait la promesse « trois » en
+   deux colonnes plus une orpheline sur les largeurs intermédiaires. */
+.nm-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--nm-gap-cards);
+}
+
+@media (max-width: 860px) {
+  .nm-grid-3 { grid-template-columns: 1fr; }
+}
+
+.nm-section__note {
+  margin: var(--nm-gap-cards) 0 0;
+  font-size: var(--nm-text-ui);
+  color: var(--nm-text-light-2);
+}
+
 .nm-card {
   background: var(--nm-surface-light);
   border: 1px solid var(--nm-border-light);
@@ -553,15 +571,19 @@
 
 /* Le mot qui porte la promesse : « vraiment » libre, et non « libre en .com ».
  *
- * Il est mis en italique parce que la nuance est la raison d'être du produit —
- * un domaine libre ne dit rien de la marque ni des réseaux. Space Grotesk n'a
- * pas d'italique dessiné ; on emprunte donc celui d'IBM Plex Sans (voir
- * fonts.css), une vraie italique plutôt qu'une pente synthétique. Le corps est
- * relevé de 2 % : à taille égale, l'italique humaniste paraît plus petite que
- * la grotesque qui l'entoure. */
+ * Mis en valeur par CONTRASTE DE GRAISSE, pas par l'italique.
+ *
+ * L'italique avait été essayée : Space Grotesk n'en publie aucune, il fallait
+ * emprunter celle d'IBM Plex Sans, et deux dessins de lettres dans un titre de
+ * 60 px se remarquent plus que le mot lui-même — l'emphase attirait l'œil sur
+ * la typographie au lieu du sens.
+ *
+ * Une graisse plus légère au milieu d'un titre gras produit l'effet inverse :
+ * elle crée un creux, et c'est le creux qui se remarque. Même famille, même
+ * couleur, même axe — rien de neuf à l'écran, juste une respiration sur le mot
+ * qui sépare Namorama d'une recherche de nom de domaine.
+ */
 .nm-h1__em {
-  font-family: var(--nm-font-body);
-  font-style: italic;
-  font-weight: 500;
-  font-size: 1.02em;
+  font-style: normal;
+  font-weight: 400;
 }
