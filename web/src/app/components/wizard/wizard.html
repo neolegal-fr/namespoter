@@ -945,13 +945,14 @@
         </div>
 
         <app-brand-report-view [report]="report" [context]="reportContext()">
+          <button refresh type="button" class="rv-refresh"
+                  *ngIf="!isSampleReport()"
+                  [attr.title]="'WIZARD.STEP3.GRID_REFRESH' | translate"
+                  [attr.aria-label]="'WIZARD.STEP3.GRID_REFRESH' | translate"
+                  (click)="refreshBrandReport(report.name)">
+            <i class="pi pi-refresh" aria-hidden="true"></i>
+          </button>
           <span actions *ngIf="!isSampleReport()" class="rv-actions">
-            <!-- Actualiser au même rang que les autres actions du document, et
-                 au même format : posé dans la ligne de date, il y pesait comme
-                 une icône isolée sans libellé, plus visible que ce qu'il fait. -->
-            <button type="button" class="nm-btn-tertiary" (click)="refreshBrandReport(report.name)">
-              <i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.GRID_REFRESH' | translate }}
-            </button>
             <button type="button" class="nm-btn-tertiary" (click)="printReport()">
               <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
             </button>
@@ -961,27 +962,11 @@
           </span>
         </app-brand-report-view>
 
+        <!-- Ce qui reste ici n'existe nulle part ailleurs : le lien de partage.
+             La date, le PDF et l'actualisation vivent en tête du document, où
+             on les cherche ; les répéter en pied donnait deux commandes pour
+             un seul geste, et deux dates pour une seule génération. -->
         <div class="report-actions">
-          <span class="report-actions__meta">
-            <i class="pi pi-clock"></i>
-            {{ 'WIZARD.STEP3.REPORT_GENERATED_ON' | translate }} {{ formatReportDate(report.generatedAt) }}
-          </span>
-
-          <!-- Le PDF passe par l'impression du navigateur, sans moteur ajouté
-               (décision US-053) : la feuille d'impression est déjà écrite, elle
-               force les surfaces claires et masque ce qui n'a pas de sens sur
-               papier. « Enregistrer au format PDF » est la destination par
-               défaut de la boîte d'impression sur les trois systèmes. -->
-          <button type="button" class="nm-btn-tertiary" (click)="printReport()">
-            <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
-          </button>
-
-          <!-- Actualisation GRATUITE : décision produit. Le tarif n'apparaît
-               plus ici — il n'y en a plus. -->
-          <button type="button" class="nm-btn-tertiary" (click)="refreshBrandReport(report.name)">
-            <i class="pi pi-refresh"></i> {{ 'WIZARD.STEP3.GRID_REFRESH' | translate }}
-          </button>
-
           <button type="button" class="nm-btn-tertiary" (click)="copyShareLink(report)">
             <i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}
           </button>

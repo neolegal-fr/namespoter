@@ -1,5 +1,7 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Menu } from 'primeng/menu';
+import type { MenuItem } from 'primeng/api';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
 
@@ -26,8 +28,13 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
 @Component({
   selector: 'app-brand-report-view',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, Menu],
   template: `
+    <!-- Un seul menu pour toutes les lignes : il se remplit au clic avec le
+         domaine concerné. Cinq menus dormants pour cinq extensions seraient
+         cinq fois le même contenu. -->
+    <p-menu #menuRegistrars [model]="registrarItems" [popup]="true" appendTo="body"></p-menu>
+
     @if (report; as r) {
       <article class="rv">
 
@@ -36,6 +43,11 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
             <p class="rv-overline">
               {{ 'WIZARD.STEP3.REPORT_CTA' | translate }}
               @if (r.generatedAt) { · {{ r.generatedAt | date: 'd MMMM y, HH:mm' }} }
+              <!-- Réactualiser se demande EN LISANT la date : c'est elle qui
+                   fait douter de la fraîcheur. Icône seule et fond transparent,
+                   la silhouette n'apparaissant qu'au survol — le geste est
+                   secondaire, son poids visuel doit l'être aussi. -->
+              <ng-content select="[refresh]"></ng-content>
             </p>
             <h2 class="rv-name">{{ r.name }}</h2>
           </div>
@@ -146,19 +158,16 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
                      part : au moment de réserver, la question « chez qui ? » est
                      la même que « je réserve ». Le choix est mémorisé, donc on
                      ne le repose pas à chaque ligne. -->
-                <span class="rv-reserve rv-noprint">
-                  <a class="rv-link" [href]="reserveUrl(r.name, d.extension, registrar())" target="_blank" rel="noopener noreferrer">
-                    <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
-                  </a>
-                  <label class="rv-reserve__who">
-                    <span class="sr-only">{{ 'WIZARD.STEP3.REPORT_REGISTRAR' | translate }}</span>
-                    <select [value]="registrar()" (change)="setRegistrar($any($event.target).value)">
-                      @for (reg of REGISTRARS; track reg.label; let i = $index) {
-                        <option [value]="i">{{ reg.label }}</option>
-                      }
-                    </select>
-                  </label>
-                </span>
+                <!-- UN bouton, un menu. Le sélecteur accolé se lisait comme un
+                     réglage à part, à remplir avant d'agir ; ici « chez qui ? »
+                     n'apparaît qu'après « je réserve », c'est-à-dire au moment
+                     où la question se pose. -->
+                <button type="button" class="rv-link rv-reserve rv-noprint"
+                        [attr.aria-label]="('WIZARD.STEP3.REPORT_RESERVE' | translate) + ' ' + d.domain"
+                        (click)="ouvrirRegistrars($event, d.domain)">
+                  <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
+                  <i class="pi pi-angle-down rv-link__caret" aria-hidden="true"></i>
+                </button>
               }
               <span class="rv-badge" [class]="'rv-badge--' + badgeTone(d.status)">
                 {{ statusKey(d.status) | translate }}
@@ -314,6 +323,28 @@ export class BrandReportViewComponent {
     { label: 'Gandi', base: 'https://shop.gandi.net/fr/domain/suggest?search=' },
     { label: 'Hostinger', base: 'https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=' },
   ];
+
+  @ViewChild('menuRegistrars') private menuRegistrars?: Menu;
+  registrarItems: MenuItem[] = [];
+
+  /**
+   * Ouvre la liste des bureaux pour CE domaine.
+   *
+   * Le choix est mémorisé et remonte en tête de liste : on réserve rarement
+   * chez cinq bureaux différents, et celui qu'on a déjà choisi mérite d'être
+   * le premier proposé la fois suivante.
+   */
+  ouvrirRegistrars(event: Event, domaine: string): void {
+    this.registrarItems = this.REGISTRARS.map((reg, i) => ({
+      label: reg.label,
+      icon: i === this.registrar() ? 'pi pi-check' : 'pi pi-external-link',
+      command: () => {
+        this.setRegistrar(String(i));
+        window.open(`${reg.base}${domaine.toLowerCase()}&utm_source=namorama&utm_medium=referral`, '_blank', 'noopener');
+      },
+    }));
+    this.menuRegistrars?.toggle(event);
+  }
 
   /** Bureau retenu, mémorisé : on ne rechoisit pas à chaque rapport. */
   readonly registrar = signal(this.readRegistrar());

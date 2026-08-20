@@ -392,3 +392,52 @@
 .nm-filter--rejected.nm-filter--on {
     color: var(--nm-app-text);
 }
+
+
+/* ─── Rapport : éléments PROJETÉS dans `app-brand-report-view` ─────────────
+ *
+ * Ces classes vivent ici et pas dans la feuille du composant : les boutons
+ * qu'elles habillent sont écrits dans le gabarit du wizard puis projetés dans
+ * la vue du rapport. Un nœud projeté garde l'attribut d'encapsulation de son
+ * composant déclarant, donc `brand-report-view.css` ne peut pas l'atteindre —
+ * le bouton y ressortait en bouton natif gris, plus visible que ce qu'il fait.
+ */
+.rv-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* Réactualiser, dans la ligne de date : icône seule, plate au repos, avec la
+   silhouette au survol — exactement le traitement des actions tertiaires. Un
+   fond permanent en ferait le point le plus voyant d'une ligne qui n'est
+   qu'une date. */
+.rv-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: 0.35rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--nm-radius-sm);
+    background: transparent;
+    color: var(--nm-app-text-2);
+    cursor: pointer;
+    vertical-align: -7px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+/* `--nm-app-divider` et non `--nm-app-surface-alt` : le bouton est POSÉ SUR LA
+   CARTE du rapport, blanche, alors que « Télécharger en PDF » est posé sur le
+   fond de page. La surface alternative y serait invisible — même intention,
+   donc, mais la teinte qui la rend perceptible à cet endroit. */
+.rv-refresh:hover {
+    background: var(--nm-app-divider);
+    color: var(--nm-app-text);
+}
+
+.rv-refresh .pi { font-size: 0.72rem; }

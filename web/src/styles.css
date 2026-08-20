@@ -670,6 +670,10 @@ body {
     .p-menubar,
     .p-toast,
     .p-drawer-mask,
+    /* Actions du rapport projetées depuis le wizard : hors de portée de la
+       feuille du composant, donc masquées ici. */
+    .rv-refresh,
+    .rv-actions,
     body > footer,
     footer.mt-8 {
         display: none !important;
