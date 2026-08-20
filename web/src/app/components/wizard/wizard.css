@@ -175,8 +175,6 @@
     border-radius: 0.5rem;
     background: var(--nm-app-surface-alt);
     min-height: 3rem;
-    max-height: 9rem;
-    overflow-y: auto;
 }
 
 /* ─── Bandeau extensions (étape 3) ─────────────── */
@@ -562,4 +560,175 @@
 
 .pick-btn .pi-lightbulb {
     color: inherit !important;
+}
+
+/* ─── Tiroir des projets ─────────────────────────────────────────────────── */
+
+.projects-drawer__intro {
+    margin: 0 0 1.25rem;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+}
+
+.projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.project-item {
+    display: flex;
+    align-items: stretch;
+    gap: 0.25rem;
+    border-radius: var(--nm-radius-sm);
+}
+
+.project-item:hover {
+    background: var(--nm-app-surface-alt);
+}
+
+/* La ligne entière est le lien, et elle atteint le plancher tactile. */
+.project-item__open {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-height: var(--nm-touch-min);
+    padding: 0.5rem 0.625rem;
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.project-item__name {
+    font-size: var(--nm-text-ui);
+    font-weight: 600;
+    color: var(--nm-app-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-item__meta {
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Discrète au repos, rouge au survol et au focus seulement. Cible 44×44. */
+.project-item__delete {
+    flex: none;
+    width: var(--nm-touch-min);
+    min-height: var(--nm-touch-min);
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: none;
+    color: var(--nm-app-text-2);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.project-item__delete:hover,
+.project-item__delete:focus-visible {
+    color: var(--nm-app-verdict-taken-fg);
+    background: var(--nm-app-verdict-taken-bg);
+}
+
+.project-item__open:focus-visible,
+.project-item__delete:focus-visible {
+    outline: 2px solid var(--nm-app-accent);
+    outline-offset: -2px;
+}
+
+.projects-drawer__empty {
+    padding: 2.5rem 0;
+    text-align: center;
+    color: var(--nm-app-text-2);
+}
+
+/* Voile : PrimeNG le pose avec `modal`, on le cale sur la teinte du design. */
+.p-drawer-mask {
+    background: rgba(11, 14, 16, 0.45) !important;
+}
+
+/* ─── Champs de l'étape 1 et 2 ───────────────────────────────────────────── */
+
+/* Auto-agrandissement piloté en TS ; la poignée native disparaît — elle
+   proposait de réparer à la main un défaut qui ne devrait pas exister. */
+.wizard-textarea {
+    resize: none;
+    overflow-y: auto;
+    min-height: 7.5rem;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.inspiration-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.inspiration-field__label {
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+    color: var(--nm-app-text-2);
+}
+
+.inspiration-field input {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+/* Croix de suppression des chips : 24px de cible dans une ligne de 44px. La
+   zone de chips ne défile plus — c'est la carte qui défile, un défilement
+   imbriqué se manipule mal et cache la moitié des mots-clés. */
+.chips-container .p-chip {
+    min-height: 2rem;
+}
+
+.chips-container .p-chip-remove-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--nm-radius-pill);
+}
+
+.chips-container .p-chip-remove-icon:hover {
+    background: var(--nm-app-border);
+}
+
+/* Ligne de signalement : discrète, sous la carte. */
+.feedback-line {
+    margin: 1rem 0 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+    text-align: center;
+}
+
+.feedback-line .nm-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+}
+
+/* Point 24 — l'étape 1 laissait une grande carte presque vide, puis un long
+   fond gris jusqu'au pied de page. La carte prend la hauteur de son contenu ;
+   c'est la ZONE qui garde une hauteur minimale, ce qui fait remonter le pied
+   de page sans étirer une surface blanche pour rien. */
+.wizard-shell .p-card {
+    height: auto;
+}
+
+.wizard-shell .p-card > .p-card-body {
+    min-height: 22rem;
 }

@@ -41,7 +41,7 @@
     "THEME_SYSTEM": "Suivre le système",
     "THEME_LIGHT": "Thème clair",
     "THEME_DARK": "Thème sombre",
-    "THEME_SYSTEM_SHORT": "Auto",
+    "THEME_SYSTEM_SHORT": "Système",
     "THEME_LIGHT_SHORT": "Clair",
     "THEME_DARK_SHORT": "Sombre"
   },
@@ -160,7 +160,11 @@
       "LIKED_EXAMPLES_PLACEHOLDER": "Noms que vous aimez : qonto.com, notion.so…",
       "DISLIKED_EXAMPLES_PLACEHOLDER": "Noms que vous n'aimez pas : mabelleboutique.fr…",
       "EXAMPLES_HINT": "L'IA s'inspirera du style, de la longueur et de la sonorité des premiers — et évitera ceux des seconds.",
-      "EXTENSIONS_FREE_NOTE": "Ajouter une extension ne coûte rien : une suggestion retenue vaut 1 crédit, qu'on en vérifie une ou cinq."
+      "EXTENSIONS_FREE_NOTE": "Ajouter une extension ne coûte rien : une suggestion retenue vaut 1 crédit, qu'on en vérifie une ou cinq.",
+      "LIKED_EXAMPLES_LABEL": "Noms qui vous inspirent",
+      "DISLIKED_EXAMPLES_LABEL": "Noms à éviter",
+      "EXTENSIONS_PLACEHOLDER": ".io, .app, .co",
+      "EXTENSIONS_ADD": "Ajouter cette extension"
     },
     "STYLE": {
       "DESCRIPTIVE": "descriptif",
@@ -327,7 +331,10 @@
       "VERIFY_PRICE": "{{n}} crédits",
       "VERIFY_GO": "Vérifier maintenant",
       "COPY_RESULTS": "Copier les résultats",
-      "GRID_SYNTH_RISK_ONE": "1 obstacle"
+      "GRID_SYNTH_RISK_ONE": "1 obstacle",
+      "SCORE_GOOD": "bon",
+      "SCORE_FAIR": "moyen",
+      "SCORE_WEAK": "faible"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

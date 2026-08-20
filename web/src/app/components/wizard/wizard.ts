@@ -598,6 +598,22 @@ export class WizardComponent implements OnInit {
     this.forceRegen.set(false);
   }
 
+  /**
+   * Auto-agrandissement de la zone de description.
+   *
+   * Bornes : 5 lignes au minimum pour que le champ invite à écrire, ~16 au
+   * maximum pour que le bouton d'action reste visible sans défiler. Au-delà,
+   * la zone défile — mais on écrit rarement 16 lignes pour décrire un projet.
+   */
+  autoGrow(event: Event): void {
+    const el = event.target as HTMLTextAreaElement;
+    const line = 24;      // hauteur de ligne effective, en px
+    const min = line * 5;
+    const max = line * 16;
+    el.style.height = 'auto';
+    el.style.height = Math.min(Math.max(el.scrollHeight, min), max) + 'px';
+  }
+
   private parseEmails(raw: string): string[] {
     return raw.split(/[,;\s]+/).map((e) => e.trim()).filter((e) => e.length > 0);
   }

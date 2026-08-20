@@ -41,7 +41,7 @@
     "THEME_SYSTEM": "Follow the system",
     "THEME_LIGHT": "Light theme",
     "THEME_DARK": "Dark theme",
-    "THEME_SYSTEM_SHORT": "Auto",
+    "THEME_SYSTEM_SHORT": "System",
     "THEME_LIGHT_SHORT": "Light",
     "THEME_DARK_SHORT": "Dark"
   },
@@ -160,7 +160,11 @@
       "LIKED_EXAMPLES_PLACEHOLDER": "Names you like: qonto.com, notion.so…",
       "DISLIKED_EXAMPLES_PLACEHOLDER": "Names you dislike: mybestshop.com…",
       "EXAMPLES_HINT": "The AI will draw on the style, length and sound of the first — and steer clear of the second.",
-      "EXTENSIONS_FREE_NOTE": "Adding an extension costs nothing: a suggestion kept is 1 credit, whether you check one extension or five."
+      "EXTENSIONS_FREE_NOTE": "Adding an extension costs nothing: a suggestion kept is 1 credit, whether you check one extension or five.",
+      "LIKED_EXAMPLES_LABEL": "Names you like",
+      "DISLIKED_EXAMPLES_LABEL": "Names to avoid",
+      "EXTENSIONS_PLACEHOLDER": ".io, .app, .co",
+      "EXTENSIONS_ADD": "Add this extension"
     },
     "STYLE": {
       "DESCRIPTIVE": "descriptive",
@@ -327,7 +331,10 @@
       "VERIFY_PRICE": "{{n}} credits",
       "VERIFY_GO": "Check now",
       "COPY_RESULTS": "Copy the results",
-      "GRID_SYNTH_RISK_ONE": "1 blocker"
+      "GRID_SYNTH_RISK_ONE": "1 blocker",
+      "SCORE_GOOD": "good",
+      "SCORE_FAIR": "fair",
+      "SCORE_WEAK": "weak"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

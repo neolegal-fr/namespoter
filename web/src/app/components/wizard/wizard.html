@@ -82,12 +82,18 @@
           <h2 class="font-bold text-900" style="font-size: 1.5rem; margin: 0 0 0.375rem 0">{{ 'WIZARD.STEP1.TITLE' | translate }}</h2>
           <p class="text-500" style="margin: 0; font-size: 0.9rem">{{ 'WIZARD.STEP1.SUBTITLE' | translate }}</p>
         </div>
+        <!--
+          Auto-agrandissement : la hauteur fixe coupait le texte en milieu de
+          ligne et imposait un défilement interne, dans un champ qu'on relit en
+          l'écrivant. La poignée de redimensionnement native disparaît — elle
+          proposait de réparer à la main un défaut qui ne devrait pas exister.
+        -->
         <textarea
           pInputTextarea
           [(ngModel)]="description"
           rows="5"
-          class="w-full border-round-md"
-          style="text-align: left; resize: vertical"
+          class="w-full border-round-md wizard-textarea"
+          (input)="autoGrow($event)"
           [placeholder]="'WIZARD.STEP1.PLACEHOLDER' | translate">
         </textarea>
 
@@ -117,9 +123,13 @@
           </div>
         </div>
 
-        <div *ngIf="isLoggedIn()" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--nm-app-accent); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
-        </div>
+        <!-- Ligne discrète, pas un encadré : le bloc de signalement était un
+             pavé bordé au texte entièrement souligné en gras vert — plus
+             visible que l'action principale de l'écran. Un seul segment est un
+             lien, le reste est du texte courant. -->
+        <p *ngIf="isLoggedIn()" class="feedback-line">
+          <button type="button" class="nm-link" (click)="openFeedback()">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}</button>{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}
+        </p>
       </div>
 
       <!-- Étape 2 : Mots-clés + configuration -->
@@ -190,19 +200,22 @@
           </div>
 
           <!-- Ajout libre de noms appréciés / rejetés -->
-          <div style="display: flex; align-items: center; gap: 0.5rem">
-            <i class="pi pi-thumbs-up" style="font-size: 0.85rem; color: var(--nm-app-verdict-free-fg); flex-shrink: 0"></i>
-            <input pInputText
+          <!--
+            Libellés texte, et non des pouces : les pouces sont des BOUTONS de
+            notation sur les cartes de résultats. Employés ici comme étiquettes
+            de champ, ils donnent à croire qu'on peut cliquer dessus.
+          -->
+          <div class="inspiration-field">
+            <label class="inspiration-field__label" for="liked-examples">{{ 'WIZARD.STEP2.LIKED_EXAMPLES_LABEL' | translate }}</label>
+            <input pInputText id="liked-examples"
                    [(ngModel)]="likedExamplesInput"
-                   [placeholder]="'WIZARD.STEP2.LIKED_EXAMPLES_PLACEHOLDER' | translate"
-                   style="flex: 1; min-width: 0; font-size: 0.9rem">
+                   [placeholder]="'WIZARD.STEP2.LIKED_EXAMPLES_PLACEHOLDER' | translate">
           </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem">
-            <i class="pi pi-thumbs-down" style="font-size: 0.85rem; color: var(--nm-app-verdict-taken-fg); flex-shrink: 0"></i>
-            <input pInputText
+          <div class="inspiration-field">
+            <label class="inspiration-field__label" for="disliked-examples">{{ 'WIZARD.STEP2.DISLIKED_EXAMPLES_LABEL' | translate }}</label>
+            <input pInputText id="disliked-examples"
                    [(ngModel)]="dislikedExamplesInput"
-                   [placeholder]="'WIZARD.STEP2.DISLIKED_EXAMPLES_PLACEHOLDER' | translate"
-                   style="flex: 1; min-width: 0; font-size: 0.9rem">
+                   [placeholder]="'WIZARD.STEP2.DISLIKED_EXAMPLES_PLACEHOLDER' | translate">
           </div>
           <span class="text-500" style="font-size: var(--nm-text-ui-sm)">{{ 'WIZARD.STEP2.EXAMPLES_HINT' | translate }}</span>
         </div>
@@ -306,9 +319,13 @@
           </p-button>
         </div>
 
-        <div *ngIf="isLoggedIn()" style="margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--nm-app-accent); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
-        </div>
+        <!-- Ligne discrète, pas un encadré : le bloc de signalement était un
+             pavé bordé au texte entièrement souligné en gras vert — plus
+             visible que l'action principale de l'écran. Un seul segment est un
+             lien, le reste est du texte courant. -->
+        <p *ngIf="isLoggedIn()" class="feedback-line">
+          <button type="button" class="nm-link" (click)="openFeedback()">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}</button>{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}
+        </p>
       </div>
 
       <!-- Étape 3 : Extensions + Recherche + Résultats -->
@@ -322,8 +339,8 @@
               <p-chip *ngFor="let ext of selectedExtensions()" [label]="ext" [removable]="true" (onRemove)="removeExtension(ext)"></p-chip>
             </div>
             <div style="display: flex; gap: 0.375rem; align-items: center; flex-shrink: 0">
-              <input pInputText [(ngModel)]="newExtension" placeholder=".io .fr net" style="width: 9rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
-              <p-button icon="pi pi-plus" size="small" (onClick)="addExtension()" [loading]="recheckLoading()"></p-button>
+              <input pInputText [(ngModel)]="newExtension" [placeholder]="'WIZARD.STEP2.EXTENSIONS_PLACEHOLDER' | translate" style="width: 9rem; height: 2rem; font-size: 0.85rem" (keydown.enter)="addExtension()">
+              <p-button icon="pi pi-plus" size="small" severity="secondary" [outlined]="true" (onClick)="addExtension()" [loading]="recheckLoading()" [attr.aria-label]="'WIZARD.STEP2.EXTENSIONS_ADD' | translate"></p-button>
             </div>
           </div>
           <!-- Argument à énoncer ICI, près du sélecteur, et pas seulement dans
@@ -517,7 +534,7 @@
             <ng-container *ngIf="domains().length > 0">
               <ng-container *ngIf="(userService.credits$ | async) as totalCredits">
                 <span (click)="projectService.showCreditDialog.set(true)"
-                      style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); cursor: pointer; text-decoration: underline; text-decoration-style: dotted">
+                      style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); cursor: pointer">
                   {{ 'WIZARD.STEP3.CREDITS_LEFT' | translate : { n: totalCredits } }}
                 </span>
               </ng-container>
@@ -526,33 +543,61 @@
         </div>
 
         <div *ngIf="isLoggedIn() && domains().length > 0" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--nm-app-surface-alt); border: 1px solid var(--nm-app-border); font-size: 0.8rem; color: var(--nm-app-text-2); text-align: center; width: 100%">
-          <button type="button" (click)="openFeedback()" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--nm-app-accent); font-size: inherit; font-weight: 600; text-decoration: underline; text-decoration-style: dotted">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}</button>
+          <button type="button" class="nm-link" (click)="openFeedback()">{{ 'FEEDBACK.WIZARD_CTA_LINK' | translate }}</button>{{ 'FEEDBACK.WIZARD_CTA_SUFFIX' | translate }}
         </div>
       </div>
     </div>
   </p-card>
 
   <!-- Volet des projets sécurisé -->
-  <p-drawer [visible]="projectService.showDrawer()" (visibleChange)="projectService.showDrawer.set($event)" [header]="'PROJECTS.TITLE' | translate" position="left" [style]="{ width: 'min(25rem, 90vw)' }" [dismissible]="true" [modal]="false">
-    <p style="color: var(--nm-app-text-2); margin-bottom: 1.5rem; font-size: 0.875rem">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
+  <!--
+    Tiroir des projets.
+    `modal` à true : PrimeNG pose alors le voile d'assombrissement, ferme sur
+    Échap et piège le focus. Il était à false — le fond restait clair et
+    cliquable, et le tiroir recouvrait partiellement l'en-tête, coupant le logo.
+  -->
+  <p-drawer [visible]="projectService.showDrawer()"
+            (visibleChange)="projectService.showDrawer.set($event)"
+            [header]="'PROJECTS.TITLE' | translate"
+            position="left"
+            [style]="{ width: 'min(25rem, 90vw)' }"
+            [dismissible]="true"
+            [modal]="true"
+            styleClass="projects-drawer">
+    <p class="projects-drawer__intro">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
 
-    <div style="display: flex; flex-direction: column; gap: 0.5rem">
-      <div *ngFor="let project of projectService.projects()"
-           class="project-item"
-           (click)="loadProject(project.id)"
-           [pTooltip]="project.description" tooltipPosition="bottom" [appendTo]="'body'">
-        <div style="flex: 1; overflow: hidden; min-width: 0">
-          <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ project.name }}</div>
-          <div class="project-item-date" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); margin-top: 0.1rem">{{ project.updatedAt | date:'d MMM yyyy' }}</div>
-        </div>
+    <div class="projects-list">
+      <!--
+        La ligne ENTIÈRE est le lien : le chevron « > » qui l'accompagnait
+        n'ajoutait rien et prenait la place d'une information utile.
+      -->
+      <div *ngFor="let project of projectService.projects()" class="project-item">
+        <button type="button" class="project-item__open" (click)="loadProject(project.id)">
+          <span class="project-item__name">{{ project.name }}</span>
+          <!--
+            Deuxième niveau : la date NE SUFFIT PAS à distinguer des homonymes.
+            Trois « Bidora » créés le même jour ne sont pas choisissables ; le
+            début de la description, lui, les sépare.
+          -->
+          <span class="project-item__meta">
+            {{ project.updatedAt | date:'d MMM yyyy' }}
+            <span *ngIf="project.description">· {{ project.description | slice:0:60 }}</span>
+          </span>
+        </button>
 
-        <div style="display: flex; align-items: center; gap: 0.5rem">
-          <p-button icon="pi pi-trash" [text]="true" severity="danger" (onClick)="deleteProject($event, project.id)" size="small"></p-button>
-          <i class="pi pi-chevron-right" style="font-size: var(--nm-text-ui-sm); color: var(--nm-app-text-2); flex-shrink: 0"></i>
-        </div>
+        <!--
+          La corbeille était l'élément le plus visible de chaque ligne : rouge
+          plein, à côté d'un nom en gris. Elle devient discrète et ne rougit
+          qu'au survol — une suppression ne s'annonce pas, elle se confirme.
+        -->
+        <button type="button" class="project-item__delete"
+                (click)="deleteProject($event, project.id)"
+                [attr.aria-label]="('PROJECTS.DELETE' | translate) + ' — ' + project.name">
+          <i class="pi pi-trash" aria-hidden="true"></i>
+        </button>
       </div>
 
-      <div *ngIf="projectService.projects().length === 0" style="text-align: center; padding: 2.5rem 0; color: var(--nm-app-text-2)">
+      <div *ngIf="projectService.projects().length === 0" class="projects-drawer__empty">
         {{ 'PROJECTS.EMPTY' | translate }}
       </div>
     </div>
@@ -724,6 +769,7 @@
     (visibleChange)="showReportDialog.set($event)"
     [modal]="true"
     [draggable]="false"
+    [closable]="false"
     [style]="{ width: '100vw', height: '100vh', maxHeight: '100vh' }"
     [contentStyle]="{ padding: '0', background: 'var(--nm-app-surface-alt)' }">
 

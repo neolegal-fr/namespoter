@@ -61,10 +61,18 @@ import { Drawer } from 'primeng/drawer';
           <div class="flex align-items-center gap-2">
 
             <!-- Langue Selector -->
-            <button (click)="langMenu.toggle($event)" class="lang-toggle cursor-pointer border-circle p-2"
-                    [attr.aria-label]="'APP.LANGUAGE' | translate"
-                    style="background: none; border: none; transition: background 0.15s">
-              <span [class]="currentFlagClass" style="font-size: 1.25rem"></span>
+            <!--
+              Le NOM de la langue, dans sa langue — pas un drapeau. Un drapeau
+              désigne un pays, pas une langue : celui de l'Espagne ne dit rien
+              à un hispanophone d'Amérique latine, et l'anglais n'a pas de
+              pays. C'est aussi ce qui permet de supprimer « flag-icons », chargé
+              depuis un CDN tiers dans le <head> — coût de chargement sur la
+              page indexée, et requête vers un tiers avant consentement.
+            -->
+            <button (click)="langMenu.toggle($event)" class="lang-toggle"
+                    [attr.aria-label]="'APP.LANGUAGE' | translate">
+              <i class="pi pi-globe" aria-hidden="true"></i>
+              <span class="lang-toggle__code">{{ currentLangLabel }}</span>
             </button>
             <p-menu #langMenu [model]="langMenuItems" [popup]="true" appendTo="body" styleClass="lang-menu"></p-menu>
 
@@ -92,7 +100,7 @@ import { Drawer } from 'primeng/drawer';
                       class="credits-pill"
                       [attr.aria-label]="('APP.CREDITS' | translate) + ': ' + credits()"
                       (click)="triggerCreditDialog()">
-                <i class="pi pi-bolt"></i><span>{{ credits() }}</span>
+                <i class="pi pi-wallet" aria-hidden="true"></i><span>{{ credits() }}</span>
               </button>
 
               <p-button
@@ -430,35 +438,35 @@ export class AppComponent implements OnInit {
   userEmail = signal('');
   
   readonly languages = [
-    { label: 'Čeština',    code: 'cs', flag: 'fi fi-cz' },
-    { label: 'Dansk',      code: 'da', flag: 'fi fi-dk' },
-    { label: 'Deutsch',    code: 'de', flag: 'fi fi-de' },
-    { label: 'English',    code: 'en', flag: 'fi fi-gb' },
-    { label: 'Español',    code: 'es', flag: 'fi fi-es' },
-    { label: 'Suomi',      code: 'fi', flag: 'fi fi-fi' },
-    { label: 'Français',   code: 'fr', flag: 'fi fi-fr' },
-    { label: 'Magyar',     code: 'hu', flag: 'fi fi-hu' },
-    { label: 'Italiano',   code: 'it', flag: 'fi fi-it' },
-    { label: 'Nederlands', code: 'nl', flag: 'fi fi-nl' },
-    { label: 'Norsk',      code: 'no', flag: 'fi fi-no' },
-    { label: 'Polski',     code: 'pl', flag: 'fi fi-pl' },
-    { label: 'Português',  code: 'pt', flag: 'fi fi-pt' },
-    { label: 'Română',     code: 'ro', flag: 'fi fi-ro' },
-    { label: 'Svenska',    code: 'sv', flag: 'fi fi-se' },
-    { label: 'Türkçe',     code: 'tr', flag: 'fi fi-tr' },
-    { label: 'Русский',    code: 'ru', flag: 'fi fi-ru' },
-    { label: '日本語',      code: 'ja', flag: 'fi fi-jp' },
-    { label: '中文',        code: 'zh', flag: 'fi fi-cn' },
+    { label: 'Čeština',    code: 'cs' },
+    { label: 'Dansk',      code: 'da' },
+    { label: 'Deutsch',    code: 'de' },
+    { label: 'English',    code: 'en' },
+    { label: 'Español',    code: 'es' },
+    { label: 'Suomi',      code: 'fi' },
+    { label: 'Français',   code: 'fr' },
+    { label: 'Magyar',     code: 'hu' },
+    { label: 'Italiano',   code: 'it' },
+    { label: 'Nederlands', code: 'nl' },
+    { label: 'Norsk',      code: 'no' },
+    { label: 'Polski',     code: 'pl' },
+    { label: 'Português',  code: 'pt' },
+    { label: 'Română',     code: 'ro' },
+    { label: 'Svenska',    code: 'sv' },
+    { label: 'Türkçe',     code: 'tr' },
+    { label: 'Русский',    code: 'ru' },
+    { label: '日本語',      code: 'ja' },
+    { label: '中文',        code: 'zh' },
   ];
 
   readonly langMenuItems: MenuItem[] = this.languages.map(l => ({
     label: l.label,
-    icon: l.flag,
     command: () => this.setLang(l.code)
   }));
 
-  get currentFlagClass(): string {
-    return this.languages.find(l => l.code === this.selectedLang)?.flag ?? 'fi fi-fr';
+  /** Nom de la langue courante, dans sa propre langue. */
+  get currentLangLabel(): string {
+    return this.languages.find(l => l.code === this.selectedLang)?.label ?? 'Français';
   }
 
   profileMenuItems: MenuItem[] = [];

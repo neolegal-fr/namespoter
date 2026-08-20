@@ -90,7 +90,7 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
               @for (h of r.trademark.hits.slice(0, 8); track h.name + h.applicationNumber) {
                 <li>
                   {{ h.name }}
-                  <span style="color: var(--nm-text-light-3)">
+                  <span style="color: var(--nm-app-text-2)">
                     ({{ officeLabel(h.collection) }}@if (h.classes.length) { · {{ 'WIZARD.STEP3.REPORT_CLASSES' | translate:{ list: h.classes.join(', ') } }} })
                   </span>
                 </li>
@@ -124,9 +124,6 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
                 <span class="rv-row__label">
                   <a [href]="s.url" target="_blank" rel="noopener noreferrer">{{ s.platform }} · &#64;{{ r.handle }}</a>
                 </span>
-                @if (s.planned) {
-                  <span class="rv-row__note">{{ 'WIZARD.STEP3.SOCIAL_SOON' | translate }}</span>
-                }
                 <span class="rv-badge" [class]="'rv-badge--' + badgeTone(s.status)">
                   {{ statusKey(s.status) | translate }}
                 </span>
@@ -140,7 +137,14 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
           <section class="rv-section">
             <div class="rv-section__head">
               <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
-              <span class="rv-section__meta">{{ q.score }}/100</span>
+              <!-- Le chiffre reste en couleur de texte ; c'est une PASTILLE
+                   de verdict qui porte l'appréciation. Un nombre coloré se lit
+                   comme un état sans dire lequel, et introduit des couleurs
+                   ad hoc hors de l'échelle du produit. -->
+              <span class="rv-section__meta">
+                <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(q.score)">{{ scoreKey(q.score) | translate }}</span>
+                <strong style="color: var(--nm-app-text)">{{ q.score }}/100</strong>
+              </span>
             </div>
             <div class="rv-criteria">
               @for (c of criteria(q); track c.label) {
@@ -237,6 +241,20 @@ export class BrandReportViewComponent {
       : t === 'watch'
         ? 'WIZARD.STEP3.REPORT_SUMMARY_WATCH'
         : 'WIZARD.STEP3.REPORT_SUMMARY_RISK';
+  }
+
+  /** Appréciation d'un score, sur l'échelle de verdict du produit. */
+  scoreTone(score: number): string {
+    return score >= 66 ? 'free' : score >= 33 ? 'watch' : 'taken';
+  }
+
+  scoreKey(score: number): string {
+    const t = this.scoreTone(score);
+    return t === 'free'
+      ? 'WIZARD.STEP3.SCORE_GOOD'
+      : t === 'watch'
+        ? 'WIZARD.STEP3.SCORE_FAIR'
+        : 'WIZARD.STEP3.SCORE_WEAK';
   }
 
   officeLabel(c?: 'FR' | 'EU' | 'WO'): string {
