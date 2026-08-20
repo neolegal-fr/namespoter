@@ -466,7 +466,104 @@ export class WizardComponent implements OnInit, OnDestroy {
    * les deux gestes : vérifier (popup courte) et consulter le rapport (écran
    * qui montre ce qu'on achète).
    */
-  openFullReport(name: string): void {
+  /**
+   * Le rapport a une URL : `?rapport=<nom>` sur la route courante.
+   *
+   * Il s'affiche dans un dialogue plein écran, mais c'est un ÉCRAN, pas une
+   * incise : on y reste, on le lit, on le partage. Sans entrée d'historique,
+   * « page précédente » quittait la recherche entière au lieu de revenir aux
+   * résultats, et l'écran n'était pas adressable.
+   *
+   * L'URL est la source de vérité de ce qui est à l'écran : `showReportDialog`
+   * ne se lève et ne retombe que par elle (voir `ngOnInit`).
+   */
+  private static readonly REPORT_PARAM = 'rapport';
+
+  /** Valeur du paramètre pour le rapport d'exemple, qui n'a pas de nom réel. */
+  private static readonly SAMPLE_PARAM = 'exemple';
+
+  /** Vrai si c'est nous qui avons empilé l'entrée d'historique du rapport. */
+  private reportUrlPushed = false;
+
+  /**
+   * Nom dont les données sont DÉJÀ chargées, en attente de l'URL.
+   *
+   * Sans lui, l'écouteur d'URL rechargerait ce que l'appelant vient d'obtenir :
+   * une requête pour rien après chaque génération.
+   */
+  private preloadedReportName: string | null = null;
+
+  /** Affiche un rapport dont les données sont déjà en mémoire. */
+  private showReport(name: string): void {
+    this.preloadedReportName = name;
+    this.pushReportUrl(name);
+  }
+
+  private pushReportUrl(name: string): void {
+    this.reportUrlPushed = true;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [WizardComponent.REPORT_PARAM]: name },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /**
+   * Ferme le rapport.
+   *
+   * Si l'entrée d'historique vient de nous, on la dépile — sinon « page
+   * précédente » rouvrirait le rapport qu'on vient de fermer. Sur une arrivée
+   * directe par l'URL il n'y a rien à dépiler : on retire le paramètre en
+   * remplaçant l'entrée, pour ne pas sortir du site.
+   */
+  closeReport(): void {
+    if (this.reportUrlPushed) {
+      this.reportUrlPushed = false;
+      this.location.back();
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [WizardComponent.REPORT_PARAM]: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Le dialogue s'est fermé autrement que par le bouton (Échap) : suivre l'URL. */
+  onReportVisibleChange(visible: boolean): void {
+    if (visible) return;
+    if (this.route.snapshot.queryParamMap.get(WizardComponent.REPORT_PARAM)) {
+      this.closeReport();
+    } else {
+      this.showReportDialog.set(false);
+    }
+  }
+
+  /** Applique l'URL : ouvrir le rapport demandé, ou refermer s'il n'y en a plus. */
+  private syncReportFromUrl(param: string | null): void {
+    if (!param) {
+      this.reportUrlPushed = false;
+      this.preloadedReportName = null;
+      this.showReportDialog.set(false);
+      return;
+    }
+    if (param === WizardComponent.SAMPLE_PARAM) {
+      this.loadSampleReport();
+      this.showReportDialog.set(true);
+      return;
+    }
+    if (this.preloadedReportName && this.normName(this.preloadedReportName) === this.normName(param)) {
+      this.preloadedReportName = null;
+      this.showReportDialog.set(true);
+      return;
+    }
+    if (this.showReportDialog() && this.normName(this.brandReportName()) === this.normName(param)) return;
+    this.loadReportInto(param);
+  }
+
+  /** Charge le rapport d'un nom et l'affiche — chemin de l'arrivée par l'URL. */
+  private loadReportInto(name: string): void {
     this.brandReportName.set(name);
     this.brandReportError.set(null);
     this.isSampleReport.set(false);
@@ -483,6 +580,10 @@ export class WizardComponent implements OnInit, OnDestroy {
       },
       error: () => this.showReportDialog.set(true),
     });
+  }
+
+  openFullReport(name: string): void {
+    this.pushReportUrl(name);
   }
 
   /** Charge l'offre du serveur pour ce nom (prix, droit gratuit, solde). */
@@ -509,7 +610,7 @@ export class WizardComponent implements OnInit, OnDestroy {
         if (res?.exists && res.report) {
           this.markReported(name);
           this.brandReport.set(res.report);
-          this.showReportDialog.set(true);
+          this.showReport(name);
         } else {
           this.openReportConfirm();
         }
@@ -594,7 +695,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     const emails = this.parseEmails(this.reportEmails());
     const force = this.forceRegen();
     this.showReportConfirm.set(false);
-    this.showReportDialog.set(true);
+    this.showReport(this.brandReportName());
     this.generateBrandReport(this.brandReportName(), emails, force);
     this.forceRegen.set(false);
   }
@@ -753,11 +854,14 @@ export class WizardComponent implements OnInit, OnDestroy {
   readonly isSampleReport = signal(false);
   showSampleReport(): void {
     this.showReportConfirm.set(false);
+    this.pushReportUrl(WizardComponent.SAMPLE_PARAM);
+  }
+
+  private loadSampleReport(): void {
     this.isSampleReport.set(true);
     this.brandReportName.set('namorama');
     this.brandReportError.set(null);
     this.brandReport.set(this.SAMPLE_REPORT);
-    this.showReportDialog.set(true);
   }
   readonly SAMPLE_REPORT: BrandReport = {
     name: 'namorama',
@@ -869,6 +973,11 @@ export class WizardComponent implements OnInit, OnDestroy {
     // Écouter les demandes de reset (depuis le menu global)
     this.projectService.resetWizard$.subscribe(() => {
       this.resetProject();
+    });
+
+    // Le rapport est un écran adressable : c'est l'URL qui l'ouvre et le ferme.
+    this.route.queryParams.subscribe(qp => {
+      this.syncReportFromUrl(qp[WizardComponent.REPORT_PARAM] ?? null);
     });
 
     // S'abonner aux changements de paramètres d'URL

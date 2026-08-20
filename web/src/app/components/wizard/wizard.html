@@ -766,7 +766,7 @@
   <!-- ─── Dialog "Rapport de disponibilité de marque" (plein écran) (US-054) ─ -->
   <p-dialog
     [visible]="showReportDialog()"
-    (visibleChange)="showReportDialog.set($event)"
+    (visibleChange)="onReportVisibleChange($event)"
     [modal]="true"
     [draggable]="false"
     [closable]="false"
@@ -776,7 +776,7 @@
     <!-- En-tête : retour à la liste + nom + badge « déjà généré » -->
     <ng-template pTemplate="header">
       <div style="display: flex; align-items: center; gap: 0.85rem; width: 100%">
-        <button type="button" class="report-back" (click)="showReportDialog.set(false)">
+        <button type="button" class="report-back" (click)="closeReport()">
           <i class="pi pi-arrow-left"></i> {{ 'WIZARD.STEP3.REPORT_BACK' | translate }}
         </button>
         <span style="font-weight: 800; font-size: 1.05rem; font-family: var(--nm-font-display)">{{ brandReportName() }}</span>
@@ -830,7 +830,7 @@
         <!-- Bandeau « exemple » : ce rapport-ci n'est pas celui de l'utilisateur. -->
         <div *ngIf="isSampleReport()" class="report-sample-banner">
           <span><i class="pi pi-info-circle"></i> {{ 'WIZARD.STEP3.REPORT_SAMPLE_BANNER' | translate }}</span>
-          <button type="button" class="nm-btn-primary" (click)="showReportDialog.set(false)">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
+          <button type="button" class="nm-btn-primary" (click)="closeReport()">{{ 'WIZARD.STEP3.REPORT_SAMPLE_CTA' | translate }}</button>
         </div>
 
         <!--
