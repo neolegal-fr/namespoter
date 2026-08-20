@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
@@ -51,6 +51,33 @@ import { SafeHtml } from '@angular/platform-browser';
             }
           </div>
         </header>
+
+        <!-- Le projet AVANT le nom : un rapport se relit des semaines plus
+             tard, et se partage à un associé qui n'était pas là quand la
+             recherche a tourné. Sans la description ni les contraintes, il
+             faut deviner pourquoi ce nom a été proposé. -->
+        @if (context; as ctx) {
+          @if (ctx.description) {
+            <section class="rv-section">
+              <div class="rv-section__head">
+                <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_PROJECT' | translate }}</h3>
+              </div>
+              <p class="rv-quote">{{ ctx.description }}</p>
+            </section>
+          }
+          @if (ctx.constraints?.length) {
+            <section class="rv-section">
+              <div class="rv-section__head">
+                <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_CONSTRAINTS' | translate }}</h3>
+              </div>
+              <div class="rv-criteria">
+                @for (c of ctx.constraints; track c.label) {
+                  <span class="rv-criterion">{{ c.label | translate }} <strong>{{ c.value }}</strong></span>
+                }
+              </div>
+            </section>
+          }
+        }
 
         <!-- L'ordre du document suit celui de la décision : d'abord CE QUE
              VAUT le nom, ensuite ce qui peut l'empêcher. Les domaines et
@@ -112,13 +139,28 @@ import { SafeHtml } from '@angular/platform-browser';
         <section class="rv-section">
           <div class="rv-section__head">
             <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_DOMAINS' | translate }}</h3>
-            <span class="rv-section__meta">RDAP@if (r.generatedAt) { · {{ r.generatedAt | date: 'HH:mm:ss' }} }</span>
+            <span class="rv-section__meta">
+              <!-- Le bureau d'enregistrement se choisit : cinq étaient déjà
+                   câblés dans le produit, le rapport n'en proposait qu'un.
+                   « rv-noprint » : réserver n'a aucun sens sur un papier. -->
+              @if (REGISTRARS.length > 1) {
+                <label class="rv-registrar rv-noprint">
+                  <span class="sr-only">{{ 'WIZARD.STEP3.REPORT_REGISTRAR' | translate }}</span>
+                  <select [value]="registrar()" (change)="setRegistrar($any($event.target).value)">
+                    @for (reg of REGISTRARS; track reg.label; let i = $index) {
+                      <option [value]="i">{{ reg.label }}</option>
+                    }
+                  </select>
+                </label>
+              }
+              RDAP@if (r.generatedAt) { · {{ r.generatedAt | date: 'HH:mm:ss' }} }
+            </span>
           </div>
           @for (d of r.domains; track d.domain) {
             <div class="rv-row">
               <span class="rv-row__label">{{ d.domain }}</span>
               @if (d.status === 'free') {
-                <a class="rv-link" [href]="reserveUrl(r.name, d.extension, 0)" target="_blank" rel="noopener noreferrer">
+                <a class="rv-link" [href]="reserveUrl(r.name, d.extension, registrar())" target="_blank" rel="noopener noreferrer">
                   <i class="pi pi-shopping-cart"></i> {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }}
                 </a>
               }
@@ -231,7 +273,7 @@ import { SafeHtml } from '@angular/platform-browser';
             </p>
           }
           @if (heroFreeDomain(r); as hero) {
-            <a class="rv-cta" [href]="reserveUrl(r.name, hero.extension, 0)" target="_blank" rel="noopener noreferrer">
+            <a class="rv-cta" [href]="reserveUrl(r.name, hero.extension, registrar())" target="_blank" rel="noopener noreferrer">
               <i class="pi pi-shopping-cart"></i>
               {{ 'WIZARD.STEP3.REPORT_RESERVE' | translate }} {{ hero.domain }}
             </a>
@@ -261,12 +303,46 @@ export class BrandReportViewComponent {
   /** Note sur 5 lue dans cette analyse (0 = inconnue). */
   @Input() analysisScore = 0;
 
+  /**
+   * Le projet tel que l'utilisateur l'a décrit, et le cadre qu'il a posé.
+   * Absent sur la page de partage publique, qui ne doit rien révéler du projet.
+   */
+  @Input() context: { description?: string; constraints?: { label: string; value: string }[] } | null = null;
+
   readonly INPI_DEPOSIT_URL = 'https://procedures.inpi.fr/?/marques/depot';
+  /**
+   * Les CINQ bureaux déjà câblés dans le wizard, et non trois.
+   *
+   * Le rapport en proposait un sous-ensemble, sans que rien ne le justifie :
+   * un utilisateur qui a ses domaines chez GoDaddy n'ira pas les acheter chez
+   * OVH parce qu'un rapport le lui suggère.
+   */
   readonly REGISTRARS = [
     { label: 'OVH', base: 'https://www.ovhcloud.com/fr/domains/domain-name-checker/?q=' },
     { label: 'Namecheap', base: 'https://www.namecheap.com/domains/registration/results.aspx?domain=' },
+    { label: 'GoDaddy', base: 'https://www.godaddy.com/domainsearch/find?domainToCheck=' },
     { label: 'Gandi', base: 'https://shop.gandi.net/fr/domain/suggest?search=' },
+    { label: 'Hostinger', base: 'https://www.hostinger.com/fr/nom-de-domaine-disponible?domain=' },
   ];
+
+  /** Bureau retenu, mémorisé : on ne rechoisit pas à chaque rapport. */
+  readonly registrar = signal(this.readRegistrar());
+
+  setRegistrar(i: string): void {
+    const n = Number(i);
+    if (!Number.isInteger(n) || n < 0 || n >= this.REGISTRARS.length) return;
+    this.registrar.set(n);
+    try { localStorage.setItem('nm-registrar', String(n)); } catch { /* stockage bloqué */ }
+  }
+
+  private readRegistrar(): number {
+    try {
+      const v = Number(localStorage.getItem('nm-registrar'));
+      return Number.isInteger(v) && v >= 0 && v < 5 ? v : 0;
+    } catch {
+      return 0;
+    }
+  }
 
   reserveUrl(name: string, extension: string, i = 0): string {
     const d = `${name}.${extension}`.toLowerCase();

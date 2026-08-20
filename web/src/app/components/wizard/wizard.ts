@@ -551,11 +551,13 @@ export class WizardComponent implements OnInit, OnDestroy {
     if (param === WizardComponent.SAMPLE_PARAM) {
       this.loadSampleReport();
       this.showReportDialog.set(true);
+      this.scrollToTop();
       return;
     }
     if (this.preloadedReportName && this.normName(this.preloadedReportName) === this.normName(param)) {
       this.preloadedReportName = null;
       this.showReportDialog.set(true);
+      this.scrollToTop();
       return;
     }
     if (this.showReportDialog() && this.normName(this.brandReportName()) === this.normName(param)) return;
@@ -589,6 +591,35 @@ export class WizardComponent implements OnInit, OnDestroy {
     return { name: d.name, handle: base.replace(/[^a-z0-9]/g, ''), domains };
   }
 
+  /**
+   * Le projet et son cadre, en tête du rapport.
+   *
+   * Un rapport se relit des semaines plus tard, et se partage à quelqu'un qui
+   * n'était pas là quand la recherche a tourné : sans la description ni les
+   * contraintes, impossible de savoir pourquoi CE nom a été proposé.
+   */
+  reportContext = computed(() => {
+    const contraintes: { label: string; value: string }[] = [];
+    contraintes.push({
+      label: 'WIZARD.STEP3.REPORT_C_LENGTH',
+      value: this.translate.instant('WIZARD.STEP3.REPORT_C_LENGTH_V', { n: this.minNameLength() }),
+    });
+    if (this.selectedExtensions().length) {
+      contraintes.push({ label: 'WIZARD.STEP3.REPORT_C_EXTENSIONS', value: this.selectedExtensions().join(' ') });
+    }
+    contraintes.push({
+      label: 'WIZARD.STEP3.REPORT_C_MATCH',
+      value: this.translate.instant(this.matchMode() === 'all' ? 'WIZARD.STEP2.MATCH_ALL' : 'WIZARD.STEP2.MATCH_ANY'),
+    });
+    if (this.isLocal()) {
+      contraintes.push({
+        label: 'WIZARD.STEP3.REPORT_C_LOCAL',
+        value: this.translate.instant('WIZARD.STEP3.REPORT_C_LOCAL_V'),
+      });
+    }
+    return { description: this.description() || undefined, constraints: contraintes };
+  });
+
   /** Analyse déjà produite pour ce nom, rendue en HTML (ou null). */
   partialAnalysis(name: string): SafeHtml | null {
     const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
@@ -617,9 +648,28 @@ export class WizardComponent implements OnInit, OnDestroy {
           this.brandReport.set(res.report);
         }
         this.showReportDialog.set(true);
+        this.scrollToTop();
       },
-      error: () => this.showReportDialog.set(true),
+      error: () => { this.showReportDialog.set(true); this.scrollToTop(); },
     });
+  }
+
+  /**
+   * Ouvre le rapport en HAUT de page.
+   *
+   * Il s'affichait à la hauteur de défilement où l'on avait cliqué — souvent
+   * la troisième rangée de cartes — donc au milieu du document, sans son
+   * en-tête ni son nom. Le dialogue plein écran masquait le problème ; une
+   * page ne le masque plus.
+   */
+  /** Ouvre la boîte d'impression, dont la destination par défaut est le PDF. */
+  printReport(): void {
+    if (typeof window !== 'undefined') window.print();
+  }
+
+  private scrollToTop(): void {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   openFullReport(name: string): void {

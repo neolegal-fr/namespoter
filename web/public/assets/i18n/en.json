@@ -341,7 +341,17 @@
       "GRID_RECHECK_DOMAINS": "Re-check",
       "GRID_RECHECK_SOON": "Trademark and socials checked less than 24 h ago",
       "GRID_DEBITED_NAMES": "credits charged — 1 for each of the {{noms}} names suggested",
-      "GRID_ANALYSE_NOW": "Analyse"
+      "GRID_ANALYSE_NOW": "Analyse",
+      "REPORT_PROJECT": "The project",
+      "REPORT_CONSTRAINTS": "Search framing",
+      "REPORT_REGISTRAR": "Registrar",
+      "REPORT_C_LENGTH": "Minimum length",
+      "REPORT_C_EXTENSIONS": "Extensions",
+      "REPORT_C_MATCH": "Availability required",
+      "REPORT_C_LOCAL": "Anchoring",
+      "REPORT_DOWNLOAD": "Download as PDF",
+      "REPORT_C_LENGTH_V": "{{n}} characters or more",
+      "REPORT_C_LOCAL_V": "names suited to the local market"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

@@ -4,7 +4,7 @@
   les contenus qui diffèrent — les formulaires gardent une colonne de lecture
   de 45rem, la grille de résultats prend toute la largeur.
 -->
-<div class="w-full wizard-shell">
+<div class="w-full wizard-shell" [class.wizard-shell--report]="showReportDialog()">
 
   <!-- ─── Landing page (visiteurs non connectés) ─────────── -->
   <div *ngIf="showLanding()" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2rem; padding: 2rem 0">
@@ -41,7 +41,7 @@
   </div>
 
   <!-- ─── Wizard ───────────────────────────────────────────── -->
-  <p-card *ngIf="!showLanding()" styleClass="md:p-5">
+  <p-card *ngIf="!showLanding() && !showReportDialog()" styleClass="md:p-5">
     <!-- En-tête de projet CONSTANT sur les trois étapes : il apparaissait aux
          étapes 2 et 3 et disparaissait à l'étape 1, pour le même projet et la
          même URL. Et il était en accent, plus gros que le titre de l'écran :
@@ -765,17 +765,15 @@
   </p-dialog>
 
   <!-- ─── Dialog "Rapport de disponibilité de marque" (plein écran) (US-054) ─ -->
-  <p-dialog
-    [visible]="showReportDialog()"
-    (visibleChange)="onReportVisibleChange($event)"
-    [modal]="true"
-    [draggable]="false"
-    [closable]="false"
-    [style]="{ width: '100vw', height: '100vh', maxHeight: '100vh' }"
-    [contentStyle]="{ padding: '0', background: 'var(--nm-app-surface-alt)' }">
-
+  <!-- ─── Rapport complet : une PAGE, pas une modale ────────────────────────
+       Il s'affichait dans un dialogue plein écran, qui recouvrait la barre de
+       navigation : on ne pouvait plus ni changer de projet, ni voir son solde,
+       ni revenir à l'accueil sans fermer le rapport. C'est pourtant un écran
+       où l'on reste — il porte d'ailleurs sa propre URL depuis hier. Il prend
+       donc simplement la place du wizard, sous la barre, et le fil d'étapes
+       s'efface le temps de la lecture. -->
+  <div *ngIf="showReportDialog()" class="report-page">
     <!-- En-tête : retour à la liste + nom + badge « déjà généré » -->
-    <ng-template pTemplate="header">
       <div style="display: flex; align-items: center; gap: 0.85rem; width: 100%">
         <button type="button" class="report-back" (click)="closeReport()">
           <i class="pi pi-arrow-left"></i> {{ 'WIZARD.STEP3.REPORT_BACK' | translate }}
@@ -785,7 +783,6 @@
           <i class="pi pi-clock" style="font-size: var(--nm-text-ui-sm)"></i> {{ 'WIZARD.STEP3.REPORT_CACHED' | translate }}
         </span>
       </div>
-    </ng-template>
 
     <div style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1.25rem">
 
@@ -820,6 +817,7 @@
         <app-brand-report-view
           *ngIf="partialReport(brandReportName()) as partial; else lockedOnly"
           [report]="partial"
+          [context]="reportContext()"
           [locked]="true"
           [analysis]="partialAnalysis(brandReportName())"
           [analysisScore]="partialAnalysisScore(brandReportName())">
@@ -866,13 +864,22 @@
           composant porte le document ; le wizard ne garde que les actions qui
           lui appartiennent (partage, actualisation, envoi par e-mail).
         -->
-        <app-brand-report-view [report]="report"></app-brand-report-view>
+        <app-brand-report-view [report]="report" [context]="reportContext()"></app-brand-report-view>
 
         <div class="report-actions">
           <span class="report-actions__meta">
             <i class="pi pi-clock"></i>
             {{ 'WIZARD.STEP3.REPORT_GENERATED_ON' | translate }} {{ formatReportDate(report.generatedAt) }}
           </span>
+
+          <!-- Le PDF passe par l'impression du navigateur, sans moteur ajouté
+               (décision US-053) : la feuille d'impression est déjà écrite, elle
+               force les surfaces claires et masque ce qui n'a pas de sens sur
+               papier. « Enregistrer au format PDF » est la destination par
+               défaut de la boîte d'impression sur les trois systèmes. -->
+          <button type="button" class="nm-btn-tertiary" (click)="printReport()">
+            <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
+          </button>
 
           <!-- Actualisation GRATUITE : décision produit. Le tarif n'apparaît
                plus ici — il n'y en a plus. -->
@@ -894,7 +901,7 @@
       </div>
     </div>
 
-  </p-dialog>
+  </div>
 
   <p-confirmDialog></p-confirmDialog>
   <p-toast></p-toast>

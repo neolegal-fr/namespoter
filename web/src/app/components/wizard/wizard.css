@@ -761,3 +761,21 @@
     padding-left: 0;
     padding-right: 0;
 }
+
+/* ─── Rapport complet : une page, pas une modale ────────────────────────────
+   La barre de navigation reste visible au-dessus — c'est tout l'objet du
+   changement. La colonne reprend la largeur de lecture du document. */
+.report-page {
+    width: 100%;
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 1.25rem 0 2.5rem;
+}
+
+.report-page__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}

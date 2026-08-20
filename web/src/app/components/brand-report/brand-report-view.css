@@ -320,3 +320,30 @@
     line-height: 1.55;
     color: var(--nm-app-text);
 }
+
+/* La description du projet, citée telle que l'utilisateur l'a écrite. */
+.rv-quote {
+    margin: 0;
+    padding-left: 0.85rem;
+    border-left: 3px solid var(--nm-app-accent-border);
+    font-size: var(--nm-text-body-sm);
+    line-height: 1.6;
+    color: var(--nm-app-text);
+    white-space: pre-line;
+}
+
+.rv-registrar select {
+    margin-right: 0.5rem;
+    padding: 2px 6px;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-xs);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text-2);
+    font: inherit;
+    font-size: var(--nm-text-ui-sm);
+}
+
+/* Ce qui n'a pas de sens sur un papier : réserver, choisir un bureau. */
+@media print {
+    .rv-noprint { display: none !important; }
+}
