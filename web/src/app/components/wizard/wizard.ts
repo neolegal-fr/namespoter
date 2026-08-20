@@ -734,6 +734,9 @@ export class WizardComponent implements OnInit, OnDestroy {
   /** Un nom est en cours de test : les défauts régionaux ne s'appliquent pas. */
   private nomEnCours = false;
 
+  /** Ouvrir la vérification dès que le nom est en place. */
+  private verifierApresCreation = false;
+
   private demarrerDepuisNom(nom: string): void {
     const propre = nom.trim().toLowerCase().replace(/^\./, '').replace(/\.[a-z]{2,10}$/, '');
     if (!propre) return;
@@ -754,6 +757,10 @@ export class WizardComponent implements OnInit, OnDestroy {
         this.maxActiveIndex.set(2);
         this.loading.set(false);
         this.cdr.detectChanges();
+        if (this.verifierApresCreation) {
+          this.verifierApresCreation = false;
+          this.askBrandReport(propre);
+        }
       },
       error: () => { this.loading.set(false); this.cdr.detectChanges(); },
     });
@@ -1277,6 +1284,10 @@ export class WizardComponent implements OnInit, OnDestroy {
      * l'est déjà avant une redirection.
      */
     const nomDemande = (this.route.snapshot.queryParamMap.get('nom') ?? '').trim();
+    // `verifier=1` : l'utilisateur vient de cliquer « vérifier marques et
+    // réseaux » sur le rapport public. Enchaîner sur la popup lui évite de
+    // rechercher le bouton sur une carte qu'il vient à peine de voir arriver.
+    this.verifierApresCreation = this.route.snapshot.queryParamMap.get('verifier') === '1';
     if (nomDemande) {
       this.location.replaceState(this.router.url.split('?')[0]);
       if (this.isLoggedIn()) {

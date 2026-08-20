@@ -1,5 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { KeycloakService } from 'keycloak-angular';
@@ -51,12 +51,12 @@ import { AnalyticsService } from '../../services/analytics';
                c'est ce qu'il obtient en créant un compte. -->
           <app-brand-report-locked locked
             [embedded]="true"
-            [signup]="true"
+            [signup]="!connecte()"
             [name]="r.name"
             [priceCredits]="cout"
             [freeExtensions]="extensionsLibres()"
-            (unlock)="creerCompte()"
-            (topUp)="creerCompte()">
+            (unlock)="deverrouiller()"
+            (topUp)="deverrouiller()">
           </app-brand-report-locked>
         </app-brand-report-view>
 
@@ -80,7 +80,15 @@ export class RapportPublicComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly domains = inject(DomainService);
-  private readonly keycloak = inject(KeycloakService);
+  private keycloak?: KeycloakService;
+
+  /**
+   * Déjà connecté : le compte existe, l'offre d'inscription n'a plus d'objet.
+   *
+   * Lu côté navigateur seulement — au prérendu, Keycloak n'est pas initialisé
+   * et toute lecture d'état y serait au mieux fausse.
+   */
+  readonly connecte = signal(false);
   private readonly translate = inject(TranslateService);
   private readonly analytics = inject(AnalyticsService);
 
@@ -92,6 +100,16 @@ export class RapportPublicComponent implements OnInit {
   readonly rapport = signal<ReportLike | null>(null);
   readonly chargement = signal(false);
   readonly erreur = signal(false);
+
+  constructor() {
+    // ⚠ `inject()` n'est utilisable qu'au MOMENT DE LA CONSTRUCTION. Placé dans
+    // `ngOnInit`, il lève NG0203 et interrompt tout le crochet — la page
+    // affichait alors son formulaire sans jamais lancer la vérification.
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      this.keycloak = inject(KeycloakService);
+      try { this.connecte.set(this.keycloak.isLoggedIn()); } catch { this.connecte.set(false); }
+    }
+  }
 
   ngOnInit(): void {
     const demande = (this.route.snapshot.queryParamMap.get('name') ?? '').trim();
@@ -142,20 +160,30 @@ export class RapportPublicComponent implements OnInit {
     return (this.rapport()?.domains ?? []).filter((d) => d.status === 'free').map((d) => '.' + d.extension);
   }
 
-  /** Inscription, puis reprise du nom dans l'application. */
-  creerCompte(): void {
-    this.analytics.track('public_report_signup_clicked');
-    this.allerVersApp();
+  /**
+   * Débloquer marques et réseaux.
+   *
+   * Le geste est le même dans les deux cas — on part vers l'application avec
+   * le nom — mais ce qu'on y trouve diffère : une inscription pour qui n'a pas
+   * de compte, la popup de vérification pour qui en a un. Le libellé et le
+   * pied de bloc suivent, sinon un utilisateur connecté se voit proposer de
+   * créer le compte qu'il possède déjà.
+   */
+  deverrouiller(): void {
+    this.analytics.track(this.connecte() ? 'public_report_verify_clicked' : 'public_report_signup_clicked');
+    this.allerVersApp(true);
   }
 
   creerProjet(): void {
     this.analytics.track('public_report_project_clicked');
-    this.allerVersApp();
+    this.allerVersApp(false);
   }
 
-  private allerVersApp(): void {
+  private allerVersApp(verifier: boolean): void {
     // Le nom voyage dans l'URL : le wizard le reprend après la connexion, crée
     // le projet et rejoue le contrôle. Rien à ressaisir.
-    void this.router.navigate(['/app'], { queryParams: { nom: this.nom() } });
+    void this.router.navigate(['/app'], {
+      queryParams: { nom: this.nom(), ...(verifier ? { verifier: 1 } : {}) },
+    });
   }
 }
