@@ -84,6 +84,10 @@ interface LockedCheck {
 
       <footer class="rl-foot">
         <div class="rl-price">
+          @if (signup()) {
+            <p class="rl-price__amount"><strong>{{ 'WIZARD.STEP3.LOCKED_SIGNUP_OFFER' | translate }}</strong></p>
+            <p class="rl-price__note">{{ 'WIZARD.STEP3.LOCKED_SIGNUP_NOTE' | translate:{ n: priceCredits() } }}</p>
+          } @else {
           <p class="rl-price__amount">
             <strong>{{ 'WIZARD.STEP3.GRID_CREDIT_MANY' | translate:{ n: priceCredits() } }}</strong>
             @if (freeThisMonth()) {
@@ -97,6 +101,7 @@ interface LockedCheck {
               {{ 'WIZARD.STEP3.LOCKED_PAID_NOTE' | translate:{ n: priceCredits() } }}
             }
           </p>
+          }
         </div>
 
         <!--
@@ -105,7 +110,7 @@ interface LockedCheck {
         -->
         @if (canAfford()) {
           <button type="button" class="rl-btn" (click)="unlock.emit()">
-            {{ 'WIZARD.STEP3.LOCKED_UNLOCK' | translate }}
+            {{ (signup() ? 'WIZARD.STEP3.LOCKED_SIGNUP_CTA' : 'WIZARD.STEP3.LOCKED_UNLOCK') | translate }}
           </button>
         } @else {
           <button type="button" class="rl-btn rl-btn--topup" (click)="topUp.emit()">
@@ -122,6 +127,15 @@ export class BrandReportLockedComponent {
 
   /** Posé DANS la page de rapport, sous les sections déjà collectées. */
   readonly embedded = input(false);
+
+  /**
+   * Visiteur sans compte : le prix en crédits ne lui dit rien.
+   *
+   * Il n'a pas de solde, ne sait pas ce que vaut un crédit, et le premier
+   * obstacle n'est pas le paiement mais l'inscription. Le pied annonce donc ce
+   * qu'il obtient en s'inscrivant, et le bouton nomme le geste attendu.
+   */
+  readonly signup = input(false);
   readonly priceCredits = input(50);
   /** Domaines déjà vérifiés et facturés en amont, rappelés à l'utilisateur. */
   readonly domainsChecked = input(0);

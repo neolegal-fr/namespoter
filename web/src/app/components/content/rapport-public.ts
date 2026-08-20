@@ -1,0 +1,161 @@
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { KeycloakService } from 'keycloak-angular';
+import { DomainService } from '../../services/domain';
+import { BrandReportViewComponent } from '../brand-report/brand-report-view';
+import { BrandReportLockedComponent } from '../brand-report/brand-report-locked';
+import { BRAND_REPORT_COST, ReportLike, Availability } from '../../services/brand-report';
+import { AnalyticsService } from '../../services/analytics';
+
+/**
+ * Rapport PUBLIC d'un nom — `/report?name=…`, sans compte.
+ *
+ * Le chemin de qui arrive avec une idée. Il obtient tout de suite ce qui ne
+ * coûte rien à produire : la disponibilité du nom sur les quatre extensions
+ * les plus courantes. Le reste — marques déposées, réseaux sociaux — reste
+ * derrière l'inscription, et le dit franchement.
+ *
+ * Pourquoi une page publique plutôt qu'une redirection vers la connexion :
+ * envoyer quelqu'un s'inscrire pour savoir si « kalvira.com » est libre, c'est
+ * lui demander de payer d'avance une réponse qu'on peut lui donner
+ * gratuitement en deux secondes. On répond d'abord ; on demande ensuite, quand
+ * il a vu ce que vaut la réponse et qu'il veut la suite.
+ *
+ * Aucune analyse du nom ici : elle suppose une suggestion enregistrée, donc un
+ * projet, donc un compte. Une page publique ne doit rien promettre qu'elle ne
+ * puisse tenir sans identité.
+ */
+@Component({
+  selector: 'app-rapport-public',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TranslatePipe, BrandReportViewComponent, BrandReportLockedComponent],
+  template: `
+    <div class="rp">
+      <form class="rp-form" (submit)="verifier($event)">
+        <label class="sr-only" for="rp-nom">{{ 'PUBLIC_REPORT.PLACEHOLDER' | translate }}</label>
+        <input id="rp-nom" name="nom" type="text" autocomplete="off"
+               [value]="nom()" [placeholder]="'PUBLIC_REPORT.PLACEHOLDER' | translate">
+        <button type="submit" class="nm-btn-primary">{{ 'PUBLIC_REPORT.CHECK' | translate }}</button>
+      </form>
+
+      @if (chargement()) {
+        <p class="rp-state">{{ 'PUBLIC_REPORT.LOADING' | translate }}</p>
+      } @else if (erreur()) {
+        <p class="rp-state rp-state--ko">{{ 'PUBLIC_REPORT.ERROR' | translate }}</p>
+      } @else if (rapport(); as r) {
+        <app-brand-report-view [report]="r" [locked]="true">
+          <!-- Le palier payant, en version « pas encore inscrit » : le prix en
+               crédits ne dit rien à qui n'a pas de solde. Ce qu'il veut savoir,
+               c'est ce qu'il obtient en créant un compte. -->
+          <app-brand-report-locked locked
+            [embedded]="true"
+            [signup]="true"
+            [name]="r.name"
+            [priceCredits]="cout"
+            [freeExtensions]="extensionsLibres()"
+            (unlock)="creerCompte()"
+            (topUp)="creerCompte()">
+          </app-brand-report-locked>
+        </app-brand-report-view>
+
+        <!-- L'autre suite possible : ce nom ne convient pas, ou il est pris.
+             Générer des noms suppose de savoir ce qu'on nomme — donc une
+             description, donc un projet. On le dit, plutôt que de proposer un
+             bouton qui produirait n'importe quoi. -->
+        <section class="rp-more">
+          <h2 class="rp-more__title">{{ 'PUBLIC_REPORT.MORE_TITLE' | translate }}</h2>
+          <p class="rp-more__lead">{{ 'PUBLIC_REPORT.MORE_LEAD' | translate }}</p>
+          <button type="button" class="nm-btn-primary" (click)="creerProjet()">
+            {{ 'PUBLIC_REPORT.MORE_CTA' | translate }}
+          </button>
+        </section>
+      }
+    </div>
+  `,
+  styleUrl: './rapport-public.css',
+})
+export class RapportPublicComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly domains = inject(DomainService);
+  private readonly keycloak = inject(KeycloakService);
+  private readonly translate = inject(TranslateService);
+  private readonly analytics = inject(AnalyticsService);
+
+  /** Les quatre extensions que tout le monde regarde en premier. */
+  private readonly EXTENSIONS = ['.com', '.fr', '.net', '.org'];
+
+  readonly cout = BRAND_REPORT_COST;
+  readonly nom = signal('');
+  readonly rapport = signal<ReportLike | null>(null);
+  readonly chargement = signal(false);
+  readonly erreur = signal(false);
+
+  ngOnInit(): void {
+    const demande = (this.route.snapshot.queryParamMap.get('name') ?? '').trim();
+    if (demande) this.lancer(demande);
+  }
+
+  verifier(event: Event): void {
+    event.preventDefault();
+    const champ = (event.target as HTMLFormElement).elements.namedItem('nom') as HTMLInputElement | null;
+    const saisi = (champ?.value ?? '').trim();
+    if (!saisi) return;
+    // L'URL porte le nom : la page se partage et se recharge telle quelle.
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { name: saisi } });
+    this.lancer(saisi);
+  }
+
+  private lancer(saisi: string): void {
+    const propre = saisi.toLowerCase().replace(/^\./, '').replace(/\.[a-z]{2,10}$/, '');
+    if (!propre) return;
+    this.nom.set(propre);
+    this.chargement.set(true);
+    this.erreur.set(false);
+    this.rapport.set(null);
+    this.analytics.track('public_report_requested');
+
+    this.domains.recheckDomains([propre], this.EXTENSIONS).subscribe({
+      next: (res: any) => {
+        const trouve = (res?.domains ?? [])[0];
+        this.rapport.set({
+          name: propre,
+          handle: propre.replace(/[^a-z0-9]/g, ''),
+          domains: this.EXTENSIONS.map((ext) => {
+            const etat = trouve?.allExtensions?.[ext];
+            return {
+              extension: ext.replace(/^\./, ''),
+              domain: propre + ext,
+              status: (etat === true ? 'free' : etat === false ? 'taken' : 'unknown') as Availability,
+            };
+          }),
+        });
+        this.chargement.set(false);
+      },
+      error: () => { this.erreur.set(true); this.chargement.set(false); },
+    });
+  }
+
+  extensionsLibres(): string[] {
+    return (this.rapport()?.domains ?? []).filter((d) => d.status === 'free').map((d) => '.' + d.extension);
+  }
+
+  /** Inscription, puis reprise du nom dans l'application. */
+  creerCompte(): void {
+    this.analytics.track('public_report_signup_clicked');
+    this.allerVersApp();
+  }
+
+  creerProjet(): void {
+    this.analytics.track('public_report_project_clicked');
+    this.allerVersApp();
+  }
+
+  private allerVersApp(): void {
+    // Le nom voyage dans l'URL : le wizard le reprend après la connexion, crée
+    // le projet et rejoue le contrôle. Rien à ressaisir.
+    void this.router.navigate(['/app'], { queryParams: { nom: this.nom() } });
+  }
+}

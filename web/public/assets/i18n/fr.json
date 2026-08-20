@@ -364,7 +364,12 @@
       "GRID_FILTER_REJECTED": "Rejetés",
       "CHECKING": "Vérification de la disponibilité…",
       "PIVOT": "Ce nom ne convient pas ?",
-      "PIVOT_CTA": "Décrivez votre projet, l'IA en propose d'autres"
+      "PIVOT_CTA": "Décrivez votre projet, l'IA en propose d'autres",
+      "LOCKED_SIGNUP_OFFER": "100 crédits offerts à la création du compte",
+      "LOCKED_SIGNUP_NOTE": "De quoi vérifier ce nom et en explorer d'autres. Sans abonnement, sans carte bancaire.",
+      "LOCKED_SIGNUP_CTA": "Créer mon compte",
+      "SEED_PROJECT": "Ce rapport ne connaît pas votre projet : ni description, ni public cible, et aucune suggestion voisine possible.",
+      "SEED_PROJECT_CTA": "Décrire mon projet"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
@@ -491,7 +496,7 @@
     "GUIDES_NOTE_EN": "Ces guides sont pour l'instant disponibles en français.",
     "FINAL_H2": "Votre nom est encore libre",
     "FINAL_TEXT": "100 crédits offerts chaque mois : environ 50 suggestions vérifiées, et un rapport complet.",
-    "FINAL_CTA": "Lancer une recherche gratuite",
+    "FINAL_CTA": "Vérifier ce nom",
     "H1_B_PRE": "unique",
     "H1_B_EM": "et",
     "H1_B_POST": "libre",
@@ -506,5 +511,14 @@
     "HAVE_NAME_LEAD": "Testez-la maintenant : les domaines et l'analyse du nom sont gratuits, la recherche d'antériorité se débloque ensuite.",
     "HAVE_NAME_PLACEHOLDER": "Le nom que vous avez en tête",
     "HAVE_NAME_BTN": "Vérifier ce nom"
+  },
+  "PUBLIC_REPORT": {
+    "PLACEHOLDER": "Le nom que vous voulez tester",
+    "CHECK": "Vérifier",
+    "LOADING": "Vérification des domaines…",
+    "ERROR": "La vérification a échoué. Réessayez dans un instant.",
+    "MORE_TITLE": "Vous cherchez d'autres noms ?",
+    "MORE_LEAD": "Décrivez votre projet en une phrase : l'IA propose des noms libres, adaptés à votre marché, et vérifie chacun d'eux.",
+    "MORE_CTA": "Obtenir des suggestions"
   }
 }

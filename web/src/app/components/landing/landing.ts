@@ -277,7 +277,15 @@ import { applyContentSeo } from '../content/content-seo';
               <h2 class="nm-final__title">{{ 'HOME.FINAL_H2' | translate }}</h2>
               <p class="nm-final__text">{{ 'HOME.FINAL_TEXT' | translate }}</p>
             </div>
-            <a routerLink="/app" class="nm-btn nm-btn--accent">{{ 'HOME.FINAL_CTA' | translate }}</a>
+            <!-- Le dernier écran demande un NOM, pas un clic. Un bouton
+                 « Vérifiez votre nom maintenant » qui mène à un formulaire vide
+                 ajoute une étape à qui a déjà sa réponse en tête. -->
+            <form class="nm-final__form" (submit)="testerNom($event)">
+              <label class="sr-only" for="nm-final-input">{{ 'HOME.HAVE_NAME_PLACEHOLDER' | translate }}</label>
+              <input id="nm-final-input" name="nom" type="text" autocomplete="off"
+                     [placeholder]="'HOME.HAVE_NAME_PLACEHOLDER' | translate">
+              <button type="submit" class="nm-btn nm-btn--accent">{{ 'HOME.FINAL_CTA' | translate }}</button>
+            </form>
           </div>
         </section>
 
@@ -356,17 +364,19 @@ export class LandingComponent {
   /**
    * Envoie le nom saisi vers l'application, qui fera le reste.
    *
-   * L'accueil ne contrôle rien lui-même : il ne sait pas si le visiteur est
-   * connecté, et un aperçu affiché ici obligerait à redemander le nom juste
-   * après. Le wizard, lui, crée le projet, ajoute le nom et affiche le verdict
-   * — et s'occupe de la connexion si elle manque.
+   * L'accueil ne contrôle rien lui-même : le rapport public s'en charge, sans
+   * demander de compte. Envoyer quelqu'un s'inscrire pour savoir si son .com
+   * est libre, c'est lui faire payer d'avance une réponse gratuite.
    */
   testerNom(event: Event): void {
     event.preventDefault();
     const champ = (event.target as HTMLFormElement).elements.namedItem('nom') as HTMLInputElement | null;
     const nom = (champ?.value ?? '').trim();
     if (!nom) return;
-    void this.router.navigate(['/app'], { queryParams: { nom } });
+    // Vers le rapport PUBLIC, pas vers l'application : personne n'a à créer un
+    // compte pour savoir si un .com est libre. L'inscription se propose après
+    // la réponse, pour ce qu'elle seule permet — marques, réseaux, suggestions.
+    void this.router.navigate(['/report'], { queryParams: { name: nom } });
   }
 
   /** Listes courtes stockées en une clé, séparées par « | » — évite 20 clés de plus. */

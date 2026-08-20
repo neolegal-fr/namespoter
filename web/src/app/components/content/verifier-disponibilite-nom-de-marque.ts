@@ -1,6 +1,6 @@
 import { Component, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { KeycloakService } from 'keycloak-angular';
 import { timeout } from 'rxjs';
@@ -160,6 +160,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
   `],
 })
 export class VerifierDisponibiliteMarqueComponent {
+  private readonly router = inject(Router);
   private readonly reports = inject(BrandReportService);
 
   readonly query = signal('');
@@ -214,7 +215,23 @@ export class VerifierDisponibiliteMarqueComponent {
     });
   }
 
+  /**
+   * Le contrôle inline part vers le rapport public.
+   *
+   * Il avait son propre aperçu — un seul domaine, trois réseaux, et un rendu
+   * qui ne ressemblait à aucun autre écran du produit. Deux pages disaient
+   * donc la même chose de deux façons. Celle-ci garde son contenu éditorial,
+   * qui est sa raison d'être, et confie la réponse à la page qui sait la
+   * donner : quatre extensions, la même mise en forme que le rapport acheté,
+   * et la suite proposée au bon moment.
+   */
   check(): void {
+    const name = this.query().trim();
+    if (!name) return;
+    void this.router.navigate(['/report'], { queryParams: { name } });
+  }
+
+  private checkAncien(): void {
     const name = this.query().trim();
     if (!name || this.loading()) return;
     this.loading.set(true);

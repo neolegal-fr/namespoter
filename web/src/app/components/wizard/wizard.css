@@ -822,3 +822,20 @@
     font-size: var(--nm-text-ui-sm);
     color: var(--nm-app-text-2);
 }
+
+/* Rapport d'un projet non initialisé : l'invitation à le décrire, au-dessus
+   du document — c'est là que le manque se remarque. */
+.report-seed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.875rem 1.125rem;
+    border: 1px solid var(--nm-app-accent-border);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-accent-surface);
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text);
+}

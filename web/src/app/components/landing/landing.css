@@ -641,3 +641,32 @@
 .nm-test__btn {
   flex: none;
 }
+
+/* Le formulaire du CTA final : même geste que l'encart des trois contrôles. */
+.nm-final__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1 1 22rem;
+  justify-content: flex-end;
+}
+
+.nm-final__form input {
+  flex: 1 1 14rem;
+  min-width: 0;
+  min-height: var(--nm-touch-cta);
+  padding: 0 16px;
+  border: 1px solid var(--nm-border-dark-interactive);
+  border-radius: var(--nm-radius-md);
+  background: var(--nm-surface-dark);
+  color: var(--nm-text-dark);
+  font-family: var(--nm-font-body);
+  font-size: 16px;
+}
+
+.nm-final__form input::placeholder { color: var(--nm-text-dark-3); }
+
+.nm-final__form input:focus-visible {
+  outline: 2px solid var(--nm-accent);
+  outline-offset: 1px;
+}

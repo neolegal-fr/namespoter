@@ -364,7 +364,12 @@
       "GRID_FILTER_REJECTED": "Rejected",
       "CHECKING": "Checking availability…",
       "PIVOT": "This name does not work for you?",
-      "PIVOT_CTA": "Describe your project and the AI will suggest others"
+      "PIVOT_CTA": "Describe your project and the AI will suggest others",
+      "LOCKED_SIGNUP_OFFER": "100 free credits when you create your account",
+      "LOCKED_SIGNUP_NOTE": "Enough to check this name and explore others. No subscription, no card.",
+      "LOCKED_SIGNUP_CTA": "Create my account",
+      "SEED_PROJECT": "This report knows nothing about your project: no description, no audience, and no related suggestions possible.",
+      "SEED_PROJECT_CTA": "Describe my project"
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -491,7 +496,7 @@
     "GUIDES_NOTE_EN": "These guides are currently available in French.",
     "FINAL_H2": "Your name is still free",
     "FINAL_TEXT": "100 free credits every month: about 50 checked suggestions, and one in-depth report.",
-    "FINAL_CTA": "Start a free search",
+    "FINAL_CTA": "Check this name",
     "H1_B_PRE": "name that is unique",
     "H1_B_EM": "and",
     "H1_B_POST": "free",
@@ -506,5 +511,14 @@
     "HAVE_NAME_LEAD": "Test it now: domains and the name analysis are free, the prior-art search unlocks afterwards.",
     "HAVE_NAME_PLACEHOLDER": "The name you have in mind",
     "HAVE_NAME_BTN": "Check this name"
+  },
+  "PUBLIC_REPORT": {
+    "PLACEHOLDER": "The name you want to test",
+    "CHECK": "Check",
+    "LOADING": "Checking domains…",
+    "ERROR": "The check failed. Try again in a moment.",
+    "MORE_TITLE": "Looking for other names?",
+    "MORE_LEAD": "Describe your project in one sentence: the AI suggests free names suited to your market, and checks each of them.",
+    "MORE_CTA": "Get suggestions"
   }
 }

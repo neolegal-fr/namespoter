@@ -930,6 +930,16 @@
           composant porte le document ; le wizard ne garde que les actions qui
           lui appartiennent (partage, actualisation, envoi par e-mail).
         -->
+        <!-- Projet non initialisé : le rapport n'a ni description ni public
+             cible, et aucune suggestion voisine n'est possible. On propose de
+             compléter, à l'endroit où le manque se voit. -->
+        <div *ngIf="!reportContext().description" class="report-seed">
+          <span>{{ 'WIZARD.STEP3.SEED_PROJECT' | translate }}</span>
+          <button type="button" class="nm-btn-secondary" (click)="closeReport(); activeIndex.set(0)">
+            {{ 'WIZARD.STEP3.SEED_PROJECT_CTA' | translate }}
+          </button>
+        </div>
+
         <app-brand-report-view [report]="report" [context]="reportContext()">
           <button refresh type="button" class="rv-refresh"
                   *ngIf="!isSampleReport()"

@@ -24,6 +24,7 @@ import { GenerateurNomMarqueCosmetiqueComponent } from './components/content/gen
 import { NomCourtInventeComponent } from './components/content/nom-court-invente';
 import { VerifierDisponibiliteMarqueComponent } from './components/content/verifier-disponibilite-nom-de-marque';
 import { RapportPartageComponent } from './components/content/rapport-partage';
+import { RapportPublicComponent } from './components/content/rapport-public';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -45,6 +46,14 @@ export const routes: Routes = [
   { path: 'nom-de-startup-court-invente', component: NomCourtInventeComponent },
   { path: 'verifier-disponibilite-nom-de-marque', component: VerifierDisponibiliteMarqueComponent },
   { path: 'rapport/:token', component: RapportPartageComponent },
+  /*
+   * Rapport PUBLIC d'un nom, sans compte : `/report?name=…`.
+   *
+   * Distinct de `/rapport/:token`, qui rejoue un rapport ACHETÉ partagé par
+   * son propriétaire. Ici rien n'a été acheté : seuls les domaines sont
+   * contrôlés, gratuitement, et le reste s'annonce derrière l'inscription.
+   */
+  { path: 'report', component: RapportPublicComponent },
   { path: 'comparatif-generateurs-de-noms', component: ComparatifGenerateursComponent },
   { path: 'namorama-vs-namelix', component: ComparatifNamelixComponent },
   { path: 'namorama-vs-looka', component: ComparatifLookaComponent },
