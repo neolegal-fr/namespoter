@@ -84,12 +84,6 @@ interface ExtVerdict {
               }
             </div>
 
-            <!-- Coût TOUJOURS présent, à droite : « 1 crédit ». Accentué
-                 seulement si toutes les extensions demandées sont libres. -->
-            <span class="rg-cost" [class.rg-cost--accent]="allFree(d)">
-              {{ 'WIZARD.STEP3.GRID_CREDIT_ONE' | translate }}
-            </span>
-
             <!--
               Les pouces vivent DANS l'en-tête, à droite du nom : ils portent
               sur le nom, pas sur le rapport. Près du bouton d'achat, leur objet

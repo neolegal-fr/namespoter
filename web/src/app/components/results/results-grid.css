@@ -191,27 +191,6 @@
   color: var(--nm-app-text-2);
 }
 
-/* Compact et aligné à gauche, comme le badge de synthèse qui le remplace une
-   fois le nom vérifié : les deux occupent la même place, rien ne se déplace. */
-.rg-cost {
-  align-self: flex-start;
-  flex: none;
-  margin-bottom: 12px;
-  padding: 4px 10px;
-  border-radius: var(--nm-radius-xs);
-  background: var(--nm-app-divider);
-  color: var(--nm-app-text-2);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.rg-cost--accent {
-  background: var(--nm-app-accent-surface);
-  /* accent-hover est un vert de survol, pas un vert de texte : 4,32:1 sur la
-     surface accentuée. --nm-app-accent y est mesuré à 4,85:1. */
-  color: var(--nm-app-accent);
-}
-
 /* ─── Verdicts ───────────────────────────────────────────────────────────── */
 
 .rg-rows {
