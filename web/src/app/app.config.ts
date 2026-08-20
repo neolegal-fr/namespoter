@@ -6,10 +6,10 @@ import localeFr from '@angular/common/locales/fr';
 // « 19 août » sur les cartes vérifiées. Les deux langues du site sont fr et en ;
 // `en` est le défaut d'Angular, seul `fr` doit être ajouté.
 registerLocaleData(localeFr);
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, RouteReuseStrategy } from '@angular/router';
+import { WizardReuseStrategy } from './wizard-reuse-strategy';
 import { provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http';
 import { of, firstValueFrom } from 'rxjs';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
@@ -272,8 +272,21 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       }),
     ),
+    { provide: RouteReuseStrategy, useClass: WizardReuseStrategy },
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
-    provideAnimations(),
+    /*
+     * PAS de `provideAnimations()`.
+     *
+     * Il enveloppe le moteur de rendu : les suppressions de nœuds ne sont plus
+     * appliquées tout de suite, elles sont mises en file et vidées au prochain
+     * cycle de détection de changement. Le voile du tiroir, que PrimeNG retire
+     * par ce moteur, restait donc sur `document.body` après l'ouverture d'un
+     * projet — et comme il avale tous les clics, plus rien ne déclenchait le
+     * cycle qui l'aurait effacé : la page restait grisée jusqu'au F5.
+     *
+     * Personne ne le réclame : `@angular/animations` n'est importé nulle part
+     * dans `src/`, et PrimeNG 21 anime en CSS (directive `pMotion`).
+     */
     providePrimeNG({
         theme: {
             preset: NamoramaPreset,

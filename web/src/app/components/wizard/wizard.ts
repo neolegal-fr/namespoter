@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, OnDestroy, ViewChild, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, HostListener, ChangeDetectorRef, ApplicationRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Subscription, firstValueFrom, of, timeout } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -68,11 +68,6 @@ import { BrandReportViewComponent } from '../brand-report/brand-report-view';
 export class WizardComponent implements OnInit, OnDestroy {
   items: MenuItem[] = [];
 
-  /**
-   * Le voile du tiroir des projets — voir ngOnDestroy pour la raison d'être
-   * de cette référence.
-   */
-  @ViewChild(Drawer) private projectsDrawer?: Drawer;
 
   // ─── US-001 : International / Local ───────────────────────
   isLocal = signal(false);
@@ -1051,27 +1046,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  /**
-   * Retire le voile du tiroir si la navigation détruit le wizard avant la fin
-   * de l'animation de fermeture.
-   *
-   * `/app` et `/projects/:id` sont deux routes DISTINCTES pointant sur ce même
-   * composant : Angular ne le réutilise donc pas, il le détruit et le recrée.
-   * Or le tiroir de PrimeNG accroche son voile à `document.body`, hors de la
-   * vue du composant, et ne le retire qu'à la fin de l'animation de sortie
-   * (500 ms de fermeture + 300 ms d'effacement du voile). Son propre
-   * `onDestroy` ne rattrape pas le coup : il ne nettoie que si `visible` est
-   * encore vrai, alors qu'ouvrir un projet commence justement par le passer à
-   * faux.
-   *
-   * Résultat sans ce correctif : le voile survit à la navigation, attaché au
-   * body, et la page reste grisée et non cliquable jusqu'au prochain F5.
-   *
-   * `destroyModal()` est sans effet s'il n'y a pas de voile — l'appeler à
-   * chaque destruction ne coûte rien.
-   */
   ngOnDestroy() {
-    this.projectsDrawer?.destroyModal();
     // Une recherche en flux survivrait autrement à la navigation : se
     // désabonner déclenche l'abandon de la requête côté service.
     this.searchSub?.unsubscribe();
