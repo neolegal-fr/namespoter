@@ -167,12 +167,22 @@ export class BrandReportService {
   }
 
   /** Rapport de marque (authentifié, payant ; le token est ajouté par l'intercepteur). */
-  full(name: string, options?: { extensions?: string[]; emails?: string[]; force?: boolean }): Observable<BrandReport> {
+  full(
+    name: string,
+    options?: {
+      extensions?: string[];
+      emails?: string[];
+      force?: boolean;
+      /** Projet et public cible : mémorisés AVEC le rapport, pour la relecture et l'email. */
+      context?: { description?: string; audience?: { label: string; value: string }[] };
+    },
+  ): Observable<BrandReport> {
     return this.http.post<BrandReport>(this.apiUrl, {
       name,
       ...(options?.extensions ? { extensions: options.extensions } : {}),
       ...(options?.emails?.length ? { emails: options.emails } : {}),
       ...(options?.force ? { force: true } : {}),
+      ...(options?.context ? { context: options.context } : {}),
     });
   }
 }

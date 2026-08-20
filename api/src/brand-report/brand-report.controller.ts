@@ -206,6 +206,7 @@ export class BrandReportController {
       report = await this.brandReport.generate(dto.name, {
         extensions: dto.extensions,
         withQuality: true,
+        context: dto.context,
       });
     } catch (e) {
       this.events.event('brand_report_failed', {

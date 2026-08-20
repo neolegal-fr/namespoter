@@ -40,15 +40,13 @@ import { SafeHtml } from '@angular/platform-browser';
             </p>
             <h2 class="rv-name">{{ r.name }}</h2>
           </div>
-          <div class="rv-head__actions">
-            <!-- Aucune synthèse tant que marque et réseaux manquent : elle
-                 agrège les trois volets, l'afficher sur les domaines seuls
-                 donnerait un verdict d'ensemble tiré d'un tiers du document. -->
-            @if (!locked && r.trademark && r.socials) {
-              <span class="rv-summary" [class]="'rv-summary--' + summaryTone(r)">
-                {{ summaryKey(r) | translate }}
-              </span>
-            }
+          <!-- Les ACTIONS du document, là où on les cherche : en haut à
+               droite du document lui-même, pas dans la barre de la page.
+               Elles remplacent la pastille de synthèse, qui répétait en un mot
+               ce que les quatre sections disent en détail juste dessous — et
+               qui, sur un document de décision, invitait à ne pas les lire. -->
+          <div class="rv-head__actions rv-noprint">
+            <ng-content select="[actions]"></ng-content>
           </div>
         </header>
 

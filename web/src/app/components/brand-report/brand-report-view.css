@@ -63,11 +63,26 @@
   }
 }
 
+/* En haut à DROITE, et sur la même ligne que le nom : c'est là qu'on cherche
+   les actions d'un document. Le nom se replie s'il est long (`min-width: 0`
+   sur son bloc) plutôt que de les pousser dessous. */
 .rv-head__actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex: none;
+  margin-left: auto;
+}
+
+.rv-head > div:first-child {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .rv-head__actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
 }
 
 /* Badge de synthèse : reprend la paire de couleurs du verdict correspondant. */
@@ -346,4 +361,13 @@
 /* Ce qui n'a pas de sens sur un papier : réserver, choisir un bureau. */
 @media print {
     .rv-noprint { display: none !important; }
+}
+
+/* Actions projetées dans l'en-tête du document. */
+.rv-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }

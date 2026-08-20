@@ -888,7 +888,17 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.analytics.track('brand_report_cta_clicked');
     // Timeout client : un traitement qui n'aboutit pas devient une erreur
     // (réessayable) plutôt qu'un chargement infini.
-    this.brandReportService.full(name, { emails, force }).pipe(timeout(90000)).subscribe({
+    // Le contexte part AVEC la génération : c'est le seul moment où le wizard
+    // le connaît. Sans lui, l'email et la relecture perdent le projet.
+    const ctx = this.reportContext();
+    this.brandReportService
+      .full(name, {
+        emails,
+        force,
+        context: { description: ctx.description, audience: ctx.constraints.map((c) => ({ label: this.translate.instant(c.label), value: c.value })) },
+      })
+      .pipe(timeout(90000))
+      .subscribe({
       next: (report) => {
         this.isSampleReport.set(false);
         this.brandReport.set(report);
