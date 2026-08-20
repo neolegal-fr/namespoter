@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -11,7 +12,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-comparatif-namelix',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -117,6 +118,8 @@ import { applyContentSeo } from './content-seo';
         <strong>Neutre et transparent.</strong> Namorama vous laisse réserver chez le registrar de votre
         choix, sans vous enfermer.
       </p>
+
+      <app-trois-risques intro="Un générateur donne des idées ; il ne dit pas lesquelles sont tenables. Trois contrôles répondent à cette question."></app-trois-risques>
 
       <app-article-cta
         heading="Comparez par vous-même en 30 secondes"

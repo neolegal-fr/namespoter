@@ -285,11 +285,10 @@
       "REPORT_SUMMARY_RISK": "Blocker identified",
       "REPORT_SCOPE_NOTE": "Scope covers French (INPI) and European Union (EUIPO) trademarks, not the national registers of other member states.",
       "LOCKED_NOT_UNLOCKED": "not unlocked",
-      "LOCKED_INTRO": "Domains and name analysis are already here. The full report adds prior-art searches at INPI, EUIPO and WIPO, plus handles on 6 networks.",
       "LOCKED_CHECK_INPI": "French trademarks — INPI",
       "LOCKED_CHECK_EUIPO": "European Union trademarks — EUIPO",
       "LOCKED_CHECK_SOCIALS": "Handles on 6 networks — GitHub, LinkedIn, Telegram, TikTok, X, YouTube",
-      "LOCKED_UNLOCK": "Unlock the report",
+      "LOCKED_UNLOCK": "Check trademarks and social handles",
       "LOCKED_TOPUP": "Top up to unlock",
       "LOCKED_FREE_THIS_MONTH": "free this month",
       "LOCKED_FREE_NOTE": "One full report free every month. After that, {{n}} credits per name.",
@@ -351,7 +350,9 @@
       "REPORT_C_LOCAL": "Anchoring",
       "REPORT_DOWNLOAD": "Download as PDF",
       "REPORT_C_LENGTH_V": "{{n}} characters or more",
-      "REPORT_C_LOCAL_V": "names suited to the local market"
+      "REPORT_C_LOCAL_V": "names suited to the local market",
+      "LOCKED_RISK": "You like {{name}}, and the domain is free in {{exts}}. But skipping the social handles means risking the very name your visibility will be built on — and skipping the trademark search means exposing yourself to opposition, to legal action, and to a rename at the worst possible time. Better disappointed now than once the project has taken off.",
+      "LOCKED_RISK_NODOM": "Before going further with {{name}}: skipping the social handles means risking the very name your visibility will be built on — and skipping the trademark search means exposing yourself to opposition, to legal action, and to a rename at the worst possible time. Better disappointed now than once the project has taken off."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",

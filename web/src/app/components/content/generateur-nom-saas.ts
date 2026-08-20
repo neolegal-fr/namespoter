@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -10,7 +11,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-generateur-nom-saas',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -85,6 +86,8 @@ import { applyContentSeo } from './content-seo';
         chaque suggestion soit réellement enregistrable. Vous gagnez la journée que vous auriez passée à tester
         des noms à la main.
       </p>
+
+      <app-trois-risques intro="Un SaaS se référence, se partage et s'intègre sous un seul nom. Trois contrôles avant de le figer dans une URL d'API."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre SaaS"

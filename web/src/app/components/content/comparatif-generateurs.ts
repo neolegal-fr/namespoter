@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -12,7 +13,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-comparatif-generateurs',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -207,6 +208,8 @@ import { applyContentSeo } from './content-seo';
         avec un avertissement chiffré quand vous descendez sous sept caractères — plutôt que de vous
         laisser chercher à l'aveugle.
       </p>
+
+      <app-trois-risques intro="C'est là que se joue la différence entre un générateur de noms et un outil de choix de nom : le nombre de contrôles."></app-trois-risques>
 
       <app-article-cta
         heading="Comparez par vous-même en 30 secondes"

@@ -57,8 +57,17 @@ interface LockedCheck {
           </p>
           <h2 class="rl-name">{{ name() }}</h2>
         }
+        <!-- Le NOM et SES domaines, pas un argumentaire générique.
+             « Le rapport ajoute la recherche d'antériorité » décrit un produit ;
+             « Locanix vous plaît et le .com est libre — mais si la marque est
+             déposée, vous devrez tout refaire » décrit ce qui va arriver à
+             l'utilisateur. Le second se lit, le premier se saute. -->
         <p class="rl-intro">
-          {{ 'WIZARD.STEP3.LOCKED_INTRO' | translate:{ n: domainsChecked(), credits: domainsChecked() } }}
+          @if (freeExtensions().length) {
+            {{ 'WIZARD.STEP3.LOCKED_RISK' | translate:{ name: name(), exts: freeExtensions().join(', ') } }}
+          } @else {
+            {{ 'WIZARD.STEP3.LOCKED_RISK_NODOM' | translate:{ name: name() } }}
+          }
         </p>
       </header>
 
@@ -116,6 +125,14 @@ export class BrandReportLockedComponent {
   readonly priceCredits = input(50);
   /** Domaines déjà vérifiés et facturés en amont, rappelés à l'utilisateur. */
   readonly domainsChecked = input(0);
+
+  /**
+   * Extensions libres pour ce nom, telles qu'affichées sur sa carte.
+   *
+   * Ce sont des verdicts GRATUITS, déjà connus de l'utilisateur : les nommer
+   * ici ne franchit pas le paywall, et c'est ce qui rend la phrase concrète.
+   */
+  readonly freeExtensions = input<string[]>([]);
   /** Le compte peut-il payer : solde suffisant, ou droit gratuit disponible. */
   readonly canAfford = input(true);
   /**

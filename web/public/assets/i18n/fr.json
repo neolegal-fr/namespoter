@@ -285,11 +285,10 @@
       "REPORT_SUMMARY_RISK": "Blocage identifié",
       "REPORT_SCOPE_NOTE": "Le périmètre couvre les marques françaises (INPI) et de l'Union européenne (EUIPO), pas les registres nationaux des autres États membres.",
       "LOCKED_NOT_UNLOCKED": "non débloqué",
-      "LOCKED_INTRO": "Les domaines et l'analyse du nom sont déjà là. Le rapport complet y ajoute la recherche d'antériorité INPI, EUIPO et OMPI, et les pseudos sur 6 réseaux.",
       "LOCKED_CHECK_INPI": "Marques françaises — INPI",
       "LOCKED_CHECK_EUIPO": "Marques de l'Union européenne — EUIPO",
       "LOCKED_CHECK_SOCIALS": "Pseudos sur 6 réseaux — GitHub, LinkedIn, Telegram, TikTok, X, YouTube",
-      "LOCKED_UNLOCK": "Débloquer le rapport",
+      "LOCKED_UNLOCK": "Vérifier marques et réseaux sociaux",
       "LOCKED_TOPUP": "Recharger pour débloquer",
       "LOCKED_FREE_THIS_MONTH": "offert ce mois-ci",
       "LOCKED_FREE_NOTE": "Un rapport complet offert chaque mois. Ensuite, {{n}} crédits par nom.",
@@ -351,7 +350,9 @@
       "REPORT_C_LOCAL": "Ancrage",
       "REPORT_DOWNLOAD": "Télécharger en PDF",
       "REPORT_C_LENGTH_V": "{{n}} caractères et plus",
-      "REPORT_C_LOCAL_V": "noms adaptés au marché local"
+      "REPORT_C_LOCAL_V": "noms adaptés au marché local",
+      "LOCKED_RISK": "{{name}} vous plaît, et le domaine est libre en {{exts}}. Mais ne pas vérifier les réseaux sociaux, c'est risquer de perdre le pseudo qui portera votre visibilité — et ne pas vérifier les marques déposées, c'est s'exposer à une opposition, à des poursuites, et à un changement de nom au pire moment. Mieux vaut être déçu maintenant qu'une fois le projet lancé.",
+      "LOCKED_RISK_NODOM": "Avant d'aller plus loin avec {{name}} : ne pas vérifier les réseaux sociaux, c'est risquer de perdre le pseudo qui portera votre visibilité — et ne pas vérifier les marques déposées, c'est s'exposer à une opposition, à des poursuites, et à un changement de nom au pire moment. Mieux vaut être déçu maintenant qu'une fois le projet lancé."
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",

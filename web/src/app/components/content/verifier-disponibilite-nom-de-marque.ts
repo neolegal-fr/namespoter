@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { KeycloakService } from 'keycloak-angular';
 import { timeout } from 'rxjs';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 import { BrandReportViewComponent } from '../brand-report/brand-report-view';
@@ -21,7 +22,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
 @Component({
   selector: 'app-verifier-disponibilite-nom-de-marque',
   standalone: true,
-  imports: [RouterModule, FormsModule, ArticleCtaComponent, BrandReportViewComponent],
+  imports: [TroisRisquesComponent, RouterModule, FormsModule, ArticleCtaComponent, BrandReportViewComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -124,6 +125,8 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
         pour le rapport complet, <strong>envoyé par email</strong> — un document que vous pouvez archiver ou partager avec
         un associé ou votre avocat.
       </p>
+
+      <app-trois-risques intro="« Disponible » ne veut pas dire la même chose selon ce qu'on vérifie. Ces trois contrôles couvrent trois risques distincts."></app-trois-risques>
 
       <app-article-cta
         heading="Vérifiez votre nom de marque maintenant"

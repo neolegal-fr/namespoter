@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -10,7 +11,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-guide-nom-entreprise',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -54,6 +55,8 @@ import { applyContentSeo } from './content-seo';
         <a href="https://data.inpi.fr" target="_blank" rel="noopener">INPI</a> et faites une recherche
         de marque. C'est l'étape que personne ne doit sauter.
       </p>
+
+      <app-trois-risques intro="Le nom d'une entreprise l'accompagne des années. Trois contrôles la protègent, et sauter les deux derniers coûte bien plus cher que le premier."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre entreprise"

@@ -620,6 +620,13 @@ export class WizardComponent implements OnInit, OnDestroy {
     return { description: this.description() || undefined, constraints: contraintes };
   });
 
+  /** Extensions libres pour ce nom — verdicts gratuits, déjà à l'écran. */
+  freeExtensionsOf(name: string): string[] {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    if (!d) return [];
+    return this.selectedExtensions().filter((e) => d.allExtensions?.[e] === true);
+  }
+
   /** Analyse déjà produite pour ce nom, rendue en HTML (ou null). */
   partialAnalysis(name: string): SafeHtml | null {
     const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -10,7 +11,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-guide-nom-de-startup',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -44,6 +45,8 @@ import { applyContentSeo } from './content-seo';
         phrase, l'IA propose des dizaines de noms <em>brandables</em> et teste en direct la disponibilité du
         domaine (Whois réel). Vous ne perdez plus une journée à vérifier des noms déjà pris à la main.
       </p>
+
+      <app-trois-risques intro="Une startup qui décolle attire l'attention — y compris celle des titulaires de marques. Trois contrôles, à faire avant la première levée."></app-trois-risques>
 
       <app-article-cta
         heading="Trouvez le nom de votre startup"

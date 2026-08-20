@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TroisRisquesComponent } from './trois-risques';
 import { ArticleCtaComponent } from './article-cta';
 import { applyContentSeo } from './content-seo';
 
@@ -12,7 +13,7 @@ import { applyContentSeo } from './content-seo';
 @Component({
   selector: 'app-nom-court-invente',
   standalone: true,
-  imports: [RouterModule, ArticleCtaComponent],
+  imports: [TroisRisquesComponent, RouterModule, ArticleCtaComponent],
   template: `
     <article class="article">
       <nav class="meta">
@@ -56,6 +57,8 @@ import { applyContentSeo } from './content-seo';
         <em>brandables</em> et <strong>teste chaque domaine par Whois réel</strong>, pour ne vous montrer que
         des noms réellement enregistrables.
       </p>
+
+      <app-trois-risques intro="Un nom court et inventé passe plus souvent les trois contrôles — mais « plus souvent » n'est pas « toujours »."></app-trois-risques>
 
       <app-article-cta
         heading="Générez votre nom court et inventé"
