@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
+import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
+import { SafeHtml } from '@angular/platform-browser';
 
 /**
  * Rapport de marque — état DÉBLOQUÉ, refonte étape 4.
@@ -40,9 +41,14 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
             <h2 class="rv-name">{{ r.name }}</h2>
           </div>
           <div class="rv-head__actions">
-            <span class="rv-summary" [class]="'rv-summary--' + summaryTone(r)">
-              {{ summaryKey(r) | translate }}
-            </span>
+            <!-- Aucune synthèse tant que marque et réseaux manquent : elle
+                 agrège les trois volets, l'afficher sur les domaines seuls
+                 donnerait un verdict d'ensemble tiré d'un tiers du document. -->
+            @if (!locked && r.trademark && r.socials) {
+              <span class="rv-summary" [class]="'rv-summary--' + summaryTone(r)">
+                {{ summaryKey(r) | translate }}
+              </span>
+            }
           </div>
         </header>
 
@@ -50,7 +56,7 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
         <section class="rv-section">
           <div class="rv-section__head">
             <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_DOMAINS' | translate }}</h3>
-            <span class="rv-section__meta">RDAP · {{ r.generatedAt | date: 'HH:mm:ss' }}</span>
+            <span class="rv-section__meta">RDAP@if (r.generatedAt) { · {{ r.generatedAt | date: 'HH:mm:ss' }} }</span>
           </div>
           @for (d of r.domains; track d.domain) {
             <div class="rv-row">
@@ -67,35 +73,36 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
           }
         </section>
 
-        <!-- Marques — INPI et EUIPO, périmètre nommé explicitement -->
+        <!-- Marques — INPI, EUIPO et OMPI, périmètre nommé explicitement -->
+        @if (r.trademark; as tm) {
         <section class="rv-section">
           <div class="rv-section__head">
             <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK_SCOPE' | translate }}</h3>
-            @if (allClasses(r.trademark.hits); as cls) {
+            @if (allClasses(tm.hits); as cls) {
               @if (cls) { <span class="rv-section__meta">{{ 'WIZARD.STEP3.REPORT_CLASSES' | translate:{ list: cls } }}</span> }
             }
           </div>
 
           <div class="rv-row">
             <span class="rv-row__label">{{ 'WIZARD.STEP3.REPORT_TM_IDENTICAL' | translate:{ name: r.name } }}</span>
-            <span class="rv-badge" [class]="'rv-badge--' + tmTone(r.trademark.match)">
-              {{ tmHeadKey(r.trademark.match) | translate }}
+            <span class="rv-badge" [class]="'rv-badge--' + tmTone(tm.match)">
+              {{ tmHeadKey(tm.match) | translate }}
             </span>
           </div>
 
-          <p class="rv-explain" [innerHTML]="tmExplainKey(r.trademark.match) | translate"></p>
+          <p class="rv-explain" [innerHTML]="tmExplainKey(tm.match) | translate"></p>
 
           <!-- La RAISON du « non vérifiable », quand le serveur la donne.
                Sans elle, une configuration manquante et une panne de l'INPI
                affichent le même texte : impossible de savoir s'il faut
                réessayer plus tard ou corriger un réglage. -->
-          @if (r.trademark.match === 'unknown' && r.trademark.note) {
+          @if (tm.match === 'unknown' && tm.note) {
             <p class="rv-note">{{ r.trademark.note }}</p>
           }
 
-          @if (r.trademark.hits.length) {
+          @if (tm.hits.length) {
             <ul class="rv-hits">
-              @for (h of r.trademark.hits.slice(0, 8); track h.name + h.applicationNumber) {
+              @for (h of tm.hits.slice(0, 8); track h.name + h.applicationNumber) {
                 <li>
                   {{ h.name }}
                   <span style="color: var(--nm-app-text-2)">
@@ -107,27 +114,28 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
           }
 
           <div class="rv-actions">
-            @if (r.trademark.match === 'none' || r.trademark.match === 'similar') {
+            @if (tm.match === 'none' || tm.match === 'similar') {
               <a class="rv-link" [href]="INPI_DEPOSIT_URL" target="_blank" rel="noopener noreferrer">
                 <i class="pi pi-shield"></i> {{ 'WIZARD.STEP3.REPORT_DEPOSIT' | translate }}
               </a>
             }
-            <a class="rv-link" [href]="r.trademark.deepLink" target="_blank" rel="noopener noreferrer">
+            <a class="rv-link" [href]="tm.deepLink" target="_blank" rel="noopener noreferrer">
               <i class="pi pi-search"></i> {{ 'WIZARD.STEP3.REPORT_OFFICIAL' | translate }}
             </a>
           </div>
         </section>
+        }
 
         <!-- Réseaux sociaux -->
-        @if (r.socials.length) {
+        @if (r.socials?.length) {
           <section class="rv-section">
             <div class="rv-section__head">
               <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
               <span class="rv-section__meta">
-                {{ 'WIZARD.STEP3.REPORT_PLATFORMS' | translate:{ n: r.socials.length } }}
+                {{ 'WIZARD.STEP3.REPORT_PLATFORMS' | translate:{ n: r.socials?.length ?? 0 } }}
               </span>
             </div>
-            @for (s of r.socials; track s.platform) {
+            @for (s of r.socials ?? []; track s.platform) {
               <div class="rv-row">
                 <span class="rv-row__label">
                   <!-- Le logo officiel, monochrome : il identifie le réseau
@@ -149,7 +157,32 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
           </section>
         }
 
-        <!-- Qualité du nom -->
+        <!-- Palier payant, PAS ENCORE ACQUIS.
+             Il se pose là où marque et réseaux s'afficheront une fois achetés :
+             la substitution se lit d'elle-même, sans qu'on ait à expliquer ce
+             qui manque. Le contenu vient de l'appelant — la page ne connaît
+             donc ni prix ni solde, et surtout aucun verdict payant. -->
+        @if (locked) {
+          <ng-content select="[locked]"></ng-content>
+        }
+
+        <!-- Qualité du nom — issue de l'analyse déjà produite pendant la
+             recherche, donc disponible avant tout achat. -->
+        @if (locked && analysis) {
+          <section class="rv-section">
+            <div class="rv-section__head">
+              <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_QUALITY' | translate }}</h3>
+              @if (analysisScore > 0) {
+                <span class="rv-section__meta">
+                  <span class="nm-verdict" [class]="'nm-verdict--' + scoreTone(analysisScore * 20)">{{ scoreKey(analysisScore * 20) | translate }}</span>
+                  <strong style="color: var(--nm-app-text)">{{ analysisScore }}/5</strong>
+                </span>
+              }
+            </div>
+            <div class="rv-explain" [innerHTML]="analysis"></div>
+          </section>
+        }
+
         @if (r.quality; as q) {
           <section class="rv-section">
             <div class="rv-section__head">
@@ -179,10 +212,12 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
 
         <!-- Pied : avertissement obligatoire + action de réservation -->
         <footer class="rv-foot">
-          <p class="rv-disclaimer">
-            {{ r.disclaimer }}
-            {{ 'WIZARD.STEP3.REPORT_SCOPE_NOTE' | translate }}
-          </p>
+          @if (r.disclaimer) {
+            <p class="rv-disclaimer">
+              {{ r.disclaimer }}
+              {{ 'WIZARD.STEP3.REPORT_SCOPE_NOTE' | translate }}
+            </p>
+          }
           @if (heroFreeDomain(r); as hero) {
             <a class="rv-cta" [href]="reserveUrl(r.name, hero.extension, 0)" target="_blank" rel="noopener noreferrer">
               <i class="pi pi-shopping-cart"></i>
@@ -196,7 +231,23 @@ import { BrandReport, Availability, NameQuality, TrademarkHit } from '../../serv
   styleUrl: './brand-report-view.css',
 })
 export class BrandReportViewComponent {
-  @Input({ required: true }) report!: BrandReport;
+  @Input({ required: true }) report!: ReportLike;
+
+  /**
+   * Marque et réseaux pas encore achetés pour ce nom.
+   *
+   * La page reste LA MÊME : mêmes sections, même ordre, même mise en forme.
+   * Seul le tiers payant est remplacé par la proposition de le débloquer.
+   * C'est ce qui permet de dire « voici votre rapport, il se complète » plutôt
+   * que de faire cohabiter deux écrans différents pour un même nom.
+   */
+  @Input() locked = false;
+
+  /** Analyse du nom déjà produite pendant la recherche, rendue en HTML. */
+  @Input() analysis: SafeHtml | null = null;
+
+  /** Note sur 5 lue dans cette analyse (0 = inconnue). */
+  @Input() analysisScore = 0;
 
   readonly INPI_DEPOSIT_URL = 'https://procedures.inpi.fr/?/marques/depot';
   readonly REGISTRARS = [
@@ -210,7 +261,7 @@ export class BrandReportViewComponent {
     return `${this.REGISTRARS[i].base}${d}&utm_source=namorama&utm_medium=referral`;
   }
 
-  heroFreeDomain(r: BrandReport): { extension: string; domain: string } | null {
+  heroFreeDomain(r: ReportLike): { extension: string; domain: string } | null {
     const free = r.domains.filter((d) => d.status === 'free');
     return free.find((d) => d.extension === 'com') ?? free[0] ?? null;
   }
@@ -244,14 +295,15 @@ export class BrandReportViewComponent {
   }
 
   /** Synthèse d'en-tête : le pire signal l'emporte, sans jamais l'adoucir. */
-  summaryTone(r: BrandReport): 'ok' | 'watch' | 'risk' {
-    if (r.trademark.match === 'exact') return 'risk';
-    if (r.trademark.match === 'similar' || r.trademark.match === 'unknown') return 'watch';
+  summaryTone(r: ReportLike): 'ok' | 'watch' | 'risk' {
+    const match = r.trademark?.match;
+    if (match === 'exact') return 'risk';
+    if (match === 'similar' || match === 'unknown') return 'watch';
     if (r.domains.some((d) => d.status === 'unknown')) return 'watch';
     return 'ok';
   }
 
-  summaryKey(r: BrandReport): string {
+  summaryKey(r: ReportLike): string {
     const t = this.summaryTone(r);
     return t === 'ok'
       ? 'WIZARD.STEP3.REPORT_SUMMARY_OK'

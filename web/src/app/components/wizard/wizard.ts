@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DomainService, CompetitorDomain } from '../../services/domain';
-import { BrandReportService, BrandReport, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
+import { BrandReportService, BrandReport, ReportLike, Availability, NameQuality, BRAND_REPORT_COST } from '../../services/brand-report';
 import { KeycloakService } from 'keycloak-angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Steps } from 'primeng/steps';
@@ -560,6 +560,46 @@ export class WizardComponent implements OnInit, OnDestroy {
     }
     if (this.showReportDialog() && this.normName(this.brandReportName()) === this.normName(param)) return;
     this.loadReportInto(param);
+  }
+
+  /**
+   * Ce qu'on sait DÉJÀ du nom, sans rien acheter.
+   *
+   * Les domaines et l'analyse ont été collectés pendant la recherche : les
+   * cacher derrière le paiement revenait à faire payer une page pour y
+   * retrouver ce qu'on avait déjà. La page de rapport les affiche donc
+   * toujours, et le tiers payant — marque et réseaux — s'y ajoute une fois
+   * acquis, à la place qu'il occupera.
+   *
+   * `null` si le nom ne vient pas de la recherche courante (arrivée par lien
+   * direct, ou projet non chargé) : on n'invente pas de données.
+   */
+  partialReport(name: string): ReportLike | null {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    if (!d) return null;
+    const base = d.name.toLowerCase();
+    const domains = this.selectedExtensions().map((ext) => {
+      const state = (d.allExtensions ?? {})[ext];
+      return {
+        extension: ext.replace(/^\./, ''),
+        domain: base + (ext.startsWith('.') ? ext : '.' + ext),
+        status: (state === true ? 'free' : state === false ? 'taken' : 'unknown') as Availability,
+      };
+    });
+    return { name: d.name, handle: base.replace(/[^a-z0-9]/g, ''), domains };
+  }
+
+  /** Analyse déjà produite pour ce nom, rendue en HTML (ou null). */
+  partialAnalysis(name: string): SafeHtml | null {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    return d?.analysis ? this.parseAnalysisHtml(d.analysis) : null;
+  }
+
+  /** Note sur 5 lue dans le texte d'analyse — 0 si absente. */
+  partialAnalysisScore(name: string): number {
+    const d = this.domains().find((x) => this.normName(x.name) === this.normName(name));
+    const m = d?.analysis?.match(/(\d+(?:[.,]\d+)?)\s*\/\s*5/);
+    return m ? Math.round(parseFloat(m[1].replace(',', '.'))) : 0;
   }
 
   /** Charge le rapport d'un nom et l'affiche — chemin de l'arrivée par l'URL. */

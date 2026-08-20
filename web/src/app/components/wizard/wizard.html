@@ -808,20 +808,44 @@
       </div>
 
       <!-- Résultat -->
-      <!-- Nom non vérifié : le rapport VERROUILLÉ, qui montre la forme de la
-           réponse sans la réponse. Ses entrées se limitent au nom, au prix et
-           au droit gratuit — aucun verdict n'atteint le navigateur avant
-           l'achat, par construction. -->
+      <!-- Nom pas encore vérifié : LA MÊME PAGE, avec ce qu'on sait déjà —
+           domaines et analyse du nom, collectés pendant la recherche — et, à
+           la place exacte où marque et réseaux s'afficheront, la proposition
+           de les débloquer. Le bloc verrouillé ne reçoit toujours que le nom,
+           le prix et le droit gratuit : aucun verdict payant n'atteint le
+           navigateur avant l'achat. -->
       <div *ngIf="!brandReportLoading() && !brandReport()" style="padding: 1.5rem 1rem">
-        <app-brand-report-locked
-          [name]="brandReportName()"
-          [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
-          [domainsChecked]="selectedExtensions().length"
-          [canAfford]="hasEnoughReportCredits()"
-          [freeThisMonth]="reportIsFree()"
-          (unlock)="confirmBrandReport()"
-          (topUp)="openCreditPurchase()">
-        </app-brand-report-locked>
+        <app-brand-report-view
+          *ngIf="partialReport(brandReportName()) as partial; else lockedOnly"
+          [report]="partial"
+          [locked]="true"
+          [analysis]="partialAnalysis(brandReportName())"
+          [analysisScore]="partialAnalysisScore(brandReportName())">
+          <app-brand-report-locked locked
+            [embedded]="true"
+            [name]="brandReportName()"
+            [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
+            [domainsChecked]="selectedExtensions().length"
+            [canAfford]="hasEnoughReportCredits()"
+            [freeThisMonth]="reportIsFree()"
+            (unlock)="confirmBrandReport()"
+            (topUp)="openCreditPurchase()">
+          </app-brand-report-locked>
+        </app-brand-report-view>
+
+        <!-- Nom venu d'ailleurs (lien direct, projet non chargé) : rien de
+             collecté à montrer, donc le palier payant seul. -->
+        <ng-template #lockedOnly>
+          <app-brand-report-locked
+            [name]="brandReportName()"
+            [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
+            [domainsChecked]="selectedExtensions().length"
+            [canAfford]="hasEnoughReportCredits()"
+            [freeThisMonth]="reportIsFree()"
+            (unlock)="confirmBrandReport()"
+            (topUp)="openCreditPurchase()">
+          </app-brand-report-locked>
+        </ng-template>
       </div>
 
       <div *ngIf="!brandReportLoading() && brandReport() as report" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem 1rem 2rem">

@@ -16,7 +16,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
  * La page est prérendue (contenu indexable) ; le checker d'aperçu s'exécute
  * côté navigateur au clic (aucun appel réseau au prerender). L'aperçu est
  * volontairement bridé (domaine phare + quelques réseaux, sans marque) pour
- * démontrer la valeur et pousser vers le rapport de marque.
+ * démontrer la valeur et pousser vers le rapport complet.
  */
 @Component({
   selector: 'app-verifier-disponibilite-nom-de-marque',
@@ -66,12 +66,12 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
               </div>
             </div>
             <p class="upsell">
-              L'aperçu ne couvre que l'essentiel. Le <strong>rapport de marque</strong> ajoute
+              L'aperçu ne couvre que l'essentiel. Le <strong>rapport complet</strong> ajoute
               tous les réseaux et la <strong>vérification de marque INPI + EUIPO</strong> (classes incluses),
               affiché et envoyé par email — {{ cost }} crédits.
             </p>
             <button class="cta" (click)="getFullReport()" [disabled]="fullLoading()">
-              {{ fullLoading() ? 'Génération du rapport…' : (isLoggedIn() ? 'Obtenir le rapport de marque' : 'Se connecter pour le rapport de marque') }}
+              {{ fullLoading() ? 'Génération du rapport…' : (isLoggedIn() ? 'Obtenir le rapport complet' : 'Se connecter pour le rapport complet') }}
             </button>
             @if (fullError()) {
               <p class="checker-error">{{ fullError() }}</p>
@@ -80,7 +80,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
           </div>
         }
 
-        <!-- Rapport de marque -->
+        <!-- Rapport complet -->
         @if (fullReport(); as fr) {
           <div style="margin-top: 1.5rem">
             <app-brand-report-view [report]="fr"></app-brand-report-view>
@@ -121,7 +121,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
       <p>
         Saisissez un nom&nbsp;: nous vérifions le domaine par une requête réelle, la disponibilité des handles sociaux,
         et interrogeons les bases de marques. Le résultat est synthétisé en un <strong>score de disponibilité</strong> et,
-        pour le rapport de marque, <strong>envoyé par email</strong> — un document que vous pouvez archiver ou partager avec
+        pour le rapport complet, <strong>envoyé par email</strong> — un document que vous pouvez archiver ou partager avec
         un associé ou votre avocat.
       </p>
 
@@ -165,7 +165,7 @@ export class VerifierDisponibiliteMarqueComponent {
   readonly error = signal<string | null>(null);
   readonly cost = BRAND_REPORT_COST;
 
-  // Rapport de marque pour un nom saisi — nécessite un compte + crédits.
+  // Rapport complet pour un nom saisi — nécessite un compte + crédits.
   private keycloak?: KeycloakService;
   readonly isLoggedIn = signal(false);
   readonly fullLoading = signal(false);
@@ -176,7 +176,7 @@ export class VerifierDisponibiliteMarqueComponent {
     applyContentSeo({
       title: 'Vérifier la disponibilité d’un nom de marque',
       description:
-        'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu gratuit et rapport de marque.',
+        'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu gratuit et rapport complet.',
       path: '/verifier-disponibilite-nom-de-marque',
     });
     // Uniquement côté navigateur : au prerender, Keycloak n'est pas initialisé.
@@ -186,7 +186,7 @@ export class VerifierDisponibiliteMarqueComponent {
     }
   }
 
-  /** Génère le Rapport de marque pour le nom saisi. */
+  /** Génère le Rapport complet pour le nom saisi. */
   getFullReport(): void {
     const name = this.query().trim();
     if (!name || this.fullLoading()) return;
@@ -203,7 +203,7 @@ export class VerifierDisponibiliteMarqueComponent {
       error: (err) => {
         this.fullError.set(
           err?.status === 403
-            ? `Crédits insuffisants (${this.cost} crédits requis). Rechargez votre solde pour générer le rapport de marque.`
+            ? `Crédits insuffisants (${this.cost} crédits requis). Rechargez votre solde pour générer le rapport complet.`
             : 'La génération du rapport a échoué. Réessayez dans un instant.',
         );
         this.fullLoading.set(false);

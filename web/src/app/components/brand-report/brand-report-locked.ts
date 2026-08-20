@@ -48,10 +48,15 @@ interface LockedCheck {
     <article class="rl">
 
       <header class="rl-head">
-        <p class="rl-overline">
-          {{ 'WIZARD.STEP3.REPORT_CTA' | translate }} · {{ 'WIZARD.STEP3.LOCKED_NOT_UNLOCKED' | translate }}
-        </p>
-        <h2 class="rl-name">{{ name() }}</h2>
+        <!-- Nom et sur-titre seulement quand le bloc est SEUL à l'écran :
+             posé dans la page de rapport, il répéterait son en-tête à trois
+             centimètres du premier. -->
+        @if (!embedded()) {
+          <p class="rl-overline">
+            {{ 'WIZARD.STEP3.REPORT_CTA' | translate }} · {{ 'WIZARD.STEP3.LOCKED_NOT_UNLOCKED' | translate }}
+          </p>
+          <h2 class="rl-name">{{ name() }}</h2>
+        }
         <p class="rl-intro">
           {{ 'WIZARD.STEP3.LOCKED_INTRO' | translate:{ n: domainsChecked(), credits: domainsChecked() } }}
         </p>
@@ -105,6 +110,9 @@ interface LockedCheck {
 })
 export class BrandReportLockedComponent {
   readonly name = input.required<string>();
+
+  /** Posé DANS la page de rapport, sous les sections déjà collectées. */
+  readonly embedded = input(false);
   readonly priceCredits = input(50);
   /** Domaines déjà vérifiés et facturés en amont, rappelés à l'utilisateur. */
   readonly domainsChecked = input(0);
@@ -130,7 +138,7 @@ export class BrandReportLockedComponent {
   readonly checks: LockedCheck[] = [
     { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_INPI',    barWidth: 132 },
     { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_EUIPO',   barWidth: 104 },
+    { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_WO',      barWidth: 118 },
     { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_SOCIALS', barWidth: 148 },
-    { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_X',       barWidth: 88 },
   ];
 }

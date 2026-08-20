@@ -44,6 +44,27 @@ export interface NameQuality {
   watchout?: string;
 }
 
+/**
+ * Ce que la page de rapport sait afficher.
+ *
+ * Un `BrandReport` complet en est un cas particulier. L'autre cas est la page
+ * AVANT achat : on y connaît déjà les domaines et l'analyse du nom — ils ont
+ * été collectés pendant la recherche — mais ni les marques ni les réseaux.
+ * D'où les champs facultatifs : ils décrivent une page qui se remplit, pas un
+ * document amputé.
+ */
+export interface ReportLike {
+  name: string;
+  handle: string;
+  domains: DomainAvailability[];
+  socials?: SocialAvailability[];
+  trademark?: TrademarkResult;
+  quality?: NameQuality;
+  generatedAt?: string;
+  disclaimer?: string;
+  cached?: boolean;
+}
+
 export interface BrandReport {
   name: string;
   handle: string;
