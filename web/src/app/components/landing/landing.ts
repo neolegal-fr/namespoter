@@ -304,6 +304,22 @@ import { applyContentSeo } from '../content/content-seo';
           </div>
         </section>
 
+        <!-- L'autre version de CETTE page, en clair.
+             Le sélecteur de langue du menu bascule le contenu sans changer
+             d'URL : aucun robot ne le déclenche, et rien ne pointait vers
+             « /en » à part le sitemap et les balises hreflang. Un lien
+             ordinaire vaut mieux — Google le suit, et un lecteur peut le
+             partager. Le libellé est dans la langue de DESTINATION, comme le
+             recommande Google : on ne demande pas à un anglophone de
+             reconnaître « Anglais ». -->
+        <p class="nm-lang-alt">
+          @if (lang === 'fr') {
+            <a routerLink="/en" hreflang="en" lang="en">This page in English</a>
+          } @else {
+            <a routerLink="/" hreflang="fr" lang="fr">Cette page en français</a>
+          }
+        </p>
+
       </div>
     </article>
   `,
@@ -338,6 +354,19 @@ export class LandingComponent implements OnInit, OnDestroy {
       lang: this.lang,
       ogType: 'website',
       alternates: { fr: '/', en: '/en' },
+      // La FAQ balisée est CELLE QUI EST AFFICHÉE : mêmes clés, même langue,
+      // même page. Construite ici plutôt qu'écrite en dur dans index.html, où
+      // elle contaminait les dix-neuf pages prérendues.
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        inLanguage: this.lang,
+        mainEntity: [1, 2, 3, 4].map((n) => ({
+          '@type': 'Question',
+          name: t('HOME.FAQ_Q' + n),
+          acceptedAnswer: { '@type': 'Answer', text: t('HOME.FAQ_A' + n) },
+        })),
+      },
     });
   }
 

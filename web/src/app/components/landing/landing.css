@@ -725,3 +725,25 @@
 }
 
 .nm-panel__sample a:hover { text-decoration: underline; }
+
+/* Lien vers l'autre langue : discret, mais un vrai lien. */
+.nm-lang-alt {
+  margin: 0;
+  padding: 0 var(--nm-section-padding-x) var(--nm-section-padding-y);
+  text-align: center;
+  font-size: var(--nm-text-ui-sm);
+}
+
+.nm-lang-alt a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  color: var(--nm-text-light-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.nm-lang-alt a:hover {
+  color: var(--nm-accent-text-light);
+}
