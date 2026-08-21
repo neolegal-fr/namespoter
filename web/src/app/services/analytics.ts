@@ -75,9 +75,25 @@ export class AnalyticsService {
     if (!this.isBrowser) return;
 
     window.addEventListener('error', (e) => {
+      /*
+       * « Script error. » sans fichier ni ligne n'est pas une erreur du
+       * produit : c'est ce que le navigateur affiche quand le script fautif
+       * vient d'une AUTRE origine sans en-tête CORS — une extension du
+       * navigateur, un traceur tiers. Le détail est masqué par sécurité, et
+       * aucun réglage de notre côté ne le révélera.
+       *
+       * On le dit dans l'événement plutôt que de laisser cinq lignes
+       * indéchiffrables se lire comme cinq bogues à corriger. Et quand
+       * l'erreur vient bien de notre code, la pile part avec : c'est elle qui
+       * permet de retrouver l'appel, le nom de fichier minifié ne suffisant
+       * pas.
+       */
+      const masquee = e.message === 'Script error.' && !e.filename;
       this.track('client_error', {
         message: e.message,
         source: `${e.filename}:${e.lineno}`,
+        origin: masquee ? 'externe' : 'application',
+        stack: String((e.error as Error | undefined)?.stack ?? '').slice(0, 300),
         path: location.pathname,
       });
     });

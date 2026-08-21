@@ -289,6 +289,10 @@ import { applyContentSeo } from '../content/content-seo';
         <section class="nm-section">
           <div class="nm-final">
             <div>
+              <!-- Une QUESTION, pas une affirmation : « Votre nom est encore
+                   libre » annonçait un verdict sur un nom que le site ne
+                   connaît pas — la phrase ne pouvait pas se comprendre avant
+                   d'avoir saisi quelque chose. -->
               <h2 class="nm-final__title">{{ 'HOME.FINAL_H2' | translate }}</h2>
               <p class="nm-final__text">{{ 'HOME.FINAL_TEXT' | translate }}</p>
             </div>
