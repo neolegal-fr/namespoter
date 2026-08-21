@@ -187,9 +187,22 @@ function initializeApp(
 
     // 3. Langue : l'URL prime (« /en » est une page anglaise, quoi qu'en dise
     // le navigateur) ; sinon, détection depuis le navigateur comme avant.
+    /*
+     * ATTENDRE le dictionnaire, ne pas seulement le demander.
+     *
+     * `use()` renvoie un observable : sans l'attendre, l'application démarre
+     * pendant que le fichier de langue arrive encore. Tout ce qui lit une
+     * traduction de façon IMPÉRATIVE à ce moment-là — `instant()` dans un
+     * constructeur — reçoit le repli anglais, et ne se corrige jamais : les
+     * gabarits, eux, se rafraîchissent tout seuls à l'arrivée du dictionnaire,
+     * mais un titre d'onglet posé une fois reste posé.
+     *
+     * C'est ce qui affichait « Find a brand name that is genuinely free » sur
+     * l'accueil FRANÇAIS, dont le HTML prérendu portait pourtant le bon titre.
+     */
     const urlLang = window.location.pathname.split('/').filter(Boolean)[0];
     if ((SITE_LANGS as readonly string[]).includes(urlLang)) {
-      translate.use(urlLang);
+      await firstValueFrom(translate.use(urlLang));
       return;
     }
     const browserLang = translate.getBrowserLang() ?? '';
@@ -201,7 +214,7 @@ function initializeApp(
      * un visiteur francophone n'est pas concerné — son navigateur annonce
      * « fr », qui est servi.
      */
-    translate.use(supportedLangs.includes(browserLang) ? browserLang : 'en');
+    await firstValueFrom(translate.use(supportedLangs.includes(browserLang) ? browserLang : 'en'));
   };
 }
 
