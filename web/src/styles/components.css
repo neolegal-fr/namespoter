@@ -410,6 +410,16 @@
     justify-content: flex-end;
 }
 
+/* Empilées faute de place, les actions s'alignent sur le nom du rapport plutôt
+   que de rester collées au bord droit : deux boutons de largeurs différentes
+   calés à droite se lisent comme un escalier. */
+@media (max-width: 640px) {
+    .rv-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
 /* Réactualiser, dans la ligne de date : icône seule, plate au repos, avec la
    silhouette au survol — exactement le traitement des actions tertiaires. Un
    fond permanent en ferait le point le plus voyant d'une ligne qui n'est

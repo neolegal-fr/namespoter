@@ -79,9 +79,16 @@
 }
 
 @media (max-width: 640px) {
+  /* `flex: none` faisait grandir ce bloc jusqu'à la largeur de son contenu :
+     le repli interne ne se déclenchait donc jamais, et les deux boutons
+     débordaient l'en-tête de 23 px. Sur petit écran il prend la ligne entière
+     et laisse ses boutons se répartir. */
   .rv-head__actions {
+    flex: 1 1 100%;
+    min-width: 0;
     margin-left: 0;
     flex-wrap: wrap;
+    justify-content: flex-start;
   }
 }
 
@@ -139,8 +146,14 @@
   white-space: nowrap;
 }
 
+/* Le verdict passe À LA LIGNE quand il ne tient plus à côté du libellé.
+   Sans `flex-wrap`, une pastille longue — « Aucun dépôt identique trouvé
+   (INPI / EUIPO / OMPI) » — gardait toute sa largeur (elle est en `flex: none`)
+   et le libellé, lui, se réduisait à zéro : « Marque identique « navorae » »
+   sortait à une lettre par ligne sur 475 px de haut. */
 .rv-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding: 11px 0;
@@ -152,11 +165,16 @@
   border-top: 0;
 }
 
+/* `flex-basis: 12rem` : en dessous, le libellé demande à passer à la ligne
+   plutôt qu'à se rétrécir encore.
+   `break-word` et non `anywhere` : les deux coupent un mot trop long, mais
+   `anywhere` ramène AUSSI la largeur minimale du bloc à un caractère — c'est
+   ce qui autorisait la colonne d'une lettre de large. */
 .rv-row__label {
-  flex: 1;
+  flex: 1 1 12rem;
   min-width: 0;
   color: var(--nm-app-text);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .rv-row__label a {
@@ -531,3 +549,36 @@
        celle-ci.) */
     .rv-cta { display: none; }
 }
+
+/* ─── Petits écrans : rendre au texte la largeur que prennent les marges ───
+ *
+ * À 390 px, trois retraits s'additionnaient — 12 px du conteneur d'application,
+ * 16 px de la page, 26 px de la carte — soit 54 px de chaque côté : le contenu
+ * n'occupait plus que 282 px sur 390, et un rapport lu au téléphone tenait sur
+ * une demi-largeur. Le retrait de la carte tombe à 16 px, ce qui rend 20 px par
+ * côté à ce qui se lit. */
+@media (max-width: 480px) {
+  .rv-head,
+  .rv-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* La pastille de verdict est en `nowrap` : sur un écran étroit, « Aucun
+     dépôt identique trouvé (INPI / EUIPO / OMPI) » dépassait sa rangée de 90 px
+     et se faisait couper par le `overflow: hidden` de la carte — le verdict
+     s'arrêtait au milieu d'un mot, sans que rien ne l'indique. Elle se replie
+     donc sur deux lignes plutôt que d'être tronquée. */
+  .rv-badge {
+    /* `white-space: normal` ne suffit pas : en `flex: none`, la pastille garde
+       la largeur de son texte sur une ligne et déborde quand même. Il faut
+       l'AUTORISER À RÉTRÉCIR — c'est `flex-shrink` qui déclenche le repli. */
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* En FIN de feuille, à dessein : `.rv-head` et `.rv-section` posent leur
+   retrait plus haut, et l'emporteraient à spécificité égale. */
