@@ -390,7 +390,8 @@
       "LOCKED_SIGNUP_CTA": "Create my account",
       "SEED_PROJECT": "For alternative name suggestions, fill in your project details.",
       "SEED_PROJECT_CTA": "Describe my project",
-      "SETUP_FIRST_BTN": "Describe the project to get alternatives"
+      "SETUP_FIRST_BTN": "Describe the project to get alternatives",
+      "LOCKED_READ_ONLY": "This project is shared with you in view-only mode: the trademark and social checks must be started from the account that owns it."
     },
     "TIMEOUT": {
       "MESSAGE": "The search is taking longer than expected. Do you want to keep waiting?",
@@ -446,7 +447,9 @@
     "GENERATE": "Generate a report",
     "TITLE": "Brand availability report",
     "CREATE_CTA": "Create your own report →",
-    "OWN_CTA": "Check your own brand name →"
+    "OWN_CTA": "Check your own brand name →",
+    "OWN_TITLE": "This report is about someone else's name",
+    "OWN_LEAD": "Check yours: domains, social handles and registered trademarks, live."
   },
   "HOME": {
     "HTML_LANG": "en",

@@ -197,3 +197,9 @@
     width: 100%;
   }
 }
+
+/* Lecture seule : le pied n'annonce plus un prix, il explique une limite. */
+.rl-foot--lecture {
+  display: block;
+  text-align: left;
+}

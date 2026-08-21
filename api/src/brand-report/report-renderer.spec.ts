@@ -83,3 +83,18 @@ describe("le document envoyé est le même que la page", () => {
     expect(html).not.toContain('Le projet');
   });
 });
+
+describe('rendu du courriel — descriptions en Markdown', () => {
+  it('affiche le texte sans ses dièses ni ses étoiles', () => {
+    // On repart du rapport complet du fichier : le rendu suppose des volets
+    // marque et réseaux présents, et ce test ne porte que sur la description.
+    const html = renderReportHtml({
+      ...report,
+      context: { description: '### Plateforme d’enchères\n\n**Une expérience gamifiée.**\n\n- un point\n- un autre' },
+    } as any);
+    expect(html).toContain('Plateforme d’enchères');
+    expect(html).toContain('Une expérience gamifiée.');
+    expect(html).not.toContain('###');
+    expect(html).not.toContain('**');
+  });
+});

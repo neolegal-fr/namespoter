@@ -1002,6 +1002,7 @@
           </span>
           <app-brand-report-locked locked
             [embedded]="true"
+            [readOnly]="lectureSeule()"
             [name]="brandReportName()"
             [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
             [domainsChecked]="selectedExtensions().length"
@@ -1016,6 +1017,7 @@
              collecté à montrer, donc le palier payant seul. -->
         <ng-template #lockedOnly>
           <app-brand-report-locked
+            [readOnly]="lectureSeule()"
             [name]="brandReportName()"
             [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
             [domainsChecked]="selectedExtensions().length"
@@ -1068,21 +1070,18 @@
             <button type="button" class="nm-btn-secondary" (click)="openShareMail()">
               <i class="pi pi-send"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_MAIL' | translate }}
             </button>
+            <!-- Le lien public vivait tout en bas de page, sous le document.
+                 C'est pourtant le geste le plus courant — envoyer le rapport par
+                 message — et il se cherche là où sont les deux autres façons de
+                 le transmettre. -->
+            <button type="button" class="nm-btn-tertiary" (click)="copyShareLink(report)">
+              <i class="pi" [class.pi-link]="!shareCopied()" [class.pi-check]="shareCopied()"></i>
+              {{ (shareCopied() ? 'WIZARD.STEP3.REPORT_SHARE_COPIED' : 'WIZARD.STEP3.REPORT_SHARE') | translate }}
+            </button>
           </span>
         </app-brand-report-view>
 
-        <!-- Ce qui reste ici n'existe nulle part ailleurs : le lien de partage.
-             La date, le PDF et l'actualisation vivent en tête du document, où
-             on les cherche ; les répéter en pied donnait deux commandes pour
-             un seul geste, et deux dates pour une seule génération. -->
         <div class="report-actions">
-          <button type="button" class="nm-btn-tertiary" (click)="copyShareLink(report)">
-            <i class="pi pi-share-alt"></i> {{ 'WIZARD.STEP3.REPORT_SHARE' | translate }}
-          </button>
-          <span *ngIf="shareCopied()" class="report-actions__ok">
-            <i class="pi pi-check"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_COPIED' | translate }}
-          </span>
-
           <span *ngIf="report.emailed" class="report-actions__ok">
             <i class="pi pi-envelope"></i> {{ 'WIZARD.STEP3.REPORT_EMAILED' | translate }}
           </span>

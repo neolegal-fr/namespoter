@@ -23,6 +23,26 @@ const STATUS_BG: Record<Availability, string> = { free: '#e8f7ef', taken: '#fdea
 const STATUS_FG: Record<Availability, string> = { free: '#0b6b45', taken: '#a32020', unknown: '#8a5a12' };
 const COLLECTION_LABEL: Record<string, string> = { FR: 'INPI (FR)', EU: 'EUIPO (UE)', WO: 'OMPI (int.)' };
 
+/**
+ * Retire la syntaxe Markdown d'un texte lu tel quel.
+ *
+ * Le courriel n'interprète pas le Markdown : « ### Titre » et « **gras** » s'y
+ * affichent dièses et étoiles compris. Les descriptions concernées sont soit
+ * collées telles quelles par l'utilisateur, soit héritées d'une reformulation
+ * d'avant le 05/08/2026, quand le modèle en produisait encore.
+ */
+function sansMarkdown(texte: string): string {
+  return (texte ?? '')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s*([-*+]|\d+[.)])\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/^\s*>\s?/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 }
@@ -100,7 +120,7 @@ export function renderReportHtml(report: BrandReport): string {
   const ctx = report.context;
   const projet = ctx?.description
     ? `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Le projet</h2>
-       <p style="margin:0;padding-left:12px;border-left:3px solid #c9e9d8;font-size:14px;line-height:1.6;white-space:pre-line">${esc(ctx.description)}</p>`
+       <p style="margin:0;padding-left:12px;border-left:3px solid #c9e9d8;font-size:14px;line-height:1.6;white-space:pre-line">${esc(sansMarkdown(ctx.description))}</p>`
     : '';
   const cible = ctx?.audience?.length
     ? `<h2 style="font-size:15px;margin:24px 0 8px;color:#111827">Public cible</h2>
