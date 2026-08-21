@@ -23,6 +23,17 @@ export interface ContentSeo {
   /** `og:type` — 'website' pour l'accueil, 'article' (défaut) pour le contenu. */
   ogType?: 'website' | 'article';
   /**
+   * Page à NE PAS indexer.
+   *
+   * Pour un lien de partage, c'est la seule protection qui vaille : le jeton
+   * est secret par obscurité, mais rien n'empêche quelqu'un de coller l'URL sur
+   * un forum. `noindex` demande à Google de ne pas la référencer ; on ne la
+   * bloque PAS dans robots.txt, car une URL interdite au crawl peut malgré tout
+   * être indexée sur la foi d'un lien entrant — et l'instruction `noindex`, que
+   * le robot n'a alors pas le droit de lire, ne s'appliquerait jamais.
+   */
+  noindex?: boolean;
+  /**
    * Données structurées PROPRES À CETTE PAGE (schema.org), sérialisées dans un
    * `<script type="application/ld+json">`.
    *
@@ -56,6 +67,12 @@ export function applyContentSeo(seo: ContentSeo): void {
   meta.updateTag({ property: 'og:type', content: seo.ogType ?? 'article' });
   meta.updateTag({ name: 'twitter:title', content: fullTitle });
   meta.updateTag({ name: 'twitter:description', content: seo.description });
+
+  if (seo.noindex) {
+    meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
+  } else {
+    meta.removeTag('name="robots"');
+  }
 
   // Canonical : pas de service Angular dédié, on manipule le <head> via DOCUMENT.
   let link = doc.querySelector<HTMLLinkElement>('link[rel="canonical"]');

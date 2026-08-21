@@ -65,7 +65,12 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
               <div class="rv-section__head">
                 <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_PROJECT' | translate }}</h3>
               </div>
-              <p class="rv-quote">{{ ctx.description }}</p>
+              <!-- Nettoyée à l'AFFICHAGE, pas en base : la description peut
+                   contenir du Markdown, soit collé tel quel par l'utilisateur,
+                   soit hérité d'une reformulation d'avant le 05/08/2026, quand
+                   l'IA en produisait encore. Réécrire ce que quelqu'un a saisi
+                   serait pire que de l'afficher proprement. -->
+              <p class="rv-quote">{{ sansMarkdown(ctx.description) }}</p>
             </section>
           }
           @if (ctx.constraints?.length) {
@@ -293,6 +298,25 @@ export class BrandReportViewComponent {
   @Input() context: { description?: string; constraints?: { label: string; value: string }[] } | null = null;
 
   readonly INPI_DEPOSIT_URL = 'https://procedures.inpi.fr/?/marques/depot';
+  /**
+   * Retire la syntaxe Markdown d'un texte destiné à être lu tel quel.
+   *
+   * Le rapport n'interprète pas le Markdown — ce n'est pas un éditeur — donc
+   * « ### Titre » et « **gras** » s'y affichent en clair, dièses et étoiles
+   * compris. Les retirer rend le texte lisible sans rien réécrire à la source.
+   */
+  sansMarkdown(texte: string | undefined): string {
+    return (texte ?? '')
+      .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+      .replace(/^\s*([-*+]|\d+[.)])\s+/gm, '')
+      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+      .replace(/(\*|_)(.*?)\1/g, '$2')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^\s*>\s?/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
   heroFreeDomain(r: ReportLike): { extension: string; domain: string } | null {
     const free = r.domains.filter((d) => d.status === 'free');
     return free.find((d) => d.extension === 'com') ?? free[0] ?? null;

@@ -446,7 +446,9 @@
     "GENERATE": "Générer un rapport",
     "TITLE": "Rapport de disponibilité de marque",
     "CREATE_CTA": "Créez votre propre rapport →",
-    "OWN_CTA": "Vérifiez votre propre nom de marque →"
+    "OWN_CTA": "Vérifiez votre propre nom de marque →",
+    "OWN_TITLE": "Ce rapport porte sur le nom de quelqu'un d'autre",
+    "OWN_LEAD": "Vérifiez le vôtre : domaines, réseaux sociaux et marques déposées, en direct."
   },
   "HOME": {
     "HTML_LANG": "fr",

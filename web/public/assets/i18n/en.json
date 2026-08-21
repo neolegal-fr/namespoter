@@ -446,7 +446,9 @@
     "GENERATE": "Generate a report",
     "TITLE": "Brand availability report",
     "CREATE_CTA": "Create your own report →",
-    "OWN_CTA": "Check your own brand name →"
+    "OWN_CTA": "Check your own brand name →",
+    "OWN_TITLE": "This report is about someone else's name",
+    "OWN_LEAD": "Check yours: domains, social handles and registered trademarks, live."
   },
   "HOME": {
     "HTML_LANG": "en",
