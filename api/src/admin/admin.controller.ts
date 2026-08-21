@@ -28,8 +28,10 @@ export class AdminController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('search') search = '',
+    @Query('sort') sort = 'createdAt',
+    @Query('dir') dir = 'DESC',
   ) {
-    return this.adminService.getUsers(page, limit, search);
+    return this.adminService.getUsers(page, limit, search, sort, dir === 'ASC' ? 'ASC' : 'DESC');
   }
 
   @Patch('users/:id/credits')

@@ -51,11 +51,22 @@ export class AdminService {
 
   constructor(private http: HttpClient, private config: ConfigService) {}
 
-  getUsers(page: number, limit: number, search: string): Observable<{ data: AdminUser[]; total: number }> {
+  getUsers(
+    page: number,
+    limit: number,
+    search: string,
+    sort = 'createdAt',
+    dir: 'ASC' | 'DESC' = 'DESC',
+  ): Observable<{ data: AdminUser[]; total: number }> {
+    // Le tri est fait par le SERVEUR : la liste est paginée, trier les vingt
+    // lignes affichées donnerait « le plus récemment actif de cette page-ci »,
+    // ce qui n'est pas la question qu'on pose au tableau.
     const params = new HttpParams()
       .set('page', page)
       .set('limit', limit)
-      .set('search', search);
+      .set('search', search)
+      .set('sort', sort)
+      .set('dir', dir);
     return this.http.get<{ data: AdminUser[]; total: number }>(`${this.base}/users`, { params });
   }
 
