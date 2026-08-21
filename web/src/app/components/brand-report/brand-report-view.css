@@ -558,11 +558,38 @@
  * une demi-largeur. Le retrait de la carte tombe à 16 px, ce qui rend 20 px par
  * côté à ce qui se lit. */
 @media (max-width: 480px) {
+  /* Le rapport n'est plus une carte posée sur la page : il EST la page.
+   *
+   * Sur un téléphone, la carte ne montrait rien de plus qu'un cadre, et ce
+   * cadre coûtait deux bordures, deux rayons et surtout les retraits de tous
+   * ses ancêtres — le texte tenait sur les trois quarts de l'écran. La
+   * technique du « pleine largeur » (`width: 100vw` + marge négative calculée)
+   * fait sortir le bloc des retraits de TOUS ses parents, quels qu'ils soient :
+   * conteneur d'application, page publique ou page du wizard, sans avoir à
+   * connaître leur valeur.
+   */
+  .rv {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+
   .rv-head,
   .rv-section {
     padding-left: 16px;
     padding-right: 16px;
   }
+
+  /* Quand la rangée se replie, c'est le BOUTON qui descend, pas le verdict :
+     « namorama.fr » et « libre » forment une information, les séparer sur deux
+     lignes laissait un « libre » orphelin sous un bouton. L'ordre du gabarit
+     reste celui du grand écran ; seul l'affichage change ici. */
+  .rv-row__label { order: 1; }
+  .rv-row .rv-badge { order: 2; }
+  .rv-row app-reserver { order: 3; }
 
   /* La pastille de verdict est en `nowrap` : sur un écran étroit, « Aucun
      dépôt identique trouvé (INPI / EUIPO / OMPI) » dépassait sa rangée de 90 px
