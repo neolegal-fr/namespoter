@@ -74,12 +74,18 @@ export class ProjectsController {
     @Body() body: { email?: string; permission?: SharePermission; message?: string },
   ) {
     const user = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
-    const share = await this.sharesService.invite(id, user, keycloakUser.sub, {
+    const { share, courrielEnvoye } = await this.sharesService.invite(id, user, keycloakUser.sub, {
       email: body.email ?? '',
       permission: body.permission,
       message: body.message,
     });
-    return { id: share.id, email: share.email, permission: share.permission, message: share.message, createdAt: share.createdAt, acceptedAt: share.acceptedAt };
+    // `emailSent` remonte jusqu'à l'écran : l'accès est accordé dans les deux
+    // cas, mais « invitation envoyée » serait un mensonge si le courriel n'est
+    // pas parti, et le propriétaire n'aurait aucune raison de prévenir lui-même.
+    return {
+      id: share.id, email: share.email, permission: share.permission, message: share.message,
+      createdAt: share.createdAt, acceptedAt: share.acceptedAt, emailSent: courrielEnvoye,
+    };
   }
 
   @Delete(':id/shares/:shareId')

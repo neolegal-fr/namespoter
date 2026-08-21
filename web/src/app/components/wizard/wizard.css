@@ -963,16 +963,22 @@
     color: var(--nm-app-verdict-taken-fg);
 }
 
-/* Partager : une action de gestion, discrète comme la corbeille voisine. */
+/* Partager : une action de gestion, discrète comme la corbeille voisine — et
+   EXACTEMENT du même gabarit qu'elle.
+   `height: 34px` était le défaut : la rangée est en `align-items: stretch`, or
+   un élément qui porte une hauteur définie ne s'étire pas et se cale en haut.
+   L'icône de partage flottait donc au-dessus de la corbeille, qui, elle,
+   occupait toute la hauteur et centrait son glyphe. */
 .project-item__share {
     flex: none;
-    width: 34px;
-    height: 34px;
+    width: var(--nm-touch-min);
+    min-height: var(--nm-touch-min);
     border: 0;
     border-radius: var(--nm-radius-sm);
     background: none;
     color: var(--nm-app-text-3);
     cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
 }
 
 .project-item__share:hover {
@@ -1031,4 +1037,11 @@
     border-color: var(--nm-app-border);
     background: var(--nm-app-surface-alt);
     color: var(--nm-app-text-2);
+}
+
+/* Le courriel n'est pas parti : dit sur la ligne, pas seulement dans une
+   notification qui disparaît au bout de quelques secondes. */
+.partage__alerte {
+    color: var(--nm-app-verdict-taken-fg);
+    font-weight: 600;
 }

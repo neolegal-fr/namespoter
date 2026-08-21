@@ -47,7 +47,7 @@ export class ProjectSharesService {
     owner: User,
     ownerSub: string,
     data: { email: string; permission?: SharePermission; message?: string },
-  ): Promise<ProjectShare> {
+  ): Promise<{ share: ProjectShare; courrielEnvoye: boolean }> {
     const project = await this.projetDe(projectId, owner);
 
     const email = (data.email ?? '').trim().toLowerCase();
@@ -73,11 +73,36 @@ export class ProjectSharesService {
     // Le compte d'abord, le courriel ensuite : le nôtre invite à se connecter,
     // celui de Keycloak permet de choisir son mot de passe. Dans cet ordre,
     // l'invité trouve les deux dans sa boîte, et le second lui sert de porte.
-    const lien = `${this.origine()}/projects/${project.id}`;
-    const compte = await this.keycloak.ensureUser(email, `${this.origine()}/`);
-    await this.envoyerInvitation({ email, project, owner, permission, message, lien, compteCree: compte.creeMaintenant });
+    /*
+     * Le lien porte l'adresse invitée ET l'écran où l'envoyer : connexion si
+     * elle a déjà un compte, inscription sinon. L'invité n'a donc aucun choix à
+     * faire, et surtout aucun mot de passe à connaître — il le CHOISIT à
+     * l'inscription, comme n'importe quel nouvel utilisateur.
+     *
+     * On ne provisionne plus le compte : un compte créé d'office n'a pas de
+     * mot de passe, ce qui obligeait à faire transiter la porte d'entrée par un
+     * second courriel signé de Keycloak. Une invitation, un message, un écran.
+     */
+    const dejaInscrit = await this.keycloak.compteExiste(email);
+    const lien = `${this.origine()}/projects/${project.id}`
+      + `?invite=${encodeURIComponent(email)}${dejaInscrit ? '' : '&nouveau=1'}`;
+    const courrielEnvoye = await this.envoyerInvitation({
+      email, project, owner, permission, message, lien, dejaInscrit,
+    });
 
-    return share;
+    /*
+     * L'accès est accordé même si le courriel n'part pas — la ligne existe, la
+     * personne pourra ouvrir le projet dès qu'elle se connectera. Mais le
+     * propriétaire doit l'APPRENDRE : sans cela, il voit « invitation envoyée »,
+     * l'autre ne reçoit rien, et personne ne comprend pourquoi. C'est exactement
+     * ce qui s'est produit le 21/08/2026 en développement, une variable SMTP
+     * détournée suffisant à rendre la fonctionnalité muette.
+     */
+    if (!courrielEnvoye) {
+      this.logger.warn(`Invitation enregistrée mais courriel non envoyé à ${email} (projet ${project.id})`);
+    }
+
+    return { share, courrielEnvoye };
   }
 
   async revoke(projectId: string, owner: User, shareId: string): Promise<void> {
@@ -106,21 +131,26 @@ export class ProjectSharesService {
     permission: SharePermission;
     message: string | null;
     lien: string;
-    compteCree: boolean;
-  }): Promise<void> {
+    /** Cette adresse a-t-elle déjà un compte Namorama ? */
+    dejaInscrit: boolean;
+  }): Promise<boolean> {
     const qui = [p.owner.firstName, p.owner.lastName].filter(Boolean).join(' ') || p.owner.email || 'Un utilisateur de Namorama';
     const droit = p.permission === 'write'
       ? 'Vous pouvez consulter le projet et y lancer des recherches.'
       : 'Vous pouvez consulter le projet, sans le modifier.';
-    const compte = p.compteCree
-      ? '<p style="margin:0 0 12px">Un compte vient d\'être créé pour cette adresse. Un second courriel, envoyé par notre service d\'authentification, vous permet de choisir votre mot de passe.</p>'
-      : '<p style="margin:0 0 12px">Connectez-vous avec cette adresse pour y accéder.</p>';
+    /*
+     * Deux situations, deux consignes. L'invité ne sait pas s'il a un compte
+     * chez nous ; le message le lui dit, et le bouton l'amène sur le bon écran.
+     */
+    const compte = p.dejaInscrit
+      ? '<p style="margin:0 0 12px"><strong>Vous avez déjà un compte avec cette adresse</strong> — connectez-vous, il n\'y a rien à créer.</p>'
+      : `<p style="margin:0 0 12px">Vous n'avez pas encore de compte : le bouton ci-dessous ouvre la création, où vous choisirez votre mot de passe. <strong>Utilisez bien cette adresse (${escapeHtml(p.email)})</strong> — c'est elle qui porte l'accès au projet.</p>`;
 
     const mot = p.message
       ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #0d7a4e;background:#f4f7f5;color:#2c3532">${escapeHtml(p.message)}</blockquote>`
       : '';
 
-    await this.mail.send({
+    return this.mail.send({
       to: p.email,
       subject: `${qui} partage un projet Namorama avec vous`,
       html: `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0b0e10;max-width:560px">
@@ -128,7 +158,7 @@ export class ProjectSharesService {
   ${mot}
   <p style="margin:0 0 12px">${droit}</p>
   ${compte}
-  <p style="margin:20px 0"><a href="${p.lien}" style="display:inline-block;padding:12px 22px;border-radius:8px;background:#0d7a4e;color:#fff;text-decoration:none;font-weight:700">Ouvrir le projet</a></p>
+  <p style="margin:20px 0"><a href="${p.lien}" style="display:inline-block;padding:12px 22px;border-radius:8px;background:#0d7a4e;color:#fff;text-decoration:none;font-weight:700">${p.dejaInscrit ? 'Ouvrir le projet' : 'Créer mon compte et ouvrir le projet'}</a></p>
   <p style="margin:0;font-size:13px;color:#5c6663">Si vous ne savez pas pourquoi vous recevez ce message, ignorez-le : sans connexion, ce lien ne donne accès à rien.</p>
 </div>`,
     });

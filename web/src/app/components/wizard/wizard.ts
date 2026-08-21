@@ -1254,6 +1254,27 @@ export class WizardComponent implements OnInit, OnDestroy {
     // `verifier=1` : l'utilisateur vient de cliquer « vérifier marques et
     // réseaux » sur le rapport public. Enchaîner sur la popup lui évite de
     // rechercher le bouton sur une carte qu'il vient à peine de voir arriver.
+    /*
+     * Arrivée par un lien d'invitation : `?invite=<adresse>`, plus `&nouveau=1`
+     * si cette adresse n'avait pas encore de compte au moment de l'invitation.
+     *
+     * On envoie l'invité sur le bon écran, l'adresse pré-remplie : inscription
+     * s'il n'a pas de compte — il y CHOISIT son mot de passe, comme n'importe
+     * quel nouvel utilisateur — connexion sinon. Le laisser choisir lui-même
+     * entre les deux ne pouvait que mal finir : il ne sait pas s'il a un compte
+     * chez nous, et se tromper renvoie une erreur qui ressemble à un refus.
+     */
+    const invitation = this.route.snapshot.queryParamMap.get('invite');
+    if (invitation && !this.isLoggedIn()) {
+      const nouveau = this.route.snapshot.queryParamMap.get('nouveau') === '1';
+      this.keycloak.login({
+        loginHint: invitation,
+        ...(nouveau ? { action: 'register' } : {}),
+        redirectUri: window.location.href.split('?')[0],
+      });
+      return;
+    }
+
     this.verifierApresCreation = this.route.snapshot.queryParamMap.get('verifier') === '1';
     if (nomDemande) {
       this.location.replaceState(this.router.url.split('?')[0]);
@@ -1510,9 +1531,14 @@ export class WizardComponent implements OnInit, OnDestroy {
           this.partageEmail = '';
           this.partageMessage = '';
           this.partageEnvoi.set(false);
+          const parti = share.emailSent !== false;
           this.messageService.add({
-            severity: 'success',
-            summary: this.translate.instant('PROJECTS.SHARE_SENT', { email: share.email }),
+            severity: parti ? 'success' : 'warn',
+            life: parti ? 4000 : 12000,
+            summary: this.translate.instant(
+              parti ? 'PROJECTS.SHARE_SENT' : 'PROJECTS.SHARE_SENT_NO_MAIL',
+              { email: share.email },
+            ),
           });
           this.cdr.detectChanges();
         },

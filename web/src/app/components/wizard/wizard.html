@@ -747,6 +747,7 @@
           <span class="partage__etat">
             {{ (p.permission === 'write' ? 'PROJECTS.SHARE_PERM_WRITE' : 'PROJECTS.SHARE_PERM_READ') | translate }}
             · {{ (p.acceptedAt ? 'PROJECTS.SHARE_ACTIVE' : 'PROJECTS.SHARE_PENDING') | translate }}
+            <span *ngIf="p.emailSent === false" class="partage__alerte">· {{ 'PROJECTS.SHARE_NO_MAIL_TAG' | translate }}</span>
           </span>
         </span>
         <button type="button" class="partage__retirer" (click)="retirerPartage(p)"
