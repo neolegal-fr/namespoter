@@ -831,3 +831,204 @@
     font-size: var(--nm-text-ui-sm);
     color: var(--nm-app-text);
 }
+
+/* ─── Partage d'un projet ──────────────────────────────────────────────────
+   Un formulaire court : une adresse, un droit, un mot. Rien d'autre à décider,
+   parce qu'il n'y a rien d'autre à décider. */
+.partage {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+}
+
+.partage__label {
+    margin-top: 0.5rem;
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+    color: var(--nm-app-text);
+}
+
+.partage__input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-surface);
+    color: var(--nm-app-text);
+    font: inherit;
+    font-size: 16px; /* sous 16 px, iOS zoome à la mise au point */
+}
+
+.partage__hint {
+    margin: 0;
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+    line-height: 1.4;
+}
+
+/* Le droit se choisit sur une CARTE entière, pas sur un bouton radio de 16 px :
+   c'est la conséquence qu'on lit, pas la puce qu'on vise. */
+.partage__choix {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--nm-app-border);
+    border-radius: var(--nm-radius-sm);
+    cursor: pointer;
+}
+
+.partage__choix--on {
+    border-color: var(--nm-app-accent);
+    background: var(--nm-app-accent-surface);
+}
+
+.partage__choix > span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.partage__choix input {
+    margin-top: 0.2rem;
+    flex: none;
+}
+
+/* Qui paie : dit une fois, clairement, avant d'envoyer — pas découvert après. */
+.partage__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin: 0.6rem 0 0.2rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-surface-alt);
+    font-size: var(--nm-text-ui-sm);
+    color: var(--nm-app-text-2);
+    line-height: 1.45;
+}
+
+.partage__liste {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--nm-app-divider);
+    text-align: left;
+}
+
+.partage__liste-titre {
+    margin: 0 0 0.5rem;
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--nm-app-text-2);
+}
+
+.partage__ligne {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+}
+
+.partage__qui {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-size: var(--nm-text-ui-sm);
+    overflow-wrap: break-word;
+}
+
+.partage__etat {
+    font-size: var(--nm-text-overline-sm);
+    color: var(--nm-app-text-2);
+}
+
+.partage__retirer {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: none;
+    color: var(--nm-app-text-3);
+    cursor: pointer;
+}
+
+.partage__retirer:hover {
+    background: var(--nm-app-verdict-taken-bg);
+    color: var(--nm-app-verdict-taken-fg);
+}
+
+/* Partager : une action de gestion, discrète comme la corbeille voisine. */
+.project-item__share {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: var(--nm-radius-sm);
+    background: none;
+    color: var(--nm-app-text-3);
+    cursor: pointer;
+}
+
+.project-item__share:hover {
+    background: var(--nm-app-accent-surface);
+    color: var(--nm-app-accent);
+}
+
+/* ─── Projets reçus en partage ─────────────────────────────────────────── */
+.projects-shared {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--nm-app-divider);
+}
+
+.projects-shared__title {
+    margin: 0 0 0.5rem;
+    font-size: var(--nm-text-overline-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nm-app-text-2);
+}
+
+.project-item__tag {
+    margin-left: 0.4rem;
+    padding: 1px 6px;
+    border-radius: var(--nm-radius-xs);
+    background: var(--nm-app-badge-bg);
+    color: var(--nm-app-badge-fg);
+    font-size: var(--nm-text-overline-sm);
+    font-weight: 600;
+    text-transform: lowercase;
+    letter-spacing: 0;
+}
+
+/* Bandeau de projet partagé : une information, pas une alerte — d'où la
+   surface neutre. La version « lecture seule » explique une absence de
+   boutons ; la version « écriture » nomme qui paie. */
+.partage-bandeau {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    max-width: var(--nm-content-max);
+    margin: 0 auto 1rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--nm-app-accent-border);
+    border-radius: var(--nm-radius-sm);
+    background: var(--nm-app-accent-surface);
+    color: var(--nm-app-text);
+    font-size: var(--nm-text-ui-sm);
+    line-height: 1.45;
+    text-align: left;
+}
+
+.partage-bandeau--lecture {
+    border-color: var(--nm-app-border);
+    background: var(--nm-app-surface-alt);
+    color: var(--nm-app-text-2);
+}

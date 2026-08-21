@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Param, Body, Query, Logger, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ProjectsService } from '../projects/projects.service';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthenticatedUser, Public } from 'nest-keycloak-connect';
@@ -29,6 +30,7 @@ export class BrandReportController {
     private readonly usersService: UsersService,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly events: AppLoggerService,
+      private readonly projectsService: ProjectsService,
   ) {}
 
   /**
@@ -50,10 +52,32 @@ export class BrandReportController {
     return report;
   }
 
+
+  /**
+   * Le compte SOUS LEQUEL les rapports d'un projet sont rangés.
+   *
+   * Un rapport payé par le propriétaire d'un projet partagé doit être lisible
+   * par ses invités — c'est ce que « consulter le projet » promet. Le
+   * rapprochement passe par le projet, jamais par le nom seul : sans lui, il
+   * suffirait de deviner un nom pour lire le rapport d'un inconnu.
+   *
+   * Sans projet, ou sans droit dessus, on retombe sur le demandeur lui-même.
+   */
+  private async subDesRapports(projectId: string | undefined, sub: string): Promise<string> {
+    if (!projectId) return sub;
+    try {
+      const demandeur = await this.usersService.findOrCreate(sub);
+      const acces = await this.projectsService.accessFor(projectId, demandeur);
+      return acces?.owner?.keycloakId ?? sub;
+    } catch {
+      return sub;
+    }
+  }
+
   /** Noms pour lesquels ce compte a déjà un rapport (le front affiche « Voir le rapport »). */
   @Get('mine')
-  async mine(@AuthenticatedUser() keycloakUser: { sub: string }) {
-    return { names: await this.store.listNames(keycloakUser.sub) };
+  async mine(@AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string }, @Query('projectId') projectId?: string) {
+    return { names: await this.store.listNames(await this.subDesRapports(projectId, keycloakUser.sub)) };
   }
 
   /**
@@ -64,8 +88,8 @@ export class BrandReportController {
    * Uniquement des données acquises : un nom sans rapport n'a pas de synthèse.
    */
   @Get('summaries')
-  async summaries(@AuthenticatedUser() keycloakUser: { sub: string }) {
-    return { summaries: await this.store.listSummaries(keycloakUser.sub) };
+  async summaries(@AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string }, @Query('projectId') projectId?: string) {
+    return { summaries: await this.store.listSummaries(await this.subDesRapports(projectId, keycloakUser.sub)) };
   }
 
   /**
@@ -75,9 +99,10 @@ export class BrandReportController {
   @Get('existing')
   async existing(
     @Query('name') name: string,
-    @AuthenticatedUser() keycloakUser: { sub: string },
+    @AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string },
+    @Query('projectId') projectId?: string,
   ) {
-    const report = name ? await this.store.find(keycloakUser.sub, name) : null;
+    const report = name ? await this.store.find(await this.subDesRapports(projectId, keycloakUser.sub), name) : null;
     return report ? { exists: true, report } : { exists: false };
   }
 
@@ -101,7 +126,7 @@ export class BrandReportController {
   @Post('send')
   async send(
     @Body() dto: { name?: string; emails?: string[] },
-    @AuthenticatedUser() keycloakUser: { sub: string; email?: string },
+    @AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string },
   ) {
     const report = dto.name ? await this.store.find(keycloakUser.sub, dto.name) : null;
     if (!report) throw new NotFoundException('Aucun rapport pour ce nom');
@@ -115,10 +140,11 @@ export class BrandReportController {
   @Get('offer')
   async offer(
     @Query('name') name: string,
-    @AuthenticatedUser() keycloakUser: { sub: string },
+    @AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string },
+    @Query('projectId') projectId?: string,
   ) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
-    const purchased = name ? !!(await this.store.find(keycloakUser.sub, name)) : false;
+    const user = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
+    const purchased = name ? !!(await this.store.find(await this.subDesRapports(projectId, keycloakUser.sub), name)) : false;
     return {
       deepReport: {
         purchased,
@@ -139,7 +165,7 @@ export class BrandReportController {
   @Post()
   async full(
     @Body() dto: BrandReportRequestDto,
-    @AuthenticatedUser() keycloakUser: { sub: string; email?: string },
+    @AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string },
   ) {
     // Émis AVANT tout traitement : c'est la demande qui est comptée, pas son
     // issue. Sans cet événement, un rapport bloqué ou en échec n'apparaît nulle
@@ -152,7 +178,29 @@ export class BrandReportController {
       forced: !!dto.force,
     });
 
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const demandeur = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
+
+    /*
+     * Qui paie, et sous quel compte le rapport est rangé.
+     *
+     * Sur un projet PARTAGÉ en écriture, les deux sont le propriétaire du
+     * projet : c'est sa réserve qui finance, et c'est chez lui que le rapport
+     * doit apparaître — il l'a payé. Le collaborateur le voit par le projet.
+     *
+     * Sans projet, ou sur son propre projet, rien ne change : le demandeur est
+     * le payeur.
+     */
+    let user = demandeur;
+    let payeurSub = keycloakUser.sub;
+    if (dto.projectId) {
+      const acces = await this.projectsService.accessFor(dto.projectId, demandeur);
+      if (!acces) throw new NotFoundException('Projet non trouvé');
+      if (acces.role === 'read') throw new ForbiddenException('Ce projet vous est partagé en lecture seule');
+      if (acces.owner && acces.owner.keycloakId !== keycloakUser.sub) {
+        user = acces.owner;
+        payeurSub = acces.owner.keycloakId;
+      }
+    }
 
     // Déjà généré → on le renvoie tel quel, sans refacturer (sauf régénération forcée).
     // Protégé : un souci de cache ne doit jamais faire échouer la génération.
@@ -163,7 +211,7 @@ export class BrandReportController {
     // et non tarifaire.
     let isRefresh = false;
     if (dto.force) {
-      const existing = await this.store.find(keycloakUser.sub, dto.name).catch(() => null);
+      const existing = await this.store.find(payeurSub, dto.name).catch(() => null);
       if (existing) {
         isRefresh = true;
         const last = Date.parse(String(existing.generatedAt ?? ''));
@@ -178,7 +226,7 @@ export class BrandReportController {
 
     let cached: Awaited<ReturnType<typeof this.store.find>> = null;
     if (!dto.force) {
-      cached = await this.store.find(keycloakUser.sub, dto.name).catch((e) => {
+      cached = await this.store.find(payeurSub, dto.name).catch((e) => {
         this.logger.error('Lecture du cache de rapport échouée', e);
         return null;
       });
@@ -221,7 +269,7 @@ export class BrandReportController {
     let costCharged = isRefresh ? 0 : BRAND_REPORT_COST;
     if (!isRefresh) {
       await this.dataSource.transaction(async (manager) => {
-        const newTotal = await this.usersService.decrementCredits(keycloakUser.sub, BRAND_REPORT_COST, manager);
+        const newTotal = await this.usersService.decrementCredits(payeurSub, BRAND_REPORT_COST, manager);
         // -1 = crédits devenus insuffisants entre-temps : on annule (rollback).
         if (newTotal < 0) throw new ForbiddenException('Crédits insuffisants');
         remainingCredits = newTotal;
@@ -233,7 +281,7 @@ export class BrandReportController {
     // `undefined` sur un rafraîchissement : le coût d'origine reste en base,
     // sinon un rapport payé 50 crédits serait réécrit à 0 à la première mise
     // à jour, et les totaux par compte deviendraient faux.
-    await this.store.save(keycloakUser.sub, dto.name, report, isRefresh ? undefined : costCharged).catch((e) =>
+    await this.store.save(payeurSub, dto.name, report, isRefresh ? undefined : costCharged).catch((e) =>
       this.logger.error('Échec de la mémorisation du rapport', e),
     );
 

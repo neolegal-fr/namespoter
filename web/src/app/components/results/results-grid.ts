@@ -93,7 +93,7 @@ interface ExtVerdict {
               sur le nom, pas sur le rapport. Près du bouton d'achat, leur objet
               devenait ambigu.
             -->
-            <div class="rg-rate">
+            <div class="rg-rate" *ngIf="!readOnly()">
               <button type="button" class="rg-icon"
                       [class.rg-icon--on]="isLiked(d)"
                       [attr.aria-label]="'WIZARD.STEP3.RATE_LIKED' | translate"
@@ -148,7 +148,7 @@ interface ExtVerdict {
                      calcul reste à la demande (un appel au modèle par nom, sur
                      trente cartes, pour une donnée que personne ne lit
                      toujours), mais il s'annonce et se déclenche d'un clic. -->
-                <button type="button" class="rg-analyse" (click)="analyse.emit(d.id)">
+                <button type="button" class="rg-analyse" *ngIf="!readOnly()" (click)="analyse.emit(d.id)">
                   {{ 'WIZARD.STEP3.GRID_ANALYSE_NOW' | translate }}
                 </button>
               }
@@ -202,9 +202,9 @@ interface ExtVerdict {
               [attr.role]="!summaryOf(d) ? 'button' : null"
               [attr.tabindex]="!summaryOf(d) ? 0 : null"
               [attr.aria-label]="!summaryOf(d) ? (('WIZARD.STEP3.GRID_VERIFY' | translate) + ' — ' + d.name) : null"
-              (click)="!summaryOf(d) && verify.emit(d.name)"
-              (keydown.enter)="!summaryOf(d) && verify.emit(d.name)"
-              (keydown.space)="!summaryOf(d) && verify.emit(d.name)">
+              (click)="!summaryOf(d) && !readOnly() && verify.emit(d.name)"
+              (keydown.enter)="!summaryOf(d) && !readOnly() && verify.emit(d.name)"
+              (keydown.space)="!summaryOf(d) && !readOnly() && verify.emit(d.name)">
             <li class="rg-row">
               <span class="rg-row__label">{{ 'WIZARD.STEP3.GRID_TM_INPI' | translate }}</span>
               @if (summaryOf(d); as sum) {
@@ -273,7 +273,7 @@ interface ExtVerdict {
                    bouton « disabled » n'émet aucun événement de souris, donc son
                    infobulle ne s'affiche jamais — l'utilisateur voit une icône
                    grisée sans savoir pourquoi. -->
-              <span class="rg-refresh__wrap"
+              <span class="rg-refresh__wrap" *ngIf="!readOnly()"
                     [attr.title]="(checkTooRecent(d) ? 'WIZARD.STEP3.GRID_RECHECK_SOON' : 'WIZARD.STEP3.GRID_RECHECK_DOMAINS') | translate">
                 <button type="button" class="rg-refresh"
                         [disabled]="checkTooRecent(d)"
@@ -289,7 +289,7 @@ interface ExtVerdict {
                  disparaît, c'est l'ACTION D'ACHAT — elle n'a plus d'objet — et
                  non la ligne, dont la hauteur garde les cartes comparables. -->
             <div class="rg-actions__row">
-              @if (!summaryOf(d)) {
+              @if (!summaryOf(d) && !readOnly()) {
                 <button type="button" class="rg-btn rg-btn--buy" (click)="verify.emit(d.name)">
                   <i class="pi pi-search" aria-hidden="true"></i>
                   {{ 'WIZARD.STEP3.GRID_VERIFY_SHORT' | translate }}
@@ -320,6 +320,15 @@ export class ResultsGridComponent {
   /** Synthèses des noms vérifiés, indexées par nom normalisé. */
   readonly summaries = input<BrandReportSummary[]>([]);
   readonly reportCost = input(50);
+  /**
+   * Projet consulté en LECTURE SEULE : on masque ce qui écrit ou dépense.
+   *
+   * Le serveur refuse déjà ces gestes ; les proposer quand même reviendrait à
+   * promettre une action qui échouera. On garde tout ce qui se lit — verdicts,
+   * rapport déjà acheté — car c'est précisément ce qu'un partage en lecture
+   * donne le droit de voir.
+   */
+  readonly readOnly = input(false);
   readonly expandedAnalysisId = input<string | null>(null);
   readonly analysisRenderer = input<(a: string | null) => SafeHtml>(() => '' as unknown as SafeHtml);
 

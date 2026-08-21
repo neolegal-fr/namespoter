@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayMaxSize, MinLength, MaxLength, IsEmail, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, ArrayMaxSize, MinLength, MaxLength, IsEmail, IsBoolean, IsUUID } from 'class-validator';
 
 export class BrandReportRequestDto {
   @IsString()
@@ -20,6 +20,18 @@ export class BrandReportRequestDto {
   @ArrayMaxSize(5)
   @IsEmail({}, { each: true, message: 'Adresse email invalide' })
   emails?: string[];
+
+  /**
+   * Projet d'où part la demande, s'il y en a un.
+   *
+   * Sa seule raison d'être : un projet PARTAGÉ en écriture se paie sur la
+   * réserve de son propriétaire. Sans cet identifiant, le serveur ne peut pas
+   * savoir pour le compte de qui le collaborateur agit, et débiterait le
+   * mauvais compte.
+   */
+  @IsOptional()
+  @IsUUID()
+  projectId?: string;
 
   /** Forcer une régénération (ignore le cache et redébite). */
   @IsOptional()

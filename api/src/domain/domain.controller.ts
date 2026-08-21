@@ -65,7 +65,7 @@ export class DomainController {
     @Body('lang') lang: string | undefined,
     @AuthenticatedUser() keycloakUser: any,
   ) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const user = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
     const suggestion = await this.projectsService.getSuggestionForUser(suggestionId, user);
     if (!suggestion) throw new NotFoundException('Suggestion non trouvée');
 
@@ -101,16 +101,42 @@ export class DomainController {
     return { domains };
   }
 
+
+  /**
+   * Le compte sur lequel la recherche est facturée.
+   *
+   * Sur un projet PARTAGÉ en écriture, c'est son propriétaire : décision
+   * produit — le projet reste le sien, c'est sa réserve qui finance ce qu'on y
+   * lance. Le collaborateur agit, le propriétaire paie, et les suggestions
+   * rejoignent le projet de ce dernier.
+   *
+   * Partout ailleurs, le demandeur paie pour lui-même et rien ne change.
+   */
+  private async payeurDuProjet(projectId: string | undefined, demandeur: any) {
+    if (!projectId) return demandeur;
+    const acces = await this.projectsService.accessFor(projectId, demandeur);
+    if (!acces) throw new NotFoundException('Projet non trouvé');
+    if (acces.role === 'read') throw new ForbiddenException('Ce projet vous est partagé en lecture seule');
+    return acces.owner ?? demandeur;
+  }
+
   @Post('search/stream')
   async searchStream(
     @Body() dto: SearchDomainsDto,
     @AuthenticatedUser() keycloakUser: any,
     @Res() res: Response,
   ) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const demandeur = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
+    let user: typeof demandeur;
+    try {
+      user = await this.payeurDuProjet(dto.projectId, demandeur);
+    } catch (e: any) {
+      res.status(e?.getStatus?.() ?? 403).json({ message: e?.message ?? 'Accès refusé' });
+      return;
+    }
 
     if (user.totalCredits <= 0) {
-      this.events.event('search_blocked_no_credits', { userId: keycloakUser.sub });
+      this.events.event('search_blocked_no_credits', { userId: keycloakUser.sub, payeur: user.keycloakId });
       res.status(403).json({ message: 'Crédits insuffisants' });
       return;
     }
@@ -243,7 +269,8 @@ export class DomainController {
 
   @Post('search')
   async search(@Body() dto: SearchDomainsDto, @AuthenticatedUser() keycloakUser: any) {
-    const user = await this.usersService.findOrCreate(keycloakUser.sub);
+    const demandeur = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
+    const user = await this.payeurDuProjet(dto.projectId, demandeur);
 
     if (user.totalCredits <= 0) {
       throw new ForbiddenException('Crédits insuffisants');

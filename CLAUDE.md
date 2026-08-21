@@ -128,6 +128,37 @@ La disponibilité a **trois états** : libre, pris, et **non vérifiable** (`nul
 
 > Ne jamais faire retomber un doute sur `true` ou `false` : « pris » masque des noms libres, « libre » fait payer un crédit pour un domaine inachetable.
 
+## Partage d'un projet
+
+Un projet se partage **par adresse e-mail**, en lecture (défaut) ou en écriture,
+avec un mot d'accompagnement facultatif.
+
+- La cible est une **adresse**, pas un compte : on partage souvent avec quelqu'un
+  qui n'en a pas encore. L'API provisionne alors le compte Keycloak et déclenche
+  le courriel « définissez votre mot de passe ». Conséquence à connaître :
+  **changer l'adresse d'un compte lui fait perdre les partages reçus**.
+- **Les crédits sont toujours débités au propriétaire du projet**, y compris quand
+  c'est un collaborateur en écriture qui lance une recherche ou achète un rapport
+  (décision produit du 21/08/2026). Le rapport acheté est rangé sous le compte du
+  propriétaire — il l'a payé — et reste lisible par les invités *via le projet*.
+- Un rapport n'est jamais retrouvé par son nom seul : le rapprochement passe par
+  le `projectId`, sans quoi deviner un nom suffirait à lire le rapport d'un tiers.
+- L'interface masque en lecture seule ce que le serveur refuse déjà (notation,
+  réactualisation, achat) : proposer un bouton qui échouera est une façon de mentir.
+
+### Deux réglages Keycloak dont dépend l'invitation
+
+1. Le compte de service `namorama-api` doit porter les rôles `realm-management` →
+   `manage-users` et `view-users`. Sans eux, la création du compte d'un invité
+   échoue en silence — **et la suppression d'un compte utilisateur aussi**, ce qui
+   était déjà le cas avant cette fonctionnalité.
+2. Le realm doit avoir un **serveur SMTP**. C'est Keycloak qui envoie le lien
+   signé « définir mon mot de passe » ; nous ne pouvons pas le fabriquer. Sans
+   SMTP, l'invité reçoit notre courriel mais n'a aucun moyen d'entrer.
+
+Les deux figurent dans `infra/keycloak/realm-export.json` pour une installation
+neuve ; sur un realm déjà en place, ils se posent par l'API d'administration.
+
 ## Déploiement en production
 
 Le serveur de prod est accessible via SSH à `192.168.1.95` (user `nicolas`) **depuis le LAN uniquement**.

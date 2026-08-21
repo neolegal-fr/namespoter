@@ -27,7 +27,7 @@ import { SplitButton } from 'primeng/splitbutton';
 import { Toast } from 'primeng/toast';
 import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { UserService } from '../../services/user';
-import { ProjectService } from '../../services/project';
+import { ProjectService, ProjectShare, SharePermission } from '../../services/project';
 import { FeedbackService } from '../../services/feedback';
 import { AnalyticsService } from '../../services/analytics';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -341,6 +341,27 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   // Projets
   projectId = signal<string | null>(null);
+  /**
+   * Ce que j'ai le droit de faire sur le projet ouvert.
+   *
+   * `read` = projet reçu en partage, en lecture seule : on regarde, on ne
+   * touche pas. Le serveur refuse de toute façon, mais présenter des boutons
+   * qui échouent est une façon de mentir à l'utilisateur.
+   */
+  projectRole = signal<'owner' | 'write' | 'read'>('owner');
+
+  // ─── Partage d'un projet ──────────────────────────────────────────────────
+  readonly partageOuvert = signal(false);
+  readonly partageProjet = signal<{ id: string; name: string } | null>(null);
+  readonly partages = signal<ProjectShare[]>([]);
+  readonly partagePermission = signal<SharePermission>('read');
+  readonly partageEnvoi = signal(false);
+  partageEmail = '';
+  partageMessage = '';
+  readonly lectureSeule = computed(() => this.projectRole() === 'read');
+  readonly projetPartage = computed(() => this.projectRole() !== 'owner');
+  /** Adresse du propriétaire, pour nommer qui paie dans le bandeau. */
+  readonly proprietaireDuProjet = signal('');
   projectName = signal('');
   isEditingName = signal(false);
 
@@ -779,7 +800,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.forceRegen.set(false);
     this.brandReport.set(null);
     void this.loadReportOffer(name);
-    this.brandReportService.existing(name).subscribe({
+    this.brandReportService.existing(name, this.projectId()).subscribe({
       next: (res) => {
         if (res?.exists && res.report) {
           this.markReported(name);
@@ -855,7 +876,7 @@ export class WizardComponent implements OnInit, OnDestroy {
   /** Charge l'offre du serveur pour ce nom (prix, droit gratuit, solde). */
   private loadReportOffer(name: string): void {
     this.reportOffer.set(null);
-    this.brandReportService.offer(name).subscribe({
+    this.brandReportService.offer(name, this.projectId()).subscribe({
       next: (o) => this.reportOffer.set({
         priceCredits: o.deepReport.priceCredits,
         credits: o.account.credits,
@@ -870,7 +891,7 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.brandReport.set(null);
     this.isSampleReport.set(false);
     this.forceRegen.set(false);
-    this.brandReportService.existing(name).subscribe({
+    this.brandReportService.existing(name, this.projectId()).subscribe({
       next: (res) => {
         if (res?.exists && res.report) {
           this.markReported(name);
@@ -1004,6 +1025,8 @@ export class WizardComponent implements OnInit, OnDestroy {
     const ctx = this.reportContext();
     this.brandReportService
       .full(name, {
+        // Sur un projet partagé en écriture, c'est le propriétaire qui paie.
+        ...(this.projectId() ? { projectId: this.projectId()! } : {}),
         emails,
         force,
         // Les extensions DEMANDÉES, et non la liste par défaut du serveur : le
@@ -1087,7 +1110,7 @@ export class WizardComponent implements OnInit, OnDestroy {
   readonly reportSummaries = signal<BrandReportSummary[]>([]);
 
   private loadReportSummaries(): void {
-    this.brandReportService.summaries().subscribe({
+    this.brandReportService.summaries(this.projectId()).subscribe({
       next: (res) => this.reportSummaries.set(res.summaries ?? []),
       // Sans synthèse, les cartes restent à l'état non vérifié : dégradation
       // lisible, jamais un verdict inventé.
@@ -1101,7 +1124,7 @@ export class WizardComponent implements OnInit, OnDestroy {
    * déjà à jour.
    */
   refreshBrandReport(name: string): void {
-    this.brandReportService.full(name, { force: true }).subscribe({
+    this.brandReportService.full(name, { force: true, ...(this.projectId() ? { projectId: this.projectId()! } : {}) }).subscribe({
       next: () => this.loadReportSummaries(),
       error: () => this.messageService.add({
         severity: 'error',
@@ -1116,7 +1139,7 @@ export class WizardComponent implements OnInit, OnDestroy {
   }
   /** Charge la liste des noms déjà rapportés (silencieux si non authentifié). */
   loadReportedNames(): void {
-    this.brandReportService.mine().subscribe({
+    this.brandReportService.mine(this.projectId()).subscribe({
       next: (res) => {
         this.reportedNames.set(new Set((res.names ?? []).map((n) => this.normName(n))));
         this.loadReportSummaries();
@@ -1455,6 +1478,63 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.searchSub = null;
   }
 
+  /** Ouvre le panneau de partage d'un projet, et charge qui y a déjà accès. */
+  ouvrirPartage(event: Event, project: { id: string; name: string }): void {
+    event.stopPropagation();
+    this.partageProjet.set({ id: project.id, name: project.name });
+    this.partageEmail = '';
+    this.partageMessage = '';
+    this.partagePermission.set('read');
+    this.partages.set([]);
+    this.partageOuvert.set(true);
+    this.projectService.listShares(project.id).subscribe({
+      next: (liste) => { this.partages.set(liste); this.cdr.detectChanges(); },
+      error: () => this.partages.set([]),
+    });
+  }
+
+  envoyerInvitation(event: Event): void {
+    event.preventDefault();
+    const projet = this.partageProjet();
+    const email = (this.partageEmail ?? '').trim();
+    if (!projet || !email || this.partageEnvoi()) return;
+
+    this.partageEnvoi.set(true);
+    this.projectService
+      .invite(projet.id, { email, permission: this.partagePermission(), message: this.partageMessage })
+      .subscribe({
+        next: (share) => {
+          // Ré-inviter une adresse déjà présente met à jour son droit : on
+          // remplace la ligne plutôt que d'en ajouter une seconde.
+          this.partages.update((liste) => [share, ...liste.filter((p) => p.email !== share.email)]);
+          this.partageEmail = '';
+          this.partageMessage = '';
+          this.partageEnvoi.set(false);
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('PROJECTS.SHARE_SENT', { email: share.email }),
+          });
+          this.cdr.detectChanges();
+        },
+        error: (e) => {
+          this.partageEnvoi.set(false);
+          this.messageService.add({ severity: 'error', summary: e?.error?.message ?? 'Invitation impossible' });
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  retirerPartage(share: ProjectShare): void {
+    const projet = this.partageProjet();
+    if (!projet) return;
+    this.projectService.revokeShare(projet.id, share.id).subscribe({
+      next: () => {
+        this.partages.update((liste) => liste.filter((p) => p.id !== share.id));
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
   loadProject(id: string) {
     this.projectService.showDrawer.set(false);
     this.loading.set(true);
@@ -1463,6 +1543,13 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.projectService.getProject(id).subscribe({
       next: (project) => {
         this.projectId.set(project.id);
+        // Le rôle vient du serveur : c'est lui qui décide, l'interface ne fait
+        // que s'y conformer. Un projet à soi n'a pas de rôle transmis dans les
+        // anciennes réponses — d'où le défaut « owner ».
+        this.projectRole.set(project.role ?? 'owner');
+        this.proprietaireDuProjet.set(
+          this.projectService.sharedProjects().find((p) => p.id === project.id)?.ownerEmail ?? '',
+        );
         this.projectName.set(project.name);
         this.description.set(project.description);
         this.setKeywords(project.keywords);
@@ -1542,6 +1629,7 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   resetProject() {
     this.projectId.set(null);
+    this.projectRole.set('owner');
     this.projectName.set('');
     this.description.set('');
     this.refinedDescription.set('');
