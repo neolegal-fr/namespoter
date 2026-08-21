@@ -729,9 +729,9 @@ export class AppComponent implements OnInit {
   }
 
   login() {
-    // zh uses BCP47 zh-Hans to match Keycloak's base theme message file
-    const kcLocale = this.selectedLang === 'zh' ? 'zh-Hans' : this.selectedLang;
-    this.keycloak.login({ locale: kcLocale });
+    // Le produit ne sert que `fr` et `en` : plus de conversion BCP47 pour le
+    // chinois, dont le dictionnaire n'existe plus.
+    this.keycloak.login({ locale: this.selectedLang });
   }
 
   logout() {
