@@ -146,18 +146,26 @@ avec un mot d'accompagnement facultatif.
 - L'interface masque en lecture seule ce que le serveur refuse déjà (notation,
   réactualisation, achat) : proposer un bouton qui échouera est une façon de mentir.
 
-### Deux réglages Keycloak dont dépend l'invitation
+### L'invité choisit son mot de passe — on ne provisionne rien
 
-1. Le compte de service `namorama-api` doit porter les rôles `realm-management` →
-   `manage-users` et `view-users`. Sans eux, la création du compte d'un invité
-   échoue en silence — **et la suppression d'un compte utilisateur aussi**, ce qui
-   était déjà le cas avant cette fonctionnalité.
-2. Le realm doit avoir un **serveur SMTP**. C'est Keycloak qui envoie le lien
-   signé « définir mon mot de passe » ; nous ne pouvons pas le fabriquer. Sans
-   SMTP, l'invité reçoit notre courriel mais n'a aucun moyen d'entrer.
+Une invitation envoie **un seul courriel**, et son bouton mène à l'écran adapté,
+adresse pré-remplie : **inscription** si l'adresse n'a pas encore de compte,
+**connexion** sinon (`?invite=<adresse>[&nouveau=1]`).
 
-Les deux figurent dans `infra/keycloak/realm-export.json` pour une installation
-neuve ; sur un realm déjà en place, ils se posent par l'API d'administration.
+La première version créait le compte Keycloak d'office. C'était une erreur : un
+compte créé ainsi **n'a pas de mot de passe**, si bien que la porte d'entrée
+reposait sur un second courriel — celui de Keycloak, avec son lien signé. Deux
+messages pour une invitation, une dépendance au SMTP du realm, un compte
+fantôme par invitation sans suite, et surtout un invité qui tente de s'inscrire
+et s'entend répondre que son adresse est déjà prise.
+
+Il reste un appel à Keycloak, en lecture seule : savoir si le compte existe,
+pour choisir l'écran. Il demande le rôle `realm-management` → `view-users` sur
+le compte de service `namorama-api` ; `manage-users` reste nécessaire, mais pour
+la **suppression de compte**, qui la précède.
+
+> Le SMTP du realm reste utile en dehors du partage : sans lui, « mot de passe
+> oublié » échoue en silence pour tout le monde.
 
 ## Déploiement en production
 

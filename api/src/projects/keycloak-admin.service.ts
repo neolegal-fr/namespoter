@@ -2,18 +2,24 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Le strict nécessaire de l'API d'administration Keycloak : trouver un compte
- * par son adresse, en créer un, lui demander de choisir un mot de passe.
+ * Une seule question posée à Keycloak : ce compte existe-t-il déjà ?
  *
- * Pourquoi provisionner nous-mêmes plutôt que laisser l'invité s'inscrire :
- * une inscription libre crée un compte avec l'adresse que la personne veut,
- * qui n'est pas forcément celle du partage — et le partage se rattache à
- * l'ADRESSE. L'invité aurait alors un compte, mais pas le projet.
+ * NOUS NE CRÉONS PLUS LE COMPTE. C'était l'erreur de la première version : un
+ * compte créé d'office n'a pas de mot de passe, et son propriétaire ne peut
+ * donc pas entrer. Toute la porte reposait alors sur un SECOND courriel, celui
+ * de Keycloak, avec son lien signé — deux messages pour une invitation, une
+ * dépendance au SMTP du realm, et un compte fantôme dans l'annuaire pour chaque
+ * invitation restée sans suite. Sans compter le pire : l'invité qui tente de
+ * s'inscrire s'entend répondre que son adresse est déjà prise.
  *
- * Tout est best-effort et journalisé : un partage doit être enregistré même
- * si Keycloak est indisponible. L'invité recevra quand même le courriel, et
- * son compte sera créé à la première connexion — au pire il lui manquera
- * l'invitation à définir son mot de passe.
+ * Laisser Keycloak gérer l'inscription règle tout cela d'un coup : la personne
+ * choisit son mot de passe elle-même, en une fois, sur l'écran prévu pour ça.
+ * La réponse à cette question sert seulement à l'envoyer sur le bon écran —
+ * connexion si le compte existe, inscription sinon.
+ *
+ * Best-effort : si Keycloak ne répond pas, on suppose que le compte n'existe
+ * pas. Se tromper n'est pas grave — l'écran d'inscription propose « déjà un
+ * compte ? », et l'écran de connexion propose « créer un compte ».
  */
 @Injectable()
 export class KeycloakAdminService {
@@ -51,85 +57,21 @@ export class KeycloakAdminService {
     }
   }
 
-  /**
-   * S'assure qu'un compte existe pour cette adresse, et lui envoie de quoi
-   * choisir son mot de passe s'il vient d'être créé.
-   *
-   * Retourne `true` si l'invité a un compte utilisable à la sortie —
-   * l'information sert à adapter le courriel d'invitation : « connectez-vous »
-   * n'a pas le même sens selon qu'un compte attend ou non.
-   */
-  async ensureUser(
-    email: string,
-    redirectUri: string,
-  ): Promise<{ existait: boolean; creeMaintenant: boolean; courrielMotDePasse: boolean }> {
+  /** Ce compte existe-t-il déjà dans le realm ? */
+  async compteExiste(email: string): Promise<boolean> {
     const jeton = await this.token();
-    if (!jeton) return { existait: false, creeMaintenant: false, courrielMotDePasse: false };
-
-    const entetes = { Authorization: `Bearer ${jeton}`, 'Content-Type': 'application/json' };
-    const url = `${this.base}/admin/realms/${this.realm}/users`;
-
+    if (!jeton) return false;
     try {
-      const existants = await fetch(`${url}?email=${encodeURIComponent(email)}&exact=true`, { headers: entetes });
-      if (existants.ok) {
-        const liste = await existants.json();
-        if (Array.isArray(liste) && liste.length > 0) return { existait: true, creeMaintenant: false, courrielMotDePasse: false };
-      }
-
-      const creation = await fetch(url, {
-        method: 'POST',
-        headers: entetes,
-        body: JSON.stringify({
-          username: email,
-          email,
-          enabled: true,
-          // `false` : nous n'avons pas vérifié cette adresse, c'est le
-          // propriétaire du projet qui l'a saisie. Le courriel de définition du
-          // mot de passe fera la vérification, puisqu'il faut l'avoir reçu.
-          emailVerified: false,
-          requiredActions: ['UPDATE_PASSWORD', 'VERIFY_EMAIL'],
-        }),
-      });
-
-      if (!creation.ok) {
-        this.logger.warn(`Création du compte ${email} refusée par Keycloak (${creation.status})`);
-        return { existait: false, creeMaintenant: false, courrielMotDePasse: false };
-      }
-
-      const id = creation.headers.get('location')?.split('/').pop();
-      const courrielMotDePasse = id ? await this.envoyerActions(id, jeton, redirectUri) : false;
-      return { existait: false, creeMaintenant: true, courrielMotDePasse };
-    } catch (err) {
-      this.logger.warn(`Provisionnement du compte ${email} impossible : ${err}`);
-      return { existait: false, creeMaintenant: false, courrielMotDePasse: false };
-    }
-  }
-
-  /**
-   * Courriel Keycloak « définissez votre mot de passe ».
-   *
-   * C'est Keycloak qui l'envoie, avec son propre lien signé — nous ne pouvons
-   * pas le fabriquer. Il faut donc que le realm ait un serveur SMTP configuré ;
-   * sans lui, l'appel échoue et l'invité devra passer par « mot de passe
-   * oublié ». On le journalise plutôt que de le taire.
-   */
-  private async envoyerActions(userId: string, jeton: string, redirectUri: string): Promise<boolean> {
-    const clientId = this.config.get<string>('KEYCLOAK_PUBLIC_CLIENT_ID') ?? 'namorama-web';
-    const url = `${this.base}/admin/realms/${this.realm}/users/${userId}/execute-actions-email`
-      + `?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&lifespan=604800`;
-
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${jeton}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(['UPDATE_PASSWORD', 'VERIFY_EMAIL']),
-    });
-
-    if (!res.ok) {
-      this.logger.warn(
-        `Courriel « définir le mot de passe » non envoyé (${res.status}) — le realm a-t-il un serveur SMTP ? `
-        + `L'invité devra passer par « mot de passe oublié ».`,
+      const res = await fetch(
+        `${this.base}/admin/realms/${this.realm}/users?email=${encodeURIComponent(email)}&exact=true`,
+        { headers: { Authorization: `Bearer ${jeton}` } },
       );
+      if (!res.ok) return false;
+      const liste = await res.json();
+      return Array.isArray(liste) && liste.length > 0;
+    } catch (err) {
+      this.logger.warn(`Recherche du compte ${email} impossible : ${err}`);
+      return false;
     }
-    return res.ok;
   }
 }

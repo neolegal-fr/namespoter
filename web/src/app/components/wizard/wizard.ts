@@ -1255,17 +1255,23 @@ export class WizardComponent implements OnInit, OnDestroy {
     // réseaux » sur le rapport public. Enchaîner sur la popup lui évite de
     // rechercher le bouton sur une carte qu'il vient à peine de voir arriver.
     /*
-     * Arrivée par un lien d'invitation : `?invite=<adresse>`.
+     * Arrivée par un lien d'invitation : `?invite=<adresse>`, plus `&nouveau=1`
+     * si cette adresse n'avait pas encore de compte au moment de l'invitation.
      *
-     * On envoie directement à la CONNEXION, avec l'adresse pré-remplie, plutôt
-     * que de laisser l'invité choisir entre « se connecter » et « s'inscrire ».
-     * Son compte existe déjà — nous venons de le créer — donc l'inscription ne
-     * peut que lui répondre « cette adresse est déjà utilisée », ce qui ressemble
-     * à un refus alors que tout est prêt pour lui.
+     * On envoie l'invité sur le bon écran, l'adresse pré-remplie : inscription
+     * s'il n'a pas de compte — il y CHOISIT son mot de passe, comme n'importe
+     * quel nouvel utilisateur — connexion sinon. Le laisser choisir lui-même
+     * entre les deux ne pouvait que mal finir : il ne sait pas s'il a un compte
+     * chez nous, et se tromper renvoie une erreur qui ressemble à un refus.
      */
     const invitation = this.route.snapshot.queryParamMap.get('invite');
     if (invitation && !this.isLoggedIn()) {
-      this.keycloak.login({ loginHint: invitation, redirectUri: window.location.href.split('?')[0] });
+      const nouveau = this.route.snapshot.queryParamMap.get('nouveau') === '1';
+      this.keycloak.login({
+        loginHint: invitation,
+        ...(nouveau ? { action: 'register' } : {}),
+        redirectUri: window.location.href.split('?')[0],
+      });
       return;
     }
 
