@@ -22,6 +22,16 @@ export interface ContentSeo {
   lang?: string;
   /** `og:type` — 'website' pour l'accueil, 'article' (défaut) pour le contenu. */
   ogType?: 'website' | 'article';
+  /**
+   * Données structurées PROPRES À CETTE PAGE (schema.org), sérialisées dans un
+   * `<script type="application/ld+json">`.
+   *
+   * À réserver à ce que la page montre vraiment : un balisage `FAQPage` sur
+   * une page sans FAQ visible contrevient aux règles de Google et expose à ce
+   * que l'ensemble des données structurées du site soit ignoré. Le balisage
+   * d'identité du site (`WebApplication`) reste, lui, dans `index.html`.
+   */
+  jsonLd?: unknown;
 }
 
 /**
@@ -76,5 +86,16 @@ export function applyContentSeo(seo: ContentSeo): void {
     for (const [lang, path] of Object.entries(seo.alternates)) add(lang, path);
     // x-default : la version française, racine du site.
     if (seo.alternates['fr']) add('x-default', seo.alternates['fr']);
+  }
+
+  // Données structurées de la page. Comme les hreflang, on retire d'abord
+  // celles de la route précédente : le <head> survit à la navigation.
+  doc.querySelectorAll('script[data-page-schema]').forEach((s) => s.remove());
+  if (seo.jsonLd) {
+    const script = doc.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    script.setAttribute('data-page-schema', '');
+    script.textContent = JSON.stringify(seo.jsonLd);
+    doc.head.appendChild(script);
   }
 }
