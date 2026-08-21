@@ -97,7 +97,9 @@
     "SHARED_BY": "Shared by {{email}}",
     "READ_ONLY": "view only",
     "READ_ONLY_BANNER": "This project is shared with you in view-only mode. You can read everything, change nothing.",
-    "WRITE_BANNER": "This project is shared with you: what you spend here is charged to {{email}}."
+    "WRITE_BANNER": "This project is shared with you: what you spend here is charged to {{email}}.",
+    "SHARE_SENT_NO_MAIL": "Access granted to {{email}}, but the invitation could not be sent. Tell them yourself: the project is waiting once they sign in.",
+    "SHARE_NO_MAIL_TAG": "email not sent"
   },
   "BILLING": {
     "TITLE": "Credits",

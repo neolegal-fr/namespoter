@@ -1510,9 +1510,14 @@ export class WizardComponent implements OnInit, OnDestroy {
           this.partageEmail = '';
           this.partageMessage = '';
           this.partageEnvoi.set(false);
+          const parti = share.emailSent !== false;
           this.messageService.add({
-            severity: 'success',
-            summary: this.translate.instant('PROJECTS.SHARE_SENT', { email: share.email }),
+            severity: parti ? 'success' : 'warn',
+            life: parti ? 4000 : 12000,
+            summary: this.translate.instant(
+              parti ? 'PROJECTS.SHARE_SENT' : 'PROJECTS.SHARE_SENT_NO_MAIL',
+              { email: share.email },
+            ),
           });
           this.cdr.detectChanges();
         },

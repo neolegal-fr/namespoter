@@ -24,6 +24,14 @@ export interface ProjectShare {
   createdAt: string;
   /** Nul tant que l'invité n'a pas ouvert le projet : invitation partie ≠ reçue. */
   acceptedAt: string | null;
+  /**
+   * Le courriel d'invitation est-il RÉELLEMENT parti ?
+   *
+   * L'accès est accordé dans les deux cas. Mais annoncer « invitation
+   * envoyée » quand le serveur de messagerie a refusé laisse le propriétaire
+   * attendre une réponse qui ne viendra pas.
+   */
+  emailSent?: boolean;
 }
 
 @Injectable({

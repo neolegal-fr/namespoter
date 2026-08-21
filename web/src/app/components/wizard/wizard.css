@@ -1038,3 +1038,10 @@
     background: var(--nm-app-surface-alt);
     color: var(--nm-app-text-2);
 }
+
+/* Le courriel n'est pas parti : dit sur la ligne, pas seulement dans une
+   notification qui disparaît au bout de quelques secondes. */
+.partage__alerte {
+    color: var(--nm-app-verdict-taken-fg);
+    font-weight: 600;
+}

@@ -97,7 +97,9 @@
     "SHARED_BY": "Partagé par {{email}}",
     "READ_ONLY": "lecture seule",
     "READ_ONLY_BANNER": "Ce projet vous est partagé en lecture seule. Vous pouvez tout consulter, rien modifier.",
-    "WRITE_BANNER": "Ce projet vous est partagé : ce que vous y dépensez est débité du compte de {{email}}."
+    "WRITE_BANNER": "Ce projet vous est partagé : ce que vous y dépensez est débité du compte de {{email}}.",
+    "SHARE_SENT_NO_MAIL": "Accès accordé à {{email}}, mais l'invitation n'a pas pu être envoyée. Prévenez la personne : le projet l'attend dès sa connexion.",
+    "SHARE_NO_MAIL_TAG": "courriel non parti"
   },
   "BILLING": {
     "TITLE": "Crédits",

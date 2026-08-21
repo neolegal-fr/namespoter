@@ -47,7 +47,7 @@ export class ProjectSharesService {
     owner: User,
     ownerSub: string,
     data: { email: string; permission?: SharePermission; message?: string },
-  ): Promise<ProjectShare> {
+  ): Promise<{ share: ProjectShare; courrielEnvoye: boolean }> {
     const project = await this.projetDe(projectId, owner);
 
     const email = (data.email ?? '').trim().toLowerCase();
@@ -75,9 +75,23 @@ export class ProjectSharesService {
     // l'invité trouve les deux dans sa boîte, et le second lui sert de porte.
     const lien = `${this.origine()}/projects/${project.id}`;
     const compte = await this.keycloak.ensureUser(email, `${this.origine()}/`);
-    await this.envoyerInvitation({ email, project, owner, permission, message, lien, compteCree: compte.creeMaintenant });
+    const courrielEnvoye = await this.envoyerInvitation({
+      email, project, owner, permission, message, lien, compteCree: compte.creeMaintenant,
+    });
 
-    return share;
+    /*
+     * L'accès est accordé même si le courriel n'part pas — la ligne existe, la
+     * personne pourra ouvrir le projet dès qu'elle se connectera. Mais le
+     * propriétaire doit l'APPRENDRE : sans cela, il voit « invitation envoyée »,
+     * l'autre ne reçoit rien, et personne ne comprend pourquoi. C'est exactement
+     * ce qui s'est produit le 21/08/2026 en développement, une variable SMTP
+     * détournée suffisant à rendre la fonctionnalité muette.
+     */
+    if (!courrielEnvoye) {
+      this.logger.warn(`Invitation enregistrée mais courriel non envoyé à ${email} (projet ${project.id})`);
+    }
+
+    return { share, courrielEnvoye };
   }
 
   async revoke(projectId: string, owner: User, shareId: string): Promise<void> {
@@ -107,7 +121,7 @@ export class ProjectSharesService {
     message: string | null;
     lien: string;
     compteCree: boolean;
-  }): Promise<void> {
+  }): Promise<boolean> {
     const qui = [p.owner.firstName, p.owner.lastName].filter(Boolean).join(' ') || p.owner.email || 'Un utilisateur de Namorama';
     const droit = p.permission === 'write'
       ? 'Vous pouvez consulter le projet et y lancer des recherches.'
@@ -120,7 +134,7 @@ export class ProjectSharesService {
       ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #0d7a4e;background:#f4f7f5;color:#2c3532">${escapeHtml(p.message)}</blockquote>`
       : '';
 
-    await this.mail.send({
+    return this.mail.send({
       to: p.email,
       subject: `${qui} partage un projet Namorama avec vous`,
       html: `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0b0e10;max-width:560px">
