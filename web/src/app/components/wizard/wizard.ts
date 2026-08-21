@@ -1254,6 +1254,21 @@ export class WizardComponent implements OnInit, OnDestroy {
     // `verifier=1` : l'utilisateur vient de cliquer « vérifier marques et
     // réseaux » sur le rapport public. Enchaîner sur la popup lui évite de
     // rechercher le bouton sur une carte qu'il vient à peine de voir arriver.
+    /*
+     * Arrivée par un lien d'invitation : `?invite=<adresse>`.
+     *
+     * On envoie directement à la CONNEXION, avec l'adresse pré-remplie, plutôt
+     * que de laisser l'invité choisir entre « se connecter » et « s'inscrire ».
+     * Son compte existe déjà — nous venons de le créer — donc l'inscription ne
+     * peut que lui répondre « cette adresse est déjà utilisée », ce qui ressemble
+     * à un refus alors que tout est prêt pour lui.
+     */
+    const invitation = this.route.snapshot.queryParamMap.get('invite');
+    if (invitation && !this.isLoggedIn()) {
+      this.keycloak.login({ loginHint: invitation, redirectUri: window.location.href.split('?')[0] });
+      return;
+    }
+
     this.verifierApresCreation = this.route.snapshot.queryParamMap.get('verifier') === '1';
     if (nomDemande) {
       this.location.replaceState(this.router.url.split('?')[0]);

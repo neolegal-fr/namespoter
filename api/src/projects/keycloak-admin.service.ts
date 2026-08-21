@@ -59,9 +59,12 @@ export class KeycloakAdminService {
    * l'information sert à adapter le courriel d'invitation : « connectez-vous »
    * n'a pas le même sens selon qu'un compte attend ou non.
    */
-  async ensureUser(email: string, redirectUri: string): Promise<{ existait: boolean; creeMaintenant: boolean }> {
+  async ensureUser(
+    email: string,
+    redirectUri: string,
+  ): Promise<{ existait: boolean; creeMaintenant: boolean; courrielMotDePasse: boolean }> {
     const jeton = await this.token();
-    if (!jeton) return { existait: false, creeMaintenant: false };
+    if (!jeton) return { existait: false, creeMaintenant: false, courrielMotDePasse: false };
 
     const entetes = { Authorization: `Bearer ${jeton}`, 'Content-Type': 'application/json' };
     const url = `${this.base}/admin/realms/${this.realm}/users`;
@@ -70,7 +73,7 @@ export class KeycloakAdminService {
       const existants = await fetch(`${url}?email=${encodeURIComponent(email)}&exact=true`, { headers: entetes });
       if (existants.ok) {
         const liste = await existants.json();
-        if (Array.isArray(liste) && liste.length > 0) return { existait: true, creeMaintenant: false };
+        if (Array.isArray(liste) && liste.length > 0) return { existait: true, creeMaintenant: false, courrielMotDePasse: false };
       }
 
       const creation = await fetch(url, {
@@ -90,15 +93,15 @@ export class KeycloakAdminService {
 
       if (!creation.ok) {
         this.logger.warn(`Création du compte ${email} refusée par Keycloak (${creation.status})`);
-        return { existait: false, creeMaintenant: false };
+        return { existait: false, creeMaintenant: false, courrielMotDePasse: false };
       }
 
       const id = creation.headers.get('location')?.split('/').pop();
-      if (id) await this.envoyerActions(id, jeton, redirectUri);
-      return { existait: false, creeMaintenant: true };
+      const courrielMotDePasse = id ? await this.envoyerActions(id, jeton, redirectUri) : false;
+      return { existait: false, creeMaintenant: true, courrielMotDePasse };
     } catch (err) {
       this.logger.warn(`Provisionnement du compte ${email} impossible : ${err}`);
-      return { existait: false, creeMaintenant: false };
+      return { existait: false, creeMaintenant: false, courrielMotDePasse: false };
     }
   }
 
@@ -110,7 +113,7 @@ export class KeycloakAdminService {
    * sans lui, l'appel échoue et l'invité devra passer par « mot de passe
    * oublié ». On le journalise plutôt que de le taire.
    */
-  private async envoyerActions(userId: string, jeton: string, redirectUri: string): Promise<void> {
+  private async envoyerActions(userId: string, jeton: string, redirectUri: string): Promise<boolean> {
     const clientId = this.config.get<string>('KEYCLOAK_PUBLIC_CLIENT_ID') ?? 'namorama-web';
     const url = `${this.base}/admin/realms/${this.realm}/users/${userId}/execute-actions-email`
       + `?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&lifespan=604800`;
@@ -127,5 +130,6 @@ export class KeycloakAdminService {
         + `L'invité devra passer par « mot de passe oublié ».`,
       );
     }
+    return res.ok;
   }
 }

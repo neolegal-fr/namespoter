@@ -73,10 +73,20 @@ export class ProjectSharesService {
     // Le compte d'abord, le courriel ensuite : le nôtre invite à se connecter,
     // celui de Keycloak permet de choisir son mot de passe. Dans cet ordre,
     // l'invité trouve les deux dans sa boîte, et le second lui sert de porte.
-    const lien = `${this.origine()}/projects/${project.id}`;
+    /*
+     * Le lien porte l'adresse invitée : à l'ouverture, l'application envoie
+     * droit à la CONNEXION avec ce compte pré-rempli, au lieu de laisser
+     * choisir entre « se connecter » et « s'inscrire ». Le compte existe déjà —
+     * nous venons de le créer — donc l'inscription ne peut que répondre « cette
+     * adresse est déjà utilisée », ce qui se lit comme un refus alors que tout
+     * est prêt.
+     */
+    const lien = `${this.origine()}/projects/${project.id}?invite=${encodeURIComponent(email)}`;
     const compte = await this.keycloak.ensureUser(email, `${this.origine()}/`);
     const courrielEnvoye = await this.envoyerInvitation({
-      email, project, owner, permission, message, lien, compteCree: compte.creeMaintenant,
+      email, project, owner, permission, message, lien,
+      compteCree: compte.creeMaintenant,
+      motDePasseAEnvoyer: compte.courrielMotDePasse,
     });
 
     /*
@@ -121,14 +131,23 @@ export class ProjectSharesService {
     message: string | null;
     lien: string;
     compteCree: boolean;
+    /** Le courriel Keycloak « choisissez votre mot de passe » est-il parti ? */
+    motDePasseAEnvoyer: boolean;
   }): Promise<boolean> {
     const qui = [p.owner.firstName, p.owner.lastName].filter(Boolean).join(' ') || p.owner.email || 'Un utilisateur de Namorama';
     const droit = p.permission === 'write'
       ? 'Vous pouvez consulter le projet et y lancer des recherches.'
       : 'Vous pouvez consulter le projet, sans le modifier.';
-    const compte = p.compteCree
-      ? '<p style="margin:0 0 12px">Un compte vient d\'être créé pour cette adresse. Un second courriel, envoyé par notre service d\'authentification, vous permet de choisir votre mot de passe.</p>'
-      : '<p style="margin:0 0 12px">Connectez-vous avec cette adresse pour y accéder.</p>';
+    /*
+     * Trois situations, trois consignes — parce que « connectez-vous » ne veut
+     * pas dire la même chose selon qu'un mot de passe existe ou non, et que
+     * l'invité, lui, ne peut pas le deviner.
+     */
+    const compte = p.compteCree && p.motDePasseAEnvoyer
+      ? '<p style="margin:0 0 12px"><strong>Commencez par le message suivant.</strong> Un compte vient d\'être créé pour cette adresse : un second courriel, envoyé par notre service d\'authentification, contient votre lien pour choisir un mot de passe. Une fois choisi, revenez ici.</p>'
+      : p.compteCree
+        ? '<p style="margin:0 0 12px">Un compte vient d\'être créé pour cette adresse, mais nous n\'avons pas pu vous envoyer le lien de définition du mot de passe. Sur l\'écran de connexion, choisissez <strong>« Mot de passe oublié ? »</strong> pour en recevoir un.</p>'
+        : '<p style="margin:0 0 12px"><strong>Vous avez déjà un compte avec cette adresse</strong> — connectez-vous, il n\'y a rien à créer. Le bouton ci-dessous vous amène directement à la page de connexion, l\'adresse déjà remplie.</p>';
 
     const mot = p.message
       ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #0d7a4e;background:#f4f7f5;color:#2c3532">${escapeHtml(p.message)}</blockquote>`
