@@ -6,6 +6,15 @@
     padding: 1.5rem 1rem 3rem;
 }
 
+/* Le conteneur d'application pose déjà 12 px de chaque côté ; en ajouter 16
+   revenait à border un rapport de 28 px avant même la carte. */
+@media (max-width: 480px) {
+    .rp {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
 .rp-form {
     display: flex;
     flex-wrap: wrap;
