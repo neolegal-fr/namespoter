@@ -105,10 +105,26 @@ Ce qui subsiste et reste utile :
 
 La disponibilité a **trois états** : libre, pris, et **non vérifiable** (`null`). Le troisième n'est pas un raffinement : sans lui, une panne de registre se déguise en verdict — c'est ainsi que `.app` a été déclaré pris pendant des semaines (serveur port 43 retiré), et que `.de`, `.it`, `.ch`, `.nl` ont été déclarés libres alors qu'ils étaient pris (aucun motif reconnu ⇒ ancien repli « libre »).
 
-- **RDAP** (`RdapService`) est la source primaire : le verdict est un code HTTP — **404 = libre, 200 = pris** — au lieu d'un texte à interpréter registre par registre. Serveur découvert via l'annuaire IANA (`data.iana.org/rdap/dns.json`), mis en cache 24 h, rechargement retenté au plus une fois par minute en cas de panne.
+- **Pré-filtre DNS** avant tout appel de registre : un domaine qui a des serveurs de
+  noms est enregistré — la délégation vient de la zone du registre, on n'y figure pas
+  autrement. Verdict en ~20 ms au lieu de 300 à 1 300. La réciproque est fausse (un
+  domaine déposé mais non configuré n'a pas de NS), donc l'absence de délégation ne
+  conclut rien et retourne au registre : **le pré-filtre ne produit jamais un
+  « libre »**. Un nom témoin aléatoire est testé une fois par extension : si le registre
+  y répond (joker de zone), le pré-filtre est désactivé pour cette extension, sans quoi
+  tout y paraîtrait pris. `search_completed` porte `viaDns` / `viaRegistre` — s'il tombe
+  à zéro sur une extension, c'est que le registre a changé de comportement.
+- **RDAP** (`RdapService`) est la source primaire des appels restants : le verdict est un code HTTP — **404 = libre, 200 = pris** — au lieu d'un texte à interpréter registre par registre. Serveur découvert via l'annuaire IANA (`data.iana.org/rdap/dns.json`), mis en cache 24 h, rechargement retenté au plus une fois par minute en cas de panne.
 - **WHOIS** reste le repli pour les TLD sans serveur RDAP déclaré — les ccTLD n'y sont pas obligés (`.de`, `.it`, `.be`, `.at`, `.io`, `.co`, `.jp`…). `readWhois()` normalise les alignements (espaces, tabulations, points de conduite) avant de chercher les motifs.
 - Ce qu'aucune des deux sources ne couvre reste `null` : `.es` (aucun serveur WHOIS), `.ch` (le registre refuse nos requêtes), et ponctuellement `.nl`/`.hu`/`.shop` (quota dépassé). L'interface affiche « ? », et `search_completed` porte un décompte `unresolved` par extension.
 - Le mode « toutes les extensions » ne porte que sur celles réellement vérifiées : un registre en panne ne doit pas vider une recherche.
+
+> **Le RDAP de l'AFNIC ralentit avec le volume** : mesuré depuis la production, 12
+> domaines `.fr` à quatre requêtes parallèles passent de 1,2 s au premier essai à 15,6 s
+> au troisième, son limiteur se refermant au fil des requêtes. C'est ce qui rend le coût
+> d'une recherche superlinéaire — 30 candidats en 21 s, 161 en 193 s. Le WHOIS de
+> l'AFNIC, lui, reste stable à ~290 ms par domaine, et le DNS répond en 20 ms. Toute
+> optimisation de la durée d'une recherche commence par là.
 
 > Ne jamais faire retomber un doute sur `true` ou `false` : « pris » masque des noms libres, « libre » fait payer un crédit pour un domaine inachetable.
 
