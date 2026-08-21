@@ -138,7 +138,7 @@ export class DomainController {
     });
 
     try {
-      const { totalChecked, minLengthUsed, unresolved } = await this.domainService.findAvailableDomains(
+      const { totalChecked, minLengthUsed, unresolved, sources } = await this.domainService.findAvailableDomains(
         dto.description,
         dto.keywords,
         {
@@ -207,6 +207,11 @@ export class DomainController {
           // accompagné d'un compteur élevé désigne une panne de WHOIS, pas
           // un marché saturé — c'est toute la différence.
           unresolved,
+          // Part des verdicts rendus par la délégation DNS, sans interroger le
+          // registre. C'est la mesure du pré-filtre : s'il tombe à zéro sur une
+          // extension, c'est que le registre a changé de comportement.
+          viaDns: sources.dns,
+          viaRegistre: sources.registre,
         });
 
         emit({

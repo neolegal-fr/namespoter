@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { Resolver } from 'node:dns/promises';
 import { MatchMode } from './dto/search-domains.dto';
 import { RdapService } from './rdap.service';
 
@@ -31,6 +32,23 @@ const CANDIDATE_CONCURRENCY = 6;
  * requêtes au lieu de les étaler.
  */
 const PER_REGISTRY_CONCURRENCY = 4;
+
+/**
+ * Pré-filtre DNS : au-delà, on n'attend plus la résolution.
+ *
+ * Le pré-filtre n'a d'intérêt que s'il est PLUS RAPIDE que le registre. Un
+ * résolveur qui traîne doit donc être abandonné, pas attendu : le registre
+ * tranchera, comme avant.
+ */
+const DNS_TIMEOUT_MS = 1500;
+
+/** D'où vient chaque verdict d'une recherche : mesure du pré-filtre DNS. */
+export interface SourcesVerdict {
+  /** Tranchés par la délégation DNS, sans toucher au registre. */
+  dns: number;
+  /** Soumis au registre (RDAP, puis WHOIS en repli). */
+  registre: number;
+}
 
 const DOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9-]{1,61})+$/;
 
@@ -123,6 +141,16 @@ export class DomainService {
   private openai: OpenAI;
   /** Une file d'attente par registre, cf. PER_REGISTRY_CONCURRENCY. */
   private readonly registryGates = new Map<string, { active: number; queue: (() => void)[] }>();
+
+  /**
+   * Résolveur dédié, avec un délai court et sans reprise : voir DNS_TIMEOUT_MS.
+   * Le résolveur global de Node attend 5 secondes et réessaie quatre fois —
+   * de quoi rendre le pré-filtre plus lent que ce qu'il évite.
+   */
+  private readonly dnsResolver = new Resolver({ timeout: DNS_TIMEOUT_MS, tries: 1 });
+
+  /** Par TLD : le pré-filtre DNS y est-il utilisable ? Voir `prefiltreUtilisable`. */
+  private readonly dnsUtilisable = new Map<string, Promise<boolean>>();
 
   /** Modèle par défaut pour les tâches simples/rapides (reformulation, mots-clés…). */
   private readonly model: string;
@@ -720,10 +748,76 @@ ${langInstruction}`;
    *
    * Un doute doit rester visible plutôt que de se déguiser en réponse.
    */
-  async isDomainAvailable(domain: string): Promise<boolean | null> {
+  async isDomainAvailable(domain: string, compteur?: SourcesVerdict): Promise<boolean | null> {
     validateDomain(domain);
     const tld = domain.slice(domain.lastIndexOf('.') + 1);
+
+    if (await this.deleguéDansLeDns(domain, tld)) {
+      if (compteur) compteur.dns++;
+      return false;
+    }
+
+    if (compteur) compteur.registre++;
     return this.withRegistryGate(tld, () => this.probe(domain));
+  }
+
+  /**
+   * Pré-filtre : ce domaine a-t-il des serveurs de noms ?
+   *
+   * Un domaine délégué EST enregistré — la délégation vient de la zone du
+   * registre, il n'y a pas d'autre façon d'y figurer. La réciproque est fausse
+   * (un domaine déposé sans être configuré n'a pas de NS), donc l'absence de
+   * délégation ne conclut rien : on passe au registre, comme avant. Le
+   * pré-filtre ne produit donc JAMAIS un « libre » — seulement des « pris »,
+   * pour 20 ms au lieu de 300 à 1 300.
+   *
+   * C'est ce qui rend une recherche longue supportable : le RDAP de l'AFNIC
+   * part à 100 ms par domaine et tombe à 1,3 s une fois son limiteur refermé —
+   * mesuré depuis la production, 12 domaines à quatre requêtes parallèles :
+   * 1,2 s au premier essai, 15,6 s au troisième. Chaque candidat écarté sans
+   * l'interroger est autant de marge rendue à ceux qu'il faut vraiment lui
+   * soumettre.
+   *
+   * Toute erreur (résolveur injoignable, délai dépassé, NXDOMAIN) vaut « je ne
+   * sais pas » et renvoie au registre : le pré-filtre accélère, il ne décide
+   * pas.
+   */
+  private async deleguéDansLeDns(domain: string, tld: string): Promise<boolean> {
+    try {
+      if (!(await this.prefiltreUtilisable(tld))) return false;
+      const ns = await this.dnsResolver.resolveNs(domain);
+      return ns.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Le pré-filtre est-il fiable pour ce TLD ?
+   *
+   * Certains registres répondent à N'IMPORTE QUEL nom (joker de zone) : tout y
+   * paraîtrait pris, et la recherche ne rendrait plus rien. On interroge donc
+   * une fois par TLD un nom témoin aléatoire, qui ne peut pas être enregistré.
+   * S'il répond, le pré-filtre est désactivé pour ce TLD — définitivement, le
+   * temps du processus.
+   */
+  private prefiltreUtilisable(tld: string): Promise<boolean> {
+    let verdict = this.dnsUtilisable.get(tld);
+    if (!verdict) {
+      const temoin = `nm-temoin-${Math.random().toString(36).slice(2, 12)}.${tld}`;
+      verdict = this.dnsResolver
+        .resolveNs(temoin)
+        .then((ns) => {
+          if (ns.length > 0) {
+            this.logger.warn(`Pré-filtre DNS désactivé pour .${tld} : le registre répond à un nom inexistant (joker de zone)`);
+            return false;
+          }
+          return true;
+        })
+        .catch(() => true); // Pas de réponse pour un nom inexistant : c'est le comportement attendu.
+      this.dnsUtilisable.set(tld, verdict);
+    }
+    return verdict;
   }
 
   /**
@@ -774,12 +868,13 @@ ${langInstruction}`;
     name: string,
     extensions: string[],
     matchMode: MatchMode,
+    compteur?: SourcesVerdict,
   ): Promise<Record<string, boolean | null>> {
     const extStatus: Record<string, boolean | null> = {};
 
     if (matchMode === MatchMode.ALL) {
       for (const ext of extensions) {
-        const status = await this.isDomainAvailable(`${name}${ext}`);
+        const status = await this.isDomainAvailable(`${name}${ext}`, compteur);
         extStatus[ext] = status;
         if (status === false) break;
       }
@@ -787,7 +882,7 @@ ${langInstruction}`;
     }
 
     await Promise.all(extensions.map(async (ext) => {
-      extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`);
+      extStatus[ext] = await this.isDomainAvailable(`${name}${ext}`, compteur);
     }));
     return extStatus;
   }
@@ -895,7 +990,7 @@ ${langInstruction}`;
     description: string,
     keywords: string[],
     options: FindDomainsOptions = {},
-  ): Promise<{ results: any[], totalChecked: number, minLengthUsed: number, unresolved: Record<string, number> }> {
+  ): Promise<{ results: any[], totalChecked: number, minLengthUsed: number, unresolved: Record<string, number>, sources: SourcesVerdict }> {
     const {
       targetCount = 10,
       extensions = ['.com'],
@@ -934,6 +1029,11 @@ ${langInstruction}`;
       constraints.referenceBrands = [...new Set([...constraints.referenceBrands, ...likedExamples])].slice(0, 15);
     }
 
+    // Combien de verdicts le pré-filtre DNS a évité au registre : sans ce
+    // décompte, on ne saurait pas si le raccourci sert vraiment, ni quand un
+    // registre commence à répondre à tout.
+    const sources: SourcesVerdict = { dns: 0, registre: 0 };
+
     while (finalResults.length < targetCount && attempts < maxAttempts) {
       onEvent?.({ type: 'generating' });
       const items = await this.generateDomainIdeas(description, keywords, locale, [...checkedNames], descriptiveNames, culturalNames, likedNames, dislikedNames, constraints, competitorDomains, dislikedStyleDomains);
@@ -961,7 +1061,7 @@ ${langInstruction}`;
 
             onEvent?.({ type: 'candidate', name: item.name, checkedSoFar: checkedNames.size });
 
-            const extStatus = await this.checkExtensions(item.name, extensions, matchMode);
+            const extStatus = await this.checkExtensions(item.name, extensions, matchMode, sources);
 
             const availableExts = Object.keys(extStatus).filter(ext => extStatus[ext] === true);
             // Extensions dont la disponibilité n'a pas pu être établie : elles
@@ -1004,6 +1104,7 @@ ${langInstruction}`;
       minLengthUsed: constraints.minLength,
       // Sans ce décompte, une panne de WHOIS se lit comme un marché saturé.
       unresolved: Object.fromEntries(unresolved),
+      sources,
     };
   }
 }
