@@ -9,6 +9,7 @@ import { TrademarkService } from './trademark/trademark.service';
 import { RdapService } from '../domain/rdap.service';
 import { DomainService } from '../domain/domain.service';
 import { UsersModule } from '../users/users.module';
+import { ProjectsModule } from '../projects/projects.module';
 import { MailModule } from '../mail/mail.module';
 import { ReportMailService } from './report-mail.service';
 
@@ -19,7 +20,7 @@ import { ReportMailService } from './report-mail.service';
  * pré-vérif marque et la mise en cache des rapports (pas de re-débit).
  */
 @Module({
-  imports: [UsersModule, MailModule, TypeOrmModule.forFeature([BrandReportRecord])],
+  imports: [UsersModule, MailModule, ProjectsModule, TypeOrmModule.forFeature([BrandReportRecord])],
   providers: [
     BrandReportService,
     BrandReportStore,

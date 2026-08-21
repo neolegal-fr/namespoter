@@ -143,22 +143,36 @@ export class BrandReportService {
     return this.http.post<{ sent: boolean }>(`${this.apiUrl}/send`, { name, emails });
   }
 
-  summaries(): Observable<{ summaries: BrandReportSummary[] }> {
-    return this.http.get<{ summaries: BrandReportSummary[] }>(`${this.apiUrl}/summaries`);
+  /*
+   * `projectId` sur les lectures : un rapport payé par le propriétaire d'un
+   * projet partagé doit être lisible par ses invités. Le rapprochement passe
+   * par le PROJET — sans lui, deviner un nom suffirait à lire le rapport d'un
+   * inconnu.
+   */
+  summaries(projectId?: string | null): Observable<{ summaries: BrandReportSummary[] }> {
+    return this.http.get<{ summaries: BrandReportSummary[] }>(`${this.apiUrl}/summaries`, {
+      params: projectId ? { projectId } : {},
+    });
   }
 
   /** État de l'offre pour un nom : acheté, prix, droit gratuit, solde. Sans verdict. */
-  offer(name: string): Observable<BrandReportOffer> {
-    return this.http.get<BrandReportOffer>(`${this.apiUrl}/offer`, { params: { name } });
+  offer(name: string, projectId?: string | null): Observable<BrandReportOffer> {
+    return this.http.get<BrandReportOffer>(`${this.apiUrl}/offer`, {
+      params: projectId ? { name, projectId } : { name },
+    });
   }
 
-  existing(name: string): Observable<{ exists: boolean; report?: BrandReport }> {
-    return this.http.get<{ exists: boolean; report?: BrandReport }>(`${this.apiUrl}/existing`, { params: { name } });
+  existing(name: string, projectId?: string | null): Observable<{ exists: boolean; report?: BrandReport }> {
+    return this.http.get<{ exists: boolean; report?: BrandReport }>(`${this.apiUrl}/existing`, {
+      params: projectId ? { name, projectId } : { name },
+    });
   }
 
   /** Noms déjà rapportés par l'utilisateur (pour afficher « Voir le rapport »). */
-  mine(): Observable<{ names: string[] }> {
-    return this.http.get<{ names: string[] }>(`${this.apiUrl}/mine`);
+  mine(projectId?: string | null): Observable<{ names: string[] }> {
+    return this.http.get<{ names: string[] }>(`${this.apiUrl}/mine`, {
+      params: projectId ? { projectId } : {},
+    });
   }
 
   /** Rapport partagé en lecture seule (public, via jeton). */
@@ -175,6 +189,12 @@ export class BrandReportService {
       force?: boolean;
       /** Projet et public cible : mémorisés AVEC le rapport, pour la relecture et l'email. */
       context?: { description?: string; audience?: { label: string; value: string }[] };
+      /**
+       * Projet d'où part la demande. Sur un projet PARTAGÉ en écriture, c'est
+       * lui qui dit au serveur pour le compte de qui on agit : le rapport est
+       * facturé au propriétaire, et rangé chez lui.
+       */
+      projectId?: string;
     },
   ): Observable<BrandReport> {
     return this.http.post<BrandReport>(this.apiUrl, {
@@ -183,6 +203,7 @@ export class BrandReportService {
       ...(options?.emails?.length ? { emails: options.emails } : {}),
       ...(options?.force ? { force: true } : {}),
       ...(options?.context ? { context: options.context } : {}),
+      ...(options?.projectId ? { projectId: options.projectId } : {}),
     });
   }
 }

@@ -711,6 +711,9 @@ export class AppComponent implements OnInit {
   openProjects() {
     const show = () => {
       this.projectService.refreshProjects().subscribe();
+      // Les projets reçus en partage se chargent en même temps : le tiroir doit
+      // les montrer dès son ouverture, sinon l'invité ne sait pas où aller.
+      this.projectService.refreshSharedProjects().subscribe({ error: () => undefined });
       this.projectService.showDrawer.set(true);
     };
     if (this.router.url.startsWith('/app')) {

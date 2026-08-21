@@ -38,6 +38,7 @@ describe('BrandReportController — crédits (US-052)', () => {
       { findOrCreate, decrementCredits, isFreeReportAvailable, consumeFreeReport } as any,
       dataSource,
       { event } as any,
+      { accessFor: jest.fn() } as any,
     );
     return { ctrl, generate, decrementCredits, consumeFreeReport, event, sendReport, find, save };
   }
@@ -100,6 +101,7 @@ describe('BrandReportController — traçage des demandes', () => {
       } as any,
       { transaction: (cb: any) => cb({}) } as any,
       { event } as any,
+      { accessFor: jest.fn() } as any,
     );
     return { ctrl, event };
   }
@@ -178,6 +180,7 @@ describe('BrandReportController — une règle unique de tarification', () => {
       users,
       { transaction: (cb: any) => cb({}) } as any,
       { event: jest.fn(), warn: jest.fn() } as any,
+      { accessFor: jest.fn() } as any,
     );
     return { controller, decrement, save, users };
   };
@@ -226,6 +229,7 @@ describe('BrandReportController — rafraîchissement gratuit', () => {
       } as any,
       { transaction: (cb: any) => cb({}) } as any,
       { event } as any,
+      { accessFor: jest.fn() } as any,
     );
     return { ctrl, generate, decrementCredits, consumeFreeReport, save, event };
   }

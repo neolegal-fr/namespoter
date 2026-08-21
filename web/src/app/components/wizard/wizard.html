@@ -47,10 +47,19 @@
          même URL. Et il était en accent, plus gros que le titre de l'écran :
          l'accent vert est réservé aux éléments actionnables et aux verdicts,
          sinon il cesse de vouloir dire quelque chose. -->
+    <!-- Projet reçu en partage : le dire AVANT que l'utilisateur ne cherche
+         pourquoi un bouton manque, ou ne dépense les crédits d'un autre sans
+         le savoir. Deux messages distincts, parce que les deux situations ne
+         demandent pas la même vigilance. -->
+    <div *ngIf="projetPartage()" class="partage-bandeau" [class.partage-bandeau--lecture]="lectureSeule()">
+      <i class="pi" [class.pi-eye]="lectureSeule()" [class.pi-wallet]="!lectureSeule()" aria-hidden="true"></i>
+      <span>{{ (lectureSeule() ? 'PROJECTS.READ_ONLY_BANNER' : 'PROJECTS.WRITE_BANNER') | translate:{ email: proprietaireDuProjet() } }}</span>
+    </div>
+
     <div class="w-full mb-5" style="text-align: center">
       <!-- Affichage du nom avec clic pour éditer -->
       <div *ngIf="!isEditingName()"
-           (click)="isEditingName.set(true)"
+           (click)="lectureSeule() || isEditingName.set(true)"
            class="edit-name-trigger cursor-pointer"
            style="display: inline-flex; align-items: center; gap: 0.75rem; max-width: calc(100vw - 2rem); overflow: hidden">
         <h1 class="wizard-project-title">
@@ -452,6 +461,7 @@
               [extensions]="selectedExtensions()"
               [summaries]="reportSummaries()"
               [reportCost]="brandReportCost"
+              [readOnly]="lectureSeule()"
               [expandedAnalysisId]="expandedAnalysisId()"
               [analysisRenderer]="analysisRenderer"
               [analysisScorer]="analysisScorer"
@@ -641,11 +651,36 @@
           plein, à côté d'un nom en gris. Elle devient discrète et ne rougit
           qu'au survol — une suppression ne s'annonce pas, elle se confirme.
         -->
+        <button type="button" class="project-item__share"
+                (click)="ouvrirPartage($event, project)"
+                [attr.title]="'PROJECTS.SHARE' | translate"
+                [attr.aria-label]="('PROJECTS.SHARE' | translate) + ' — ' + project.name">
+          <i class="pi pi-user-plus" aria-hidden="true"></i>
+        </button>
+
         <button type="button" class="project-item__delete"
                 (click)="deleteProject($event, project.id)"
                 [attr.aria-label]="('PROJECTS.DELETE' | translate) + ' — ' + project.name">
           <i class="pi pi-trash" aria-hidden="true"></i>
         </button>
+      </div>
+
+      <!-- Liste SÉPARÉE, et non fondue dans la précédente : un projet reçu
+           n'est pas un projet à soi. On y lit de qui il vient et ce qu'on a le
+           droit d'y faire — mélangés, on croirait pouvoir les supprimer. -->
+      <div *ngIf="projectService.sharedProjects().length > 0" class="projects-shared">
+        <h4 class="projects-shared__title">{{ 'PROJECTS.SHARED_WITH_ME' | translate }}</h4>
+        <div *ngFor="let shared of projectService.sharedProjects()" class="project-item">
+          <button type="button" class="project-item__open" (click)="loadProject(shared.id)">
+            <span class="project-item__name">
+              {{ shared.name }}
+              <span *ngIf="shared.permission === 'read'" class="project-item__tag">{{ 'PROJECTS.READ_ONLY' | translate }}</span>
+            </span>
+            <span class="project-item__meta">
+              {{ 'PROJECTS.SHARED_BY' | translate:{ email: shared.ownerEmail || '—' } }}
+            </span>
+          </button>
+        </div>
       </div>
 
       <div *ngIf="projectService.projects().length === 0" class="projects-drawer__empty">
@@ -655,6 +690,73 @@
   </p-drawer>
 
   <!-- ─── Dialog "Help me pick the best" ─────────────────── -->
+  <!-- ─── Partager un projet ────────────────────────────────────────────
+       Une adresse, un droit, un mot. L'invité n'a pas besoin d'un compte : il
+       en reçoit un, avec de quoi choisir son mot de passe. -->
+  <p-dialog [visible]="partageOuvert()"
+            (visibleChange)="partageOuvert.set($event)"
+            [modal]="true"
+            [draggable]="false"
+            [style]="{ width: 'min(34rem, 94vw)' }"
+            [header]="'PROJECTS.SHARE_TITLE' | translate:{ name: partageProjet()?.name || '' }">
+    <form class="partage" (submit)="envoyerInvitation($event)">
+      <label class="partage__label" for="partage-email">{{ 'PROJECTS.SHARE_EMAIL' | translate }}</label>
+      <input id="partage-email" name="email" type="email" required autocomplete="off"
+             class="partage__input" [(ngModel)]="partageEmail" [ngModelOptions]="{ standalone: true }"
+             placeholder="prenom.nom@exemple.fr">
+      <p class="partage__hint">{{ 'PROJECTS.SHARE_EMAIL_HINT' | translate }}</p>
+
+      <span class="partage__label">{{ 'PROJECTS.SHARE_PERM' | translate }}</span>
+      <label class="partage__choix" [class.partage__choix--on]="partagePermission() === 'read'">
+        <input type="radio" name="perm" value="read" [checked]="partagePermission() === 'read'" (change)="partagePermission.set('read')">
+        <span>
+          <strong>{{ 'PROJECTS.SHARE_PERM_READ' | translate }}</strong>
+          <span class="partage__hint">{{ 'PROJECTS.SHARE_PERM_READ_HINT' | translate }}</span>
+        </span>
+      </label>
+      <label class="partage__choix" [class.partage__choix--on]="partagePermission() === 'write'">
+        <input type="radio" name="perm" value="write" [checked]="partagePermission() === 'write'" (change)="partagePermission.set('write')">
+        <span>
+          <strong>{{ 'PROJECTS.SHARE_PERM_WRITE' | translate }}</strong>
+          <span class="partage__hint">{{ 'PROJECTS.SHARE_PERM_WRITE_HINT' | translate }}</span>
+        </span>
+      </label>
+
+      <label class="partage__label" for="partage-mot">{{ 'PROJECTS.SHARE_MESSAGE' | translate }}</label>
+      <textarea id="partage-mot" rows="2" class="partage__input" [(ngModel)]="partageMessage"
+                [ngModelOptions]="{ standalone: true }" maxlength="500"
+                [placeholder]="'PROJECTS.SHARE_MESSAGE_PLACEHOLDER' | translate"></textarea>
+
+      <p class="partage__note">
+        <i class="pi pi-wallet" aria-hidden="true"></i>
+        {{ 'PROJECTS.SHARE_CREDITS_NOTE' | translate }}
+      </p>
+
+      <button type="submit" class="nm-btn-primary" [disabled]="partageEnvoi()">
+        <i class="pi" [class.pi-send]="!partageEnvoi()" [class.pi-spin]="partageEnvoi()" [class.pi-spinner]="partageEnvoi()"></i>
+        {{ 'PROJECTS.SHARE_SUBMIT' | translate }}
+      </button>
+    </form>
+
+    <div class="partage__liste">
+      <h4 class="partage__liste-titre">{{ 'PROJECTS.SHARE_LIST' | translate }}</h4>
+      <p *ngIf="partages().length === 0" class="partage__hint">{{ 'PROJECTS.SHARE_NONE' | translate }}</p>
+      <div *ngFor="let p of partages()" class="partage__ligne">
+        <span class="partage__qui">
+          {{ p.email }}
+          <span class="partage__etat">
+            {{ (p.permission === 'write' ? 'PROJECTS.SHARE_PERM_WRITE' : 'PROJECTS.SHARE_PERM_READ') | translate }}
+            · {{ (p.acceptedAt ? 'PROJECTS.SHARE_ACTIVE' : 'PROJECTS.SHARE_PENDING') | translate }}
+          </span>
+        </span>
+        <button type="button" class="partage__retirer" (click)="retirerPartage(p)"
+                [attr.aria-label]="('PROJECTS.SHARE_REVOKE' | translate) + ' — ' + p.email">
+          <i class="pi pi-times" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </p-dialog>
+
   <p-dialog
     [visible]="showPickDialog()"
     (visibleChange)="showPickDialog.set($event)"
