@@ -42,6 +42,26 @@ const PER_REGISTRY_CONCURRENCY = 4;
  */
 const DNS_TIMEOUT_MS = 1500;
 
+/**
+ * Extensions dont le WHOIS est interrogé AVANT le RDAP.
+ *
+ * `.fr` uniquement, et sur mesure : à volume de recherche réel (60 domaines,
+ * quatre requêtes en parallèle, depuis la production), le RDAP de l'AFNIC
+ * plafonne à 1 295 ms par domaine quand son WHOIS plafonne à 283 ms — 4,6 fois
+ * plus rapide en régime établi, et 4 fois sur le premier bloc de vingt. Les
+ * deux limitent le débit ; l'un le fait beaucoup plus durement que l'autre.
+ *
+ * Ce n'est pas un procès du RDAP : chez Verisign (.com, .net) il tient sans
+ * broncher, et il reste la source primaire partout ailleurs — un code HTTP
+ * vaut mieux qu'un texte à interpréter registre par registre. C'est le
+ * DÉPLOIEMENT de l'AFNIC qui bride RDAP plus que son service historique.
+ *
+ * Le RDAP reste le repli : si le WHOIS ne conclut pas — quota épuisé,
+ * vocabulaire inconnu — on l'interroge, exactement comme avant dans l'autre
+ * sens. Une extension ne rejoint cette liste que mesures à l'appui.
+ */
+const WHOIS_AVANT_RDAP = new Set(['fr']);
+
 /** D'où vient chaque verdict d'une recherche : mesure du pré-filtre DNS. */
 export interface SourcesVerdict {
   /** Tranchés par la délégation DNS, sans toucher au registre. */
@@ -888,12 +908,25 @@ ${langInstruction}`;
   }
 
   private async probe(domain: string): Promise<boolean | null> {
+    const tld = domain.slice(domain.lastIndexOf('.') + 1);
+    if (WHOIS_AVANT_RDAP.has(tld)) {
+      const viaWhois = await this.probeWhois(domain);
+      if (viaWhois !== null) return viaWhois;
+      return this.rdap.lookup(domain);
+    }
+    return this.probeRdapPuisWhois(domain);
+  }
+
+  private async probeRdapPuisWhois(domain: string): Promise<boolean | null> {
     // RDAP d'abord : verdict par code HTTP, pas de motif à deviner, pas de
     // quota atteint dès la deuxième requête. Il ne couvre pas tous les TLD
     // (les ccTLD n'y sont pas obligés), d'où le repli WHOIS juste en dessous.
     const viaRdap = await this.rdap.lookup(domain);
     if (viaRdap !== null) return viaRdap;
+    return this.probeWhois(domain);
+  }
 
+  private async probeWhois(domain: string): Promise<boolean | null> {
     try {
       const { stdout } = await execFileAsync('whois', [domain], { timeout: 10000 });
       return this.readWhois(stdout);

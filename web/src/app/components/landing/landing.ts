@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { applyContentSeo } from '../content/content-seo';
@@ -103,20 +103,26 @@ import { applyContentSeo } from '../content/content-seo';
 
                 <p class="nm-overline">{{ ('HOME.OVERLINE_' + step()) | translate }}</p>
 
-                <!-- Hauteur plancher : sans elle, la page saute à chaque
-                     changement d'étape, les volets n'ayant pas la même taille. -->
+                <!-- Les QUATRE volets sont rendus, empilés dans une seule
+                     cellule de grille : le bloc prend donc la hauteur du plus
+                     grand, et ne bouge plus quand l'étape change. Un plancher
+                     en pixels ne pouvait pas tenir cette promesse — la hauteur
+                     d'un volet dépend de la largeur de l'écran, de la langue et
+                     de la taille de police du visiteur. Les volets inactifs
+                     sont masqués par « visibility », qui conserve la place et les
+                     retire de l'ordre de tabulation comme de la vocalisation. -->
                 <div id="nm-demo-panel" class="nm-panel__body">
 
-                  @switch (step()) {
-                    @case (1) {
+                  <div class="nm-panel__pane" [class.is-active]="step() === 1">
                       <p class="nm-quote">{{ 'HOME.DEMO_QUOTE' | translate }}</p>
                       <p class="nm-note">{{ 'HOME.DEMO_NOTE_1' | translate }}</p>
                       <div class="nm-chips">
                         @for (c of chips('HOME.DEMO_CHIPS_1'); track c) { <span class="nm-chip">{{ c }}</span> }
                         <span class="nm-chip nm-chip--accent">{{ 'HOME.DEMO_CHIP_ADD' | translate }}</span>
                       </div>
-                    }
-                    @case (2) {
+                  </div>
+
+                  <div class="nm-panel__pane" [class.is-active]="step() === 2">
                       <div class="nm-chips">
                         @for (c of chips('HOME.DEMO_CHIPS_2'); track $index) {
                           <span class="nm-chip" [class.nm-chip--accent]="$index < 2">{{ c }}</span>
@@ -124,8 +130,9 @@ import { applyContentSeo } from '../content/content-seo';
                       </div>
                       <p class="nm-note">{{ 'HOME.DEMO_NOTE_2A' | translate }}</p>
                       <p class="nm-note">{{ 'HOME.DEMO_NOTE_2B' | translate }}</p>
-                    }
-                    @case (3) {
+                  </div>
+
+                  <div class="nm-panel__pane" [class.is-active]="step() === 3">
                       <!-- Des CARTES, comme dans le produit : un nom y porte
                            plusieurs extensions à la fois. La liste plate qui
                            les précédait donnait à croire qu'on vérifiait un
@@ -144,8 +151,9 @@ import { applyContentSeo } from '../content/content-seo';
                         }
                       </div>
                       <p class="nm-note">{{ 'HOME.DEMO_NOTE_3' | translate }}</p>
-                    }
-                    @case (4) {
+                  </div>
+
+                  <div class="nm-panel__pane" [class.is-active]="step() === 4">
                       <!-- Le MODÈLE du rapport, pas son prix : ce qu'on achète
                            se montre, il ne s'annonce pas. -->
                       <div class="nm-report-teaser">
@@ -164,8 +172,7 @@ import { applyContentSeo } from '../content/content-seo';
                         </ul>
                         <p class="nm-note">{{ 'HOME.DEMO_NOTE_4' | translate }}</p>
                       </div>
-                    }
-                  }
+                  </div>
                 </div>
 
                 <!-- Le vrai document, pas une maquette : quatre volets ne
@@ -329,7 +336,7 @@ import { applyContentSeo } from '../content/content-seo';
   `,
   styleUrl: './landing.css',
 })
-export class LandingComponent implements OnInit, OnDestroy {
+export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -409,14 +416,37 @@ export class LandingComponent implements OnInit, OnDestroy {
    * moins d'animations.
    */
   private minuterie?: ReturnType<typeof setInterval>;
+  private observateur?: IntersectionObserver;
   private pilotageManuel = false;
 
   ngOnInit(): void {
     this.demarrerDemo();
   }
 
+  /**
+   * Le défilement ne tourne que sous les yeux du visiteur.
+   *
+   * Une démonstration qui s'anime en haut de page pendant qu'on lit la FAQ ne
+   * sert personne : elle consomme de la batterie et provoque un rendu toutes
+   * les cinq secondes. On la met en pause dès qu'elle sort du champ.
+   *
+   * Sans `IntersectionObserver` (prérendu, navigateur ancien), rien ne change :
+   * la minuterie lancée par `ngOnInit` continue, comme avant.
+   */
+  ngAfterViewInit(): void {
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') return;
+    const panneau = document.getElementById('nm-demo-panel');
+    if (!panneau) return;
+    this.observateur = new IntersectionObserver(
+      ([entree]) => (entree.isIntersecting ? this.reprendreDemo() : this.figerDemo()),
+      { threshold: 0.15 },
+    );
+    this.observateur.observe(panneau);
+  }
+
   ngOnDestroy(): void {
     this.figerDemo();
+    this.observateur?.disconnect();
   }
 
   private demarrerDemo(): void {
