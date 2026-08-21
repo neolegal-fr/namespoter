@@ -91,9 +91,44 @@ export class AdminService {
     return new Map(rows.map((r) => [Number(r.userId), Number(r.cnt)]));
   }
 
-  async getUsers(page: number, limit: number, search: string): Promise<{ data: AdminUserRow[]; total: number }> {
+  /**
+   * Colonnes triables, et l'expression SQL de chacune.
+   *
+   * Liste BLANCHE : le paramètre vient de l'URL, et il finit dans un ORDER BY,
+   * c'est-à-dire à un endroit qu'aucun paramètre lié ne protège. Tout ce qui
+   * n'est pas dans cette table est refusé.
+   *
+   * Les deux compteurs passent par une sous-requête corrélée plutôt qu'une
+   * jointure : ils sont calculés APRÈS pagination dans le reste de la méthode
+   * (deux requêtes groupées, pour ne pas multiplier les lignes), et un tri ne
+   * peut pas porter sur une valeur que la requête ne connaît pas encore.
+   */
+  private static readonly TRIS: Record<string, string> = {
+    name: 'u.firstName',
+    email: 'u.email',
+    totalCredits: '(u.credits + u.extraCredits)',
+    createdAt: 'u.createdAt',
+    lastLogin: 'u.lastLogin',
+    projectCount: '(SELECT COUNT(*) FROM project p WHERE p.userId = u.id)',
+    brandReportCount: '(SELECT COUNT(*) FROM brand_report_record b WHERE b.keycloakId = u.keycloakId)',
+  };
+
+  async getUsers(
+    page: number,
+    limit: number,
+    search: string,
+    sort = 'createdAt',
+    dir: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<{ data: AdminUserRow[]; total: number }> {
+    const colonne = AdminService.TRIS[sort] ?? AdminService.TRIS['createdAt'];
+    const sens = dir === 'ASC' ? 'ASC' : 'DESC';
+
     const qb = this.userRepo.createQueryBuilder('u')
-      .orderBy('u.createdAt', 'DESC')
+      .orderBy(colonne, sens)
+      // Départage stable : sans second critère, deux comptes de même valeur
+      // peuvent changer de page d'un appel à l'autre — et l'un d'eux
+      // disparaître de la liste pendant qu'on la parcourt.
+      .addOrderBy('u.id', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 

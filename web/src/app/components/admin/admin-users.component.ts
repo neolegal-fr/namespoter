@@ -34,17 +34,41 @@ import { KeycloakService } from 'keycloak-angular';
              (ngModelChange)="onSearch()" style="max-width: 24rem">
 
       <div class="border-1 border-solid border-round-lg shadow-1 overflow-x-auto" style="background: white">
+        <!-- « lazy » : le tri part au SERVEUR. La table étant paginée, trier les
+             vingt lignes chargées répondrait à « qui est le plus récemment
+             actif de cette page », pas de la base. -->
         <p-table [value]="users()" [loading]="loadingUsers()" [tableStyle]="{'width': '100%'}"
-                 styleClass="p-datatable-sm">
+                 styleClass="p-datatable-sm"
+                 [lazy]="true" [sortField]="sortField()" [sortOrder]="sortOrder()"
+                 (onLazyLoad)="onSort($any($event))">
           <ng-template pTemplate="header">
             <tr>
-              <th style="background: var(--p-surface-50)">{{ 'ADMIN.COL_NAME' | translate }}</th>
-              <th style="background: var(--p-surface-50)">{{ 'ADMIN.COL_EMAIL' | translate }}</th>
-              <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_CREDITS' | translate }}</th>
-              <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_PROJECTS' | translate }}</th>
-              <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_REPORTS' | translate }}</th>
-              <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_CREATED' | translate }}</th>
-              <th class="text-center" style="background: var(--p-surface-50); white-space: nowrap">{{ 'ADMIN.COL_LAST_LOGIN' | translate }}</th>
+              <th pSortableColumn="name" style="background: var(--p-surface-50)">
+                {{ 'ADMIN.COL_NAME' | translate }} <p-sortIcon field="name"></p-sortIcon>
+              </th>
+              <th pSortableColumn="email" style="background: var(--p-surface-50)">
+                {{ 'ADMIN.COL_EMAIL' | translate }} <p-sortIcon field="email"></p-sortIcon>
+              </th>
+              <th pSortableColumn="totalCredits" class="text-center" style="background: var(--p-surface-50); white-space: nowrap">
+                {{ 'ADMIN.COL_CREDITS' | translate }} <p-sortIcon field="totalCredits"></p-sortIcon>
+              </th>
+              <th pSortableColumn="projectCount" class="text-center" style="background: var(--p-surface-50); white-space: nowrap">
+                {{ 'ADMIN.COL_PROJECTS' | translate }} <p-sortIcon field="projectCount"></p-sortIcon>
+              </th>
+              <th pSortableColumn="brandReportCount" class="text-center" style="background: var(--p-surface-50); white-space: nowrap">
+                {{ 'ADMIN.COL_REPORTS' | translate }} <p-sortIcon field="brandReportCount"></p-sortIcon>
+              </th>
+              <th pSortableColumn="createdAt" class="text-center" style="background: var(--p-surface-50); white-space: nowrap">
+                {{ 'ADMIN.COL_CREATED' | translate }} <p-sortIcon field="createdAt"></p-sortIcon>
+              </th>
+              <!-- « Dernière activité », et non « dernière connexion » : le champ
+                   est réécrit à CHAQUE appel authentifié de l'API, pas seulement
+                   à l'ouverture de session. Il dit donc quand le compte s'est
+                   servi du produit pour la dernière fois — ce qu'on cherche
+                   vraiment en triant cette colonne. -->
+              <th pSortableColumn="lastLogin" class="text-center" style="background: var(--p-surface-50); white-space: nowrap">
+                {{ 'ADMIN.COL_LAST_LOGIN' | translate }} <p-sortIcon field="lastLogin"></p-sortIcon>
+              </th>
               <th style="background: var(--p-surface-50); width: 1px"></th>
             </tr>
           </ng-template>
@@ -127,6 +151,14 @@ export class AdminUsersComponent implements OnInit {
   searchText = '';
   private searchTimer: any;
 
+  /**
+   * Tri courant. Par défaut la date d'inscription, décroissante — l'ordre
+   * historique de cette liste, conservé pour ne pas déplacer les repères de
+   * qui l'utilise déjà.
+   */
+  readonly sortField = signal('createdAt');
+  readonly sortOrder = signal(-1);
+
   editingUserId = signal<number | null>(null);
   savingUserId = signal<number | null>(null);
   deletingUserId = signal<number | null>(null);
@@ -149,7 +181,15 @@ export class AdminUsersComponent implements OnInit {
 
   loadUsers() {
     this.loadingUsers.set(true);
-    this.adminService.getUsers(this.page(), this.pageSize, this.searchText).subscribe({
+    this.adminService
+      .getUsers(
+        this.page(),
+        this.pageSize,
+        this.searchText,
+        this.sortField(),
+        this.sortOrder() === 1 ? 'ASC' : 'DESC',
+      )
+      .subscribe({
       next: ({ data, total }) => {
         this.users.set(data);
         this.total.set(total);
@@ -157,6 +197,25 @@ export class AdminUsersComponent implements OnInit {
       },
       error: () => this.loadingUsers.set(false),
     });
+  }
+
+  /**
+   * Clic sur un en-tête.
+   *
+   * `onLazyLoad` se déclenche AUSSI à l'initialisation de la table, avec le
+   * tri qu'on vient de lui donner : sans la comparaison ci-dessous, chaque
+   * ouverture de l'écran lancerait deux fois la même requête. Le retour à la
+   * première page est volontaire — trier puis rester page 3 montre le milieu
+   * d'un classement qu'on vient tout juste de demander.
+   */
+  onSort(e: { sortField?: string | string[] | null; sortOrder?: number | null }): void {
+    const champ = (Array.isArray(e.sortField) ? e.sortField[0] : e.sortField) || 'createdAt';
+    const sens = e.sortOrder ?? -1;
+    if (champ === this.sortField() && sens === this.sortOrder()) return;
+    this.sortField.set(champ);
+    this.sortOrder.set(sens);
+    this.page.set(1);
+    this.loadUsers();
   }
 
   totalPages() {
