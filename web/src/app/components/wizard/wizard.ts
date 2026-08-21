@@ -24,6 +24,7 @@ import { Tooltip } from 'primeng/tooltip';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Dialog } from 'primeng/dialog';
 import { SplitButton } from 'primeng/splitbutton';
+import { Menu } from 'primeng/menu';
 import { Toast } from 'primeng/toast';
 import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 import { UserService } from '../../services/user';
@@ -59,6 +60,7 @@ import { ReserverBoutonComponent } from '../shared/reserver-bouton';
     ConfirmDialog,
     Dialog,
     SplitButton,
+    Menu,
     Toast,
     TranslatePipe,
     ResultsGridComponent,
@@ -1063,12 +1065,56 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   // ─── Partage du rapport (Sally #5) ─────────────────────────────────────────
   readonly shareCopied = signal(false);
+  /**
+   * Les trois façons de transmettre un rapport, dans un seul menu.
+   *
+   * Recalculé à chaque ouverture plutôt que mémorisé : les libellés dépendent
+   * de la langue et l'entrée « lien public » du jeton, qui n'existe qu'une fois
+   * le rapport enregistré.
+   */
+  partageItems(report: BrandReport): MenuItem[] {
+    const t = (k: string) => this.translate.instant(k) as string;
+    return [
+      {
+        label: t('WIZARD.STEP3.REPORT_DOWNLOAD'),
+        icon: 'pi-file-pdf',
+        command: () => this.printReport(),
+      },
+      {
+        // Libellés PROPRES au menu : « Partager » et « Partager le rapport »
+        // désignaient deux choses différentes avec presque les mêmes mots. Sous
+        // un bouton « Partager », chaque entrée doit dire par quel MOYEN.
+        label: t('WIZARD.STEP3.REPORT_SHARE_BY_MAIL'),
+        icon: 'pi-send',
+        command: () => this.openShareMail(),
+      },
+      {
+        label: t('WIZARD.STEP3.REPORT_SHARE_COPY_LINK'),
+        icon: 'pi-link',
+        // L'avertissement porte sur ce que le lien rend possible, pas sur le
+        // geste : « toute personne qui l'a » est l'information décisive.
+        note: t('WIZARD.STEP3.REPORT_SHARE_PUBLIC_WARN'),
+        disabled: !report.shareToken,
+        command: () => this.copyShareLink(report),
+      },
+    ] as MenuItem[];
+  }
+
   copyShareLink(report: BrandReport): void {
     if (!report.shareToken || typeof window === 'undefined') return;
     const url = `${window.location.origin}/rapport/${report.shareToken}`;
     navigator.clipboard?.writeText(url).then(() => {
       this.shareCopied.set(true);
       setTimeout(() => this.shareCopied.set(false), 2500);
+      // Le lien est copié : on redit ce qu'il permet, au moment où il part
+      // dans un message.
+      this.messageService.add({
+        severity: 'info',
+        life: 6000,
+        summary: this.translate.instant('WIZARD.STEP3.REPORT_SHARE_COPIED'),
+        detail: this.translate.instant('WIZARD.STEP3.REPORT_SHARE_PUBLIC_WARN'),
+      });
+      this.cdr.detectChanges();
     }).catch(() => { /* presse-papiers indisponible */ });
   }
 

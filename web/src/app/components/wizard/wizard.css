@@ -1045,3 +1045,40 @@
     color: var(--nm-app-verdict-taken-fg);
     font-weight: 600;
 }
+
+/* ─── Menu « Partager » du rapport ─────────────────────────────────────────
+   Une entrée peut porter une seconde ligne : l'avertissement du lien public se
+   lit AVANT de cliquer, pas après. */
+.partage-menu__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.6rem 0.9rem;
+    color: var(--nm-app-text);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.partage-menu__item[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.partage-menu__item > span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.partage-menu__label {
+    font-size: var(--nm-text-ui-sm);
+    font-weight: 600;
+}
+
+.partage-menu__note {
+    max-width: 17rem;
+    font-size: var(--nm-text-overline-sm);
+    line-height: 1.35;
+    color: var(--nm-app-text-2);
+    white-space: normal;
+}

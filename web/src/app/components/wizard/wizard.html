@@ -1063,21 +1063,31 @@
                   (click)="refreshBrandReport(report.name)">
             <i class="pi pi-refresh" aria-hidden="true"></i>
           </button>
+          <!-- UN bouton, trois façons de transmettre.
+               Les trois côte à côte pesaient autant que le nom du rapport, pour
+               des gestes qu'on ne fait qu'une fois — et « Partager » voisinait
+               avec « Partager le rapport », deux libellés proches pour deux
+               choses différentes. -->
           <span actions *ngIf="!isSampleReport()" class="rv-actions">
-            <button type="button" class="nm-btn-tertiary" (click)="printReport()">
-              <i class="pi pi-file-pdf"></i> {{ 'WIZARD.STEP3.REPORT_DOWNLOAD' | translate }}
+            <button type="button" class="nm-btn-secondary" (click)="menuPartage.toggle($event)"
+                    [attr.aria-label]="'WIZARD.STEP3.REPORT_SHARE_MENU' | translate">
+              <i class="pi pi-share-alt" aria-hidden="true"></i>
+              {{ 'WIZARD.STEP3.REPORT_SHARE_MENU' | translate }}
+              <i class="pi pi-angle-down" style="font-size: 0.7rem; opacity: 0.7" aria-hidden="true"></i>
             </button>
-            <button type="button" class="nm-btn-secondary" (click)="openShareMail()">
-              <i class="pi pi-send"></i> {{ 'WIZARD.STEP3.REPORT_SHARE_MAIL' | translate }}
-            </button>
-            <!-- Le lien public vivait tout en bas de page, sous le document.
-                 C'est pourtant le geste le plus courant — envoyer le rapport par
-                 message — et il se cherche là où sont les deux autres façons de
-                 le transmettre. -->
-            <button type="button" class="nm-btn-tertiary" (click)="copyShareLink(report)">
-              <i class="pi" [class.pi-link]="!shareCopied()" [class.pi-check]="shareCopied()"></i>
-              {{ (shareCopied() ? 'WIZARD.STEP3.REPORT_SHARE_COPIED' : 'WIZARD.STEP3.REPORT_SHARE') | translate }}
-            </button>
+            <p-menu #menuPartage [model]="partageItems(report)" [popup]="true" appendTo="body" styleClass="partage-menu">
+              <ng-template pTemplate="item" let-item>
+                <a class="partage-menu__item" [attr.aria-disabled]="item.disabled">
+                  <i [class]="'pi ' + item.icon" aria-hidden="true"></i>
+                  <span>
+                    <span class="partage-menu__label">{{ item.label }}</span>
+                    <!-- L'avertissement est SUR l'entrée, pas après le clic :
+                         un lien public se réfléchit avant d'être copié. -->
+                    <small *ngIf="item.note" class="partage-menu__note">{{ item.note }}</small>
+                  </span>
+                </a>
+              </ng-template>
+            </p-menu>
           </span>
         </app-brand-report-view>
 

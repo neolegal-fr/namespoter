@@ -391,7 +391,11 @@
       "SEED_PROJECT": "Pour des suggestions de noms alternatifs, complétez les informations de projet.",
       "SEED_PROJECT_CTA": "Décrire mon projet",
       "SETUP_FIRST_BTN": "Décrire le projet pour obtenir des alternatives",
-      "LOCKED_READ_ONLY": "Ce projet vous est partagé en lecture seule : la vérification des marques et des réseaux se demande depuis le compte qui possède le projet."
+      "LOCKED_READ_ONLY": "Ce projet vous est partagé en lecture seule : la vérification des marques et des réseaux se demande depuis le compte qui possède le projet.",
+      "REPORT_SHARE_MENU": "Partager",
+      "REPORT_SHARE_PUBLIC_WARN": "Toute personne qui reçoit ce lien pourra consulter le rapport, sans compte.",
+      "REPORT_SHARE_BY_MAIL": "Envoyer par e-mail",
+      "REPORT_SHARE_COPY_LINK": "Copier le lien public"
     },
     "TIMEOUT": {
       "MESSAGE": "La recherche prend plus de temps que prévu. Voulez-vous continuer à attendre ?",
