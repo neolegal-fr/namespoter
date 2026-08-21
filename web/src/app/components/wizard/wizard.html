@@ -1002,6 +1002,7 @@
           </span>
           <app-brand-report-locked locked
             [embedded]="true"
+            [readOnly]="lectureSeule()"
             [name]="brandReportName()"
             [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
             [domainsChecked]="selectedExtensions().length"
@@ -1016,6 +1017,7 @@
              collecté à montrer, donc le palier payant seul. -->
         <ng-template #lockedOnly>
           <app-brand-report-locked
+            [readOnly]="lectureSeule()"
             [name]="brandReportName()"
             [priceCredits]="reportOffer()?.priceCredits ?? brandReportCost"
             [domainsChecked]="selectedExtensions().length"

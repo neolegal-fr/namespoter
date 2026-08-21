@@ -76,6 +76,18 @@ interface LockedCheck {
         }
       </section>
 
+      <!--
+        Projet partagé en LECTURE SEULE : on montre ce qui reste à vérifier,
+        mais ni le prix ni le bouton. L'invité ne peut pas dépenser les crédits
+        d'autrui — le serveur le refuse — et lui présenter « 50 crédits » puis
+        « Débloquer » l'enverrait droit dans un mur, en lui laissant croire au
+        passage qu'il s'apprête à payer de sa poche.
+      -->
+      @if (readOnly()) {
+        <footer class="rl-foot rl-foot--lecture">
+          <p class="rl-price__note">{{ 'WIZARD.STEP3.LOCKED_READ_ONLY' | translate }}</p>
+        </footer>
+      } @else {
       <footer class="rl-foot">
         <div class="rl-price">
           @if (signup()) {
@@ -105,6 +117,7 @@ interface LockedCheck {
           </button>
         }
       </footer>
+      }
     </article>
   `,
   styleUrl: './brand-report-locked.css',
@@ -136,6 +149,13 @@ export class BrandReportLockedComponent {
   readonly freeExtensions = input<string[]>([]);
   /** Le compte peut-il payer : solde suffisant, ou droit gratuit disponible. */
   readonly canAfford = input(true);
+  /**
+   * Projet partagé en lecture seule : ni prix, ni bouton d'achat.
+   *
+   * Le serveur refuse déjà l'achat pour ce rôle ; l'écran cesse de le proposer,
+   * et explique pourquoi plutôt que de laisser deviner.
+   */
+  readonly readOnly = input(false);
 
   readonly unlock = output<void>();
   readonly topUp = output<void>();
