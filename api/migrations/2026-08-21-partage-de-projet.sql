@@ -28,4 +28,11 @@ CREATE TABLE IF NOT EXISTS project_share (
     REFERENCES project (id) ON DELETE CASCADE,
   CONSTRAINT uq_project_share UNIQUE (projectId, email),
   INDEX idx_project_share_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- `COLLATE` explicite, et non le défaut du serveur : une clé étrangère exige
+-- que les DEUX colonnes partagent la même collation. `project.id` est en
+-- `utf8mb4_unicode_ci` (posée par TypeORM à la création) ; sans cette ligne,
+-- MariaDB 11 crée `projectId` avec sa collation par défaut et refuse la
+-- contrainte — « errno: 150, Foreign key constraint is incorrectly formed »,
+-- rencontré tel quel en production.
