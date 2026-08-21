@@ -198,16 +198,42 @@
    l'encart gagnait 42px sur cette seule étape — le saut que le plancher est
    précisément censé supprimer. Mesuré, pas estimé. */
 .nm-panel__body {
+  display: grid;
+  /* Un plancher demeure, mais comme confort de lecture au premier rendu, pas
+     comme rustine anti-saut : c'est l'empilement qui garantit la stabilité. */
   min-height: 344px;
 }
 
-/* Sur mobile, le plancher devient un plafond de vide : le volet « rapport »
-   ne fait pas 344 px, et l'écart part en zone morte au milieu de l'écran. Les
-   colonnes se sont empilées, la hauteur varie déjà d'une étape à l'autre —
-   figer le pire cas n'empêche plus rien, il ne fait que creuser. */
 @media (max-width: 640px) {
   .nm-panel__body {
     min-height: 0;
+  }
+}
+
+/* Les quatre volets occupent LA MÊME cellule : le bloc prend la hauteur du
+   plus grand, quelle que soit la largeur de l'écran, la langue ou la taille de
+   police. Plus aucun saut au changement d'étape — et plus besoin de plancher
+   en pixels, qui laissait du vide sur mobile et sautait quand même dès qu'un
+   volet dépassait la valeur devinée.
+
+   `visibility: hidden` plutôt que `display: none` : la place est conservée
+   (c'est tout l'objet), et l'élément sort quand même de l'ordre de tabulation
+   et de la vocalisation. */
+.nm-panel__pane {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.nm-panel__pane.is-active {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nm-panel__pane {
+    transition: none;
   }
 }
 
