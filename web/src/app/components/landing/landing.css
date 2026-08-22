@@ -151,6 +151,17 @@
   color: var(--nm-text-dark-3);
 }
 
+/* Le TRAIT qui relie les étapes entre elles — et qui s'arrête à la troisième.
+   Dessiné sur la pastille de gauche de chaque paire, donc jamais avant la
+   première ni après la dernière. C'est lui qui rend lisible la rupture : ce
+   qui suit le pointillé n'appartient pas à la même suite. */
+.nm-step + .nm-step::before {
+  content: '';
+  width: 14px;
+  border-top: 1px solid var(--nm-border-dark);
+  flex: none;
+}
+
 .nm-step__num {
   display: inline-flex;
   align-items: center;
@@ -600,34 +611,42 @@
   }
 }
 
-/* Volet « rapport », hors du fil d'étapes : il n'est pas une étape du wizard
-   mais une action depuis une carte. Ni numéro, ni trait de liaison — sinon la
-   démonstration annonce un parcours en quatre temps qui n'existe pas. */
-.nm-steps__aside {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: var(--nm-touch-min);
-  margin-bottom: 14px;
-  padding: 0 12px;
-  border: 1px solid var(--nm-border-dark);
-  border-radius: var(--nm-radius-pill);
-  background: var(--nm-surface-dark);
-  color: var(--nm-text-dark-2);
-  font-family: inherit;
-  font-size: var(--nm-text-ui-sm);
-  cursor: pointer;
-}
+/* Mobile : les quatre étapes deviennent des BARRES de progression.
+   À 390px, quatre pastilles à libellé se replient sur trois lignes et le fil
+   occupe plus de place que le volet qu'il commande. Des barres disent la
+   position sans rien faire lire ; le nom de l'étape courante est déjà sous
+   elles, dans le sur-titre du panneau. */
+@media (max-width: 640px) {
+  .nm-steps {
+    gap: 6px;
+    row-gap: 8px;
+    flex-wrap: nowrap;
+  }
 
-.nm-steps__aside--on {
-  background: var(--nm-accent-surface-dark);
-  border-color: var(--nm-accent-border-dark);
-  color: var(--nm-accent-hover);
-}
+  .nm-step {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 20px;
+  }
 
-.nm-steps__aside:focus-visible {
-  outline: 2px solid var(--nm-accent);
-  outline-offset: 2px;
+  .nm-step__num,
+  .nm-step__label,
+  .nm-step + .nm-step::before {
+    display: none;
+  }
+
+  .nm-step::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--nm-border-dark);
+  }
+
+  .nm-step--on::after {
+    background: var(--nm-accent);
+  }
 }
 
 /* Le mot qui porte la promesse : « vraiment » libre, et non « libre en .com ».

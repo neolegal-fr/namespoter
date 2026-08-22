@@ -87,6 +87,16 @@ import { applyContentSeo } from '../content/content-seo';
               <div class="nm-panel"
                    (mouseenter)="figerDemo()" (mouseleave)="reprendreDemo()"
                    (focusin)="figerDemo()">
+                <!--
+                  QUATRE étapes reliées par le même trait.
+                  Le rapport de marque n'est pas une étape du wizard, mais
+                  c'est lui qui distingue le produit : le sortir du fil rendait
+                  la démonstration moins lisible qu'elle ne gagnait en
+                  exactitude. Décision produit du 22/08/2026 — un visiteur
+                  comprend un parcours en quatre temps ; il n'a pas à
+                  apprendre, sur la page d'accueil, ce qui relève du wizard et
+                  ce qui relève d'un achat.
+                -->
                 <div class="nm-steps">
                   @for (s of steps; track s.n) {
                     <button type="button"
