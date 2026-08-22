@@ -697,7 +697,30 @@ export class AppComponent implements OnInit {
     });
   }
 
+  /**
+   * Le sélecteur est désormais la SEULE affordance de langue.
+   *
+   * Le lien « This page in English » du pied de l'accueil a disparu : deux
+   * commandes pour un même effet, dont l'une exigeait de dérouler toute la
+   * page. Mais elles ne faisaient pas la même chose — le lien changeait
+   * d'URL, le sélecteur non. Garder le seul sélecteur tel quel aurait servi
+   * l'anglais sous « / », une adresse que son canonical et ses hreflang
+   * déclarent française.
+   *
+   * Sur les deux pages qui ont une URL par langue, le sélecteur NAVIGUE donc.
+   * Partout ailleurs il bascule le dictionnaire, comme avant : les guides
+   * n'existent qu'en français, leur donner une adresse anglaise créerait du
+   * contenu dupliqué.
+   */
   setLang(lang: string) {
+    const chemin = this.router.url.split('?')[0].split('#')[0].replace(/\/$/, '') || '/';
+    if (chemin === '/' || chemin === '/en') {
+      // `WizardReuseStrategy` ne réutilise PAS `LandingComponent` entre ces
+      // deux routes : l'instance est recréée et redécide sa langue depuis
+      // l'URL, métadonnées et hreflang compris.
+      void this.router.navigateByUrl(lang === 'en' ? '/en' : '/');
+      return;
+    }
     this.translate.use(lang);
     this.currentLang.set(lang);
     this.selectedLang = lang;

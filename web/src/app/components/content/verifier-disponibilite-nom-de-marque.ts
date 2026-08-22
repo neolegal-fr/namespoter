@@ -33,7 +33,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
       <p class="lead">
         Avant de vous engager sur un nom, une question décide de tout&nbsp;: est-il <strong>réellement libre</strong>&nbsp;?
         Pas seulement le domaine — aussi les <strong>réseaux sociaux</strong> et surtout la <strong>marque déposée</strong>
-        (INPI en France, EUIPO en Europe). Testez un nom ci-dessous&nbsp;: aperçu gratuit, immédiat.
+        (INPI en France, EUIPO en Europe). Testez un nom ci-dessous&nbsp;: aperçu immédiat, sans compte.
       </p>
 
       <!-- Checker d'aperçu (client-side) -->
@@ -102,10 +102,10 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
       <ul>
         <li><strong>Le domaine</strong> — la base, mais la partie la plus simple. Un nom sans <code>.com</code> reste viable&nbsp;;
           un nom déjà déposé en marque, non.</li>
-        <li><strong>Les réseaux sociaux</strong> — un handle cohérent (Instagram, TikTok, LinkedIn, GitHub…) fait gagner
+        <li><strong>Les réseaux sociaux</strong> — un handle cohérent (GitHub, LinkedIn, Telegram, TikTok, X, YouTube) fait gagner
           en clarté de marque. Les pseudos identiques partent vite.</li>
         <li><strong>La marque déposée</strong> — le seul plan à portée juridique. Nous interrogeons les bases officielles
-          <strong>INPI (France)</strong>, <strong>EUIPO (Union européenne)</strong> et <strong>OMPI (international)</strong>
+          <strong>INPI (France)</strong> et <strong>EUIPO (Union européenne)</strong>
           pour signaler les dépôts identiques ou proches, avec leurs <strong>classes de Nice</strong>.</li>
       </ul>
 
@@ -180,7 +180,7 @@ export class VerifierDisponibiliteMarqueComponent {
     applyContentSeo({
       title: 'Vérifier la disponibilité d’un nom de marque',
       description:
-        'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu gratuit et rapport complet.',
+        'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu immédiat, sans compte, et rapport complet.',
       path: '/verifier-disponibilite-nom-de-marque',
     });
     // Uniquement côté navigateur : au prerender, Keycloak n'est pas initialisé.

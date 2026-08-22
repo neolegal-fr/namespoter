@@ -169,9 +169,12 @@ export class BrandReportLockedComponent {
    * l'impression d'un chargement en cours.
    */
   readonly checks: LockedCheck[] = [
+    // Deux offices, pas trois : c'est le périmètre que le rapport RESTITUE.
+    // Annoncer un troisième office avant l'achat, pour ne produire ensuite
+    // qu'un verdict INPI / EUIPO, se paie au moment exact où le lecteur ouvre
+    // ce qu'il vient de payer.
     { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_INPI',    barWidth: 132 },
     { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_EUIPO',   barWidth: 104 },
-    { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_WO',      barWidth: 118 },
     { labelKey: 'WIZARD.STEP3.LOCKED_CHECK_SOCIALS', barWidth: 148 },
   ];
 }

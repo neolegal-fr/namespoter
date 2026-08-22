@@ -166,11 +166,13 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
           }
         </section>
 
-        <!-- Marques — INPI, EUIPO et OMPI, périmètre nommé explicitement -->
+        <!-- Marques — périmètre nommé par la chaîne PARTAGÉE « TRADEMARK.SCOPE »,
+             la même que sur l'accueil et dans le comparatif. Trois textes
+             décrivaient trois périmètres différents pour un seul résultat. -->
         @if (r.trademark; as tm) {
         <section class="rv-section">
           <div class="rv-section__head">
-            <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK_SCOPE' | translate }}</h3>
+            <h3 class="rv-section__title">{{ 'TRADEMARK.SCOPE' | translate }}</h3>
             @if (allClasses(tm.hits); as cls) {
               @if (cls) { <span class="rv-section__meta">{{ 'WIZARD.STEP3.REPORT_CLASSES' | translate:{ list: cls } }}</span> }
             }
@@ -184,6 +186,12 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
           </div>
 
           <p class="rv-explain" [innerHTML]="tmExplainKey(tm.match) | translate"></p>
+
+          <!-- La PORTÉE de ce qui vient d'être affirmé, sous le verdict et non
+               en note de bas de page : « aucun dépôt identique » se lit comme
+               « le nom est libre » si rien ne dit ce que la recherche n'a pas
+               couvert. C'est la phrase qui protège juridiquement. -->
+          <p class="rv-note rv-note--scope">{{ 'TRADEMARK.SCOPE_NOTE' | translate }}</p>
 
           <!-- La RAISON du « non vérifiable », quand le serveur la donne.
                Sans elle, une configuration manquante et une panne de l'INPI
@@ -224,8 +232,11 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
           <section class="rv-section">
             <div class="rv-section__head">
               <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
+              <!-- Les six plateformes NOMMÉES, et non « 6 plateformes » : le
+                   lecteur qui paie doit pouvoir vérifier que la sienne y est
+                   avant de payer, pas après. -->
               <span class="rv-section__meta">
-                {{ 'WIZARD.STEP3.REPORT_PLATFORMS' | translate:{ n: r.socials?.length ?? 0 } }}
+                {{ 'WIZARD.STEP3.REPORT_PLATFORMS' | translate }}
               </span>
             </div>
             @for (s of r.socials ?? []; track s.platform) {
@@ -372,6 +383,15 @@ export class BrandReportViewComponent {
   readonly X_LOGO =
     'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z';
 
+  /**
+   * Les SIX plateformes réellement interrogées, et elles seules.
+   *
+   * Instagram et Facebook y figuraient sans être interrogés (leur adaptateur
+   * est marqué `planned` côté API). Une icône prête pour une plateforme muette
+   * rendrait INVISIBLE le jour où l'une d'elles s'activerait à moitié : elle
+   * s'afficherait comme les autres, avec un verdict qui ne vient de nulle
+   * part. Sans elle, le repli `pi-globe` saute aux yeux.
+   */
   private readonly SOCIAL_ICONS: Record<string, string> = {
     github: 'pi-github',
     linkedin: 'pi-linkedin',
@@ -379,8 +399,6 @@ export class BrandReportViewComponent {
     tiktok: 'pi-tiktok',
     x: 'x',
     youtube: 'pi-youtube',
-    instagram: 'pi-instagram',
-    facebook: 'pi-facebook',
   };
 
   socialIcon(platform: string): string {

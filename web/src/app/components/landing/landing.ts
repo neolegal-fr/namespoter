@@ -87,6 +87,16 @@ import { applyContentSeo } from '../content/content-seo';
               <div class="nm-panel"
                    (mouseenter)="figerDemo()" (mouseleave)="reprendreDemo()"
                    (focusin)="figerDemo()">
+                <!--
+                  QUATRE étapes reliées par le même trait.
+                  Le rapport de marque n'est pas une étape du wizard, mais
+                  c'est lui qui distingue le produit : le sortir du fil rendait
+                  la démonstration moins lisible qu'elle ne gagnait en
+                  exactitude. Décision produit du 22/08/2026 — un visiteur
+                  comprend un parcours en quatre temps ; il n'a pas à
+                  apprendre, sur la page d'accueil, ce qui relève du wizard et
+                  ce qui relève d'un achat.
+                -->
                 <div class="nm-steps">
                   @for (s of steps; track s.n) {
                     <button type="button"
@@ -133,20 +143,20 @@ import { applyContentSeo } from '../content/content-seo';
                   </div>
 
                   <div class="nm-panel__pane" [class.is-active]="step() === 3">
-                      <!-- Des CARTES, comme dans le produit : un nom y porte
-                           plusieurs extensions à la fois. La liste plate qui
-                           les précédait donnait à croire qu'on vérifiait un
-                           domaine, pas un nom. -->
+                      <!-- Une CARTE par nom, verdict de tête à droite, reste
+                           des extensions en retrait : c'est la ligne du vrai
+                           écran de résultats. Les classes existaient déjà dans
+                           ce gabarit sans qu'aucune règle ne les vise — les
+                           lignes retombaient sur le rendu par défaut du
+                           navigateur, sans cadre ni alignement. -->
                       <div class="nm-democards">
                         @for (c of demoCards; track c.name) {
                           <div class="nm-democard">
-                            <p class="nm-democard__name">{{ c.name }}</p>
-                            @for (e of c.ext; track e.dom) {
-                              <div class="nm-democard__row">
-                                <span>{{ e.dom }}</span>
-                                <span class="nm-verdict__state" [class]="'nm-verdict__state--' + e.state">{{ e.label | translate }}</span>
-                              </div>
-                            }
+                            <span class="nm-democard__name">{{ c.name }}</span>
+                            <span class="nm-democard__verdicts">
+                              <span class="nm-verdict__state" [class]="'nm-verdict__state--' + c.state">@if (c.ext) {<span>{{ c.ext }} </span>}{{ c.label | translate }}</span>
+                              <span class="nm-democard__rest">{{ c.rest | translate }}</span>
+                            </span>
                           </div>
                         }
                       </div>
@@ -155,9 +165,17 @@ import { applyContentSeo } from '../content/content-seo';
 
                   <div class="nm-panel__pane" [class.is-active]="step() === 4">
                       <!-- Le MODÈLE du rapport, pas son prix : ce qu'on achète
-                           se montre, il ne s'annonce pas. -->
+                           se montre, il ne s'annonce pas.
+                           Et la STRUCTURE du vrai document : deux lignes de
+                           marque, les réseaux nommés. Les synthèses agrégées
+                           (« Domaines libre · Réseaux libre ») ont été retirées
+                           de l'application ; les vendre ici garantissait que la
+                           première vraie carte déçoive. -->
                       <div class="nm-report-teaser">
-                        <p class="nm-report-teaser__name">roulio</p>
+                        <div class="nm-report-teaser__head">
+                          <p class="nm-report-teaser__name">Roulio</p>
+                          <span class="nm-report-teaser__tag">{{ 'HOME.DEMO_REPORT_TAG' | translate }}</span>
+                        </div>
                         <ul class="nm-report-teaser__lines">
                           @for (l of reportLines; track l.key) {
                             <li>
@@ -165,10 +183,6 @@ import { applyContentSeo } from '../content/content-seo';
                               <span class="nm-verdict__state" [class]="'nm-verdict__state--' + l.state">{{ l.value | translate }}</span>
                             </li>
                           }
-                          <li>
-                            <span>{{ 'HOME.DEMO_REPORT_SCORE' | translate }}</span>
-                            <span class="nm-report-teaser__score">78/100</span>
-                          </li>
                         </ul>
                         <p class="nm-note">{{ 'HOME.DEMO_NOTE_4' | translate }}</p>
                       </div>
@@ -238,22 +252,32 @@ import { applyContentSeo } from '../content/content-seo';
               <span role="columnheader">{{ 'HOME.CMP_AI' | translate }}</span>
               <span role="columnheader">{{ 'HOME.CMP_REG' | translate }}</span>
             </div>
+            <!-- Chaque valeur porte le nom de sa colonne, masqué sur grand
+                 écran. Sous 640px la rangée devient une carte : la colonne qui
+                 nous distingue était hors champ, derrière un défilement
+                 horizontal que personne ne déclenche. Les libellés portent
+                 « aria-hidden » — la rangée d'en-têtes reste dans l'arbre
+                 d'accessibilité, seulement masquée à l'œil, et les répéter les
+                 ferait lire deux fois. -->
             @for (r of compareRows(); track r[0]) {
               <div class="nm-table__row" role="row">
-                <span role="cell">{{ r[0] }}</span>
-                <span role="cell" class="nm-table__us">{{ r[1] }}</span>
-                <span role="cell">{{ r[2] }}</span>
-                <span role="cell">{{ r[3] }}</span>
+                <span role="cell" class="nm-table__crit">{{ r[0] }}</span>
+                <span role="cell" class="nm-table__cell nm-table__us">
+                  <span class="nm-table__collabel" aria-hidden="true">{{ 'HOME.CMP_US' | translate }}</span>
+                  <span>{{ r[1] }}</span>
+                </span>
+                <span role="cell" class="nm-table__cell">
+                  <span class="nm-table__collabel" aria-hidden="true">{{ 'HOME.CMP_AI' | translate }}</span>
+                  <span>{{ r[2] }}</span>
+                </span>
+                <span role="cell" class="nm-table__cell">
+                  <span class="nm-table__collabel" aria-hidden="true">{{ 'HOME.CMP_REG' | translate }}</span>
+                  <span>{{ r[3] }}</span>
+                </span>
               </div>
             }
           </div>
           </div>
-          <!-- Le tableau défile horizontalement sur petit écran (décision
-               assumée : à moins de 72 px par colonne, « registre en direct »
-               se casse en quatre lignes). Encore faut-il le DIRE : sans cette
-               ligne, la troisième colonne apparaît tranchée au milieu d'un mot
-               et rien n'indique qu'il y a quelque chose derrière. -->
-          <p class="nm-table__hint">{{ 'HOME.CMP_SCROLL_HINT' | translate }}</p>
         </section>
 
         <!-- Pour qui — texte SEO conservé -->
@@ -314,22 +338,6 @@ import { applyContentSeo } from '../content/content-seo';
             </form>
           </div>
         </section>
-
-        <!-- L'autre version de CETTE page, en clair.
-             Le sélecteur de langue du menu bascule le contenu sans changer
-             d'URL : aucun robot ne le déclenche, et rien ne pointait vers
-             « /en » à part le sitemap et les balises hreflang. Un lien
-             ordinaire vaut mieux — Google le suit, et un lecteur peut le
-             partager. Le libellé est dans la langue de DESTINATION, comme le
-             recommande Google : on ne demande pas à un anglophone de
-             reconnaître « Anglais ». -->
-        <p class="nm-lang-alt">
-          @if (lang === 'fr') {
-            <a routerLink="/en" hreflang="en" lang="en">This page in English</a>
-          } @else {
-            <a routerLink="/" hreflang="fr" lang="fr">Cette page en français</a>
-          }
-        </p>
 
       </div>
     </article>
@@ -525,33 +533,33 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
    * suggestion retenue vaut 1 crédit, qu'on en vérifie une ou cinq — afficher
    * « 1 crédit » en face de chaque domaine libre suggérait l'inverse.
    */
-  /** Étape 3 : trois cartes, chacune portant ses extensions. */
+  /**
+   * Volet « domaines » — quatre noms, à l'image de l'écran de résultats.
+   *
+   * Le verdict de tête porte l'extension qui décide (« .com libre ») ; le
+   * reste des extensions suit en retrait. Le quatrième cas est un registre
+   * injoignable, et il est là exprès : c'est le troisième état du produit, et
+   * il ne se déguise ni en libre ni en pris.
+   */
   readonly demoCards = [
-    { name: 'roulio',   ext: [{ dom: 'roulio.com',   state: 'free',    label: 'HOME.DEMO_FREE' },
-                              { dom: 'roulio.fr',    state: 'free',    label: 'HOME.DEMO_FREE' }] },
-    { name: 'bikara',   ext: [{ dom: 'bikara.com',   state: 'free',    label: 'HOME.DEMO_FREE' },
-                              { dom: 'bikara.fr',    state: 'taken',   label: 'HOME.DEMO_TAKEN' }] },
-    { name: 'cyclique', ext: [{ dom: 'cyclique.fr',  state: 'free',    label: 'HOME.DEMO_FREE' },
-                              { dom: 'cyclique.ch',  state: 'unknown', label: 'HOME.DEMO_UNKNOWN' }] },
+    { name: 'Roulio',  ext: '.com', state: 'free',    label: 'HOME.DEMO_FREE',    rest: 'HOME.DEMO_ALSO_FR' },
+    { name: 'Velora',  ext: '.com', state: 'taken',   label: 'HOME.DEMO_TAKEN',   rest: 'HOME.DEMO_FR_FREE' },
+    { name: 'Rekiclo', ext: '.com', state: 'free',    label: 'HOME.DEMO_FREE',    rest: 'HOME.DEMO_ALSO_FR_EU' },
+    { name: 'Pedalio', ext: '',     state: 'unknown', label: 'HOME.DEMO_UNKNOWN', rest: 'HOME.DEMO_REGISTRY_DOWN' },
   ];
 
-  /** Étape 4 : les trois volets du rapport, dans l'ordre du document. */
+  /**
+   * Volet « marque et réseaux » — les lignes du VRAI rapport.
+   *
+   * Deux lignes de marque, parce que le résumé n'expose que l'INPI et
+   * l'EUIPO ; les réseaux nommés, groupés par verdict, parce que c'est ainsi
+   * qu'on les lit. Aucun agrégat : le rapport n'en produit pas.
+   */
   readonly reportLines = [
-    { key: 'HOME.DEMO_REPORT_DOM', value: 'HOME.DEMO_FREE',    state: 'free' },
-    { key: 'HOME.DEMO_REPORT_SOC', value: 'HOME.DEMO_FREE',    state: 'free' },
-    // Le volet marque montre un résultat, pas une panne : « non vérifiable »
-    // est déjà démontré à l'étape 3, sur une extension. L'afficher ici
-    // reviendrait à vendre le rapport en annonçant qu'il ne conclut pas.
-    { key: 'HOME.DEMO_REPORT_TM',  value: 'HOME.DEMO_TM_NONE', state: 'free' },
-  ];
-
-  readonly demoDomains = [
-    { name: 'roulio.com',  state: 'free',    label: 'HOME.DEMO_FREE' },
-    { name: 'bikara.com',  state: 'free',    label: 'HOME.DEMO_FREE' },
-    { name: 'sprocco.com', state: 'free',    label: 'HOME.DEMO_FREE' },
-    { name: 'cyclique.fr', state: 'free',    label: 'HOME.DEMO_FREE' },
-    { name: 'pedalo.com',  state: 'taken',   label: 'HOME.DEMO_TAKEN' },
-    { name: 'moyeu.ch',    state: 'unknown', label: 'HOME.DEMO_UNKNOWN' },
+    { key: 'HOME.DEMO_REPORT_INPI',      value: 'HOME.DEMO_TM_NONE', state: 'free' },
+    { key: 'HOME.DEMO_REPORT_EUIPO',     value: 'HOME.DEMO_TM_NONE', state: 'free' },
+    { key: 'HOME.DEMO_REPORT_SOC_FREE',  value: 'HOME.DEMO_FREE_PL', state: 'free' },
+    { key: 'HOME.DEMO_REPORT_SOC_TAKEN', value: 'HOME.DEMO_TAKEN',   state: 'taken' },
   ];
 
   /*
@@ -560,11 +568,18 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
    * parmi les vérifications, il affaiblissait les trois autres. Son contenu
    * descend en note sous la grille.
    */
-  readonly controls = [1, 2, 3].map((i) => ({
-    overline: `HOME.C${i}_OVER`,
-    title: `HOME.C${i}_TITLE`,
-    text: `HOME.C${i}_TEXT`,
-  }));
+  readonly controls = [
+    { overline: 'HOME.C1_OVER', title: 'HOME.C1_TITLE', text: 'HOME.C1_TEXT' },
+    { overline: 'HOME.C2_OVER', title: 'HOME.C2_TITLE', text: 'HOME.C2_TEXT' },
+    /*
+     * Le périmètre des marques est décrit par UNE chaîne, `TRADEMARK.SCOPE`,
+     * partagée avec le rapport et le comparatif. Recopiée dans une clé
+     * `HOME.C3_TITLE`, elle divergeait à la première retouche : l'accueil
+     * annonçait trois registres pendant que la grille n'affichait que deux
+     * lignes de verdict.
+     */
+    { overline: 'HOME.C3_OVER', title: 'TRADEMARK.SCOPE', text: 'HOME.C3_TEXT' },
+  ];
 
   /** Liens de guides — en français seulement : ces pages n'existent que dans cette langue. */
   readonly guides = [
