@@ -33,7 +33,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
       <p class="lead">
         Avant de vous engager sur un nom, une question décide de tout&nbsp;: est-il <strong>réellement libre</strong>&nbsp;?
         Pas seulement le domaine — aussi les <strong>réseaux sociaux</strong> et surtout la <strong>marque déposée</strong>
-        (INPI en France, EUIPO en Europe). Testez un nom ci-dessous&nbsp;: aperçu gratuit, immédiat.
+        (INPI en France, EUIPO en Europe). Testez un nom ci-dessous&nbsp;: aperçu immédiat, sans compte.
       </p>
 
       <!-- Checker d'aperçu (client-side) -->
@@ -180,7 +180,7 @@ export class VerifierDisponibiliteMarqueComponent {
     applyContentSeo({
       title: 'Vérifier la disponibilité d’un nom de marque',
       description:
-        'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu gratuit et rapport complet.',
+        'Vérifiez si un nom de marque est disponible : domaine, réseaux sociaux et marque déposée (INPI + EUIPO). Aperçu immédiat, sans compte, et rapport complet.',
       path: '/verifier-disponibilite-nom-de-marque',
     });
     // Uniquement côté navigateur : au prerender, Keycloak n'est pas initialisé.
