@@ -301,12 +301,77 @@
   white-space: nowrap;
 }
 
+/* Volet « domaines » — une carte par nom, comme sur l'écran de résultats.
+   Les classes `nm-democard*` étaient posées dans le gabarit sans qu'aucune
+   règle ne les vise : les lignes retombaient sur le rendu par défaut du
+   navigateur, sans cadre, sans alignement, sans hiérarchie. */
+.nm-democards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nm-democard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--nm-surface-dark);
+  border: 1px solid var(--nm-divider-dark-3);
+  border-radius: var(--nm-radius-sm);
+}
+
+.nm-democard__name {
+  min-width: 0;
+  font-family: var(--nm-font-display);
+  font-weight: 600;
+  font-size: var(--nm-text-body-sm);
+  color: var(--nm-text-dark);
+  overflow-wrap: anywhere;
+}
+
+.nm-democard__verdicts {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+/* Les extensions restantes, en retrait : elles complètent le verdict de tête,
+   elles ne le concurrencent pas. */
+.nm-democard__rest {
+  font-size: 12px;
+  color: var(--nm-text-dark-3);
+  white-space: nowrap;
+}
+
 /* Volet « rapport » */
 .nm-report-teaser {
   padding: 18px;
   border: 1px solid var(--nm-accent-border-dark);
   border-radius: var(--nm-radius-lg);
   background: var(--nm-accent-surface-dark);
+}
+
+.nm-report-teaser__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Ce qu'on achète, NOMMÉ — pas son prix. Le prix se lit dans la FAQ, où le
+   forfait mensuel a été expliqué ; ici il arriverait avant le contexte. */
+.nm-report-teaser__tag {
+  padding: 3px 8px;
+  border: 1px solid var(--nm-accent-border-dark);
+  border-radius: var(--nm-radius-xs);
+  font-size: 12px;
+  color: var(--nm-accent-hover);
+  white-space: nowrap;
+  flex: none;
 }
 
 .nm-report-teaser__name {
@@ -339,12 +404,6 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-}
-
-.nm-report-teaser__score {
-  font-family: var(--nm-font-display);
-  font-weight: 700;
-  color: var(--nm-text-dark);
 }
 
 /* ═══ Sections claires ═══════════════════════════════════════════════════ */
