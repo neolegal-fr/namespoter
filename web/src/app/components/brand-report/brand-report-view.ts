@@ -232,8 +232,11 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
           <section class="rv-section">
             <div class="rv-section__head">
               <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_SOCIALS' | translate }}</h3>
+              <!-- Les six plateformes NOMMÉES, et non « 6 plateformes » : le
+                   lecteur qui paie doit pouvoir vérifier que la sienne y est
+                   avant de payer, pas après. -->
               <span class="rv-section__meta">
-                {{ 'WIZARD.STEP3.REPORT_PLATFORMS' | translate:{ n: r.socials?.length ?? 0 } }}
+                {{ 'WIZARD.STEP3.REPORT_PLATFORMS' | translate }}
               </span>
             </div>
             @for (s of r.socials ?? []; track s.platform) {
@@ -380,6 +383,15 @@ export class BrandReportViewComponent {
   readonly X_LOGO =
     'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z';
 
+  /**
+   * Les SIX plateformes réellement interrogées, et elles seules.
+   *
+   * Instagram et Facebook y figuraient sans être interrogés (leur adaptateur
+   * est marqué `planned` côté API). Une icône prête pour une plateforme muette
+   * rendrait INVISIBLE le jour où l'une d'elles s'activerait à moitié : elle
+   * s'afficherait comme les autres, avec un verdict qui ne vient de nulle
+   * part. Sans elle, le repli `pi-globe` saute aux yeux.
+   */
   private readonly SOCIAL_ICONS: Record<string, string> = {
     github: 'pi-github',
     linkedin: 'pi-linkedin',
@@ -387,8 +399,6 @@ export class BrandReportViewComponent {
     tiktok: 'pi-tiktok',
     x: 'x',
     youtube: 'pi-youtube',
-    instagram: 'pi-instagram',
-    facebook: 'pi-facebook',
   };
 
   socialIcon(platform: string): string {

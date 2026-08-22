@@ -94,7 +94,7 @@ import { applyContentSeo } from './content-seo';
       <ul>
         <li>Vérifiez que le nom est <strong>libre à l'INPI</strong> (classe cosmétiques / bijoux) — la beauté est
           un secteur très concurrentiel.</li>
-        <li>Réservez le <strong>handle Instagram / TikTok</strong> en même temps que le domaine.</li>
+        <li>Réservez vos <strong>handles</strong> sur vos deux réseaux prioritaires en même temps que le domaine.</li>
         <li>Assurez-vous que le nom <strong>ne se limite pas</strong> à votre premier produit si vous comptez
           élargir la gamme.</li>
       </ul>

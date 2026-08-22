@@ -309,7 +309,7 @@
       "GRID_DEEPEN": "Approfondir",
       "REPORT_CLASSES": "classes {{list}}",
       "REPORT_TM_IDENTICAL": "Marque identique « {{name}} »",
-      "REPORT_PLATFORMS": "{{n}} plateformes",
+      "REPORT_PLATFORMS": "GitHub, LinkedIn, Telegram, TikTok, X, YouTube",
       "REPORT_SUMMARY_OK": "Aucun blocage identifié",
       "REPORT_SUMMARY_WATCH": "À surveiller",
       "REPORT_SUMMARY_RISK": "Blocage identifié",

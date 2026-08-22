@@ -102,7 +102,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
       <ul>
         <li><strong>Le domaine</strong> — la base, mais la partie la plus simple. Un nom sans <code>.com</code> reste viable&nbsp;;
           un nom déjà déposé en marque, non.</li>
-        <li><strong>Les réseaux sociaux</strong> — un handle cohérent (Instagram, TikTok, LinkedIn, GitHub…) fait gagner
+        <li><strong>Les réseaux sociaux</strong> — un handle cohérent (GitHub, LinkedIn, Telegram, TikTok, X, YouTube) fait gagner
           en clarté de marque. Les pseudos identiques partent vite.</li>
         <li><strong>La marque déposée</strong> — le seul plan à portée juridique. Nous interrogeons les bases officielles
           <strong>INPI (France)</strong> et <strong>EUIPO (Union européenne)</strong>

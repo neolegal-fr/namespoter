@@ -64,7 +64,7 @@ import { applyContentSeo } from './content-seo';
         C'est la spécificité de l'e-commerce&nbsp;: votre nom sera lu sur des supports que vous ne maîtrisez
         pas. Sur une place de marché à côté de dizaines de vendeurs, dans un e-mail de confirmation, sur un
         bordereau de livraison, sur un ticket de carte bancaire tronqué à vingt caractères, dans une story
-        Instagram lue en trois secondes.
+        lue en trois secondes.
       </p>
       <p>
         Trois conséquences pratiques&nbsp;: il doit rester <strong>lisible tronqué</strong>, se
@@ -108,7 +108,7 @@ import { applyContentSeo } from './content-seo';
         Vérifiez surtout que l'autre extension n'appartient pas à un concurrent&nbsp;: vos clients taperont
         votre nom de mémoire, avec l'extension qui leur vient spontanément.
       </p>
-      <h3>Puis-je utiliser un nom déjà pris sur Instagram si le domaine est libre&nbsp;?</h3>
+      <h3>Puis-je utiliser un nom déjà pris sur les réseaux sociaux si le domaine est libre&nbsp;?</h3>
       <p>
         Techniquement oui, mais c'est un mauvais calcul. En e-commerce, le réseau social est souvent le premier
         point de contact&nbsp;: un pseudo différent du nom de domaine coûte en mémorisation à chaque
