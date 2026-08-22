@@ -105,7 +105,7 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
         <li><strong>Les réseaux sociaux</strong> — un handle cohérent (Instagram, TikTok, LinkedIn, GitHub…) fait gagner
           en clarté de marque. Les pseudos identiques partent vite.</li>
         <li><strong>La marque déposée</strong> — le seul plan à portée juridique. Nous interrogeons les bases officielles
-          <strong>INPI (France)</strong>, <strong>EUIPO (Union européenne)</strong> et <strong>OMPI (international)</strong>
+          <strong>INPI (France)</strong> et <strong>EUIPO (Union européenne)</strong>
           pour signaler les dépôts identiques ou proches, avec leurs <strong>classes de Nice</strong>.</li>
       </ul>
 

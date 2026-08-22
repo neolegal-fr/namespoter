@@ -166,11 +166,13 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
           }
         </section>
 
-        <!-- Marques — INPI, EUIPO et OMPI, périmètre nommé explicitement -->
+        <!-- Marques — périmètre nommé par la chaîne PARTAGÉE « TRADEMARK.SCOPE »,
+             la même que sur l'accueil et dans le comparatif. Trois textes
+             décrivaient trois périmètres différents pour un seul résultat. -->
         @if (r.trademark; as tm) {
         <section class="rv-section">
           <div class="rv-section__head">
-            <h3 class="rv-section__title">{{ 'WIZARD.STEP3.REPORT_TRADEMARK_SCOPE' | translate }}</h3>
+            <h3 class="rv-section__title">{{ 'TRADEMARK.SCOPE' | translate }}</h3>
             @if (allClasses(tm.hits); as cls) {
               @if (cls) { <span class="rv-section__meta">{{ 'WIZARD.STEP3.REPORT_CLASSES' | translate:{ list: cls } }}</span> }
             }
@@ -184,6 +186,12 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
           </div>
 
           <p class="rv-explain" [innerHTML]="tmExplainKey(tm.match) | translate"></p>
+
+          <!-- La PORTÉE de ce qui vient d'être affirmé, sous le verdict et non
+               en note de bas de page : « aucun dépôt identique » se lit comme
+               « le nom est libre » si rien ne dit ce que la recherche n'a pas
+               couvert. C'est la phrase qui protège juridiquement. -->
+          <p class="rv-note rv-note--scope">{{ 'TRADEMARK.SCOPE_NOTE' | translate }}</p>
 
           <!-- La RAISON du « non vérifiable », quand le serveur la donne.
                Sans elle, une configuration manquante et une panne de l'INPI

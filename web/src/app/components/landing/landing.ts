@@ -570,11 +570,18 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
    * parmi les vérifications, il affaiblissait les trois autres. Son contenu
    * descend en note sous la grille.
    */
-  readonly controls = [1, 2, 3].map((i) => ({
-    overline: `HOME.C${i}_OVER`,
-    title: `HOME.C${i}_TITLE`,
-    text: `HOME.C${i}_TEXT`,
-  }));
+  readonly controls = [
+    { overline: 'HOME.C1_OVER', title: 'HOME.C1_TITLE', text: 'HOME.C1_TEXT' },
+    { overline: 'HOME.C2_OVER', title: 'HOME.C2_TITLE', text: 'HOME.C2_TEXT' },
+    /*
+     * Le périmètre des marques est décrit par UNE chaîne, `TRADEMARK.SCOPE`,
+     * partagée avec le rapport et le comparatif. Recopiée dans une clé
+     * `HOME.C3_TITLE`, elle divergeait à la première retouche : l'accueil
+     * annonçait trois registres pendant que la grille n'affichait que deux
+     * lignes de verdict.
+     */
+    { overline: 'HOME.C3_OVER', title: 'TRADEMARK.SCOPE', text: 'HOME.C3_TEXT' },
+  ];
 
   /** Liens de guides — en français seulement : ces pages n'existent que dans cette langue. */
   readonly guides = [

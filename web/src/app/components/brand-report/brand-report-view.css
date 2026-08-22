@@ -148,7 +148,7 @@
 
 /* Le verdict passe À LA LIGNE quand il ne tient plus à côté du libellé.
    Sans `flex-wrap`, une pastille longue — « Aucun dépôt identique trouvé
-   (INPI / EUIPO / OMPI) » — gardait toute sa largeur (elle est en `flex: none`)
+   (INPI / EUIPO) » — gardait toute sa largeur (elle est en `flex: none`)
    et le libellé, lui, se réduisait à zéro : « Marque identique « navorae » »
    sortait à une lettre par ligne sur 475 px de haut. */
 .rv-row {
@@ -374,6 +374,15 @@
     color: var(--nm-app-text-3);
 }
 
+/* Portée de la recherche : un cran plus présent que la note technique, parce
+   qu'il borne une affirmation juridique. Un filet le rattache au verdict qu'il
+   qualifie, au lieu de le laisser flotter en fin de section. */
+.rv-note--scope {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--nm-app-border);
+}
+
 /* Logo de réseau : monochrome, à la couleur du texte. L'état du compte est
    porté par la pastille de droite — le logo ne dit que « quel réseau ». */
 .rv-social__logo {
@@ -592,7 +601,7 @@
   .rv-row app-reserver { order: 3; }
 
   /* La pastille de verdict est en `nowrap` : sur un écran étroit, « Aucun
-     dépôt identique trouvé (INPI / EUIPO / OMPI) » dépassait sa rangée de 90 px
+     dépôt identique trouvé (INPI / EUIPO) » dépassait sa rangée de 90 px
      et se faisait couper par le `overflow: hidden` de la carte — le verdict
      s'arrêtait au milieu d'un mot, sans que rien ne l'indique. Elle se replie
      donc sur deux lignes plutôt que d'être tronquée. */
