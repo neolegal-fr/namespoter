@@ -545,8 +545,7 @@
     "HAVE_NAME_LEAD": "Essayez gratuitement — 100 crédits offerts chaque mois, sans carte bancaire.",
     "HAVE_NAME_PLACEHOLDER": "Le nom que vous avez en tête",
     "HAVE_NAME_BTN": "Vérifier ce nom",
-    "SEE_SAMPLE": "Voir un exemple de rapport complet →",
-    "CMP_SCROLL_HINT": "Faites glisser le tableau pour voir les autres colonnes."
+    "SEE_SAMPLE": "Voir un exemple de rapport complet →"
   },
   "PUBLIC_REPORT": {
     "PLACEHOLDER": "Le nom que vous voulez tester",

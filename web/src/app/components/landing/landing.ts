@@ -252,22 +252,32 @@ import { applyContentSeo } from '../content/content-seo';
               <span role="columnheader">{{ 'HOME.CMP_AI' | translate }}</span>
               <span role="columnheader">{{ 'HOME.CMP_REG' | translate }}</span>
             </div>
+            <!-- Chaque valeur porte le nom de sa colonne, masqué sur grand
+                 écran. Sous 640px la rangée devient une carte : la colonne qui
+                 nous distingue était hors champ, derrière un défilement
+                 horizontal que personne ne déclenche. Les libellés portent
+                 « aria-hidden » — la rangée d'en-têtes reste dans l'arbre
+                 d'accessibilité, seulement masquée à l'œil, et les répéter les
+                 ferait lire deux fois. -->
             @for (r of compareRows(); track r[0]) {
               <div class="nm-table__row" role="row">
-                <span role="cell">{{ r[0] }}</span>
-                <span role="cell" class="nm-table__us">{{ r[1] }}</span>
-                <span role="cell">{{ r[2] }}</span>
-                <span role="cell">{{ r[3] }}</span>
+                <span role="cell" class="nm-table__crit">{{ r[0] }}</span>
+                <span role="cell" class="nm-table__cell nm-table__us">
+                  <span class="nm-table__collabel" aria-hidden="true">{{ 'HOME.CMP_US' | translate }}</span>
+                  <span>{{ r[1] }}</span>
+                </span>
+                <span role="cell" class="nm-table__cell">
+                  <span class="nm-table__collabel" aria-hidden="true">{{ 'HOME.CMP_AI' | translate }}</span>
+                  <span>{{ r[2] }}</span>
+                </span>
+                <span role="cell" class="nm-table__cell">
+                  <span class="nm-table__collabel" aria-hidden="true">{{ 'HOME.CMP_REG' | translate }}</span>
+                  <span>{{ r[3] }}</span>
+                </span>
               </div>
             }
           </div>
           </div>
-          <!-- Le tableau défile horizontalement sur petit écran (décision
-               assumée : à moins de 72 px par colonne, « registre en direct »
-               se casse en quatre lignes). Encore faut-il le DIRE : sans cette
-               ligne, la troisième colonne apparaît tranchée au milieu d'un mot
-               et rien n'indique qu'il y a quelque chose derrière. -->
-          <p class="nm-table__hint">{{ 'HOME.CMP_SCROLL_HINT' | translate }}</p>
         </section>
 
         <!-- Pour qui — texte SEO conservé -->
@@ -328,22 +338,6 @@ import { applyContentSeo } from '../content/content-seo';
             </form>
           </div>
         </section>
-
-        <!-- L'autre version de CETTE page, en clair.
-             Le sélecteur de langue du menu bascule le contenu sans changer
-             d'URL : aucun robot ne le déclenche, et rien ne pointait vers
-             « /en » à part le sitemap et les balises hreflang. Un lien
-             ordinaire vaut mieux — Google le suit, et un lecteur peut le
-             partager. Le libellé est dans la langue de DESTINATION, comme le
-             recommande Google : on ne demande pas à un anglophone de
-             reconnaître « Anglais ». -->
-        <p class="nm-lang-alt">
-          @if (lang === 'fr') {
-            <a routerLink="/en" hreflang="en" lang="en">This page in English</a>
-          } @else {
-            <a routerLink="/" hreflang="fr" lang="fr">Cette page en français</a>
-          }
-        </p>
 
       </div>
     </article>
