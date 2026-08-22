@@ -517,7 +517,7 @@
     "CMP_US": "Namorama",
     "CMP_AI": "AI generators",
     "CMP_REG": "Registrars",
-    "CMP_ROWS": "AI-generated names|yes|yes|—;Domain availability|live registry|estimated|yes;Trademark prior-art — INPI and EUIPO|included|—|—;Social handles|included|—|—;“Unverifiable” state reported|yes|—|—;No subscription|yes|rarely|yes",
+    "CMP_ROWS": "AI-generated names|yes|yes|no;Domain availability|live registry|estimated|yes;Trademark prior-art — INPI and EUIPO|yes|no|no;Social handles|yes|no|no;“Unverifiable” state reported|yes|no|no;No subscription|yes|rarely|yes",
     "WHO_H2": "Which projects is it for?",
     "WHO_TEXT": "Whether you are launching a <strong>startup</strong>, an <strong>online shop</strong>, a <strong>restaurant</strong>, a <strong>mobile app</strong>, a <strong>consulting</strong> firm or a <strong>cosmetics</strong> brand, Namorama helps you find a memorable name whose domain is still free. Ideal for naming a startup, a new product, or rebranding an existing business.",
     "FAQ_H2": "Frequently asked questions",

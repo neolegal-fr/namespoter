@@ -517,7 +517,7 @@
     "CMP_US": "Namorama",
     "CMP_AI": "Générateurs IA",
     "CMP_REG": "Registrars",
-    "CMP_ROWS": "Noms générés par IA|oui|oui|—;Disponibilité du domaine|registre en direct|estimée|oui;Antériorité de marque — INPI et EUIPO|incluse|—|—;Pseudos réseaux sociaux|inclus|—|—;État « invérifiable » signalé|oui|—|—;Sans abonnement|oui|rarement|oui",
+    "CMP_ROWS": "Noms générés par IA|oui|oui|non;Disponibilité du domaine|registre en direct|estimée|oui;Antériorité de marque — INPI et EUIPO|oui|non|non;Pseudos réseaux sociaux|oui|non|non;État « invérifiable » signalé|oui|non|non;Sans abonnement|oui|rarement|oui",
     "WHO_H2": "Pour quels projets ?",
     "WHO_TEXT": "Que vous lanciez une <strong>startup</strong>, une <strong>boutique e-commerce</strong>, un <strong>restaurant</strong>, une <strong>application mobile</strong>, un cabinet de <strong>conseil</strong> ou une marque de <strong>cosmétiques</strong>, Namorama vous aide à trouver un nom mémorable dont le nom de domaine est encore libre. Idéal pour choisir un nom de startup, nommer un nouveau produit ou rebrander une activité existante.",
     "FAQ_H2": "Questions fréquentes",
