@@ -1,5 +1,5 @@
 import { Controller, Get, Patch, Post, Delete, Param, Body, Query, ParseIntPipe, DefaultValuePipe, HttpCode, ForbiddenException } from '@nestjs/common';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Roles, AuthenticatedUser } from 'nest-keycloak-connect';
 import { AdminService } from './admin.service';
 import { FeedbackService } from '../feedback/feedback.service';
@@ -12,6 +12,11 @@ class AdjustCreditsDto {
   @IsOptional()
   @IsString()
   reason?: string;
+}
+
+class SetInternalDto {
+  @IsBoolean()
+  internal: boolean;
 }
 
 @Controller('admin')
@@ -41,6 +46,21 @@ export class AdminController {
     @AuthenticatedUser() admin: any,
   ) {
     return this.adminService.adjustCredits(id, body.delta, body.reason ?? '', admin.sub);
+  }
+
+  /**
+   * Marque un compte comme interne (ou l'en retire).
+   *
+   * Le corps porte un booléen EXPLICITE plutôt qu'une bascule : deux clics
+   * rapides sur une bascule, ou deux onglets ouverts, laisseraient le compte
+   * dans l'état inverse de celui qu'on voit à l'écran.
+   */
+  @Patch('users/:id/internal')
+  async setInternal(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: SetInternalDto,
+  ) {
+    return this.adminService.setInternal(id, body.internal);
   }
 
   @Delete('users/:id')

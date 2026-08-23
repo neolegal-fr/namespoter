@@ -309,9 +309,29 @@ Le **taux d'activation** (inscrits de la période ayant créé au moins un proje
 calcule rétroactivement sur tout l'historique : c'est le seul indicateur de fond qui
 n'attendait aucune nouvelle colonne.
 
-> Deux migrations à appliquer **avant** de déployer l'image :
-> `2026-08-23-journal-d-activite-quotidienne.sql` et
-> `2026-08-23-date-de-creation-des-suggestions.sql`.
+#### Comptes écartés des statistiques
+
+Deux drapeaux, qui ne se recouvrent pas :
+
+- `user.isAdmin`, recopié du token Keycloak, ne couvre que les porteurs du rôle realm.
+- `user.isInternal` se coche **à la main** depuis le tableau admin (icône drapeau,
+  badge « interne » sur la ligne). Rien dans les données ne trahit un compte de test :
+  relevé sur les 47 comptes de production, aucun alias `+`, et 28 sur 47 chez
+  gmail.com, comptes de test compris. Ni motif d'adresse, ni liste en dur ne
+  tiendraient.
+
+Le défaut est « mesuré » : oublier de cocher gonfle les chiffres, ce qui se remarque ;
+l'inverse les viderait en silence.
+
+> Le prédicat vit à **un seul endroit** — `AdminService.comptesMesures()`. Il apparaît
+> dix-neuf fois dans le fichier, une par agrégat : écrit à la main partout, il suffisait
+> d'en oublier un pour qu'un indicateur compte les comptes de test sans que rien ne le
+> signale. Le chiffre reste plausible, il est simplement faux.
+
+> Trois migrations à appliquer **avant** de déployer l'image :
+> `2026-08-23-journal-d-activite-quotidienne.sql`,
+> `2026-08-23-date-de-creation-des-suggestions.sql` et
+> `2026-08-23-comptes-internes.sql`.
 
 ### Suivi des rapports de marque
 

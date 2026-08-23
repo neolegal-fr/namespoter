@@ -17,6 +17,11 @@ export interface AdminUser {
   projectCount: number;
   /** Rapports de marque produits (les demandes bloquées/en échec ne sont visibles que dans les logs). */
   brandReportCount: number;
+  /**
+   * Compte interne (le vôtre, une démonstration, un test) : écarté de toutes
+   * les statistiques. Se coche à la main — rien dans les données ne le trahit.
+   */
+  isInternal: boolean;
 }
 
 export interface FeedbackItem {
@@ -136,6 +141,17 @@ export class AdminService {
 
   deleteFeedback(feedbackId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/feedback/${feedbackId}`);
+  }
+
+  /**
+   * Marque un compte comme interne, ou l'en retire.
+   *
+   * L'état voulu est envoyé EXPLICITEMENT plutôt qu'une bascule : deux clics
+   * rapides, ou deux onglets ouverts, laisseraient sinon le compte dans l'état
+   * inverse de celui qu'on voit à l'écran.
+   */
+  setInternal(userId: number, internal: boolean): Observable<AdminUser> {
+    return this.http.patch<AdminUser>(`${this.base}/users/${userId}/internal`, { internal });
   }
 
   deleteUser(userId: number): Observable<void> {

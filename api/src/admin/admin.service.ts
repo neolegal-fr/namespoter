@@ -25,6 +25,11 @@ export interface AdminUserRow {
    * échec n'y figure pas — seuls les logs les voient (`brand_report_requested`).
    */
   brandReportCount: number;
+  /**
+   * Compte interne (vôtre, démonstration, test) : écarté de toutes les
+   * statistiques. Se coche à la main — rien dans les données ne le trahit.
+   */
+  isInternal: boolean;
 }
 
 /**
@@ -140,6 +145,23 @@ export class AdminService {
   }
 
   /**
+   * Les comptes retenus dans les statistiques : ni admin, ni interne.
+   *
+   * Ce prédicat apparaît DIX-NEUF fois dans ce fichier — un par agrégat. Écrit
+   * à la main à chaque endroit, il suffisait d'en oublier un pour qu'un seul
+   * indicateur compte les comptes de test, sans que rien ne le signale : le
+   * chiffre reste plausible, il est simplement faux. D'où une seule source.
+   *
+   * Les deux drapeaux ne se recouvrent pas. `isAdmin` est recopié du token
+   * Keycloak et ne couvre que les porteurs du rôle realm ; `isInternal` se
+   * coche à la main, parce que rien dans les données ne trahit un compte de
+   * test (cf. la migration du 23/08/2026).
+   */
+  private static comptesMesures(alias = 'u'): string {
+    return `${alias}.isAdmin = false AND ${alias}.isInternal = false`;
+  }
+
+  /**
    * Colonnes triables, et l'expression SQL de chacune.
    *
    * Liste BLANCHE : le paramètre vient de l'URL, et il finit dans un ORDER BY,
@@ -203,6 +225,7 @@ export class AdminService {
       lastLogin: u.lastLogin,
       projectCount: projCounts.get(u.id) ?? 0,
       brandReportCount: reportCounts.get(u.keycloakId) ?? 0,
+      isInternal: u.isInternal,
     }));
 
     return { data, total };
@@ -233,6 +256,38 @@ export class AdminService {
       lastLogin: user.lastLogin,
       projectCount: await this.projectRepo.count({ where: { user: { id: userId } } }),
       brandReportCount: await this.brandReportRepo.count({ where: { keycloakId: user.keycloakId } }),
+      isInternal: user.isInternal,
+    };
+  }
+
+  /**
+   * Marque un compte comme interne, ou le remet dans les statistiques.
+   *
+   * Aucun garde-fou sur l'identité de l'appelant : le geste est réversible d'un
+   * clic et ne touche ni aux crédits, ni aux données du compte, ni à son accès
+   * au produit. Il ne change QUE ce que le tableau de bord compte.
+   */
+  async setInternal(userId: number, internal: boolean): Promise<AdminUserRow> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException(`User ${userId} not found`);
+
+    user.isInternal = internal;
+    await this.userRepo.save(user);
+
+    return {
+      id: user.id,
+      keycloakId: user.keycloakId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      credits: user.credits,
+      extraCredits: user.extraCredits,
+      totalCredits: user.credits + user.extraCredits,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
+      projectCount: await this.projectRepo.count({ where: { user: { id: userId } } }),
+      brandReportCount: await this.brandReportRepo.count({ where: { keycloakId: user.keycloakId } }),
+      isInternal: user.isInternal,
     };
   }
 
@@ -310,7 +365,7 @@ export class AdminService {
         `SELECT COUNT(DISTINCT a.userId) AS n
            FROM user_activity_day a
            INNER JOIN user u ON u.id = a.userId
-          WHERE u.isAdmin = false AND a.day >= ? AND a.day <= ?`,
+          WHERE ${AdminService.comptesMesures()} AND a.day >= ? AND a.day <= ?`,
         [AdminService.jourISO(premierJour), AdminService.jourISO(dernierJour)],
       );
       return Number(rows[0]?.n ?? 0);
@@ -319,7 +374,7 @@ export class AdminService {
     if (Math.abs(Date.now() - fin.getTime()) <= AdminService.MAINTENANT_MS) {
       return this.userRepo.createQueryBuilder('u')
         .where('u.lastLogin >= :from AND u.lastLogin <= :to', { from: debut, to: fin })
-        .andWhere('u.isAdmin = false')
+        .andWhere(AdminService.comptesMesures())
         .getCount();
     }
 
@@ -340,7 +395,7 @@ export class AdminService {
       this.projectRepo.createQueryBuilder('p')
         .innerJoin('p.user', 'u')
         .where('p.createdAt >= :from AND p.createdAt <= :to', { from: debut, to: fin })
-        .andWhere('u.isAdmin = false')
+        .andWhere(AdminService.comptesMesures())
         .getCount(),
 
       // Jointure sur le `sub` Keycloak : BrandReportRecord ne référence pas
@@ -349,7 +404,7 @@ export class AdminService {
       this.brandReportRepo.createQueryBuilder('r')
         .innerJoin(User, 'u', 'u.keycloakId = r.keycloakId')
         .where('r.createdAt >= :from AND r.createdAt <= :to', { from: debut, to: fin })
-        .andWhere('u.isAdmin = false')
+        .andWhere(AdminService.comptesMesures())
         .getCount(),
 
       // Une suggestion coûte un crédit ; un rapport coûte ce qu'il a
@@ -366,13 +421,13 @@ export class AdminService {
               FROM domain_suggestion ds
               INNER JOIN project p ON p.id = ds.projectId
               INNER JOIN user u ON u.id = p.userId
-             WHERE u.isAdmin = false
+             WHERE ${AdminService.comptesMesures()}
                AND COALESCE(ds.createdAt, p.createdAt) >= ?
                AND COALESCE(ds.createdAt, p.createdAt) <= ?) AS suggestions,
            (SELECT COALESCE(SUM(r.costCredits), 0)
               FROM brand_report_record r
               INNER JOIN user u ON u.keycloakId = r.keycloakId
-             WHERE u.isAdmin = false
+             WHERE ${AdminService.comptesMesures()}
                AND r.createdAt >= ? AND r.createdAt <= ?) AS creditsRapports`,
         [debut, fin, debut, fin],
       ),
@@ -386,7 +441,7 @@ export class AdminService {
         `SELECT COUNT(*) AS inscrits,
                 COALESCE(SUM(EXISTS (SELECT 1 FROM project p WHERE p.userId = u.id)), 0) AS actives
            FROM user u
-          WHERE u.isAdmin = false AND u.createdAt >= ? AND u.createdAt <= ?`,
+          WHERE ${AdminService.comptesMesures()} AND u.createdAt >= ? AND u.createdAt <= ?`,
         [debut, fin],
       ),
     ]);
@@ -432,19 +487,19 @@ export class AdminService {
     ]);
 
     const [totalUsers, totalProjects, totalSuggestions, totalBrandReports] = await Promise.all([
-      this.userRepo.count({ where: { isAdmin: false } }),
+      this.userRepo.count({ where: { isAdmin: false, isInternal: false } }),
       this.projectRepo.createQueryBuilder('p')
         .innerJoin('p.user', 'u')
-        .where('u.isAdmin = false')
+        .where(AdminService.comptesMesures())
         .getCount(),
       this.suggestionRepo.createQueryBuilder('ds')
         .innerJoin('ds.project', 'p')
         .innerJoin('p.user', 'u')
-        .where('u.isAdmin = false')
+        .where(AdminService.comptesMesures())
         .getCount(),
       this.brandReportRepo.createQueryBuilder('r')
         .innerJoin(User, 'u', 'u.keycloakId = r.keycloakId')
-        .where('u.isAdmin = false')
+        .where(AdminService.comptesMesures())
         .getCount(),
     ]);
 
@@ -453,7 +508,7 @@ export class AdminService {
          SELECT COUNT(*) as cnt FROM domain_suggestion ds
          INNER JOIN project p ON p.id = ds.projectId
          INNER JOIN user u ON u.id = p.userId
-         WHERE u.isAdmin = false
+         WHERE ${AdminService.comptesMesures()}
          GROUP BY ds.projectId) sub`
     );
     const avgFavoritesResult = await this.dataSource.query(
@@ -461,12 +516,12 @@ export class AdminService {
          SELECT COUNT(*) as cnt FROM domain_suggestion ds
          INNER JOIN project p ON p.id = ds.projectId
          INNER JOIN user u ON u.id = p.userId
-         WHERE ds.rating = 'liked' AND u.isAdmin = false
+         WHERE ds.rating = 'liked' AND ${AdminService.comptesMesures()}
          GROUP BY ds.projectId) sub`
     );
 
     const creditsResult = await this.dataSource.query(
-      `SELECT SUM(credits) as free, SUM(extraCredits) as pack FROM user WHERE isAdmin = false`
+      `SELECT SUM(u.credits) as free, SUM(u.extraCredits) as pack FROM user u WHERE ${AdminService.comptesMesures()}`
     );
 
     return {
@@ -527,7 +582,7 @@ export class AdminService {
       this.dataSource.query(
         `SELECT ${AdminService.SEMAINE('u.createdAt')} AS semaine, COUNT(*) AS n
            FROM user u
-          WHERE u.isAdmin = false AND u.createdAt >= ?
+          WHERE ${AdminService.comptesMesures()} AND u.createdAt >= ?
           GROUP BY semaine`,
         [depuis],
       ),
@@ -536,7 +591,7 @@ export class AdminService {
         `SELECT ${AdminService.SEMAINE('p.createdAt')} AS semaine, COUNT(*) AS n
            FROM project p
            INNER JOIN user u ON u.id = p.userId
-          WHERE u.isAdmin = false AND p.createdAt >= ?
+          WHERE ${AdminService.comptesMesures()} AND p.createdAt >= ?
           GROUP BY semaine`,
         [depuis],
       ),
@@ -546,7 +601,7 @@ export class AdminService {
            FROM domain_suggestion ds
            INNER JOIN project p ON p.id = ds.projectId
            INNER JOIN user u ON u.id = p.userId
-          WHERE u.isAdmin = false AND COALESCE(ds.createdAt, p.createdAt) >= ?
+          WHERE ${AdminService.comptesMesures()} AND COALESCE(ds.createdAt, p.createdAt) >= ?
           GROUP BY semaine`,
         [depuis],
       ),
@@ -555,7 +610,7 @@ export class AdminService {
         `SELECT ${AdminService.SEMAINE('r.createdAt')} AS semaine, COALESCE(SUM(r.costCredits), 0) AS n
            FROM brand_report_record r
            INNER JOIN user u ON u.keycloakId = r.keycloakId
-          WHERE u.isAdmin = false AND r.createdAt >= ?
+          WHERE ${AdminService.comptesMesures()} AND r.createdAt >= ?
           GROUP BY semaine`,
         [depuis],
       ),
@@ -564,7 +619,7 @@ export class AdminService {
         `SELECT ${AdminService.SEMAINE('a.day')} AS semaine, COUNT(DISTINCT a.userId) AS n
            FROM user_activity_day a
            INNER JOIN user u ON u.id = a.userId
-          WHERE u.isAdmin = false AND a.day >= ?
+          WHERE ${AdminService.comptesMesures()} AND a.day >= ?
           GROUP BY semaine`,
         [depuis],
       ),
