@@ -168,6 +168,7 @@ export class ProjectsService {
         domainName: d.name,
         availability: d.allExtensions,
         checkedAt: new Date(),
+        createdAt: new Date(),
         style: d.style || 'standard',
       }),
     );
@@ -229,7 +230,7 @@ export class ProjectsService {
     });
     if (existing) return existing;
 
-    const suggestion = this.suggestionsRepository.create({ project, domainName, availability, checkedAt: new Date() });
+    const suggestion = this.suggestionsRepository.create({ project, domainName, availability, checkedAt: new Date(), createdAt: new Date() });
     return this.suggestionsRepository.save(suggestion);
   }
 

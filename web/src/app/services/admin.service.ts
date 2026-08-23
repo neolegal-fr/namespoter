@@ -29,13 +29,27 @@ export interface FeedbackItem {
   createdAt: string;
 }
 
+/** Ce qu'on mesure sur une fenêtre. Voir `PeriodMetrics` côté API. */
+export interface PeriodMetrics {
+  from: string;
+  to: string;
+  /** `null` = non mesurable sur cette fenêtre, PAS zéro. */
+  activeUsers: number | null;
+  newUsers: number;
+  newProjects: number;
+  suggestions: number;
+  brandReports: number;
+  creditsConsumed: number;
+  activatedUsers: number;
+  /** En %, ou `null` si personne ne s'est inscrit sur la fenêtre. */
+  activationRate: number | null;
+}
+
 export interface AdminStats {
+  period: PeriodMetrics;
+  /** Même durée, immédiatement avant la période choisie. */
+  previous: PeriodMetrics;
   totalUsers: number;
-  periodActiveUsers: number;
-  periodNewUsers: number;
-  periodNewProjects: number;
-  periodSuggestions: number;
-  periodBrandReports: number;
   totalProjects: number;
   totalSuggestions: number;
   totalBrandReports: number;
@@ -43,6 +57,23 @@ export interface AdminStats {
   avgFavoritesPerProject: number;
   totalFreeCredits: number;
   totalPackCredits: number;
+  /** `AAAA-MM-JJ` du premier jour mesuré par le journal d'activité, ou `null`. */
+  activityTrackingSince: string | null;
+}
+
+/** Un point hebdomadaire. `week` est le lundi, au format `AAAA-MM-JJ`. */
+export interface WeeklyPoint {
+  week: string;
+  newUsers: number;
+  /** `null` avant le démarrage du journal — un trou dans la courbe, pas un zéro. */
+  activeUsers: number | null;
+  projects: number;
+  creditsConsumed: number;
+}
+
+export interface AdminSeries {
+  weeks: WeeklyPoint[];
+  activityTrackingSince: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -79,6 +110,16 @@ export class AdminService {
     if (from) params = params.set('from', from.toISOString());
     if (to) params = params.set('to', to.toISOString());
     return this.http.get<AdminStats>(`${this.base}/stats`, { params });
+  }
+
+  /**
+   * Historique hebdomadaire. Appel distinct de `getStats` : la série ne dépend
+   * pas de la période choisie et n'a donc pas à être rejouée à chaque clic.
+   */
+  getSeries(weeks = 26): Observable<AdminSeries> {
+    return this.http.get<AdminSeries>(`${this.base}/series`, {
+      params: new HttpParams().set('weeks', weeks),
+    });
   }
 
   getFeedback(): Observable<FeedbackItem[]> {
