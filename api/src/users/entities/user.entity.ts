@@ -45,6 +45,22 @@ export class User {
   @Column({ default: false })
   isAdmin: boolean;
 
+  /**
+   * Compte interne : le vôtre, une démonstration, un test.
+   *
+   * Écarté de TOUTES les statistiques d'administration, au même titre qu'un
+   * compte admin. Contrairement à {@link isAdmin}, qui est recopié du token,
+   * celui-ci se coche à la main depuis le tableau admin — rien dans les données
+   * ne permet de reconnaître un compte de test. Relevé sur la production :
+   * aucun alias `+`, et la majorité des comptes de test partagent le domaine de
+   * messagerie des vrais utilisateurs.
+   *
+   * Le défaut est « mesuré ». Oublier de cocher gonfle les chiffres, ce qui se
+   * remarque ; l'inverse les viderait sans bruit.
+   */
+  @Column({ default: false })
+  isInternal: boolean;
+
   /** Dernière date de reset des crédits gratuits (lazy reset mensuel) */
   @Column({ nullable: true, type: 'datetime' })
   lastFreeReset: Date | null;

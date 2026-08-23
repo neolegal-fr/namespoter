@@ -76,6 +76,10 @@ import { KeycloakService } from 'keycloak-angular';
             <tr>
               <td class="text-sm font-semibold text-900">
                 {{ (user.firstName || user.lastName) ? (user.firstName + ' ' + user.lastName) : '—' }}
+                <!-- Le badge porte le mot, pas seulement une teinte : « ce
+                     compte ne compte pas » ne se devine pas d'une couleur. -->
+                <span *ngIf="user.isInternal" class="nm-badge-interne"
+                      pTooltip="Écarté de toutes les statistiques" tooltipPosition="top">interne</span>
               </td>
               <td class="text-xs text-500" style="font-family: monospace">
                 {{ user.email || user.keycloakId }}
@@ -111,6 +115,16 @@ import { KeycloakService } from 'keycloak-angular';
                             [pTooltip]="'ADMIN.ADJUST_CREDITS' | translate" tooltipPosition="top"
                             (onClick)="startEdit(user)">
                   </p-button>
+                  <p-button [icon]="user.isInternal ? 'pi pi-flag-fill' : 'pi pi-flag'"
+                            size="small" [text]="true"
+                            [severity]="user.isInternal ? 'warn' : 'secondary'"
+                            [loading]="marquageUserId() === user.id"
+                            [pTooltip]="user.isInternal
+                              ? 'Compte interne — le remettre dans les statistiques'
+                              : 'Marquer comme compte interne (exclu des statistiques)'"
+                            tooltipPosition="top"
+                            (onClick)="basculerInterne(user)">
+                  </p-button>
                   <p-button icon="pi pi-trash" size="small" [text]="true" severity="danger"
                             [loading]="deletingUserId() === user.id"
                             [disabled]="user.keycloakId === currentKeycloakId()"
@@ -141,6 +155,16 @@ import { KeycloakService } from 'keycloak-angular';
       </div>
     </div>
   `,
+  styles: [`
+    .nm-badge-interne {
+      display: inline-block; margin-left: 0.4rem;
+      padding: 0.05rem 0.35rem; border-radius: 4px;
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; vertical-align: middle;
+      color: var(--nm-verdict-watch-light-fg, #9a6a12);
+      background: var(--nm-verdict-watch-light-bg, #fdf3e3);
+    }
+  `],
 })
 export class AdminUsersComponent implements OnInit {
   users = signal<AdminUser[]>([]);
@@ -162,6 +186,7 @@ export class AdminUsersComponent implements OnInit {
   editingUserId = signal<number | null>(null);
   savingUserId = signal<number | null>(null);
   deletingUserId = signal<number | null>(null);
+  marquageUserId = signal<number | null>(null);
   currentKeycloakId = signal<string | null>(null);
   adjustNewValue = 0;
   adjustReason = '';
@@ -269,6 +294,32 @@ export class AdminUsersComponent implements OnInit {
         });
       },
       error: () => this.deletingUserId.set(null),
+    });
+  }
+
+  /**
+   * Bascule le drapeau « compte interne ».
+   *
+   * Pas de confirmation : le geste ne touche ni aux crédits, ni aux données du
+   * compte, ni à son accès au produit — il ne change QUE ce que le tableau de
+   * bord compte, et se défait d'un second clic. Le message rappelle en
+   * revanche que les chiffres viennent de bouger, sans quoi l'écart constaté
+   * à la prochaine ouverture passerait pour une variation d'usage.
+   */
+  basculerInterne(user: AdminUser) {
+    const vise = !user.isInternal;
+    this.marquageUserId.set(user.id);
+    this.adminService.setInternal(user.id, vise).subscribe({
+      next: (updated) => {
+        this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
+        this.marquageUserId.set(null);
+        this.messageService.add({
+          severity: 'success',
+          summary: vise ? 'Compte marqué comme interne' : 'Compte remis dans les statistiques',
+          detail: `${updated.email || updated.keycloakId} — les indicateurs du tableau de bord changent en conséquence.`,
+        });
+      },
+      error: () => this.marquageUserId.set(null),
     });
   }
 
