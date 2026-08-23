@@ -67,6 +67,20 @@ export class AdminController {
     );
   }
 
+  /**
+   * Historique hebdomadaire, pour les courbes du tableau de bord.
+   *
+   * Séparé de `/stats` : la série balaie six mois et ne change qu'une fois par
+   * semaine, alors que les indicateurs se recalculent à chaque changement de
+   * période. Les fusionner ferait rejouer six mois d'agrégats à chaque clic.
+   */
+  @Get('series')
+  async getSeries(
+    @Query('weeks', new DefaultValuePipe(26), ParseIntPipe) weeks: number,
+  ) {
+    return this.adminService.getSeries(weeks);
+  }
+
   @Get('feedback')
   async getFeedback() {
     return this.feedbackService.findAll();

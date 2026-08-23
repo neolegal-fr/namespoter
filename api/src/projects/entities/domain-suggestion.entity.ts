@@ -26,6 +26,22 @@ export class DomainSuggestion {
   @Column({ type: 'datetime', nullable: true })
   checkedAt: Date | null;
 
+  /**
+   * Date de création de la suggestion — distincte de {@link checkedAt}, qui est
+   * réécrite à chaque revérification de disponibilité.
+   *
+   * Sert aux agrégats hebdomadaires du tableau de bord : une suggestion coûte
+   * un crédit, et sans date propre elle était rattachée à celle du PROJET.
+   * `addSuggestion()` en ajoutant à des projets anciens, une recherche relancée
+   * aujourd'hui était comptée le mois de la création du projet.
+   *
+   * Nullable : les suggestions antérieures à cette colonne n'ont pas de date de
+   * création. Les agrégats font le repli sur `project.createdAt` explicitement,
+   * plutôt que de graver l'approximation en base.
+   */
+  @Column({ type: 'datetime', nullable: true })
+  createdAt: Date | null;
+
   @Column({ type: 'varchar', length: 10, default: 'neutral' })
   rating: 'liked' | 'disliked' | 'neutral';
 

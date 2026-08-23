@@ -278,6 +278,41 @@ Les fichiers appartiennent à root (écrits par le conteneur) mais sont lisibles
 - Accès hybride : public pour le test, connexion requise pour les résultats
 - Rapport de marque complet (domaines + réseaux + INPI), facturé `BRAND_REPORT_COST` crédits
 
+### Tableau de bord d'administration
+
+Chaque indicateur de période s'affiche avec son **écart à la période précédente** —
+même durée, immédiatement avant — et cinq **historiques hebdomadaires** sur six mois.
+
+Trois règles, chacune posée contre une façon précise de faire mentir un chiffre :
+
+- **`user.lastLogin` ne fait pas d'historique.** C'est un scalaire écrasé à chaque
+  passage : un compte actif deux semaines de suite n'apparaît que dans la seconde.
+  Il ne répond juste que pour une fenêtre **se terminant maintenant**, et sous-estime
+  donc systématiquement la période à laquelle on se compare. D'où `user_activity_day`
+  (une ligne par compte et par jour, écrite dans `findOrCreate`, best-effort). Avant
+  le premier jour du journal, « comptes actifs » vaut **`null`**, jamais zéro —
+  l'interface affiche « — » et la courbe un creux hachuré.
+- **Pas de pourcentage sous 5 sur la période précédente.** À une poignée
+  d'événements par semaine, 1 → 4 s'afficherait « +300 % » et 0 → 1 n'aurait pas de
+  pourcentage du tout. En dessous du socle, l'écart s'affiche en absolu. Sur un
+  indicateur déjà en pourcentage (taux d'activation), l'écart se compte en **points**.
+- **La semaine en cours est incomplète.** Affichée pleine, elle simule une chute
+  hebdomadaire : elle est estompée, annoncée comme telle, et exclue des moyennes.
+
+Les **crédits consommés** sont reconstitués, faute de journal de débits :
+suggestions × 1 + `costCredits` réel des rapports. Deux angles morts assumés et
+affichés dans l'interface — les suggestions antérieures au 23/08/2026 n'ont pas de
+`createdAt` et retombent sur la date de leur projet (`COALESCE`), et les rapports
+antérieurs au 19/08/2026 n'ont pas gardé leur coût.
+
+Le **taux d'activation** (inscrits de la période ayant créé au moins un projet) se
+calcule rétroactivement sur tout l'historique : c'est le seul indicateur de fond qui
+n'attendait aucune nouvelle colonne.
+
+> Deux migrations à appliquer **avant** de déployer l'image :
+> `2026-08-23-journal-d-activite-quotidienne.sql` et
+> `2026-08-23-date-de-creation-des-suggestions.sql`.
+
 ### Suivi des rapports de marque
 
 Deux sources, volontairement distinctes — elles ne mesurent pas la même chose :

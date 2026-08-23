@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { UserActivityDay } from './entities/user-activity-day.entity';
 import { Project } from '../projects/entities/project.entity';
 
 /** Quota mensuel de crédits gratuits */
@@ -36,8 +37,58 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Project)
     private projectsRepository: Repository<Project>,
+    @InjectRepository(UserActivityDay)
+    private activityRepository: Repository<UserActivityDay>,
     private configService: ConfigService,
   ) {}
+
+  /**
+   * Couples (compte, jour) déjà écrits par CE processus.
+   *
+   * `findOrCreate` est appelé au début de presque chaque requête authentifiée :
+   * sans ce garde, un utilisateur qui parcourt l'application déclencherait un
+   * `INSERT ... IGNORE` par clic. La clé primaire garantit déjà l'unicité en
+   * base — ce cache ne corrige rien, il évite le trajet.
+   *
+   * Volontairement non borné en taille : une entrée par (compte, jour) actif,
+   * et le processus redémarre à chaque déploiement. Bornée en revanche dans le
+   * temps — les entrées d'hier sont purgées au premier appel du lendemain,
+   * sinon un conteneur de longue durée les accumulerait indéfiniment.
+   */
+  private activiteVue = new Set<string>();
+  private activiteJour = '';
+
+  /**
+   * Note que ce compte s'est servi du produit aujourd'hui.
+   *
+   * Best-effort, comme les logs : une requête utilisateur ne doit jamais
+   * échouer parce qu'une statistique n'a pas pu s'écrire.
+   */
+  private async noterActivite(userId: number): Promise<void> {
+    try {
+      const now = new Date();
+      const jour = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      if (jour !== this.activiteJour) {
+        this.activiteVue.clear();
+        this.activiteJour = jour;
+      }
+      const cle = `${userId}:${jour}`;
+      if (this.activiteVue.has(cle)) return;
+
+      await this.activityRepository
+        .createQueryBuilder()
+        .insert()
+        .into(UserActivityDay)
+        .values({ userId, day: jour })
+        .orIgnore()
+        .execute();
+
+      this.activiteVue.add(cle);
+    } catch (e) {
+      this.logger.warn(`Activité non enregistrée pour l'utilisateur ${userId}: ${e}`);
+    }
+  }
 
   /**
    * Réinitialise les crédits gratuits si le dernier reset date d'un mois précédent.
@@ -85,6 +136,10 @@ export class UsersService {
 
     user.lastLogin = new Date();
     await this.usersRepository.save(user);
+
+    // `lastLogin` ne retient que la dernière fois ; le journal retient CHAQUE
+    // jour. Voir UserActivityDay pour ce que l'un mesure et l'autre pas.
+    await this.noterActivite(user.id);
 
     return user;
   }

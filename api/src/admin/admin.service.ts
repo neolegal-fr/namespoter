@@ -27,13 +27,39 @@ export interface AdminUserRow {
   brandReportCount: number;
 }
 
+/**
+ * Ce qu'on mesure sur une fenêtre de temps. Le tableau de bord en calcule deux
+ * — la période choisie et celle de même durée qui la précède — pour que chaque
+ * chiffre s'affiche avec son évolution plutôt que seul.
+ */
+export interface PeriodMetrics {
+  /** Bornes effectives, renvoyées telles qu'utilisées (ISO 8601). */
+  from: string;
+  to: string;
+  /**
+   * Comptes distincts ayant utilisé le produit.
+   *
+   * `null` = NON MESURABLE sur cette fenêtre, pas zéro. Voir
+   * {@link AdminService.comptesActifs} : avant le journal d'activité, seule une
+   * fenêtre se terminant maintenant avait une réponse juste.
+   */
+  activeUsers: number | null;
+  newUsers: number;
+  newProjects: number;
+  suggestions: number;
+  brandReports: number;
+  /** Suggestions (1 crédit) + coût réel des rapports produits. */
+  creditsConsumed: number;
+  /** Inscrits de la fenêtre ayant créé au moins un projet depuis. */
+  activatedUsers: number;
+  /** `activatedUsers / newUsers` en %, ou `null` si personne ne s'est inscrit. */
+  activationRate: number | null;
+}
+
 export interface AdminStats {
+  period: PeriodMetrics;
+  previous: PeriodMetrics;
   totalUsers: number;
-  periodActiveUsers: number;
-  periodNewUsers: number;
-  periodNewProjects: number;
-  periodSuggestions: number;
-  periodBrandReports: number;
   totalProjects: number;
   totalSuggestions: number;
   totalBrandReports: number;
@@ -41,6 +67,28 @@ export interface AdminStats {
   avgFavoritesPerProject: number;
   totalFreeCredits: number;
   totalPackCredits: number;
+  /**
+   * Premier jour couvert par le journal d'activité (`AAAA-MM-JJ`), ou `null`
+   * s'il est vide. Sert à l'interface pour dire « mesuré depuis le … » au lieu
+   * de laisser croire à un trou dans l'usage.
+   */
+  activityTrackingSince: string | null;
+}
+
+/** Un point de la série hebdomadaire. `week` est le LUNDI de la semaine. */
+export interface WeeklyPoint {
+  week: string;
+  newUsers: number;
+  /** `null` avant le démarrage du journal d'activité — un trou, pas un zéro. */
+  activeUsers: number | null;
+  /** Projets créés : une recherche aboutie, ou un nom soumis au test. */
+  projects: number;
+  creditsConsumed: number;
+}
+
+export interface AdminSeries {
+  weeks: WeeklyPoint[];
+  activityTrackingSince: string | null;
 }
 
 @Injectable()
@@ -188,49 +236,203 @@ export class AdminService {
     };
   }
 
-  async getStats(from?: Date, to?: Date): Promise<AdminStats> {
-    const periodEnd = to ?? new Date();
-    const periodStart = from ?? new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+  // ─── Repères de temps ──────────────────────────────────────────────────────
 
-    // Les comptes admin servent à tester et à faire des démonstrations : leur
-    // activité gonflerait chaque agrégat sans rien dire de l'usage réel. Ils
-    // sont donc écartés de bout en bout — utilisateurs, projets, suggestions
-    // et crédits — et pas seulement du décompte d'utilisateurs.
-    const [totalUsers, periodActiveUsers, periodNewUsers, periodNewProjects, periodBrandReports] = await Promise.all([
-      this.userRepo.count({ where: { isAdmin: false } }),
-      this.userRepo.createQueryBuilder('u')
-        .where('u.lastLogin >= :from AND u.lastLogin <= :to', { from: periodStart, to: periodEnd })
+  /** `AAAA-MM-JJ` dans le fuseau du serveur — celui où les dates sont stockées. */
+  private static jourISO(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  /**
+   * Minuit le plus PROCHE, avant ou après.
+   *
+   * Le journal d'activité raisonne en jours civils, le sélecteur de période en
+   * instants. Tronquer les deux bornes vers le bas ferait couvrir huit jours à
+   * une fenêtre de sept ; arrondir chacune au minuit le plus proche en fait
+   * exactement sept, quelle que soit l'heure à laquelle on regarde.
+   */
+  private static minuitProche(d: Date): Date {
+    const j = new Date(d);
+    j.setHours(0, 0, 0, 0);
+    if (d.getTime() - j.getTime() >= 12 * 60 * 60 * 1000) j.setDate(j.getDate() + 1);
+    return j;
+  }
+
+  /** Lundi de la semaine contenant `d` (semaine ISO, comme `WEEKDAY()` en SQL). */
+  private static lundiDe(d: Date): Date {
+    const j = new Date(d);
+    j.setHours(0, 0, 0, 0);
+    j.setDate(j.getDate() - ((j.getDay() + 6) % 7));
+    return j;
+  }
+
+  /** Tolérance sur « la fenêtre se termine maintenant » : le temps d'un aller-retour. */
+  private static readonly MAINTENANT_MS = 5 * 60 * 1000;
+
+  /**
+   * Premier jour couvert par le journal d'activité, ou `null` s'il est vide.
+   *
+   * Avant cette date, « comptes actifs » n'a pas de réponse — et l'absence de
+   * réponse doit se voir. Cf. la migration du 23/08/2026.
+   */
+  private async debutDuJournal(): Promise<string | null> {
+    const rows = await this.dataSource.query(
+      `SELECT DATE_FORMAT(MIN(day), '%Y-%m-%d') AS d FROM user_activity_day`,
+    );
+    return rows[0]?.d ?? null;
+  }
+
+  // ─── Comptes actifs ────────────────────────────────────────────────────────
+
+  /**
+   * Comptes distincts ayant utilisé le produit entre deux instants.
+   *
+   * Deux sources, et un `null` assumé quand aucune ne répond :
+   *
+   * 1. **Le journal d'activité** dès qu'il couvre toute la fenêtre. Une ligne
+   *    par (compte, jour) : il répond juste pour n'importe quelle fenêtre, y
+   *    compris passée. C'est la seule source qui permette de comparer une
+   *    période à la précédente.
+   * 2. **`user.lastLogin`** sinon, mais SEULEMENT si la fenêtre se termine
+   *    maintenant. La colonne ne retient que le dernier passage : « actif dans
+   *    la fenêtre » équivaut à « lastLogin dans la fenêtre » uniquement quand
+   *    la borne haute est le présent. Sur une fenêtre passée, un compte revenu
+   *    depuis a écrasé sa trace et manque à l'appel.
+   * 3. Ni l'un ni l'autre → `null`. Renvoyer zéro ferait passer une absence de
+   *    mesure pour une absence d'usage.
+   */
+  private async comptesActifs(debut: Date, fin: Date, debutJournal: string | null): Promise<number | null> {
+    const premierJour = AdminService.minuitProche(debut);
+    const dernierJour = new Date(AdminService.minuitProche(fin).getTime() - 24 * 60 * 60 * 1000);
+
+    if (debutJournal && dernierJour >= premierJour && AdminService.jourISO(premierJour) >= debutJournal) {
+      const rows = await this.dataSource.query(
+        `SELECT COUNT(DISTINCT a.userId) AS n
+           FROM user_activity_day a
+           INNER JOIN user u ON u.id = a.userId
+          WHERE u.isAdmin = false AND a.day >= ? AND a.day <= ?`,
+        [AdminService.jourISO(premierJour), AdminService.jourISO(dernierJour)],
+      );
+      return Number(rows[0]?.n ?? 0);
+    }
+
+    if (Math.abs(Date.now() - fin.getTime()) <= AdminService.MAINTENANT_MS) {
+      return this.userRepo.createQueryBuilder('u')
+        .where('u.lastLogin >= :from AND u.lastLogin <= :to', { from: debut, to: fin })
         .andWhere('u.isAdmin = false')
-        .getCount(),
-      this.userRepo.createQueryBuilder('u')
-        .where('u.createdAt >= :from AND u.createdAt <= :to', { from: periodStart, to: periodEnd })
-        .andWhere('u.isAdmin = false')
-        .getCount(),
+        .getCount();
+    }
+
+    return null;
+  }
+
+  // ─── Indicateurs d'une fenêtre ─────────────────────────────────────────────
+
+  /**
+   * Les comptes admin servent à tester et à faire des démonstrations : leur
+   * activité gonflerait chaque agrégat sans rien dire de l'usage réel. Ils sont
+   * écartés de bout en bout — comptes, projets, suggestions, rapports, crédits.
+   */
+  private async metriquesPeriode(debut: Date, fin: Date, debutJournal: string | null): Promise<PeriodMetrics> {
+    const [activeUsers, newProjects, brandReports, credits, activation] = await Promise.all([
+      this.comptesActifs(debut, fin, debutJournal),
+
       this.projectRepo.createQueryBuilder('p')
         .innerJoin('p.user', 'u')
-        .where('p.createdAt >= :from AND p.createdAt <= :to', { from: periodStart, to: periodEnd })
+        .where('p.createdAt >= :from AND p.createdAt <= :to', { from: debut, to: fin })
         .andWhere('u.isAdmin = false')
         .getCount(),
+
       // Jointure sur le `sub` Keycloak : BrandReportRecord ne référence pas
       // `user.id`. L'`innerJoin` écarte au passage les rapports orphelins
       // (compte supprimé), qu'il serait trompeur de compter dans l'usage.
       this.brandReportRepo.createQueryBuilder('r')
         .innerJoin(User, 'u', 'u.keycloakId = r.keycloakId')
-        .where('r.createdAt >= :from AND r.createdAt <= :to', { from: periodStart, to: periodEnd })
+        .where('r.createdAt >= :from AND r.createdAt <= :to', { from: debut, to: fin })
         .andWhere('u.isAdmin = false')
         .getCount(),
+
+      // Une suggestion coûte un crédit ; un rapport coûte ce qu'il a
+      // RÉELLEMENT coûté (`costCredits`), pas le tarif du jour — un changement
+      // de prix ne doit pas réécrire l'historique. Les rapports antérieurs à
+      // cette colonne portent NULL : `SUM` les ignore, faute de savoir.
+      //
+      // `COALESCE(ds.createdAt, p.createdAt)` : les suggestions créées depuis
+      // le 23/08/2026 ont leur propre date ; les plus anciennes retombent sur
+      // celle du projet, avec le décalage que cela suppose.
+      this.dataSource.query(
+        `SELECT
+           (SELECT COUNT(*)
+              FROM domain_suggestion ds
+              INNER JOIN project p ON p.id = ds.projectId
+              INNER JOIN user u ON u.id = p.userId
+             WHERE u.isAdmin = false
+               AND COALESCE(ds.createdAt, p.createdAt) >= ?
+               AND COALESCE(ds.createdAt, p.createdAt) <= ?) AS suggestions,
+           (SELECT COALESCE(SUM(r.costCredits), 0)
+              FROM brand_report_record r
+              INNER JOIN user u ON u.keycloakId = r.keycloakId
+             WHERE u.isAdmin = false
+               AND r.createdAt >= ? AND r.createdAt <= ?) AS creditsRapports`,
+        [debut, fin, debut, fin],
+      ),
+
+      // Taux d'activation : parmi les comptes créés dans la fenêtre, ceux qui
+      // ont créé au moins un projet. « Projet » couvre les deux parcours — une
+      // recherche aboutie en crée un, un nom soumis au test aussi. Mesuré à
+      // aujourd'hui, pas à la fin de la fenêtre : la question est « ces gens
+      // ont-ils fini par s'en servir », pas « dans les sept jours ».
+      this.dataSource.query(
+        `SELECT COUNT(*) AS inscrits,
+                COALESCE(SUM(EXISTS (SELECT 1 FROM project p WHERE p.userId = u.id)), 0) AS actives
+           FROM user u
+          WHERE u.isAdmin = false AND u.createdAt >= ? AND u.createdAt <= ?`,
+        [debut, fin],
+      ),
     ]);
 
-    const periodSuggestionsResult = await this.dataSource.query(
-      `SELECT COUNT(*) as cnt FROM domain_suggestion ds
-       INNER JOIN project p ON p.id = ds.projectId
-       INNER JOIN user u ON u.id = p.userId
-       WHERE p.createdAt >= ? AND p.createdAt <= ? AND u.isAdmin = false`,
-      [periodStart, periodEnd],
-    );
-    const periodSuggestions = Number(periodSuggestionsResult[0]?.cnt ?? 0);
+    const suggestions = Number(credits[0]?.suggestions ?? 0);
+    const creditsRapports = Number(credits[0]?.creditsRapports ?? 0);
+    const newUsers = Number(activation[0]?.inscrits ?? 0);
+    const activatedUsers = Number(activation[0]?.actives ?? 0);
 
-    const [totalProjects, totalSuggestions, totalBrandReports] = await Promise.all([
+    return {
+      from: debut.toISOString(),
+      to: fin.toISOString(),
+      activeUsers,
+      newUsers,
+      newProjects,
+      suggestions,
+      brandReports,
+      creditsConsumed: suggestions + creditsRapports,
+      activatedUsers,
+      activationRate: newUsers > 0 ? Math.round((activatedUsers / newUsers) * 1000) / 10 : null,
+    };
+  }
+
+  async getStats(from?: Date, to?: Date): Promise<AdminStats> {
+    const periodEnd = to ?? new Date();
+    const periodStart = from ?? new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Période de comparaison : même DURÉE, immédiatement avant. Comparer à
+    // « le mois dernier » quand on regarde sept jours ne dirait rien.
+    // Les bornes des agrégats sont INCLUSIVES des deux côtés (`>=` et `<=`) :
+    // faire finir la période précédente sur `periodStart` compterait deux fois
+    // ce qui tombe exactement à la charnière. Elle s'arrête une milliseconde
+    // avant, et les deux fenêtres se touchent sans se chevaucher.
+    const duree = periodEnd.getTime() - periodStart.getTime();
+    const previousEnd = new Date(periodStart.getTime() - 1);
+    const previousStart = new Date(periodStart.getTime() - duree);
+
+    const debutJournal = await this.debutDuJournal();
+
+    const [period, previous] = await Promise.all([
+      this.metriquesPeriode(periodStart, periodEnd, debutJournal),
+      this.metriquesPeriode(previousStart, previousEnd, debutJournal),
+    ]);
+
+    const [totalUsers, totalProjects, totalSuggestions, totalBrandReports] = await Promise.all([
+      this.userRepo.count({ where: { isAdmin: false } }),
       this.projectRepo.createQueryBuilder('p')
         .innerJoin('p.user', 'u')
         .where('u.isAdmin = false')
@@ -268,19 +470,130 @@ export class AdminService {
     );
 
     return {
+      period,
+      previous,
       totalUsers,
-      periodActiveUsers,
-      periodNewUsers,
-      periodNewProjects,
-      periodSuggestions,
-      periodBrandReports,
       totalProjects,
       totalSuggestions,
       totalBrandReports,
       avgSuggestionsPerProject: Math.round((avgSuggestionsResult[0]?.avg ?? 0) * 10) / 10,
       avgFavoritesPerProject: Math.round((avgFavoritesResult[0]?.avg ?? 0) * 10) / 10,
-      totalFreeCredits: creditsResult[0]?.free ?? 0,
-      totalPackCredits: creditsResult[0]?.pack ?? 0,
+      totalFreeCredits: Number(creditsResult[0]?.free ?? 0),
+      totalPackCredits: Number(creditsResult[0]?.pack ?? 0),
+      activityTrackingSince: debutJournal,
+    };
+  }
+
+  // ─── Série hebdomadaire ────────────────────────────────────────────────────
+
+  /**
+   * Semaine ISO en SQL : `WEEKDAY()` vaut 0 le lundi, on recule d'autant.
+   * `DATE_FORMAT` plutôt que le type DATE brut — le pilote rendrait sinon un
+   * objet Date dont le fuseau dépend de la connexion, là où on veut une clé.
+   */
+  private static readonly SEMAINE = (col: string) =>
+    `DATE_FORMAT(DATE_SUB(DATE(${col}), INTERVAL WEEKDAY(${col}) DAY), '%Y-%m-%d')`;
+
+  private static parSemaine(rows: any[]): Map<string, number> {
+    return new Map(rows.map((r) => [String(r.semaine), Number(r.n)]));
+  }
+
+  /**
+   * Historique hebdomadaire des indicateurs de flux.
+   *
+   * La semaine, pas le mois : à ce volume, six points mensuels ne dessinent
+   * rien. Et pas le jour : le produit ne reçoit pas assez de monde pour qu'un
+   * point quotidien porte autre chose que du bruit.
+   *
+   * Ne porte que des FLUX (ce qui s'est produit pendant la semaine). Les stocks
+   * — solde de crédits, moyennes par projet — n'ont pas d'historique et n'en
+   * auraient pas le sens.
+   */
+  async getSeries(weeks: number): Promise<AdminSeries> {
+    const nb = Math.min(Math.max(Math.trunc(weeks) || 26, 2), 104);
+
+    const lundiCourant = AdminService.lundiDe(new Date());
+    const lundis: string[] = [];
+    for (let k = nb - 1; k >= 0; k--) {
+      const d = new Date(lundiCourant);
+      d.setDate(d.getDate() - 7 * k);
+      lundis.push(AdminService.jourISO(d));
+    }
+    const depuis = lundis[0];
+
+    const [debutJournal, inscrits, projets, suggestions, creditsRapports, actifs] = await Promise.all([
+      this.debutDuJournal(),
+
+      this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('u.createdAt')} AS semaine, COUNT(*) AS n
+           FROM user u
+          WHERE u.isAdmin = false AND u.createdAt >= ?
+          GROUP BY semaine`,
+        [depuis],
+      ),
+
+      this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('p.createdAt')} AS semaine, COUNT(*) AS n
+           FROM project p
+           INNER JOIN user u ON u.id = p.userId
+          WHERE u.isAdmin = false AND p.createdAt >= ?
+          GROUP BY semaine`,
+        [depuis],
+      ),
+
+      this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('COALESCE(ds.createdAt, p.createdAt)')} AS semaine, COUNT(*) AS n
+           FROM domain_suggestion ds
+           INNER JOIN project p ON p.id = ds.projectId
+           INNER JOIN user u ON u.id = p.userId
+          WHERE u.isAdmin = false AND COALESCE(ds.createdAt, p.createdAt) >= ?
+          GROUP BY semaine`,
+        [depuis],
+      ),
+
+      this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('r.createdAt')} AS semaine, COALESCE(SUM(r.costCredits), 0) AS n
+           FROM brand_report_record r
+           INNER JOIN user u ON u.keycloakId = r.keycloakId
+          WHERE u.isAdmin = false AND r.createdAt >= ?
+          GROUP BY semaine`,
+        [depuis],
+      ),
+
+      this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('a.day')} AS semaine, COUNT(DISTINCT a.userId) AS n
+           FROM user_activity_day a
+           INNER JOIN user u ON u.id = a.userId
+          WHERE u.isAdmin = false AND a.day >= ?
+          GROUP BY semaine`,
+        [depuis],
+      ),
+    ]);
+
+    const mInscrits = AdminService.parSemaine(inscrits);
+    const mProjets = AdminService.parSemaine(projets);
+    const mSugg = AdminService.parSemaine(suggestions);
+    const mRapports = AdminService.parSemaine(creditsRapports);
+    const mActifs = AdminService.parSemaine(actifs);
+
+    // Le journal ne couvre une semaine que si son premier jour la précède. Une
+    // semaine à cheval sur son démarrage compterait les seuls jours mesurés et
+    // se lirait comme un creux : elle reste « non mesurée ».
+    const premiereSemaineMesuree = debutJournal
+      ? AdminService.jourISO(AdminService.lundiDe(new Date(`${debutJournal}T00:00:00`)))
+      : null;
+    const journalCouvre = (lundi: string) =>
+      premiereSemaineMesuree !== null && lundi > premiereSemaineMesuree;
+
+    return {
+      activityTrackingSince: debutJournal,
+      weeks: lundis.map((lundi) => ({
+        week: lundi,
+        newUsers: mInscrits.get(lundi) ?? 0,
+        activeUsers: journalCouvre(lundi) ? (mActifs.get(lundi) ?? 0) : null,
+        projects: mProjets.get(lundi) ?? 0,
+        creditsConsumed: (mSugg.get(lundi) ?? 0) + (mRapports.get(lundi) ?? 0),
+      })),
     };
   }
 }
