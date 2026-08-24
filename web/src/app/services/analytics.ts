@@ -26,7 +26,14 @@ export class AnalyticsService {
   private readonly config = inject(ConfigService);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  private get sessionId(): string {
+  /**
+   * Identifiant de la visite en cours, créé au besoin.
+   *
+   * Public : l'intercepteur HTTP le pose sur chaque appel à l'API, pour que le
+   * serveur puisse rattacher une recherche ou une inscription à la visite qui
+   * les a produites. Vide hors navigateur (prerender).
+   */
+  get sessionId(): string {
     if (!this.isBrowser) return '';
     let id = sessionStorage.getItem('nm_sid');
     if (!id) {
@@ -34,6 +41,22 @@ export class AnalyticsService {
       sessionStorage.setItem('nm_sid', id);
     }
     return id;
+  }
+
+  /**
+   * Enregistre l'affichage d'une page.
+   *
+   * C'est le SEUL événement qui compte une visite, et donc le dénominateur de
+   * tout l'entonnoir : sans lui, quelqu'un qui arrive, lit et repart ne laisse
+   * aucune trace nulle part — ni dans les logs, ni dans Google Analytics, qui
+   * ne voit que ceux ayant accepté la bannière.
+   *
+   * `connecte` distingue les visites arrivées avec une session déjà ouverte :
+   * elles ne peuvent pas créer de compte, et gonfleraient le dénominateur du
+   * taux d'inscription.
+   */
+  pageView(path: string, connecte: boolean): void {
+    this.track('page_viewed', { path, connecte });
   }
 
   /** Enregistre une étape de parcours ou une action notable. */

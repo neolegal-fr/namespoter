@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Res, ForbiddenException, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, ForbiddenException, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { DomainService } from './domain.service';
 import { RefineDescriptionDto } from './dto/refine-description.dto';
 import { SearchDomainsDto } from './dto/search-domains.dto';
@@ -11,6 +11,7 @@ import { UsersService } from '../users/users.service';
 import { ProjectsService } from '../projects/projects.service';
 import { Project } from '../projects/entities/project.entity';
 import { AppLoggerService } from '../common/logging/app-logger.service';
+import { FunnelService, sessionIdDeLaRequete } from '../common/funnel/funnel.service';
 
 @Controller('domain')
 export class DomainController {
@@ -22,6 +23,7 @@ export class DomainController {
     private readonly projectsService: ProjectsService,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly events: AppLoggerService,
+    private readonly funnel: FunnelService,
   ) {}
 
   @Public()
@@ -125,7 +127,14 @@ export class DomainController {
     @Body() dto: SearchDomainsDto,
     @AuthenticatedUser() keycloakUser: any,
     @Res() res: Response,
+    @Req() req: Request,
   ) {
+    // Marqué AVANT le contrôle de crédits : l'entonnoir mesure des intentions,
+    // et quelqu'un qui lance une recherche sans pouvoir la payer a bien
+    // franchi cette étape-là. La confondre avec un abandon masquerait
+    // précisément le blocage qu'on cherche à voir.
+    await this.funnel.marquer(sessionIdDeLaRequete(req), 'recherche', keycloakUser.sub);
+
     const demandeur = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
     let user: typeof demandeur;
     try {
@@ -268,7 +277,8 @@ export class DomainController {
   }
 
   @Post('search')
-  async search(@Body() dto: SearchDomainsDto, @AuthenticatedUser() keycloakUser: any) {
+  async search(@Body() dto: SearchDomainsDto, @AuthenticatedUser() keycloakUser: any, @Req() req: Request) {
+    await this.funnel.marquer(sessionIdDeLaRequete(req), 'recherche', keycloakUser.sub);
     const demandeur = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
     const user = await this.payeurDuProjet(dto.projectId, demandeur);
 

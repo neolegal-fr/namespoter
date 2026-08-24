@@ -19,7 +19,9 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:4200',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    // `X-Session-Id` porte l'identifiant de visite anonyme (cf. FunnelService) :
+    // sans lui dans cette liste, le navigateur bloque la requête au préalable.
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-Id'],
   });
 
   app.useGlobalPipes(new ValidationPipe({

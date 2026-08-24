@@ -3,6 +3,7 @@ import { Public } from 'nest-keycloak-connect';
 import type { Request } from 'express';
 import { TrackEventDto } from './dto/track-event.dto';
 import { AppLoggerService } from '../common/logging/app-logger.service';
+import { FunnelService } from '../common/funnel/funnel.service';
 
 /**
  * Collecte des étapes de parcours envoyées par le front.
@@ -19,12 +20,29 @@ export class EventsController {
   private readonly MAX_META_KEYS = 20;
   private readonly MAX_VALUE_LENGTH = 300;
 
-  constructor(private readonly logger: AppLoggerService) {}
+  /**
+   * Le seul événement qui compte une VISITE, et donc le dénominateur de tout
+   * l'entonnoir. Émis au premier affichage d'une page — c'est là, et nulle part
+   * ailleurs, qu'on voit quelqu'un qui repart sans rien faire.
+   */
+  private static readonly VISITE = 'page_viewed';
+
+  constructor(
+    private readonly logger: AppLoggerService,
+    private readonly funnel: FunnelService,
+  ) {}
 
   @Public()
   @Post()
   @HttpCode(204)
-  track(@Body() dto: TrackEventDto, @Req() req: Request & { user?: { sub?: string } }) {
+  async track(@Body() dto: TrackEventDto, @Req() req: Request & { user?: { sub?: string } }) {
+    if (dto.name === EventsController.VISITE) {
+      // `await` bien que la balise `sendBeacon` n'attende pas la réponse :
+      // sans lui, Nest clôt la requête pendant l'écriture, et une erreur de
+      // base partirait dans le vide au lieu d'être journalisée.
+      await this.funnel.visite(dto.sessionId, dto.meta?.['connecte'] === true);
+    }
+
     this.logger.event(dto.name, {
       sessionId: dto.sessionId,
       userId: req.user?.sub,

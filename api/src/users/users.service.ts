@@ -105,8 +105,25 @@ export class UsersService {
   }
 
   async findOrCreate(keycloakId: string, profile: UserProfile = {}): Promise<User> {
+    return (await this.findOrCreateDetaille(keycloakId, profile)).user;
+  }
+
+  /**
+   * Comme {@link findOrCreate}, mais dit si le compte vient d'être créé.
+   *
+   * C'est le seul endroit du produit qui le sache : Keycloak ne prévient pas
+   * d'une inscription, et `createdAt` ne distingue pas « créé par cet appel »
+   * de « créé il y a une minute ». L'entonnoir du tableau de bord en dépend —
+   * sans ce booléen, l'étape « a créé un compte » n'aurait aucun signal à
+   * rattacher à la visite en cours.
+   */
+  async findOrCreateDetaille(
+    keycloakId: string,
+    profile: UserProfile = {},
+  ): Promise<{ user: User; cree: boolean }> {
     const { email, firstName, lastName, locale, isAdmin } = profile;
     let user = await this.usersRepository.findOne({ where: { keycloakId } });
+    const cree = !user;
 
     if (!user) {
       user = this.usersRepository.create({
@@ -141,7 +158,7 @@ export class UsersService {
     // jour. Voir UserActivityDay pour ce que l'un mesure et l'autre pas.
     await this.noterActivite(user.id);
 
-    return user;
+    return { user, cree };
   }
 
   async findByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {

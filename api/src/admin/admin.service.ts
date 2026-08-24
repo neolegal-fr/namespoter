@@ -33,6 +33,25 @@ export interface AdminUserRow {
 }
 
 /**
+ * L'entonnoir d'une fenêtre : combien sont venus, et jusqu'où ils sont allés.
+ *
+ * Volumétrie brute, sans pourcentage — les taux se calculent à l'affichage,
+ * qui est le seul endroit à savoir quel dénominateur il montre. Deux
+ * dénominateurs coexistent ici, et les confondre fausserait l'inscription :
+ * une visite arrivée avec un compte ouvert ne pouvait pas en créer un.
+ */
+export interface FunnelMetrics {
+  /** Visites (sessions de navigateur), comptes internes et admin écartés. */
+  visits: number;
+  /** Celles arrivées SANS compte ouvert — dénominateur de l'étape « inscription ». */
+  visitsAnonymous: number;
+  searched: number;
+  accountsCreated: number;
+  /** Demandes de rapport, y compris refusées faute de crédits : c'est l'intention qu'on compte. */
+  reportsRequested: number;
+}
+
+/**
  * Ce qu'on mesure sur une fenêtre de temps. Le tableau de bord en calcule deux
  * — la période choisie et celle de même durée qui la précède — pour que chaque
  * chiffre s'affiche avec son évolution plutôt que seul.
@@ -59,6 +78,12 @@ export interface PeriodMetrics {
   activatedUsers: number;
   /** `activatedUsers / newUsers` en %, ou `null` si personne ne s'est inscrit. */
   activationRate: number | null;
+  /**
+   * L'entonnoir de la fenêtre. Toujours renseigné ; c'est
+   * {@link AdminStats.visitTrackingSince} qui dit s'il a un sens sur cette
+   * fenêtre-là, et à partir de quand.
+   */
+  funnel: FunnelMetrics;
 }
 
 export interface AdminStats {
@@ -78,6 +103,12 @@ export interface AdminStats {
    * de laisser croire à un trou dans l'usage.
    */
   activityTrackingSince: string | null;
+  /**
+   * Première visite enregistrée (`AAAA-MM-JJ`), ou `null` si le journal des
+   * visites est vide. Avant cette date, il n'y a pas « zéro visiteur » — il n'y
+   * a pas de mesure, et l'interface doit le dire plutôt que d'afficher 0 %.
+   */
+  visitTrackingSince: string | null;
 }
 
 /** Un point de la série hebdomadaire. `week` est le LUNDI de la semaine. */
@@ -89,11 +120,14 @@ export interface WeeklyPoint {
   /** Projets créés : une recherche aboutie, ou un nom soumis au test. */
   projects: number;
   creditsConsumed: number;
+  /** Visites de la semaine. `null` avant le démarrage du journal des visites. */
+  visits: number | null;
 }
 
 export interface AdminSeries {
   weeks: WeeklyPoint[];
   activityTrackingSince: string | null;
+  visitTrackingSince: string | null;
 }
 
 @Injectable()
@@ -337,6 +371,68 @@ export class AdminService {
     return rows[0]?.d ?? null;
   }
 
+  /**
+   * Premier jour enregistré dans le journal des visites, ou `null` s'il est vide.
+   *
+   * Même rôle que {@link debutDuJournal} pour les comptes actifs : avant cette
+   * date, l'entonnoir n'a pas de dénominateur. Afficher « 0 visiteur » ferait
+   * passer une absence de mesure pour une absence de trafic.
+   */
+  private async debutDesVisites(): Promise<string | null> {
+    const rows = await this.dataSource.query(
+      `SELECT DATE_FORMAT(MIN(firstSeenAt), '%Y-%m-%d') AS d FROM visitor_session`,
+    );
+    return rows[0]?.d ?? null;
+  }
+
+  // ─── Entonnoir ─────────────────────────────────────────────────────────────
+
+  /**
+   * Les visites retenues dans les statistiques.
+   *
+   * Une visite jamais authentifiée est COMPTÉE : c'est le cas normal d'un
+   * visiteur, et c'est même toute la population qu'on cherche à mesurer. Sont
+   * écartées les seules visites rattachées à un compte admin ou interne — le
+   * même prédicat que partout ailleurs, appliqué au compte joint.
+   *
+   * `u.keycloakId IS NULL` couvre deux cas d'un coup : la visite anonyme, et
+   * celle rattachée à un compte supprimé depuis. Tester `v.keycloakId` à la
+   * place ferait disparaître la seconde des chiffres.
+   */
+  private static readonly VISITES_MESUREES =
+    `(u.keycloakId IS NULL OR (${AdminService.comptesMesures()}))`;
+
+  /**
+   * Combien de visites, et jusqu'où elles sont allées, sur une fenêtre.
+   *
+   * Une visite est rattachée à la fenêtre par son PREMIER affichage. Une
+   * session commencée la veille et poursuivie aujourd'hui appartient donc à
+   * hier — sans quoi une même visite pourrait compter dans deux périodes, et le
+   * total des visiteurs dépasserait le nombre de visites.
+   */
+  private async entonnoir(debut: Date, fin: Date): Promise<FunnelMetrics> {
+    const rows = await this.dataSource.query(
+      `SELECT COUNT(*)                          AS visites,
+              COALESCE(SUM(v.loggedInAtStart = 0), 0) AS anonymes,
+              COALESCE(SUM(v.searched), 0)            AS recherches,
+              COALESCE(SUM(v.accountCreated), 0)      AS comptes,
+              COALESCE(SUM(v.reportRequested), 0)     AS rapports
+         FROM visitor_session v
+         LEFT JOIN user u ON u.keycloakId = v.keycloakId
+        WHERE ${AdminService.VISITES_MESUREES}
+          AND v.firstSeenAt >= ? AND v.firstSeenAt <= ?`,
+      [debut, fin],
+    );
+    const r = rows[0] ?? {};
+    return {
+      visits: Number(r.visites ?? 0),
+      visitsAnonymous: Number(r.anonymes ?? 0),
+      searched: Number(r.recherches ?? 0),
+      accountsCreated: Number(r.comptes ?? 0),
+      reportsRequested: Number(r.rapports ?? 0),
+    };
+  }
+
   // ─── Comptes actifs ────────────────────────────────────────────────────────
 
   /**
@@ -389,8 +485,10 @@ export class AdminService {
    * écartés de bout en bout — comptes, projets, suggestions, rapports, crédits.
    */
   private async metriquesPeriode(debut: Date, fin: Date, debutJournal: string | null): Promise<PeriodMetrics> {
-    const [activeUsers, newProjects, brandReports, credits, activation] = await Promise.all([
+    const [activeUsers, funnel, newProjects, brandReports, credits, activation] = await Promise.all([
       this.comptesActifs(debut, fin, debutJournal),
+
+      this.entonnoir(debut, fin),
 
       this.projectRepo.createQueryBuilder('p')
         .innerJoin('p.user', 'u')
@@ -462,6 +560,7 @@ export class AdminService {
       creditsConsumed: suggestions + creditsRapports,
       activatedUsers,
       activationRate: newUsers > 0 ? Math.round((activatedUsers / newUsers) * 1000) / 10 : null,
+      funnel,
     };
   }
 
@@ -479,7 +578,10 @@ export class AdminService {
     const previousEnd = new Date(periodStart.getTime() - 1);
     const previousStart = new Date(periodStart.getTime() - duree);
 
-    const debutJournal = await this.debutDuJournal();
+    const [debutJournal, debutVisites] = await Promise.all([
+      this.debutDuJournal(),
+      this.debutDesVisites(),
+    ]);
 
     const [period, previous] = await Promise.all([
       this.metriquesPeriode(periodStart, periodEnd, debutJournal),
@@ -536,6 +638,7 @@ export class AdminService {
       totalFreeCredits: Number(creditsResult[0]?.free ?? 0),
       totalPackCredits: Number(creditsResult[0]?.pack ?? 0),
       activityTrackingSince: debutJournal,
+      visitTrackingSince: debutVisites,
     };
   }
 
@@ -576,8 +679,9 @@ export class AdminService {
     }
     const depuis = lundis[0];
 
-    const [debutJournal, inscrits, projets, suggestions, creditsRapports, actifs] = await Promise.all([
+    const [debutJournal, debutVisites, inscrits, projets, suggestions, creditsRapports, actifs, visites] = await Promise.all([
       this.debutDuJournal(),
+      this.debutDesVisites(),
 
       this.dataSource.query(
         `SELECT ${AdminService.SEMAINE('u.createdAt')} AS semaine, COUNT(*) AS n
@@ -623,6 +727,15 @@ export class AdminService {
           GROUP BY semaine`,
         [depuis],
       ),
+
+      this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('v.firstSeenAt')} AS semaine, COUNT(*) AS n
+           FROM visitor_session v
+           LEFT JOIN user u ON u.keycloakId = v.keycloakId
+          WHERE ${AdminService.VISITES_MESUREES} AND v.firstSeenAt >= ?
+          GROUP BY semaine`,
+        [depuis],
+      ),
     ]);
 
     const mInscrits = AdminService.parSemaine(inscrits);
@@ -630,6 +743,7 @@ export class AdminService {
     const mSugg = AdminService.parSemaine(suggestions);
     const mRapports = AdminService.parSemaine(creditsRapports);
     const mActifs = AdminService.parSemaine(actifs);
+    const mVisites = AdminService.parSemaine(visites);
 
     // Le journal ne couvre une semaine que si son premier jour la précède. Une
     // semaine à cheval sur son démarrage compterait les seuls jours mesurés et
@@ -640,14 +754,24 @@ export class AdminService {
     const journalCouvre = (lundi: string) =>
       premiereSemaineMesuree !== null && lundi > premiereSemaineMesuree;
 
+    // Même règle pour les visites : une semaine à cheval sur le démarrage du
+    // journal n'a que ses derniers jours mesurés et se lirait comme un creux.
+    const premiereSemaineVisitee = debutVisites
+      ? AdminService.jourISO(AdminService.lundiDe(new Date(`${debutVisites}T00:00:00`)))
+      : null;
+    const visitesCouvertes = (lundi: string) =>
+      premiereSemaineVisitee !== null && lundi > premiereSemaineVisitee;
+
     return {
       activityTrackingSince: debutJournal,
+      visitTrackingSince: debutVisites,
       weeks: lundis.map((lundi) => ({
         week: lundi,
         newUsers: mInscrits.get(lundi) ?? 0,
         activeUsers: journalCouvre(lundi) ? (mActifs.get(lundi) ?? 0) : null,
         projects: mProjets.get(lundi) ?? 0,
         creditsConsumed: (mSugg.get(lundi) ?? 0) + (mRapports.get(lundi) ?? 0),
+        visits: visitesCouvertes(lundi) ? (mVisites.get(lundi) ?? 0) : null,
       })),
     };
   }

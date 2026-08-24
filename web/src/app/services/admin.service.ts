@@ -34,6 +34,23 @@ export interface FeedbackItem {
   createdAt: string;
 }
 
+/**
+ * L'entonnoir d'une fenêtre, en volumétrie brute. Voir `FunnelMetrics` côté API.
+ *
+ * Les taux se calculent ici, à l'affichage : deux dénominateurs coexistent, et
+ * seul l'écran sait lequel il montre. Une visite arrivée avec un compte ouvert
+ * ne pouvait pas en créer un — la rapporter au total diluerait l'inscription.
+ */
+export interface FunnelMetrics {
+  visits: number;
+  /** Visites arrivées SANS compte ouvert — dénominateur de l'étape « inscription ». */
+  visitsAnonymous: number;
+  searched: number;
+  accountsCreated: number;
+  /** Demandes de rapport, refus faute de crédits compris : c'est l'intention qu'on compte. */
+  reportsRequested: number;
+}
+
 /** Ce qu'on mesure sur une fenêtre. Voir `PeriodMetrics` côté API. */
 export interface PeriodMetrics {
   from: string;
@@ -48,6 +65,7 @@ export interface PeriodMetrics {
   activatedUsers: number;
   /** En %, ou `null` si personne ne s'est inscrit sur la fenêtre. */
   activationRate: number | null;
+  funnel: FunnelMetrics;
 }
 
 export interface AdminStats {
@@ -64,6 +82,12 @@ export interface AdminStats {
   totalPackCredits: number;
   /** `AAAA-MM-JJ` du premier jour mesuré par le journal d'activité, ou `null`. */
   activityTrackingSince: string | null;
+  /**
+   * `AAAA-MM-JJ` de la première visite enregistrée, ou `null` si le journal des
+   * visites est vide. Avant cette date il n'y a pas « zéro visiteur » : il n'y
+   * a pas de mesure, et l'entonnoir ne doit pas afficher 0 %.
+   */
+  visitTrackingSince: string | null;
 }
 
 /** Un point hebdomadaire. `week` est le lundi, au format `AAAA-MM-JJ`. */
@@ -74,11 +98,14 @@ export interface WeeklyPoint {
   activeUsers: number | null;
   projects: number;
   creditsConsumed: number;
+  /** Visites de la semaine. `null` avant le démarrage du journal des visites. */
+  visits: number | null;
 }
 
 export interface AdminSeries {
   weeks: WeeklyPoint[];
   activityTrackingSince: string | null;
+  visitTrackingSince: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
