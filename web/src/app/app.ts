@@ -1,10 +1,11 @@
 import { Component, signal, OnInit, ChangeDetectorRef, inject, Inject, PLATFORM_ID } from '@angular/core';
-import { RouterOutlet, Router, RouterModule } from '@angular/router';
+import { RouterOutlet, Router, RouterModule, NavigationEnd } from '@angular/router';
 import { UserService, CreditInfo } from './services/user';
 import { ProjectService } from './services/project';
 import { PaymentService, PackType } from './services/payment';
 import { FeedbackService } from './services/feedback';
 import { CookieConsentService } from './services/cookie-consent';
+import { AnalyticsService } from './services/analytics';
 import { ThemeService } from './services/theme';
 import { KeycloakService } from 'keycloak-angular';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
@@ -562,6 +563,7 @@ export class AppComponent implements OnInit {
     private cookieConsent: CookieConsentService,
     private feedbackService: FeedbackService,
     private messageService: MessageService,
+    private analytics: AnalyticsService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -579,6 +581,8 @@ export class AppComponent implements OnInit {
     this.cookieConsent.init();
     this.isLoggedIn.set(await this.keycloak.isLoggedIn());
     this.isAdmin.set(this.keycloak.isUserInRole('admin'));
+
+    this.suivreLesPages();
 
     if (this.isLoggedIn()) {
       const profile = await this.keycloak.loadUserProfile();
@@ -611,6 +615,38 @@ export class AppComponent implements OnInit {
     });
 
     this.feedbackService.openDialog$.subscribe(() => this.openFeedback());
+  }
+
+  /**
+   * Dernier chemin compté, pour ne pas compter deux fois la même page.
+   *
+   * L'affichage initial est signalé ici même ; `NavigationEnd` le rejoue
+   * parfois pour la route de départ, et un rechargement de la page suffirait
+   * sinon à doubler la première visite.
+   */
+  private dernierChemin = '';
+
+  /**
+   * Compte les affichages de page — le dénominateur de tout l'entonnoir.
+   *
+   * Appelé une fois que Keycloak a répondu : `connecte` distingue les visites
+   * arrivées avec une session ouverte, qui ne peuvent pas créer de compte et
+   * fausseraient le taux d'inscription si on les mélangeait aux autres.
+   *
+   * Aucun cookie, aucun consentement requis : c'est la seule mesure qui voie
+   * les visiteurs partis avant d'avoir cliqué sur quoi que ce soit.
+   */
+  private suivreLesPages(): void {
+    const compter = (chemin: string) => {
+      if (chemin === this.dernierChemin) return;
+      this.dernierChemin = chemin;
+      this.analytics.pageView(chemin, this.isLoggedIn());
+    };
+
+    compter(this.router.url.split('?')[0]);
+    this.router.events.subscribe(e => {
+      if (e instanceof NavigationEnd) compter(e.urlAfterRedirects.split('?')[0]);
+    });
   }
 
   updateProjectMenu() {

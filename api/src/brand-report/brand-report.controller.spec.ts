@@ -2,6 +2,13 @@ import { ForbiddenException } from '@nestjs/common';
 import { BrandReportController } from './brand-report.controller';
 import { BRAND_REPORT_COST } from './brand-report.service';
 
+/**
+ * Requête sans en-tête de session : le journal des visites (`FunnelService`)
+ * n'a alors rien à marquer, ce qui est le cas nominal côté serveur — un appel
+ * hors navigateur ne porte pas d'identifiant de visite.
+ */
+const requete = { headers: {} } as any;
+
 describe('BrandReportController — crédits (US-052)', () => {
   const dto = { name: 'Qonto' } as any;
   const user = { sub: 'kc-123', email: 'me@example.com' };
@@ -38,6 +45,7 @@ describe('BrandReportController — crédits (US-052)', () => {
       { findOrCreate, decrementCredits, isFreeReportAvailable, consumeFreeReport } as any,
       dataSource,
       { event } as any,
+      { marquer: jest.fn(), lier: jest.fn(), visite: jest.fn() } as any,
       { accessFor: jest.fn() } as any,
     );
     return { ctrl, generate, decrementCredits, consumeFreeReport, event, sendReport, find, save };
@@ -45,7 +53,7 @@ describe('BrandReportController — crédits (US-052)', () => {
 
   it('bloque et ne génère pas si crédits < coût', async () => {
     const { ctrl, generate, event } = make({ totalCredits: BRAND_REPORT_COST - 1 });
-    await expect(ctrl.full(dto, user)).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(ctrl.full(dto, user, requete)).rejects.toBeInstanceOf(ForbiddenException);
     expect(generate).not.toHaveBeenCalled();
     expect(event).toHaveBeenCalledWith('brand_report_blocked_no_credits', expect.any(Object));
   });
@@ -53,7 +61,7 @@ describe('BrandReportController — crédits (US-052)', () => {
   it('ne débite pas et renvoie le rapport en cache s\'il existe déjà', async () => {
     const { ctrl, generate, decrementCredits, find } = make({ totalCredits: BRAND_REPORT_COST * 2 });
     find.mockResolvedValue({ name: 'Qonto', score: 90 });
-    const res: any = await ctrl.full(dto, user);
+    const res: any = await ctrl.full(dto, user, requete);
     expect(res.cached).toBe(true);
     expect(res.score).toBe(90);
     expect(generate).not.toHaveBeenCalled();
@@ -62,7 +70,7 @@ describe('BrandReportController — crédits (US-052)', () => {
 
   it('génère puis débite le coût, et renvoie les crédits restants', async () => {
     const { ctrl, generate, decrementCredits, event, sendReport, save } = make({ totalCredits: BRAND_REPORT_COST * 2, newTotal: 200 });
-    const res: any = await ctrl.full(dto, user);
+    const res: any = await ctrl.full(dto, user, requete);
     expect(generate).toHaveBeenCalledWith('Qonto', { extensions: undefined, withQuality: true });
     expect(save).toHaveBeenCalled();
     expect(decrementCredits).toHaveBeenCalledWith('kc-123', BRAND_REPORT_COST, expect.anything());
@@ -75,7 +83,7 @@ describe('BrandReportController — crédits (US-052)', () => {
 
   it('annule si les crédits deviennent insuffisants au moment du débit (course)', async () => {
     const { ctrl } = make({ totalCredits: BRAND_REPORT_COST * 2, newTotal: -1 });
-    await expect(ctrl.full(dto, user)).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(ctrl.full(dto, user, requete)).rejects.toBeInstanceOf(ForbiddenException);
   });
 });
 
@@ -101,6 +109,7 @@ describe('BrandReportController — traçage des demandes', () => {
       } as any,
       { transaction: (cb: any) => cb({}) } as any,
       { event } as any,
+      { marquer: jest.fn(), lier: jest.fn(), visite: jest.fn() } as any,
       { accessFor: jest.fn() } as any,
     );
     return { ctrl, event };
@@ -109,7 +118,7 @@ describe('BrandReportController — traçage des demandes', () => {
   /** La demande est comptée quelle que soit son issue — sinon l'usage réel est sous-estimé. */
   it('émet brand_report_requested avant tout traitement', async () => {
     const { ctrl, event } = make({ totalCredits: BRAND_REPORT_COST * 2 });
-    await ctrl.full(dto, user);
+    await ctrl.full(dto, user, requete);
     expect(event).toHaveBeenNthCalledWith(1, 'brand_report_requested', {
       sub: 'kc-123',
       cost: BRAND_REPORT_COST,
@@ -119,7 +128,7 @@ describe('BrandReportController — traçage des demandes', () => {
 
   it('émet brand_report_requested même quand la demande est bloquée faute de crédits', async () => {
     const { ctrl, event } = make({ totalCredits: BRAND_REPORT_COST - 1 });
-    await expect(ctrl.full(dto, user)).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(ctrl.full(dto, user, requete)).rejects.toBeInstanceOf(ForbiddenException);
     expect(event).toHaveBeenNthCalledWith(1, 'brand_report_requested', expect.any(Object));
     expect(event).toHaveBeenCalledWith('brand_report_blocked_no_credits', expect.any(Object));
   });
@@ -129,14 +138,14 @@ describe('BrandReportController — traçage des demandes', () => {
       totalCredits: BRAND_REPORT_COST * 2,
       find: jest.fn().mockResolvedValue({ name: 'Qonto', score: 90 }),
     });
-    await ctrl.full(dto, user);
+    await ctrl.full(dto, user, requete);
     expect(event).toHaveBeenNthCalledWith(1, 'brand_report_requested', expect.any(Object));
     expect(event).toHaveBeenCalledWith('brand_report_cache_hit', expect.any(Object));
   });
 
   it('marque forced quand la régénération est forcée', async () => {
     const { ctrl, event } = make({ totalCredits: BRAND_REPORT_COST * 2 });
-    await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    await ctrl.full({ name: 'Qonto', force: true } as any, user, requete);
     expect(event).toHaveBeenNthCalledWith(1, 'brand_report_requested',
       expect.objectContaining({ forced: true }));
   });
@@ -147,7 +156,7 @@ describe('BrandReportController — traçage des demandes', () => {
       totalCredits: BRAND_REPORT_COST * 2,
       generate: jest.fn().mockRejectedValue(new Error('INPI injoignable')),
     });
-    await expect(ctrl.full(dto, user)).rejects.toThrow('INPI injoignable');
+    await expect(ctrl.full(dto, user, requete)).rejects.toThrow('INPI injoignable');
     expect(event).toHaveBeenCalledWith('brand_report_failed',
       expect.objectContaining({ sub: 'kc-123', reason: 'INPI injoignable' }));
     expect(event).not.toHaveBeenCalledWith('brand_report_generated', expect.anything());
@@ -180,6 +189,7 @@ describe('BrandReportController — une règle unique de tarification', () => {
       users,
       { transaction: (cb: any) => cb({}) } as any,
       { event: jest.fn(), warn: jest.fn() } as any,
+      { marquer: jest.fn(), lier: jest.fn(), visite: jest.fn() } as any,
       { accessFor: jest.fn() } as any,
     );
     return { controller, decrement, save, users };
@@ -187,14 +197,14 @@ describe('BrandReportController — une règle unique de tarification', () => {
 
   it('débite le tarif plein, dès le premier rapport du mois', async () => {
     const { controller, decrement, save } = faire(100);
-    await controller.full({ name: 'qonto' }, { sub: 'u1', email: 'a@b.c' });
+    await controller.full({ name: 'qonto' }, { sub: 'u1', email: 'a@b.c' }, requete);
     expect(decrement).toHaveBeenCalledWith('u1', 50, expect.anything());
     expect(save.mock.calls[0][3]).toBe(50);
   });
 
   it("refuse quand le solde ne couvre pas le tarif — plus aucune gratuité n'en dispense", async () => {
     const { controller, decrement } = faire(0);
-    await expect(controller.full({ name: 'qonto' }, { sub: 'u1' })).rejects.toThrow('Crédits insuffisants');
+    await expect(controller.full({ name: 'qonto' }, { sub: 'u1' }, requete)).rejects.toThrow('Crédits insuffisants');
     expect(decrement).not.toHaveBeenCalled();
   });
 
@@ -229,6 +239,7 @@ describe('BrandReportController — rafraîchissement gratuit', () => {
       } as any,
       { transaction: (cb: any) => cb({}) } as any,
       { event } as any,
+      { marquer: jest.fn(), lier: jest.fn(), visite: jest.fn() } as any,
       { accessFor: jest.fn() } as any,
     );
     return { ctrl, generate, decrementCredits, consumeFreeReport, save, event };
@@ -236,7 +247,7 @@ describe('BrandReportController — rafraîchissement gratuit', () => {
 
   it('ne débite rien et ne consomme pas le droit gratuit', async () => {
     const { ctrl, decrementCredits, consumeFreeReport, event } = make({ generatedAt: vieux });
-    const res: any = await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    const res: any = await ctrl.full({ name: 'Qonto', force: true } as any, user, requete);
     expect(decrementCredits).not.toHaveBeenCalled();
     expect(consumeFreeReport).not.toHaveBeenCalled();
     expect(event).toHaveBeenCalledWith('brand_report_generated', expect.objectContaining({ cost: 0, refresh: true }));
@@ -245,19 +256,19 @@ describe('BrandReportController — rafraîchissement gratuit', () => {
 
   it('fonctionne à 0 crédit : un rapport payé reste maintenable', async () => {
     const { ctrl, generate } = make({ generatedAt: vieux, credits: 0 });
-    await expect(ctrl.full({ name: 'Qonto', force: true } as any, user)).resolves.toBeDefined();
+    await expect(ctrl.full({ name: 'Qonto', force: true } as any, user, requete)).resolves.toBeDefined();
     expect(generate).toHaveBeenCalled();
   });
 
   it("n'écrase pas le coût d'origine en base", async () => {
     const { ctrl, save } = make({ generatedAt: vieux });
-    await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    await ctrl.full({ name: 'Qonto', force: true } as any, user, requete);
     expect(save).toHaveBeenCalledWith('kc-123', 'Qonto', expect.any(Object), undefined);
   });
 
   it('rend le rapport en cache si le précédent date de moins de 6 h, sans réinterroger', async () => {
     const { ctrl, generate, event } = make({ generatedAt: recent });
-    const res: any = await ctrl.full({ name: 'Qonto', force: true } as any, user);
+    const res: any = await ctrl.full({ name: 'Qonto', force: true } as any, user, requete);
     expect(generate).not.toHaveBeenCalled();
     expect(res.cached).toBe(true);
     expect(event).toHaveBeenCalledWith('brand_report_refresh_throttled', expect.any(Object));

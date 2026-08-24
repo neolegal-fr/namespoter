@@ -28,6 +28,20 @@ interface Kpi {
   indispo?: string;
 }
 
+/**
+ * Une marche de l'entonnoir.
+ *
+ * `pourcentage` peut manquer : sans visiteur sur la période, un taux de
+ * conversion n'a pas de dénominateur, et afficher 0 % ferait passer une
+ * absence de trafic pour un échec de conversion.
+ */
+interface EtapeEntonnoir {
+  label: string;
+  pourcentage: number | null;
+  /** Le compte brut et son dénominateur — un pourcentage seul se lit mal à ces volumes. */
+  detail: string;
+}
+
 interface Ecart {
   affiche: boolean;
   texte: string;
@@ -145,6 +159,43 @@ const SOCLE_POURCENTAGE = 5;
           </div>
         </div>
 
+        <!-- ─── Entonnoir : la seule vue qui rapporte tout au trafic ────────
+             Les cartes ci-dessus comptent des faits ; celle-ci les rapporte au
+             nombre de visiteurs, c'est-à-dire au dénominateur qui manquait. -->
+        <div [style.opacity]="loadingStats() ? 0.55 : 1" style="transition: opacity 0.15s">
+          <div style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--nm-text-light-3, #6a7470)">Entonnoir de conversion</span>
+            <span style="font-size: 0.7rem; color: var(--nm-text-light-3, #6a7470)">
+              sur la période sélectionnée — pour 100 visites
+            </span>
+          </div>
+
+          <div *ngIf="entonnoirMesure(); else entonnoirAbsent" class="nm-kpi"
+               style="display: flex; flex-direction: column; gap: 0.9rem">
+            <div *ngFor="let e of entonnoir()">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem">
+                <span class="nm-kpi-label" style="margin-bottom: 0">{{ e.label }}</span>
+                <span class="nm-etape-pct" [class.nm-kpi-vide]="e.pourcentage === null">
+                  {{ e.pourcentage === null ? '—' : formate(e.pourcentage) + ' %' }}
+                </span>
+              </div>
+              <div class="nm-etape-piste">
+                <div class="nm-etape-barre" [style.width.%]="e.pourcentage ?? 0"></div>
+              </div>
+              <div class="nm-kpi-detail">{{ e.detail }}</div>
+            </div>
+          </div>
+
+          <ng-template #entonnoirAbsent>
+            <div class="nm-kpi" style="color: var(--nm-text-light-3, #6a7470); font-size: 0.78rem">
+              Le journal des visites n'a pas encore de données : sans visiteurs comptés,
+              aucun de ces taux n'a de dénominateur.
+            </div>
+          </ng-template>
+
+          <div class="nm-kpi-detail" style="margin-top: 0.5rem">{{ noteEntonnoir() }}</div>
+        </div>
+
         <!-- ─── Cumul, sans comparaison : un stock n'a pas d'« évolution » ── -->
         <div [style.opacity]="loadingStats() ? 0.55 : 1" style="transition: opacity 0.15s">
           <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--nm-text-light-3, #6a7470); margin-bottom: 0.5rem">Total cumulé</div>
@@ -179,6 +230,13 @@ const SOCLE_POURCENTAGE = 5;
 
           <div *ngIf="series() as serie"
                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 0.75rem">
+            <app-admin-weekly-chart
+              title="Visites"
+              unite="visites"
+              [points]="pointsVisites()"
+              [note]="noteVisites()">
+            </app-admin-weekly-chart>
+
             <app-admin-weekly-chart
               title="Nouveaux comptes"
               unite="comptes"
@@ -257,6 +315,24 @@ const SOCLE_POURCENTAGE = 5;
     .nm-kpi-detail {
       font-size: 0.68rem; color: var(--nm-text-light-3, #6a7470);
       margin-top: 0.3rem; line-height: 1.35;
+    }
+
+    /* La barre EST le chiffre : à ces volumes, lire « 12 % » et « 4 % » côte à
+       côte demande un effort que la longueur épargne. */
+    .nm-etape-pct {
+      font-size: 1.15rem; font-weight: 800; line-height: 1.1;
+      color: var(--nm-accent-text-light, #0d7a4e);
+      font-variant-numeric: tabular-nums;
+    }
+    .nm-etape-piste {
+      height: 0.5rem; border-radius: 999px; margin: 0.35rem 0 0.1rem;
+      background: var(--nm-divider-light-1, #eef1f0);
+      overflow: hidden;
+    }
+    .nm-etape-barre {
+      height: 100%; border-radius: 999px;
+      background: var(--nm-accent-text-light, #0d7a4e);
+      transition: width 0.25s ease;
     }
 
     /* L'écart porte une flèche EN PLUS de sa couleur : la couleur seule ne dit
@@ -382,6 +458,87 @@ export class AdminDashboardComponent implements OnInit {
     ];
   }
 
+  // ─── Entonnoir ────────────────────────────────────────────────────────────
+
+  /** Le journal des visites a-t-il commencé ? Sinon, aucun taux n'a de sens. */
+  entonnoirMesure = computed(() => this.stats()?.visitTrackingSince != null);
+
+  /**
+   * Part de `n` dans `base`, ou `null` quand la question ne se pose pas.
+   *
+   * Zéro visiteur ne donne pas « 0 % de conversion » : il ne donne pas de taux
+   * du tout. La distinction est celle entre « personne n'a converti » et
+   * « personne n'est venu ».
+   */
+  private part(n: number, base: number): number | null {
+    return base > 0 ? Math.round((n / base) * 1000) / 10 : null;
+  }
+
+  /**
+   * Les quatre marches, rapportées au trafic.
+   *
+   * L'inscription se rapporte aux visites arrivées SANS compte ouvert, et non
+   * au total : quelqu'un déjà connecté ne peut pas s'inscrire, le compter au
+   * dénominateur ne ferait qu'écraser le taux à mesure que les habitués
+   * reviennent — le chiffre baisserait quand le produit marche.
+   */
+  entonnoir(): EtapeEntonnoir[] {
+    const f = this.stats()?.period.funnel;
+    if (!f) return [];
+
+    return [
+      {
+        // « Visites », pas « visiteurs » : l'unité est la session de navigateur.
+        // Une même personne qui revient demain compte deux fois — dédoublonner
+        // demanderait un cookie, c'est-à-dire un consentement, c'est-à-dire de
+        // perdre la moitié de la mesure pour gagner un peu de précision.
+        label: 'Visites',
+        pourcentage: f.visits > 0 ? 100 : null,
+        detail: `${this.formate(f.visits)} visite${f.visits > 1 ? 's' : ''}`
+          + ` — dont ${this.formate(f.visitsAnonymous)} arrivée${f.visitsAnonymous > 1 ? 's' : ''} sans compte ouvert`,
+      },
+      {
+        label: 'Lancent une recherche',
+        pourcentage: this.part(f.searched, f.visits),
+        detail: `${this.formate(f.searched)} sur ${this.formate(f.visits)} visites`,
+      },
+      {
+        label: 'Créent un compte',
+        pourcentage: this.part(f.accountsCreated, f.visitsAnonymous),
+        detail: `${this.formate(f.accountsCreated)} sur ${this.formate(f.visitsAnonymous)} visites arrivées sans compte`,
+      },
+      {
+        label: 'Demandent un rapport de marque',
+        pourcentage: this.part(f.reportsRequested, f.visits),
+        detail: `${this.formate(f.reportsRequested)} sur ${this.formate(f.visits)} visites`
+          + ' — demandes, refus faute de crédits compris',
+      },
+    ];
+  }
+
+  /**
+   * Ce que l'entonnoir ne dit pas, dit sous l'entonnoir.
+   *
+   * Une période antérieure au journal n'invalide pas les TAUX — numérateur et
+   * dénominateur manquent des mêmes jours — mais elle sous-estime les volumes.
+   * Le silence, ici, laisserait lire « 3 visiteurs » comme un fait.
+   */
+  noteEntonnoir(): string {
+    const s = this.stats();
+    const depuis = s?.visitTrackingSince;
+    if (!depuis) return 'Mesure des visites non démarrée.';
+
+    const base = 'Une visite = une session de navigateur, sans cookie ni consentement requis.'
+      + ' Les comptes administrateurs et internes sont écartés, comme partout ailleurs.';
+    const debutPeriode = s ? new Date(s.period.from) : null;
+    const debutMesure = new Date(`${depuis}T00:00:00`);
+
+    return debutPeriode && debutPeriode < debutMesure
+      ? `${base} Mesuré depuis le ${this.dateCourte(depuis)} seulement :`
+        + ' les taux restent justes, les volumes sont sous-estimés sur cette période.'
+      : `${base} Mesuré depuis le ${this.dateCourte(depuis)}.`;
+  }
+
   /** Pourquoi « comptes actifs » peut ne pas avoir de valeur. */
   private indisponibiliteActifs(): string {
     const depuis = this.stats()?.activityTrackingSince;
@@ -469,6 +626,18 @@ export class AdminDashboardComponent implements OnInit {
       courant -= weeks[i].newUsers;
     }
     return weeks.map((w, i) => ({ week: w.week, value: cumul[i] }));
+  });
+
+  pointsVisites = computed<ChartPoint[]>(() =>
+    (this.series()?.weeks ?? []).map(w => ({ week: w.week, value: w.visits })),
+  );
+
+  noteVisites = computed(() => {
+    const depuis = this.series()?.visitTrackingSince;
+    return depuis
+      ? `Une visite = une session de navigateur. Mesuré depuis le ${this.dateCourte(depuis)} :`
+        + ' les semaines antérieures sont hachurées — non mesurées, pas vides.'
+      : 'Le journal des visites n\'a pas encore de données : aucune semaine n\'est mesurée.';
   });
 
   pointsActifs = computed<ChartPoint[]>(() =>

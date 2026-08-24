@@ -24,6 +24,7 @@ import { routes } from './app.routes';
 import { ConfigService } from './services/config';
 import { SessionKeeperService } from './services/session-keeper';
 import { AnalyticsService } from './services/analytics';
+import { SessionIdInterceptor } from './services/session-id.interceptor';
 
 /**
  * Langues dont l'accueil existe VRAIMENT : il a une URL prérendue, ses
@@ -393,6 +394,14 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: KeycloakBearerInterceptor,
+      multi: true
+    },
+    // Rattache chaque appel API à la visite en cours : c'est ce qui permet au
+    // tableau de bord de compter « sur 100 visiteurs, combien lancent une
+    // recherche ». Anonyme, sans cookie — cf. SessionIdInterceptor.
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: SessionIdInterceptor,
       multi: true
     },
     ConfirmationService,

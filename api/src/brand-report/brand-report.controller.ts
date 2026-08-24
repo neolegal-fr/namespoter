@@ -1,4 +1,5 @@
-import { Controller, Post, Get, Param, Body, Query, Logger, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Query, Req, Logger, ForbiddenException, NotFoundException } from '@nestjs/common';
+import type { Request } from 'express';
 import { ProjectsService } from '../projects/projects.service';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -18,6 +19,7 @@ import { ReportMailService } from './report-mail.service';
 import { BrandReportRequestDto } from './dto/brand-report.dto';
 import { UsersService } from '../users/users.service';
 import { AppLoggerService } from '../common/logging/app-logger.service';
+import { FunnelService, sessionIdDeLaRequete } from '../common/funnel/funnel.service';
 
 @Controller('brand-report')
 export class BrandReportController {
@@ -30,6 +32,7 @@ export class BrandReportController {
     private readonly usersService: UsersService,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly events: AppLoggerService,
+    private readonly funnel: FunnelService,
       private readonly projectsService: ProjectsService,
   ) {}
 
@@ -166,7 +169,12 @@ export class BrandReportController {
   async full(
     @Body() dto: BrandReportRequestDto,
     @AuthenticatedUser() keycloakUser: { sub: string; email?: string; given_name?: string; family_name?: string },
+    @Req() req: Request,
   ) {
+    // Même règle que l'événement ci-dessous : c'est la DEMANDE qui est comptée
+    // dans l'entonnoir, avant qu'on sache si elle aboutira.
+    await this.funnel.marquer(sessionIdDeLaRequete(req), 'rapport', keycloakUser.sub);
+
     // Émis AVANT tout traitement : c'est la demande qui est comptée, pas son
     // issue. Sans cet événement, un rapport bloqué ou en échec n'apparaît nulle
     // part, et le total par utilisateur sous-estime l'usage réel.

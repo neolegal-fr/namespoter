@@ -233,7 +233,7 @@ achat. C'est le seul endroit où le prix se discute vraiment, et le seul moyen d
 
 Deux canaux complémentaires :
 
-- **`POST /events`** (public, anonyme) : appelé systématiquement, sans cookie, avec un identifiant de session éphémère en `sessionStorage`. C'est le seul canal qui mesure ceux qui refusent les cookies — donc ceux qui abandonnent le plus tôt.
+- **`POST /events`** (public, anonyme) : appelé systématiquement, sans cookie, avec un identifiant de session éphémère en `sessionStorage`. C'est le seul canal qui mesure ceux qui refusent les cookies — donc ceux qui abandonnent le plus tôt. `page_viewed` y tient une place à part : c'est le seul événement qui compte une **visite**, et donc le dénominateur de l'entonnoir du tableau de bord.
 - **Google Analytics** : uniquement si consentement (Consent Mode v2), pour les tableaux de bord d'audience.
 
 Côté front, passer par `AnalyticsService.track()`, qui alimente les deux et n'échoue jamais.
@@ -268,6 +268,22 @@ Les fichiers appartiennent à root (écrits par le conteneur) mais sont lisibles
 
 > Le `docker-compose.yml` de prod n'est pas versionné dans ce dépôt. Toute modification (volume de logs, rotation) est à reporter à la main sur le serveur, et une sauvegarde datée est créée avant chaque changement.
 
+### Journal d'accès nginx de l'hôte
+
+Le serveur sert vingt-trois vhosts dans **un seul** `/var/log/nginx/access.log`, au
+format `combined` — qui ne contient pas `$host`. Un « GET / » n'était donc attribuable
+à aucun domaine, et les seules mesures possibles passaient par des chemins d'actifs
+propres à l'application (`/assets/config.json`), ce qui ne tient pas dans la durée.
+
+`infra/nginx/journaliser-le-vhost.sh` ajoute le nom d'hôte **en fin de ligne** — les
+positions des champs existants ne bougent pas, ce qui lit déjà ce fichier continue de
+fonctionner. Idempotent, sauvegarde datée, `nginx -t` avant rechargement. À lancer en
+root sur le serveur : `sudo bash journaliser-le-vhost.sh` (le `sudo` demande un mot de
+passe, il ne passe pas en SSH non interactif).
+
+> Rotation à 14 jours : ce journal reste une source d'appoint. Le compte durable des
+> visites vit en base (`visitor_session`), pas ici.
+
 ## Fonctionnalités
 
 - Wizard : Description → Reformulation IA → Mots-clés → Recherche domaines
@@ -281,7 +297,8 @@ Les fichiers appartiennent à root (écrits par le conteneur) mais sont lisibles
 ### Tableau de bord d'administration
 
 Chaque indicateur de période s'affiche avec son **écart à la période précédente** —
-même durée, immédiatement avant — et cinq **historiques hebdomadaires** sur six mois.
+même durée, immédiatement avant — et six **historiques hebdomadaires** sur six mois.
+Un **entonnoir de conversion** rapporte le tout au trafic (voir plus bas).
 
 Trois règles, chacune posée contre une façon précise de faire mentir un chiffre :
 
@@ -328,10 +345,62 @@ l'inverse les viderait en silence.
 > d'en oublier un pour qu'un indicateur compte les comptes de test sans que rien ne le
 > signale. Le chiffre reste plausible, il est simplement faux.
 
-> Trois migrations à appliquer **avant** de déployer l'image :
+> Quatre migrations à appliquer **avant** de déployer l'image :
 > `2026-08-23-journal-d-activite-quotidienne.sql`,
-> `2026-08-23-date-de-creation-des-suggestions.sql` et
-> `2026-08-23-comptes-internes.sql`.
+> `2026-08-23-date-de-creation-des-suggestions.sql`,
+> `2026-08-23-comptes-internes.sql` et
+> `2026-08-24-journal-des-visites.sql`.
+
+#### Entonnoir de conversion : le dénominateur qui manquait
+
+Le produit savait compter ses comptes, ses projets et ses rapports. Il ne savait pas
+**sur combien de visiteurs** — aucune des sources existantes ne pouvait le dire :
+
+- **Google Analytics** (`G-0PRN6V9ZL7`, posé le 02/03/2026) est conditionné au
+  consentement, `denied` par défaut. Il ne voit donc pas ceux qui repartent tout de
+  suite, c'est-à-dire précisément la population qu'un entonnoir mesure. À ce volume,
+  la modélisation cookieless de GA4 ne se déclenche pas non plus.
+- **Les logs NDJSON** tournent sur 30 jours, et **aucun événement n'était émis au
+  simple affichage d'une page** : lire et repartir ne laissait aucune trace.
+- **Les journaux nginx de l'hôte** tournent sur 14 jours et, jusqu'au 24/08/2026, ne
+  portaient pas `$host` — vingt-trois vhosts dans un seul fichier, sans moyen de les
+  distinguer.
+
+D'où **`visitor_session`** : une ligne par session de navigateur (`sessionStorage`,
+éphémère, sans cookie), créée au premier affichage et complétée au fil des étapes.
+
+- L'unité est la **visite**, et les colonnes sont des **drapeaux, pas des compteurs** :
+  la question est « cette visite a-t-elle lancé une recherche », pas « combien de
+  fois ». Compter les répétitions ferait dire au taux ce qu'il ne dit pas.
+- Les quatre marches viennent de deux canaux, et c'est voulu. La **visite** arrive par
+  `POST /events` (`page_viewed`, balise anonyme, sans jeton). Les trois autres —
+  **recherche**, **compte créé**, **rapport demandé** — sont marquées **côté serveur**
+  par les contrôleurs concernés, à partir de l'en-tête `X-Session-Id` posé par
+  `SessionIdInterceptor`. Le `sub` y est celui du jeton : le navigateur ne peut ni
+  s'attribuer le compte d'un autre, ni se soustraire aux chiffres en se déclarant
+  interne. Le flux SSE de recherche pose l'en-tête **à la main** — c'est un `fetch`
+  brut, il ne passe pas par l'intercepteur.
+- Une étape marquée **crée la visite si elle manque** : une balise peut être bloquée
+  par une extension là où l'appel métier, lui, passe forcément. Sans ce repli,
+  l'entonnoir afficherait plus d'étapes que de visiteurs.
+- **L'inscription se rapporte aux visites arrivées SANS compte ouvert**, pas au total.
+  Quelqu'un déjà connecté ne peut pas s'inscrire : le compter au dénominateur ferait
+  baisser le taux à mesure que les habitués reviennent — le chiffre chuterait quand le
+  produit marche. D'où la colonne `loggedInAtStart`.
+- Une demande de rapport **refusée faute de crédits compte quand même** : l'entonnoir
+  mesure des intentions, et confondre un refus avec un abandon masquerait exactement le
+  blocage qu'on cherche à voir. Même règle pour la recherche, marquée avant le contrôle
+  de crédits.
+- Avant la première visite enregistrée, l'interface dit **« mesuré depuis le … »**
+  plutôt que d'afficher 0 %. Une période antérieure au journal n'invalide pas les
+  **taux** — numérateur et dénominateur manquent des mêmes jours — mais sous-estime les
+  **volumes** ; c'est dit sous l'entonnoir.
+
+> **Rien n'est rétroactif.** Les visites d'avant le 24/08/2026 n'existent nulle part :
+> ni GA (consentement), ni logs (aucun `page_viewed`), ni nginx (14 jours, sans vhost).
+> Le seul ordre de grandeur reconstituable pour août 2026, à partir des requêtes
+> `/assets/config.json` du journal nginx : **3 à 12 chargements d'application par
+> jour**, pour 9 inscriptions du 10 au 24.
 
 ### Suivi des rapports de marque
 

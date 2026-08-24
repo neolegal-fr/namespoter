@@ -20,6 +20,7 @@ import { AdminModule } from './admin/admin.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { BrandReportModule } from './brand-report/brand-report.module';
 import { LoggingModule } from './common/logging/logging.module';
+import { FunnelModule } from './common/funnel/funnel.module';
 import { EventsController } from './events/events.controller';
 
 @Module({
@@ -61,6 +62,7 @@ import { EventsController } from './events/events.controller';
       inject: [ConfigService],
     }),
     LoggingModule,
+    FunnelModule,
     DomainModule,
     UsersModule,
     ProjectsModule,

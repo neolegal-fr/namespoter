@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config';
+import { AnalyticsService } from './analytics';
 
 /** Contraintes de naming extraites du brief libre par l'IA. */
 export interface NamingConstraints {
@@ -29,6 +30,8 @@ export interface CompetitorsResult {
 })
 export class DomainService {
   private get apiUrl() { return `${this.config.apiUrl}/domain`; }
+
+  private readonly analytics = inject(AnalyticsService);
 
   constructor(private http: HttpClient, private config: ConfigService) {}
 
@@ -84,6 +87,11 @@ export class DomainService {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
+              // Posé à la main : cet appel est un `fetch` brut (flux SSE), il
+              // ne passe donc pas par l'intercepteur qui ajoute l'en-tête aux
+              // autres appels API. Sans lui, la recherche — l'étape centrale
+              // de l'entonnoir — ne serait rattachée à aucune visite.
+              'X-Session-Id': this.analytics.sessionId,
             },
             body: JSON.stringify({ ...params, locale: params.locale ?? undefined }),
             signal: controller.signal,

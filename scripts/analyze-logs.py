@@ -30,6 +30,11 @@ SCAN_MESSAGE = re.compile(r"^Cannot [A-Z]+ ")
 
 # Ordre du tunnel : chaque étape suppose la précédente franchie.
 FUNNEL = [
+    # Le seul événement qui compte une VISITE, donc le seul dénominateur : sans
+    # lui, un visiteur qui arrive, lit et repart ne laisse aucune trace. Le
+    # tableau de bord en tient le compte durable (table `visitor_session`) ;
+    # ici, on ne voit que les 30 derniers jours.
+    ("page_viewed", "Page affichée"),
     ("wizard_step_viewed", "Étape du wizard vue"),
     ("login_required_before_search", "Redirigé vers la connexion"),
     ("search_blocked_validation", "Refusé avant départ : saisie invalide"),
