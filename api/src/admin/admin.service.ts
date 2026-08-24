@@ -6,6 +6,7 @@ import { Project } from '../projects/entities/project.entity';
 import { DomainSuggestion } from '../projects/entities/domain-suggestion.entity';
 import { CreditAdjustment } from './entities/credit-adjustment.entity';
 import { BrandReportRecord } from '../brand-report/entities/brand-report-record.entity';
+import { AppLoggerService } from '../common/logging/app-logger.service';
 
 export interface AdminUserRow {
   id: number;
@@ -79,11 +80,14 @@ export interface PeriodMetrics {
   /** `activatedUsers / newUsers` en %, ou `null` si personne ne s'est inscrit. */
   activationRate: number | null;
   /**
-   * L'entonnoir de la fenêtre. Toujours renseigné ; c'est
-   * {@link AdminStats.visitTrackingSince} qui dit s'il a un sens sur cette
-   * fenêtre-là, et à partir de quand.
+   * L'entonnoir de la fenêtre, ou `null` si son calcul a échoué.
+   *
+   * `null` n'est pas « zéro visiteur » : c'est « pas de réponse ». Le
+   * dénominateur vit dans une table à part, jointe au compte — une jointure
+   * suffit à faire échouer la requête (collation, schéma), et il serait absurde
+   * qu'une carte nouvelle emporte les quinze autres avec elle.
    */
-  funnel: FunnelMetrics;
+  funnel: FunnelMetrics | null;
 }
 
 export interface AdminStats {
@@ -139,6 +143,7 @@ export class AdminService {
     @InjectRepository(CreditAdjustment) private adjustmentRepo: Repository<CreditAdjustment>,
     @InjectRepository(BrandReportRecord) private brandReportRepo: Repository<BrandReportRecord>,
     private dataSource: DataSource,
+    private readonly logger: AppLoggerService,
   ) {}
 
   /**
@@ -410,7 +415,28 @@ export class AdminService {
    * hier — sans quoi une même visite pourrait compter dans deux périodes, et le
    * total des visiteurs dépasserait le nombre de visites.
    */
-  private async entonnoir(debut: Date, fin: Date): Promise<FunnelMetrics> {
+  private async entonnoir(debut: Date, fin: Date): Promise<FunnelMetrics | null> {
+    try {
+      return await this.entonnoirBrut(debut, fin);
+    } catch (e) {
+      /*
+       * Le SEUL agrégat qui a le droit d'échouer sans emporter la page.
+       *
+       * Tous les autres lisent des tables que ce service connaît depuis
+       * toujours ; celui-ci joint `visitor_session` à `user`, et une jointure a
+       * plus de façons de casser qu'un COUNT — c'est d'ailleurs une collation
+       * divergente entre les deux tables qui a mis tout le tableau de bord à
+       * 500 le 24/08/2026, pour une carte sur seize.
+       *
+       * `null`, et non zéro : l'interface dira « indisponible », pas
+       * « personne n'est venu ».
+       */
+      this.logger.error(`Entonnoir non calculé : ${e}`, undefined, AdminService.name);
+      return null;
+    }
+  }
+
+  private async entonnoirBrut(debut: Date, fin: Date): Promise<FunnelMetrics> {
     const rows = await this.dataSource.query(
       `SELECT COUNT(*)                          AS visites,
               COALESCE(SUM(v.loggedInAtStart = 0), 0) AS anonymes,
@@ -431,6 +457,28 @@ export class AdminService {
       accountsCreated: Number(r.comptes ?? 0),
       reportsRequested: Number(r.rapports ?? 0),
     };
+  }
+
+  /**
+   * Visites par semaine, ou `null` si la requête échoue.
+   *
+   * Même raison que {@link entonnoir} : cette jointure est la plus récente du
+   * service, et un échec doit hachurer UNE courbe, pas vider les cinq autres.
+   */
+  private async visitesParSemaine(depuis: string): Promise<any[] | null> {
+    try {
+      return await this.dataSource.query(
+        `SELECT ${AdminService.SEMAINE('v.firstSeenAt')} AS semaine, COUNT(*) AS n
+           FROM visitor_session v
+           LEFT JOIN user u ON u.keycloakId = v.keycloakId
+          WHERE ${AdminService.VISITES_MESUREES} AND v.firstSeenAt >= ?
+          GROUP BY semaine`,
+        [depuis],
+      );
+    } catch (e) {
+      this.logger.error(`Visites hebdomadaires non calculées : ${e}`, undefined, AdminService.name);
+      return null;
+    }
   }
 
   // ─── Comptes actifs ────────────────────────────────────────────────────────
@@ -728,14 +776,7 @@ export class AdminService {
         [depuis],
       ),
 
-      this.dataSource.query(
-        `SELECT ${AdminService.SEMAINE('v.firstSeenAt')} AS semaine, COUNT(*) AS n
-           FROM visitor_session v
-           LEFT JOIN user u ON u.keycloakId = v.keycloakId
-          WHERE ${AdminService.VISITES_MESUREES} AND v.firstSeenAt >= ?
-          GROUP BY semaine`,
-        [depuis],
-      ),
+      this.visitesParSemaine(depuis),
     ]);
 
     const mInscrits = AdminService.parSemaine(inscrits);
@@ -743,7 +784,7 @@ export class AdminService {
     const mSugg = AdminService.parSemaine(suggestions);
     const mRapports = AdminService.parSemaine(creditsRapports);
     const mActifs = AdminService.parSemaine(actifs);
-    const mVisites = AdminService.parSemaine(visites);
+    const mVisites = visites === null ? null : AdminService.parSemaine(visites);
 
     // Le journal ne couvre une semaine que si son premier jour la précède. Une
     // semaine à cheval sur son démarrage compterait les seuls jours mesurés et
@@ -760,7 +801,7 @@ export class AdminService {
       ? AdminService.jourISO(AdminService.lundiDe(new Date(`${debutVisites}T00:00:00`)))
       : null;
     const visitesCouvertes = (lundi: string) =>
-      premiereSemaineVisitee !== null && lundi > premiereSemaineVisitee;
+      mVisites !== null && premiereSemaineVisitee !== null && lundi > premiereSemaineVisitee;
 
     return {
       activityTrackingSince: debutJournal,
@@ -771,7 +812,7 @@ export class AdminService {
         activeUsers: journalCouvre(lundi) ? (mActifs.get(lundi) ?? 0) : null,
         projects: mProjets.get(lundi) ?? 0,
         creditsConsumed: (mSugg.get(lundi) ?? 0) + (mRapports.get(lundi) ?? 0),
-        visits: visitesCouvertes(lundi) ? (mVisites.get(lundi) ?? 0) : null,
+        visits: visitesCouvertes(lundi) ? (mVisites!.get(lundi) ?? 0) : null,
       })),
     };
   }

@@ -188,8 +188,14 @@ const SOCLE_POURCENTAGE = 5;
 
           <ng-template #entonnoirAbsent>
             <div class="nm-kpi" style="color: var(--nm-text-light-3, #6a7470); font-size: 0.78rem">
-              Le journal des visites n'a pas encore de données : sans visiteurs comptés,
-              aucun de ces taux n'a de dénominateur.
+              <ng-container *ngIf="entonnoirEnEchec(); else jamaisMesure">
+                Le calcul de l'entonnoir a échoué : les indicateurs ci-dessus restent
+                justes, celui-ci n'a pas de réponse. Le détail est dans les logs de l'API.
+              </ng-container>
+              <ng-template #jamaisMesure>
+                Le journal des visites n'a pas encore de données : sans visiteurs comptés,
+                aucun de ces taux n'a de dénominateur.
+              </ng-template>
             </div>
           </ng-template>
 
@@ -460,8 +466,23 @@ export class AdminDashboardComponent implements OnInit {
 
   // ─── Entonnoir ────────────────────────────────────────────────────────────
 
-  /** Le journal des visites a-t-il commencé ? Sinon, aucun taux n'a de sens. */
-  entonnoirMesure = computed(() => this.stats()?.visitTrackingSince != null);
+  /**
+   * Y a-t-il un entonnoir à montrer ?
+   *
+   * Deux façons de n'en pas avoir, et le message diffère : le journal des
+   * visites n'a pas commencé, ou son calcul a échoué. Dans les deux cas, pas de
+   * 0 % — une absence de mesure n'est pas un échec de conversion.
+   */
+  entonnoirMesure = computed(() => {
+    const s = this.stats();
+    return s != null && s.visitTrackingSince != null && s.period.funnel != null;
+  });
+
+  /** `true` quand le journal existe mais que le calcul n'a pas abouti. */
+  entonnoirEnEchec = computed(() => {
+    const s = this.stats();
+    return s != null && s.visitTrackingSince != null && s.period.funnel == null;
+  });
 
   /**
    * Part de `n` dans `base`, ou `null` quand la question ne se pose pas.
@@ -527,6 +548,7 @@ export class AdminDashboardComponent implements OnInit {
     const s = this.stats();
     const depuis = s?.visitTrackingSince;
     if (!depuis) return 'Mesure des visites non démarrée.';
+    if (s?.period.funnel == null) return '';
 
     const base = 'Une visite = une session de navigateur, sans cookie ni consentement requis.'
       + ' Les comptes administrateurs et internes sont écartés, comme partout ailleurs.';

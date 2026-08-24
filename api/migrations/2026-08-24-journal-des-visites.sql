@@ -35,6 +35,22 @@
 -- Retour arrière :
 --   DROP TABLE visitor_session;
 
+-- ⚠ LA COLLATION DE `keycloakId` DOIT SUIVRE CELLE DE `user.keycloakId`.
+--
+-- Les agrégats joignent les deux (`LEFT JOIN user u ON u.keycloakId =
+-- v.keycloakId`), et MariaDB REFUSE de comparer deux collations différentes :
+-- « Illegal mix of collations … for operation '=' ». La requête ne renvoie pas
+-- un résultat faux, elle échoue — le tableau de bord entier retourne 500.
+--
+-- Le piège est qu'il ne se voit pas en développement. `DEFAULT CHARSET=utf8mb4`
+-- sans `COLLATE` prend la collation de la BASE quand le jeu de caractères est
+-- le même : `utf8mb4_unicode_ci` en local (base créée par `synchronize`),
+-- `utf8mb4_general_ci` en production. Même script, deux résultats, et l'erreur
+-- n'apparaît que là où elle coûte.
+--
+-- D'où l'alignement DYNAMIQUE plus bas, plutôt qu'une collation écrite en dur :
+-- la règle est « la même que `user` », quelle qu'elle soit ici.
+
 CREATE TABLE IF NOT EXISTS visitor_session (
   sessionId       VARCHAR(64)  NOT NULL,
   firstSeenAt     DATETIME     NOT NULL,
@@ -47,3 +63,18 @@ CREATE TABLE IF NOT EXISTS visitor_session (
   -- Tous les agrégats filtrent sur la fenêtre de temps, et seulement sur elle.
   INDEX IDX_visitor_session_firstSeenAt (firstSeenAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Aligne `keycloakId` sur la colonne à laquelle il est joint. Sans effet si
+-- c'est déjà le cas : ce fichier reste rejouable, et l'est d'ailleurs sur toute
+-- base créée avant cet ajout.
+SET @collation := (
+  SELECT COLLATION_NAME FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'user' AND COLUMN_NAME = 'keycloakId'
+);
+SET @sql := CONCAT(
+  'ALTER TABLE visitor_session MODIFY keycloakId VARCHAR(64) CHARACTER SET utf8mb4 COLLATE ',
+  @collation, ' NULL'
+);
+PREPARE aligner FROM @sql;
+EXECUTE aligner;
+DEALLOCATE PREPARE aligner;
