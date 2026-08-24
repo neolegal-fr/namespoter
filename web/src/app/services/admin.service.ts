@@ -65,7 +65,8 @@ export interface PeriodMetrics {
   activatedUsers: number;
   /** En %, ou `null` si personne ne s'est inscrit sur la fenêtre. */
   activationRate: number | null;
-  funnel: FunnelMetrics;
+  /** `null` = calcul en échec (pas « zéro visiteur »). Voir `PeriodMetrics` côté API. */
+  funnel: FunnelMetrics | null;
 }
 
 export interface AdminStats {

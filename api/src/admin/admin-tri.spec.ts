@@ -22,6 +22,7 @@ describe('AdminService — tri de la liste des utilisateurs', () => {
       { create: jest.fn(), save: jest.fn() } as any, // credit_adjustment
       { count: jest.fn() } as any,             // brand_report_record
       {} as any,                               // dataSource
+      { error: jest.fn() } as any,             // journalisation
     );
     // Les deux compteurs ne sont pas appelés quand la page est vide.
     return { service, qb };

@@ -391,6 +391,14 @@ D'où **`visitor_session`** : une ligne par session de navigateur (`sessionStora
   mesure des intentions, et confondre un refus avec un abandon masquerait exactement le
   blocage qu'on cherche à voir. Même règle pour la recherche, marquée avant le contrôle
   de crédits.
+- **La collation de `visitor_session.keycloakId` doit suivre celle de
+  `user.keycloakId`.** MariaDB refuse de comparer deux collations différentes : la
+  jointure n'a pas renvoyé un chiffre faux, elle a mis **tout** le tableau de bord à
+  500 le 24/08/2026. Le piège ne se voit pas en développement — `DEFAULT CHARSET=utf8mb4`
+  sans `COLLATE` prend la collation de la base, `unicode_ci` en local, `general_ci` en
+  production. La migration aligne donc la colonne **dynamiquement** sur celle de `user`.
+  Depuis, l'entonnoir et la courbe des visites **échouent seuls** (`funnel: null`,
+  `visits: null`) : une carte nouvelle n'emporte plus les quinze autres.
 - Avant la première visite enregistrée, l'interface dit **« mesuré depuis le … »**
   plutôt que d'afficher 0 %. Une période antérieure au journal n'invalide pas les
   **taux** — numérateur et dénominateur manquent des mêmes jours — mais sous-estime les
