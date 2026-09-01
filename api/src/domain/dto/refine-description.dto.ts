@@ -1,10 +1,16 @@
 import { IsString, IsNotEmpty, IsOptional, MinLength, MaxLength, IsIn } from 'class-validator';
+import {
+  DESCRIPTION_MIN_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+  DESCRIPTION_MIN_MESSAGE,
+  DESCRIPTION_MAX_MESSAGE,
+} from './description.constants';
 
 export class RefineDescriptionDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(5, { message: 'La description doit faire au moins 5 caractères' })
-  @MaxLength(2000, { message: 'La description ne peut pas dépasser 2000 caractères' })
+  @MinLength(DESCRIPTION_MIN_LENGTH, { message: DESCRIPTION_MIN_MESSAGE })
+  @MaxLength(DESCRIPTION_MAX_LENGTH, { message: DESCRIPTION_MAX_MESSAGE })
   description: string;
 
   @IsOptional()

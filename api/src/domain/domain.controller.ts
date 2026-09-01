@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Res, ForbiddenException, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, BadRequestException, ForbiddenException, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import type { Request, Response } from 'express';
@@ -67,6 +67,14 @@ export class DomainController {
     @Body('lang') lang: string | undefined,
     @AuthenticatedUser() keycloakUser: any,
   ) {
+    // `suggestionId` est un scalaire du corps, donc aucun DTO ne le valide.
+    // Absent, il descendait tel quel jusqu'à `findOne({ where: { id: undefined } })`,
+    // que TypeORM refuse par une exception — une saisie invalide ressortait en
+    // 500. Observé en production le 26/08/2026 sur `/domain/analyze`.
+    if (typeof suggestionId !== 'string' || !suggestionId.trim()) {
+      throw new BadRequestException('Identifiant de suggestion manquant');
+    }
+
     const user = await this.usersService.findOrCreate(keycloakUser.sub, { email: keycloakUser.email, firstName: keycloakUser.given_name, lastName: keycloakUser.family_name });
     const suggestion = await this.projectsService.getSuggestionForUser(suggestionId, user);
     if (!suggestion) throw new NotFoundException('Suggestion non trouvée');
