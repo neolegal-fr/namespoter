@@ -149,7 +149,13 @@
       "SUGGESTION_TITLE": "Suggested refinement:",
       "USE_VERSION": "Use this version",
       "HAVE_NAME": "Already have a name in mind?",
-      "HAVE_NAME_CTA": "Test it directly"
+      "HAVE_NAME_CTA": "Test it directly",
+      "MIN_LENGTH_HINT": "{{count}} more character(s) to continue.",
+      "MIN_LENGTH_SUMMARY": "Description too short",
+      "MIN_LENGTH_ERROR": "Describe your project in at least {{count}} characters.",
+      "ERROR_SUMMARY": "Error",
+      "REFINE_ERROR": "Could not refine the description. Please try again.",
+      "KEYWORDS_ERROR": "Could not generate keywords. Please try again."
     },
     "STEP2": {
       "TITLE": "Your preferences",

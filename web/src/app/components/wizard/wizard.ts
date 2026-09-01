@@ -370,6 +370,22 @@ export class WizardComponent implements OnInit, OnDestroy {
   // Étape 1
   description = signal('');
   refinedDescription = signal('');
+  /**
+   * Doit rester aligné sur `DESCRIPTION_MIN_LENGTH` de l'API (`@MinLength` des
+   * DTO de description) : en dessous, chaque appel de l'étape 1 repart en 400.
+   * Le bouton l'ouvrait dès un caractère — l'utilisateur cliquait, l'écran
+   * tournait, revenait identique, et il recommençait. Observé le 27/08/2026 :
+   * quatre tentatives en six secondes, puis abandon.
+   */
+  readonly DESCRIPTION_MIN_LENGTH = 10;
+  /** Idem pour `@MaxLength` : le champ tronque à la saisie, l'API n'a plus à refuser. */
+  readonly DESCRIPTION_MAX_LENGTH = 2000;
+  descriptionLength = computed(() => this.description().trim().length);
+  descriptionTooShort = computed(() => this.descriptionLength() < this.DESCRIPTION_MIN_LENGTH);
+  /** Caractères restants à saisir, pour l'indication sous le champ. */
+  descriptionRemaining = computed(() =>
+    Math.max(0, this.DESCRIPTION_MIN_LENGTH - this.descriptionLength()),
+  );
 
   // Étape 2
   keywords = signal<string[]>([]);
@@ -1469,7 +1485,7 @@ export class WizardComponent implements OnInit, OnDestroy {
   loadCompetitors(force = false): Promise<void> {
     if (this.competitorsLoading() || (this.competitorsLoaded() && !force)) return Promise.resolve();
     const desc = this.refinedDescription() || this.description();
-    if (!desc || desc.trim().length < 10) return Promise.resolve();
+    if (!desc || desc.trim().length < this.DESCRIPTION_MIN_LENGTH) return Promise.resolve();
 
     this.competitorsLoading.set(true);
     this.cdr.detectChanges();
@@ -2235,8 +2251,9 @@ export class WizardComponent implements OnInit, OnDestroy {
         this.autoSuggestName(res.refined);
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (e) => {
         this.loading.set(false);
+        this.signalDescriptionFailure(e, 'WIZARD.STEP1.REFINE_ERROR');
         this.cdr.detectChanges();
       }
     });
@@ -2245,24 +2262,42 @@ export class WizardComponent implements OnInit, OnDestroy {
   autoSuggestName(description: string) {
     // Ne suggérer que si le nom est vide ou générique
     if (!this.projectName() || this.projectName().includes('...')) {
-      this.domainService.suggestProjectName(description).subscribe(res => {
-        if (res.suggestedName) {
-          this.projectName.set(res.suggestedName);
-          this.cdr.detectChanges();
-        }
+      // La branche d'erreur est obligatoire, même vide de conséquence : sans
+      // elle, un 400 remonte en rejet non capturé (« Uncaught [object Object] »
+      // dans les logs client). Un nom de projet non deviné n'est pas un échec —
+      // l'utilisateur le saisit lui-même — donc rien à signaler à l'écran.
+      this.domainService.suggestProjectName(description).subscribe({
+        next: res => {
+          if (res.suggestedName) {
+            this.projectName.set(res.suggestedName);
+            this.cdr.detectChanges();
+          }
+        },
+        error: () => { /* non bloquant : le nom reste celui de l'utilisateur */ },
       });
     }
   }
 
   async goToKeywords() {
+    // Le bouton est déjà inactif en dessous du seuil ; ce garde-fou couvre les
+    // autres chemins (restauration d'un état, raccourci clavier) plutôt que de
+    // laisser partir trois appels que l'API refusera.
+    if (this.descriptionTooShort()) {
+      this.signalDescriptionTooShort();
+      return;
+    }
+
     this.loading.set(true);
     this.cdr.detectChanges();
     const descToUse = this.refinedDescription() || this.description();
-    
+
     // Suggérer un nom avant de passer aux mots-clés si ce n'est pas déjà fait
     if (!this.projectName() || this.projectName().includes('...')) {
-      this.domainService.suggestProjectName(descToUse).subscribe(res => {
-        if (res.suggestedName) this.projectName.set(res.suggestedName);
+      this.domainService.suggestProjectName(descToUse).subscribe({
+        next: res => {
+          if (res.suggestedName) this.projectName.set(res.suggestedName);
+        },
+        error: () => { /* non bloquant : le nom reste celui de l'utilisateur */ },
       });
     }
 
@@ -2288,8 +2323,44 @@ export class WizardComponent implements OnInit, OnDestroy {
     if (keywordsResult) {
       this.setKeywords(keywordsResult.keywords);
       this.nextStep();
+    } else {
+      // Sans ce message, l'échec était indistinguable d'un clic sans effet :
+      // le voyant s'éteignait, l'étape ne changeait pas, et rien ne disait
+      // pourquoi. C'est ce silence qui a produit quatre tentatives de suite.
+      this.signalDescriptionFailure(null, 'WIZARD.STEP1.KEYWORDS_ERROR');
     }
     this.cdr.detectChanges();
+  }
+
+  /** Refus local : la description n'atteint pas le seuil que l'API exige. */
+  private signalDescriptionTooShort() {
+    this.translate
+      .get('WIZARD.STEP1.MIN_LENGTH_ERROR', { count: this.DESCRIPTION_MIN_LENGTH })
+      .subscribe(detail => {
+        this.messageService.add({
+          severity: 'warn',
+          summary: this.translate.instant('WIZARD.STEP1.MIN_LENGTH_SUMMARY'),
+          detail,
+          life: 4000,
+        });
+      });
+  }
+
+  /**
+   * Échec d'un appel de l'étape 1. Le message de l'API n'est délibérément pas
+   * relayé : il est rédigé en français en dur dans les DTO, et l'afficher tel
+   * quel servirait du français à un utilisateur anglophone. Les deux causes
+   * qu'il nommait — description trop courte, trop longue — sont désormais
+   * impossibles à atteindre depuis l'écran (bouton inactif, champ tronqué),
+   * donc ce qui reste ici est une panne : le libellé traduit suffit.
+   */
+  private signalDescriptionFailure(_error: any, cleParDefaut: string) {
+    this.messageService.add({
+      severity: 'error',
+      summary: this.translate.instant('WIZARD.STEP1.ERROR_SUMMARY'),
+      detail: this.translate.instant(cleParDefaut),
+      life: 4000,
+    });
   }
 
   private meetsMatchMode(allExtensions: Record<string, boolean | null>): boolean {

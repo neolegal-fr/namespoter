@@ -1,4 +1,10 @@
 import { IsString, IsNotEmpty, IsArray, IsEnum, IsOptional, IsBoolean, IsInt, Min, Max, MinLength, MaxLength, ArrayMinSize, ArrayMaxSize, Matches, IsIn } from 'class-validator';
+import {
+  DESCRIPTION_MIN_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+  DESCRIPTION_MIN_MESSAGE,
+  DESCRIPTION_MAX_MESSAGE,
+} from './description.constants';
 
 export enum MatchMode {
   ANY = 'any',
@@ -8,8 +14,8 @@ export enum MatchMode {
 export class SearchDomainsDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(10, { message: 'La description doit faire au moins 10 caractères' })
-  @MaxLength(2000, { message: 'La description ne peut pas dépasser 2000 caractères' })
+  @MinLength(DESCRIPTION_MIN_LENGTH, { message: DESCRIPTION_MIN_MESSAGE })
+  @MaxLength(DESCRIPTION_MAX_LENGTH, { message: DESCRIPTION_MAX_MESSAGE })
   description: string;
 
   @IsArray()

@@ -103,13 +103,26 @@
           rows="5"
           class="w-full border-round-md wizard-textarea"
           (input)="autoGrow($event)"
+          [attr.maxlength]="DESCRIPTION_MAX_LENGTH"
           [placeholder]="'WIZARD.STEP1.PLACEHOLDER' | translate">
         </textarea>
+
+        <!--
+          Le compte restant ne s'affiche qu'une fois la saisie commencée :
+          annoncer un minimum devant un champ vide se lit comme un reproche
+          avant la faute. Il disparaît dès le seuil atteint.
+        -->
+        <small *ngIf="descriptionLength() > 0 && descriptionTooShort()"
+               class="text-500"
+               style="margin: -0.75rem 0 0 0; font-size: 0.85rem">
+          {{ 'WIZARD.STEP1.MIN_LENGTH_HINT' | translate: { count: descriptionRemaining() } }}
+        </small>
 
         <div class="flex align-items-center" style="justify-content: center; gap: 0.75rem; flex-wrap: wrap">
           <p-button
             [label]="'WIZARD.STEP1.REFINE_BTN' | translate"
             icon="pi pi-sparkles"
+            [disabled]="descriptionTooShort()"
             [loading]="loading()"
             (onClick)="refine()"
             styleClass="btn-ai">
@@ -118,7 +131,7 @@
           <p-button
             [label]="'WIZARD.STEP1.CONTINUE_BTN' | translate"
             icon="pi pi-arrow-right"
-            [disabled]="!description()"
+            [disabled]="descriptionTooShort()"
             [loading]="loading()"
             (onClick)="goToKeywords()">
           </p-button>
