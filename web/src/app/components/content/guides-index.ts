@@ -19,11 +19,27 @@ import { applyContentSeo } from './content-seo';
 
       <h1>Guides : trouver un nom et son domaine disponible</h1>
       <p class="lead">
-        Marque, entreprise, produit ou startup&nbsp;: nommer, c'est choisir un nom mémorable
+        Marque, entreprise, société, produit ou startup&nbsp;: nommer, c'est choisir un nom mémorable
         <strong>dont le nom de domaine est encore libre</strong>. Nos guides pratiques vous donnent la
         méthode, et l'IA de Namorama l'accélère en générant des noms et en vérifiant la disponibilité du
         domaine en temps réel.
       </p>
+
+      <h2 class="section-title">Générateurs de noms</h2>
+      <div class="guide-list">
+        <a routerLink="/generateur-nom-de-marque" class="guide-item">
+          <h2>Générateur de nom de marque</h2>
+          <p>Des noms générés par IA, avec le domaine vérifié libre en direct. Gratuit à l'essai.</p>
+        </a>
+        <a routerLink="/generateur-nom-entreprise" class="guide-item">
+          <h2>Nom d'entreprise et de société</h2>
+          <p>Dénomination, nom commercial, marque : trois noms différents, et où vérifier chacun.</p>
+        </a>
+        <a routerLink="/generateur-nom-de-domaine" class="guide-item">
+          <h2>Générateur de nom de domaine</h2>
+          <p>RDAP puis Whois, sur 30 extensions — et aucun domaine à vous vendre.</p>
+        </a>
+      </div>
 
       <h2 class="section-title">Générateurs de noms par secteur</h2>
       <div class="guide-list">
@@ -38,6 +54,10 @@ import { applyContentSeo } from './content-seo';
         <a routerLink="/generateur-nom-saas" class="guide-item">
           <h2>Nom pour SaaS / logiciel B2B</h2>
           <p>Un nom de produit crédible et évolutif, domaine .com / .io vérifié en direct.</p>
+        </a>
+        <a routerLink="/generateur-nom-marque-vetement" class="guide-item">
+          <h2>Nom de marque de vêtements</h2>
+          <p>Streetwear ou prêt-à-porter : un nom libre en domaine, et le réflexe classe 25.</p>
         </a>
         <a routerLink="/generateur-nom-marque-cosmetique" class="guide-item">
           <h2>Nom de marque cosmétique &amp; beauté</h2>
@@ -66,6 +86,14 @@ import { applyContentSeo } from './content-seo';
         <a routerLink="/guides/trouver-nom-de-startup" class="guide-item">
           <h2>Trouver un nom de startup</h2>
           <p>Court, brandable, disponible en .com / .io / .ai dès le premier jour.</p>
+        </a>
+        <a routerLink="/recherche-anteriorite-marque-inpi" class="guide-item">
+          <h2>Recherche d'antériorité (INPI)</h2>
+          <p>L'INPI ne vérifie pas à votre place : comment chercher, et où la recherche gratuite s'arrête.</p>
+        </a>
+        <a routerLink="/verifier-disponibilite-nom-de-marque" class="guide-item">
+          <h2>Vérifier la disponibilité d'un nom</h2>
+          <p>Domaine, réseaux sociaux et marques INPI + EUIPO : le test en une saisie.</p>
         </a>
         <a routerLink="/comparatif-generateurs-de-noms" class="guide-item">
           <h2>Comparatif des générateurs de noms</h2>

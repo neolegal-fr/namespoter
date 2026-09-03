@@ -16,6 +16,11 @@ import { GuidesIndexComponent } from './components/content/guides-index';
 import { GuideNomEntrepriseComponent } from './components/content/guide-nom-entreprise';
 import { GuideNomDeProduitComponent } from './components/content/guide-nom-de-produit';
 import { GuideNomDeStartupComponent } from './components/content/guide-nom-de-startup';
+import { GenerateurNomDeMarqueComponent } from './components/content/generateur-nom-de-marque';
+import { GenerateurNomEntrepriseComponent } from './components/content/generateur-nom-entreprise';
+import { GenerateurNomMarqueVetementComponent } from './components/content/generateur-nom-marque-vetement';
+import { GenerateurNomDeDomaineComponent } from './components/content/generateur-nom-de-domaine';
+import { RechercheAnterioriteMarqueInpiComponent } from './components/content/recherche-anteriorite-marque-inpi';
 import { GenerateurNomStartupIaComponent } from './components/content/generateur-nom-startup-ia';
 import { GenerateurNomEcommerceComponent } from './components/content/generateur-nom-ecommerce';
 import { GenerateurNomSaasComponent } from './components/content/generateur-nom-saas';
@@ -38,6 +43,11 @@ export const routes: Routes = [
   { path: 'guides/trouver-nom-entreprise', component: GuideNomEntrepriseComponent },
   { path: 'guides/trouver-nom-de-produit', component: GuideNomDeProduitComponent },
   { path: 'guides/trouver-nom-de-startup', component: GuideNomDeStartupComponent },
+  { path: 'generateur-nom-de-marque', component: GenerateurNomDeMarqueComponent },
+  { path: 'generateur-nom-entreprise', component: GenerateurNomEntrepriseComponent },
+  { path: 'generateur-nom-marque-vetement', component: GenerateurNomMarqueVetementComponent },
+  { path: 'generateur-nom-de-domaine', component: GenerateurNomDeDomaineComponent },
+  { path: 'recherche-anteriorite-marque-inpi', component: RechercheAnterioriteMarqueInpiComponent },
   { path: 'generateur-nom-startup-ia', component: GenerateurNomStartupIaComponent },
   { path: 'generateur-nom-ecommerce', component: GenerateurNomEcommerceComponent },
   { path: 'generateur-nom-saas', component: GenerateurNomSaasComponent },

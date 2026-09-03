@@ -155,6 +155,8 @@ import { applyContentSeo } from './content-seo';
         Selon votre projet, ces guides complètent celui-ci&nbsp;:
       </p>
       <ul>
+        <li><a routerLink="/generateur-nom-entreprise">Générateur de nom d'entreprise et de société</a></li>
+        <li><a routerLink="/recherche-anteriorite-marque-inpi">Recherche d'antériorité de marque (INPI)</a></li>
         <li><a routerLink="/guides/trouver-nom-de-marque">Trouver un nom de marque disponible</a></li>
         <li><a routerLink="/guides/trouver-nom-de-startup">Trouver un nom de startup</a></li>
         <li><a routerLink="/guides/trouver-nom-de-produit">Trouver un nom de produit</a></li>

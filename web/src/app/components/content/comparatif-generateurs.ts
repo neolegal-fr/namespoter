@@ -286,6 +286,8 @@ import { applyContentSeo } from './content-seo';
           une application ou un nouveau produit — il vous faut un outil qui relie le nom à une
           disponibilité réelle. C'est précisément le rôle de Namorama, et la comparaison détaillée avec
           l'outil IA le plus connu est ici&nbsp;: <a routerLink="/namorama-vs-namelix">Namorama vs Namelix</a>.
+          Pour l'outil lui-même, voir le <a routerLink="/generateur-nom-de-marque">générateur de nom de marque</a>
+          et le <a routerLink="/generateur-nom-de-domaine">générateur de nom de domaine</a>.
         </li>
       </ul>
 

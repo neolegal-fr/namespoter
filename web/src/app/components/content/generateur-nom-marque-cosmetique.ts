@@ -90,6 +90,21 @@ import { applyContentSeo } from './content-seo';
         effet thérapeutique peut vous exposer bien au-delà du droit des marques.
       </p>
 
+      <h2 id="bijoux">Le cas des bijoux&nbsp;: proche de la beauté, mais pas la même classe</h2>
+      <p>
+        Une marque de bijoux obéit aux mêmes codes de naming qu'un soin — évocation sensorielle, élégance,
+        prononciation qui tienne à l'oral — mais elle relève d'une autre <strong>classe de Nice</strong>&nbsp;: la
+        14 (joaillerie, horlogerie), là où les cosmétiques relèvent de la 3. Ce détail décide de la
+        disponibilité&nbsp;: un nom bloqué pour un parfum peut être parfaitement libre pour une bague, et
+        inversement.
+      </p>
+      <p>
+        Deux conséquences pratiques. D'abord, si vous vendez déjà des soins et ajoutez des bijoux (ou l'inverse),
+        votre dépôt initial ne vous couvre pas&nbsp;: il faut étendre. Ensuite, la fabrication artisanale se
+        vend beaucoup par le compte social&nbsp;: un pseudo cohérent avec le nom pèse ici plus lourd que le
+        <code>.com</code>. Vérifiez les deux avant de graver le nom sur un poinçon.
+      </p>
+
       <h2 id="conseils">Avant de lancer votre marque</h2>
       <ul>
         <li>Vérifiez que le nom est <strong>libre à l'INPI</strong> (classe cosmétiques / bijoux) — la beauté est
@@ -128,7 +143,9 @@ import { applyContentSeo } from './content-seo';
 
       <h2 id="suite">Guides liés</h2>
       <ul>
+        <li><a routerLink="/generateur-nom-marque-vetement">Nom de marque de vêtements</a></li>
         <li><a routerLink="/generateur-nom-ecommerce">Générateur de nom pour boutique en ligne</a></li>
+        <li><a routerLink="/recherche-anteriorite-marque-inpi">Recherche d'antériorité de marque (INPI)</a></li>
         <li><a routerLink="/nom-de-startup-court-invente">Nom court et inventé (façon Qonto, Stripe)</a></li>
         <li><a routerLink="/guides/trouver-nom-de-marque">Trouver un nom de marque disponible</a></li>
       </ul>
