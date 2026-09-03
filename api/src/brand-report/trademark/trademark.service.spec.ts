@@ -1,4 +1,5 @@
 import { TrademarkService } from './trademark.service';
+import { NameVariantsService } from './name-variants.service';
 
 /** Config sans identifiants → repli propre, aucune I/O réseau dans ces tests. */
 const noConfig = { get: () => undefined } as any;
@@ -16,9 +17,11 @@ const makeEvents = () => {
   };
 };
 const noEvents = makeEvents().logger;
+/** Variantes neutres : ces tests portent sur le service de marques, pas sur le découpage. */
+const noVariants = { variants: async () => [] } as any;
 
 describe('TrademarkService', () => {
-  const svc = new TrademarkService(noConfig, noEvents) as any;
+  const svc = new TrademarkService(noConfig, noEvents, noVariants) as any;
 
   describe('extractNiceClasses (notice ST66)', () => {
     it('extrait, déduplique et trie les classes', () => {
@@ -75,7 +78,7 @@ describe('TrademarkService', () => {
       // en premier et ce garde-fou ne serait jamais atteint. Aucune I/O pour
       // autant — il rend la main avant l'authentification.
       const configured = { get: (k: string) => (k === 'INPI_USERNAME' ? 'u' : 'p') } as any;
-      const r = await (new TrademarkService(configured, noEvents) as any).check('[]=""');
+      const r = await (new TrademarkService(configured, noEvents, noVariants) as any).check('[]=""');
       expect(r.match).toBe('unknown');
       expect(r.hits).toEqual([]);
       expect(r.note).toContain('inexploitable');
@@ -90,6 +93,38 @@ describe('TrademarkService', () => {
       expect(svc.classify('Qonto', [{ name: 'Qontoo', classes: [] }])).toBe('similar'));
   });
 
+  describe('proximity (à quelle distance se trouve un dépôt)', () => {
+    it('exact : le même nom, casse et bordures en moins', () => {
+      expect(svc.proximity('Qonto', ' qonto ')).toBe('exact');
+    });
+
+    /*
+     * Le cas du 03/09/2026 : « Neo Legal » est déposé en classe 45, « neolegal »
+     * ne le trouvait pas. Pour l'INPI, l'espace ne distingue pas deux marques.
+     */
+    it('normalized : le même nom à un espace, un tiret ou un accent près', () => {
+      expect(svc.proximity('neolegal', 'Neo Legal')).toBe('normalized');
+      expect(svc.proximity('neolegal', 'néo-légal')).toBe('normalized');
+    });
+
+    it('other : remonté par la recherche, sans correspondance de nom', () => {
+      expect(svc.proximity('neolegal', 'bauer.legal')).toBe('other');
+      expect(svc.proximity('Qonto', 'Qontoo')).toBe('other');
+    });
+  });
+
+  describe('classify avec la hiérarchie', () => {
+    /*
+     * Faire tomber « Neo Legal » dans `similar` peindrait en orange ce qui
+     * mérite du rouge — c'est le faux négatif qu'on corrige.
+     */
+    it("un même nom aux séparateurs près vaut un dépôt identique", () =>
+      expect(svc.classify('neolegal', [{ name: 'Neo Legal', classes: [] }])).toBe('exact'));
+
+    it('les dépôts sans correspondance restent similar', () =>
+      expect(svc.classify('neolegal', [{ name: 'bauer.legal', classes: [] }])).toBe('similar'));
+  });
+
   describe('check sans configuration INPI', () => {
     it('renvoie unknown + lien profond, sans appel réseau', async () => {
       const r = await svc.check('Qonto');
@@ -101,7 +136,7 @@ describe('TrademarkService', () => {
 
     it('dit POURQUOI, dans le rapport et dans le journal', async () => {
       const { spy, logger } = makeEvents();
-      const r = await (new TrademarkService(noConfig, logger) as any).check('Qonto');
+      const r = await (new TrademarkService(noConfig, logger, noVariants) as any).check('Qonto');
 
       // Dans le rapport : sans la note, une configuration absente et une panne
       // de l'INPI donnent le même écran.
@@ -120,7 +155,7 @@ describe('TrademarkService', () => {
 
     it("journalise le compteur et l'octet restant sur une recherche", () => {
       const { spy, logger } = makeEvents();
-      const svc2 = new TrademarkService(noConfig, logger) as any;
+      const svc2 = new TrademarkService(noConfig, logger, noVariants) as any;
       svc2.trackQuota('https://api-gateway.inpi.fr/services/apidiffusion/api/marques/search',
         fakeRes({ 'x-rate-limit-remaining': '42', 'x-size-limit-remaining': '49994497' }));
       expect(spy.payloads).toEqual([{ endpoint: 'search', remaining: 42, bytesRemaining: 49994497 }]);
@@ -129,7 +164,7 @@ describe('TrademarkService', () => {
 
     it('distingue une notice d\'une recherche — elle coûte une unité aussi', () => {
       const { spy, logger } = makeEvents();
-      const svc2 = new TrademarkService(noConfig, logger) as any;
+      const svc2 = new TrademarkService(noConfig, logger, noVariants) as any;
       svc2.trackQuota('https://api-gateway.inpi.fr/services/apidiffusion/api/marques/FR123/xml',
         fakeRes({ 'x-rate-limit-remaining': '41' }));
       expect(spy.payloads[0]).toEqual({ endpoint: 'notice', remaining: 41 });
@@ -137,14 +172,14 @@ describe('TrademarkService', () => {
 
     it("ne journalise rien quand l'appel n'expose pas de quota (auth, login)", () => {
       const { spy, logger } = makeEvents();
-      const svc2 = new TrademarkService(noConfig, logger) as any;
+      const svc2 = new TrademarkService(noConfig, logger, noVariants) as any;
       svc2.trackQuota('https://api-gateway.inpi.fr/auth/login', fakeRes({}));
       expect(spy.events).toEqual([]);
     });
 
     it('alerte sous le seuil : moins de deux rapports possibles', () => {
       const { spy, logger } = makeEvents();
-      const svc2 = new TrademarkService(noConfig, logger) as any;
+      const svc2 = new TrademarkService(noConfig, logger, noVariants) as any;
       svc2.trackQuota('.../search', fakeRes({ 'x-rate-limit-remaining': '11' }));
       expect(spy.warnings).toHaveLength(1);
       expect(spy.warnings[0]).toContain('11');

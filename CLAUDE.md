@@ -419,6 +419,32 @@ Deux sources, volontairement distinctes — elles ne mesurent pas la même chose
 
 > L'admin affichera toujours un chiffre ≤ celui des logs : un rapport bloqué faute de crédits est une demande, pas un rapport.
 
+### Recherche de marque : ce que l'index de l'INPI compare vraiment
+
+`Mark_Exp` indexe des **jetons**, et la valeur doit partir **entre guillemets**.
+
+- Sans guillemets, un nom en plusieurs mots devient un **OU** entre ses mots :
+  `[Mark_Exp=neo legal]` a renvoyé **3818** dépôts, sans la marque cherchée dans la page
+  (le tri se fait par date de dépôt, pas par pertinence) ; `[Mark_Exp="neo legal"]` en
+  renvoie **1**, le bon. Un point ou un tiret suffisaient : `neolegal.fr` → 9455.
+- La passerelle **ne connaît aucun opérateur booléen**. `OR` y est un mot ordinaire — il
+  ramène « CARTE D'OR ». Une orthographe par requête, donc une unité de quota par
+  orthographe.
+- « Neo Legal » vit en deux jetons, `neo` et `legal` : **aucune requête sur `neolegal` ne
+  peut l'atteindre**, ni exacte, ni tronquée. C'est le faux négatif du 03/09/2026 — un
+  rapport facturé annonçait « aucun dépôt identique » sur un nom déposé en classe 45.
+  D'où `NameVariantsService`, qui cherche aussi les autres orthographes : la forme collée
+  et la forme espacée quand le nom porte un séparateur, un découpage proposé par le modèle
+  quand c'est un mot collé. **La sortie du modèle est vérifiée** — une variante n'est
+  retenue que si, séparateurs retirés, elle redonne exactement le nom de départ.
+
+> `data.inpi.fr` ne répond pas à la même question, et la divergence est normale : il
+> cherche dans **tout le dossier** — déposant, **mandataire**, libellés — et compare après
+> avoir collé les mots. Sur une recherche « neolegal », 6 de ses 7 résultats étaient les
+> dossiers d'un cabinet tchèque nommé NEOLEGAL, mandataire de marques sans rapport
+> (vérifié dans la notice ST66 du n° 1804223). Recopier son affichage remplacerait un faux
+> négatif par six faux positifs.
+
 ### Quota INPI
 
 Le volet marque d'un rapport s'appuie sur **un seul compte INPI**, partagé par tout le
@@ -426,14 +452,15 @@ produit. La passerelle expose ce qu'il en reste à chaque appel de diffusion :
 `x-rate-limit-remaining` (sur **100**) et `x-size-limit-remaining` (~**50 Mo**).
 
 - Une **notice coûte une unité au même titre qu'une recherche** — mesuré, pas supposé.
-  Un rapport en consomme donc jusqu'à **6** (1 recherche + `MAX_NOTICE_FETCHES`), soit
-  **au plus ~16 rapports par période**.
+  Un rapport en consomme donc jusqu'à **8** (1 recherche pour le nom, jusqu'à
+  `MAX_VARIANT_SEARCHES` pour ses autres orthographes, `MAX_NOTICE_FETCHES` pour les
+  notices), soit **au plus ~12 rapports par période**.
 - **La durée de la période n'est documentée nulle part** : aucun `x-rate-limit-reset`,
   rien dans l'OpenAPI de la passerelle ni dans la documentation publique de l'INPI.
   C'est pourquoi chaque appel journalise `trademark_quota_observed` : `python3 - quota`
   affiche la suite chronologique et **signale les remontées du compteur**, ce qui encadre
   la période entre deux bornes observées.
-- Sous 12 appels restants, `trademark_quota_low` passe en `warn` : le manque de quota ne
+- Sous 16 appels restants (deux rapports au plafond), `trademark_quota_low` passe en `warn` : le manque de quota ne
   casse rien de visible, il fait retomber le volet marque sur « non vérifiable » dans un
   rapport pourtant facturé.
 

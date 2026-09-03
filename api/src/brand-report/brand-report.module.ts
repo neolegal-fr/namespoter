@@ -6,6 +6,7 @@ import { BrandReportStore } from './brand-report.store';
 import { BrandReportRecord } from './entities/brand-report-record.entity';
 import { SocialCheckService } from './social/social-check.service';
 import { TrademarkService } from './trademark/trademark.service';
+import { NameVariantsService } from './trademark/name-variants.service';
 import { RdapService } from '../domain/rdap.service';
 import { DomainService } from '../domain/domain.service';
 import { UsersModule } from '../users/users.module';
@@ -26,6 +27,7 @@ import { ReportMailService } from './report-mail.service';
     BrandReportStore,
     SocialCheckService,
     TrademarkService,
+    NameVariantsService,
     ReportMailService,
     RdapService,
     DomainService,
