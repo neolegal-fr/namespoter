@@ -50,8 +50,13 @@ const COLLECTION_CODE: Record<string, TrademarkHit['collection']> = {
  * requête — recette du spike US-050).
  *
  * Points clés découverts au spike :
- * - le champ cherchable est **`Mark_Exp`** (l'exemple `[Mark=…]` de la spec
- *   provoque une 500 Solr côté INPI) ;
+ * - le champ cherchable est **`Mark_Exp`**. La note du spike disait que
+ *   l'exemple `[Mark=…]` de la spec provoquait une 500 Solr : c'était
+ *   passager. Réessayé le 03/09/2026, `[Mark=qonto]` et `[Mark_Exp=qonto]`
+ *   renvoient les mêmes 9 dépôts. On garde `Mark_Exp`, mais le choix ne tient
+ *   plus à une panne de l'autre ;
+ * - la valeur doit être **entre guillemets** (voir `buildQuery`) — sans quoi
+ *   un nom en plusieurs mots devient un OU entre ses mots ;
  * - les collections en entrée sont les codes courts **`FR`/`EU`/`WO`** ;
  * - la gateway (JHipster) fait tourner le **jeton XSRF à chaque requête** : il
  *   faut relire le cookie et le renvoyer en `X-XSRF-TOKEN` à chaque appel.
@@ -80,6 +85,13 @@ export class TrademarkService {
       this.events.warn('INPI_USERNAME/INPI_PASSWORD absents : volet marque non vérifiable', 'trademark_check_unconfigured');
       this.events.event('trademark_check_unconfigured');
       return { office: 'INPI', match: 'unknown', hits: [], deepLink, note: 'Vérification INPI non configurée.' };
+    }
+    // Un nom qui ne survit pas à l'assainissement (que des crochets, que des
+    // guillemets) donnerait `[Mark_Exp=""]` — une requête vide, dont la réponse
+    // ne veut rien dire. Mieux vaut ne pas la poser que d'en tirer un « aucun
+    // dépôt identique » sur du néant.
+    if (!this.sanitize(name)) {
+      return { office: 'INPI', match: 'unknown', hits: [], deepLink, note: 'Nom inexploitable pour la recherche INPI.' };
     }
     try {
       const cookies = await this.authenticate();
@@ -123,9 +135,36 @@ export class TrademarkService {
     return jar;
   }
 
+  /**
+   * Requête de recherche : le nom entre GUILLEMETS, donc cherché comme une
+   * phrase et non comme un sac de mots.
+   *
+   * Sans eux, `Mark_Exp` découpe sur les espaces et fait un OU entre les
+   * termes. Mesuré le 03/09/2026 sur la passerelle de production :
+   *
+   *   [Mark_Exp=neo legal]   → 3818 résultats, et la marque réellement
+   *                            homonyme ABSENTE de la page renvoyée (le tri
+   *                            se fait par date de dépôt, pas par pertinence) ;
+   *   [Mark_Exp="neo legal"] → 1 résultat, le bon.
+   *
+   * Le volet marque annonçait donc « marques proches existantes » sur un tas
+   * de dépôts sans aucun rapport — SAHIRA NEO, bauer.legal, LQ Legal
+   * Quotient — pour tout nom en plusieurs mots, tout en passant à côté du
+   * seul qui comptait. Un point, un tiret ou une apostrophe suffisaient :
+   * `neolegal.fr` ramenait 9455 résultats.
+   *
+   * Une phrase par requête, et une seule : la passerelle ne connaît pas
+   * l'opérateur booléen. `OR` y est traité comme un mot ordinaire — il ramène
+   * « CARTE D'OR ». Grouper deux orthographes dans une même requête est donc
+   * impossible ; il faudrait deux appels, donc deux unités de quota.
+   */
+  private buildQuery(name: string): string {
+    return `[Mark_Exp="${this.sanitize(name)}"]`;
+  }
+
   private async search(name: string, jar: CookieJar): Promise<unknown> {
     const body = JSON.stringify({
-      query: `[Mark_Exp=${this.sanitize(name)}]`,
+      query: this.buildQuery(name),
       collections: ['FR', 'EU', 'WO'],
       size: 20,
       position: 0,
@@ -290,9 +329,19 @@ export class TrademarkService {
     return hits.some((h) => norm(h.name) === norm(name)) ? 'exact' : 'similar';
   }
 
-  /** Le nom entre dans un DSL entre crochets : retirer ce qui casserait la syntaxe. */
+  /**
+   * Le nom entre dans un DSL entre crochets ET, désormais, entre guillemets :
+   * retirer ce qui casserait l'une ou l'autre syntaxe.
+   *
+   * Le guillemet compte autant que les crochets. Laissé passer, il refermerait
+   * la phrase au milieu du nom et rendrait le OU entre les mots restants —
+   * c'est-à-dire exactement le défaut que les guillemets corrigent.
+   *
+   * Les espaces sont normalisés : une phrase à double espace ne correspond à
+   * rien dans l'index.
+   */
   private sanitize(name: string): string {
-    return name.replace(/[[\]=]/g, ' ').trim();
+    return name.replace(/["\\[\]=]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 }
 
