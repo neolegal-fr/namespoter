@@ -225,6 +225,15 @@
   color: var(--nm-app-text-2);
 }
 
+.rv-hits-group { margin-top: 0.9rem; }
+.rv-hits-group__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--nm-app-text-2);
+}
 .rv-hits {
   margin: 10px 0 0;
   padding-left: 18px;

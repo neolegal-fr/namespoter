@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ReserverBoutonComponent } from '../shared/reserver-bouton';
-import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from '../../services/brand-report';
+import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit, TrademarkProximity } from '../../services/brand-report';
 
 /**
  * Rapport de marque — état DÉBLOQUÉ, refonte étape 4.
@@ -201,17 +201,31 @@ import { BrandReport, ReportLike, Availability, NameQuality, TrademarkHit } from
             <p class="rv-note">{{ r.trademark.note }}</p>
           }
 
-          @if (tm.hits.length) {
-            <ul class="rv-hits">
-              @for (h of tm.hits.slice(0, 8); track h.name + h.applicationNumber) {
-                <li>
-                  {{ h.name }}
-                  <span style="color: var(--nm-app-text-2)">
-                    ({{ officeLabel(h.collection) }}@if (h.classes.length) { · {{ 'WIZARD.STEP3.REPORT_CLASSES' | translate:{ list: h.classes.join(', ') } }} })
-                  </span>
-                </li>
+          <!-- Les dépôts, RANGÉS par distance au nom cherché. À plat, la seule
+               marque qui engage se noyait au milieu de dépôts remontés parce
+               qu'ils partagent un mot avec le nom — ou, sur la base officielle,
+               parce qu'ils ont le même mandataire. -->
+          @for (g of HIT_GROUPS; track g.proximity) {
+            @if (hitsOf(tm.hits, g.proximity); as group) {
+              @if (group.length) {
+                <div class="rv-hits-group">
+                  <h4 class="rv-hits-group__title">{{ g.label | translate }}</h4>
+                  <ul class="rv-hits">
+                    @for (h of group; track h.name + h.applicationNumber) {
+                      <li>
+                        {{ h.name }}
+                        <span style="color: var(--nm-app-text-2)">
+                          ({{ officeLabel(h.collection) }}@if (h.classes.length) { · {{ 'WIZARD.STEP3.REPORT_CLASSES' | translate:{ list: h.classes.join(', ') } }} })
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                  @if (g.note) {
+                    <p class="rv-note">{{ g.note | translate }}</p>
+                  }
+                </div>
               }
-            </ul>
+            }
           }
 
           <div class="rv-actions">
@@ -417,6 +431,29 @@ export class BrandReportViewComponent {
       : t === 'watch'
         ? 'WIZARD.STEP3.SCORE_FAIR'
         : 'WIZARD.STEP3.SCORE_WEAK';
+  }
+
+  /**
+   * Les trois rangs d'affichage, du plus engageant au moins engageant.
+   *
+   * L'ordre est le message : ce qui porte le même nom se lit d'abord, le
+   * bruit se lit en dernier et s'annonce comme tel.
+   */
+  readonly HIT_GROUPS = [
+    { proximity: 'exact' as const, label: 'WIZARD.STEP3.TM_HITS_EXACT', note: '' },
+    { proximity: 'normalized' as const, label: 'WIZARD.STEP3.TM_HITS_NORMALIZED', note: '' },
+    { proximity: 'other' as const, label: 'WIZARD.STEP3.TM_HITS_OTHER', note: 'WIZARD.STEP3.TM_HITS_OTHER_NOTE' },
+  ];
+
+  /**
+   * Les dépôts d'un rang donné, plafonnés.
+   *
+   * Un rapport antérieur au 03/09/2026 n'a pas de `proximity` : ses dépôts
+   * retombent dans « autres », qui n'affirme rien — plutôt que d'être promus
+   * à « même nom » sur la foi d'un champ absent.
+   */
+  hitsOf(hits: TrademarkHit[], proximity: TrademarkProximity): TrademarkHit[] {
+    return hits.filter((h) => (h.proximity ?? 'other') === proximity).slice(0, 8);
   }
 
   officeLabel(c?: 'FR' | 'EU' | 'WO'): string {

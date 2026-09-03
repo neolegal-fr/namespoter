@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppLoggerService } from '../../common/logging/app-logger.service';
-import type { TrademarkHit, TrademarkMatch, TrademarkResult } from '../dto/brand-report.types';
+import type { TrademarkHit, TrademarkMatch, TrademarkProximity, TrademarkResult } from '../dto/brand-report.types';
+import { NameVariantsService, squash } from './name-variants.service';
 
 const BASE = 'https://api-gateway.inpi.fr';
 const AUTH_URL = `${BASE}/services/uaa/api/authenticate`;
@@ -18,8 +19,9 @@ const REQUEST_TIMEOUT_MS = 15000;
  * aussi — ce n'est donc pas « la recherche coûte, l'enrichissement est gratuit ».
  *
  * Conséquence directe sur le plafond : un rapport coûte jusqu'à
- * 1 + MAX_NOTICE_FETCHES unités, soit 6 — donc **au plus ~16 rapports par
- * période**, tous comptes confondus, puisqu'il n'y a qu'un compte INPI.
+ * MAX_UNITS_PER_REPORT unités — une recherche par orthographe cherchée, plus
+ * une notice par dépôt retenu — donc **au plus ~12 rapports par période**,
+ * tous comptes confondus, puisqu'il n'y a qu'un compte INPI.
  *
  * La DURÉE de la période n'est écrite nulle part : ni dans les en-têtes (aucun
  * `x-rate-limit-reset` ni `Retry-After`), ni dans l'OpenAPI de la passerelle,
@@ -30,13 +32,25 @@ const REQUEST_TIMEOUT_MS = 15000;
 const MAX_NOTICE_FETCHES = 5;
 
 /**
+ * Orthographes supplémentaires cherchées, au-delà du nom lui-même.
+ *
+ * Chacune est une requête, donc une unité de quota sur un compte partagé par
+ * tout le produit. Deux suffisent : au-delà, on paie pour des découpages de
+ * moins en moins plausibles. Voir `NameVariantsService`.
+ */
+const MAX_VARIANT_SEARCHES = 2;
+
+/** Plafond de consommation d'un rapport : les recherches, plus les notices. */
+const MAX_UNITS_PER_REPORT = 1 + MAX_VARIANT_SEARCHES + MAX_NOTICE_FETCHES;
+
+/**
  * Seuil d'alerte sur le quota restant : moins de deux rapports possibles.
  *
- * Le manque de quota ne casse rien de visible — il fait juste retomber le
- * volet marque sur « non vérifiable », dans un rapport facturé 50 crédits.
- * C'est exactement le genre de panne qu'il faut voir venir.
+ * Le manque de quota ne casse rien de visible — il fait retomber le volet
+ * marque sur « non vérifiable », dans un rapport facturé 50 crédits. C'est
+ * exactement le genre de panne qu'il faut voir venir.
  */
-const QUOTA_WARN_BELOW = 2 * (1 + MAX_NOTICE_FETCHES);
+const QUOTA_WARN_BELOW = 2 * MAX_UNITS_PER_REPORT;
 
 /** ukey préfixe → code de collection lisible. */
 const COLLECTION_CODE: Record<string, TrademarkHit['collection']> = {
@@ -70,7 +84,11 @@ export class TrademarkService {
   private readonly username?: string;
   private readonly password?: string;
 
-  constructor(config: ConfigService, private readonly events: AppLoggerService) {
+  constructor(
+    config: ConfigService,
+    private readonly events: AppLoggerService,
+    private readonly nameVariants: NameVariantsService,
+  ) {
     this.username = config.get<string>('INPI_USERNAME');
     this.password = config.get<string>('INPI_PASSWORD');
   }
@@ -95,14 +113,68 @@ export class TrademarkService {
     }
     try {
       const cookies = await this.authenticate();
-      const data = await this.search(name, cookies);
-      const hits = this.parseHits(data);
+      const hits = await this.searchAllSpellings(name, cookies);
       await this.enrichClasses(name, hits, cookies);
       return { office: 'INPI', match: this.classify(name, hits), hits, deepLink };
     } catch (err) {
       this.events.event('trademark_check_failed', { reason: err instanceof Error ? err.name : 'unknown' });
       return { office: 'INPI', match: 'unknown', hits: [], deepLink, note: 'Vérification INPI temporairement indisponible.' };
     }
+  }
+
+  /**
+   * Cherche le nom, puis ses autres orthographes, et fusionne.
+   *
+   * Une requête par orthographe : la passerelle ne sait pas les regrouper (cf.
+   * `buildQuery`). L'ordre compte — le nom d'abord, les variantes ensuite —
+   * parce que la déduplication garde la première occurrence, et que les
+   * classes de Nice se lisent en priorité sur les dépôts les plus proches.
+   *
+   * Une variante qui échoue ne fait pas échouer la vérification : on garde ce
+   * qu'on a. L'inverse transformerait une recherche élargie, donc un progrès,
+   * en nouvelle cause de panne.
+   */
+  private async searchAllSpellings(name: string, jar: CookieJar): Promise<TrademarkHit[]> {
+    const spellings = [name, ...(await this.variantsOf(name))];
+    const byId = new Map<string, TrademarkHit>();
+
+    for (const [index, spelling] of spellings.entries()) {
+      try {
+        for (const hit of this.parseHits(await this.search(spelling, jar))) {
+          const id = hit.applicationNumber || `${hit.collection ?? ''}|${hit.name}`;
+          if (!byId.has(id)) byId.set(id, { ...hit, proximity: this.proximity(name, hit.name) });
+        }
+      } catch (err) {
+        if (index === 0) throw err; // le nom lui-même : c'est une vraie panne
+        this.events.event('trademark_variant_search_failed', { reason: err instanceof Error ? err.name : 'unknown' });
+      }
+    }
+    return [...byId.values()];
+  }
+
+  /** Les autres orthographes à interroger, bornées par le quota. Best-effort. */
+  private async variantsOf(name: string): Promise<string[]> {
+    try {
+      const variants = (await this.nameVariants.variants(name)).slice(0, MAX_VARIANT_SEARCHES);
+      if (variants.length) this.events.event('trademark_variants_searched', { count: variants.length });
+      return variants;
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * À quelle distance du nom cherché se trouve ce dépôt.
+   *
+   * `normalized` n'est pas un demi-`exact` de complaisance : « Neo Legal »
+   * face à « neolegal », c'est le même nom à un espace près, et l'INPI le
+   * traiterait comme tel. C'est précisément le cas que la recherche par jetons
+   * laissait passer.
+   */
+  private proximity(name: string, hitName: string): TrademarkProximity {
+    if (hitName.trim().toLowerCase() === name.trim().toLowerCase()) return 'exact';
+    if (squash(hitName) === squash(name) && squash(name) !== '') return 'normalized';
+    return 'other';
   }
 
   /** Recherche officielle INPI pré-remplie (repli et CTA « démarche officielle »). */
@@ -250,10 +322,16 @@ export class TrademarkService {
    * échec laisse simplement `classes: []`.
    */
   private async enrichClasses(name: string, hits: TrademarkHit[], jar: CookieJar): Promise<void> {
-    const norm = (s: string) => s.trim().toLowerCase();
+    // La classe de Nice est ce qui décide du risque réel : on la lit d'abord
+    // sur les dépôts qui portent le même nom, quitte à laisser sans classe les
+    // voisins lointains que le quota ne permet pas d'aller chercher.
+    const rank = (h: TrademarkHit) => {
+      const p = h.proximity ?? this.proximity(name, h.name);
+      return p === 'exact' ? 0 : p === 'normalized' ? 1 : 2;
+    };
     const targets = [...hits]
       .filter((h) => h.noticeUrl)
-      .sort((a, b) => Number(norm(b.name) === norm(name)) - Number(norm(a.name) === norm(name)))
+      .sort((a, b) => rank(a) - rank(b))
       .slice(0, MAX_NOTICE_FETCHES);
 
     await Promise.all(
@@ -322,11 +400,18 @@ export class TrademarkService {
       .replace(/&amp;/g, '&');
   }
 
-  /** `exact` si une marque porte exactement ce nom, `similar` si d'autres correspondances, sinon `none`. */
+  /**
+   * `exact` si un dépôt porte le même nom — au caractère près OU aux seuls
+   * séparateurs et accents près. `similar` si la recherche a remonté autre
+   * chose, `none` si elle n'a rien remonté.
+   *
+   * Faire tomber « Neo Legal » face à « neolegal » dans `similar` reviendrait
+   * à peindre en orange ce qui mérite du rouge : pour l'INPI, l'espace ne
+   * distingue pas deux marques.
+   */
   private classify(name: string, hits: TrademarkHit[]): TrademarkMatch {
     if (!hits.length) return 'none';
-    const norm = (s: string) => s.trim().toLowerCase();
-    return hits.some((h) => norm(h.name) === norm(name)) ? 'exact' : 'similar';
+    return hits.some((h) => this.proximity(name, h.name) !== 'other') ? 'exact' : 'similar';
   }
 
   /**

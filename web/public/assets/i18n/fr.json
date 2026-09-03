@@ -129,7 +129,7 @@
   },
   "TRADEMARK": {
     "SCOPE": "Antériorité de marque — INPI et EUIPO",
-    "SCOPE_NOTE": "Recherche à l'identique sur les classes retenues. Ce n'est pas une recherche d'antériorité complète."
+    "SCOPE_NOTE": "Nous comparons des noms de marque, espaces et accents neutralisés. La base officielle, elle, cherche aussi dans le déposant, le mandataire et les libellés&nbsp;: elle affichera donc des dépôts qui ne concernent pas votre nom. Ni l'une ni l'autre ne remplace une recherche d'antériorité complète."
   },
   "WIZARD": {
     "STEPS": {
@@ -290,11 +290,15 @@
       "STATUS_TAKEN": "pris",
       "STATUS_UNKNOWN": "non vérifiable",
       "SOCIAL_SOON": "bientôt",
-      "TM_NONE_HEAD": "Aucun dépôt identique trouvé (INPI / EUIPO)",
+      "TM_NONE_HEAD": "Aucun dépôt à ce nom (INPI / EUIPO)",
+      "TM_HITS_EXACT": "Même nom",
+      "TM_HITS_NORMALIZED": "Même nom, à un espace ou un accent près",
+      "TM_HITS_OTHER": "Autres dépôts remontés",
+      "TM_HITS_OTHER_NOTE": "Ces dépôts ne portent pas votre nom : ils partagent un mot avec lui. À regarder, pas à craindre.",
       "TM_EXACT_HEAD": "Marque identique déjà déposée",
       "TM_SIMILAR_HEAD": "Marques proches existantes",
       "TM_UNKNOWN_HEAD": "Vérification automatique indisponible",
-      "TM_NONE_EXPLAIN": "Aucune marque <strong>identique</strong> n'apparaît dans les bases officielles INPI (France) et EUIPO (Europe). Bon signal — mais cela ne couvre pas les marques <em>similaires</em> (proches à l'oreille ou à l'œil). Prochaine étape&nbsp;: sécurisez le nom en <strong>déposant votre marque</strong> avant de communiquer.",
+      "TM_NONE_EXPLAIN": "Aucun dépôt ne porte ce nom dans les bases officielles INPI (France) et EUIPO (Europe) — ni à l'identique, ni aux espaces, tirets et accents près. Bon signal, mais il ne couvre pas les marques <em>similaires</em> (proches à l'oreille ou à l'œil), que seul un conseil en propriété industrielle sait apprécier. Prochaine étape&nbsp;: sécurisez le nom en <strong>déposant votre marque</strong> avant de communiquer.",
       "TM_EXACT_EXPLAIN": "Une marque <strong>identique</strong> est déjà déposée. Utiliser ce nom dans les mêmes classes de produits/services vous expose à une <strong>opposition</strong> ou à une action en <strong>contrefaçon</strong>. Regardez les classes ci-dessous&nbsp;: si elles ne recouvrent pas votre activité, un usage reste parfois possible — à faire valider par un conseil en propriété industrielle.",
       "TM_SIMILAR_EXPLAIN": "Des marques <strong>proches</strong> existent. Le risque dépend du degré de similarité et du recouvrement des classes. Avant tout dépôt, une recherche d'antériorité approfondie et l'avis d'un <strong>conseil en propriété industrielle</strong> sont recommandés.",
       "TM_UNKNOWN_EXPLAIN": "La vérification automatique n'a pas pu aboutir pour ce nom (source indisponible). Lancez la <strong>recherche officielle INPI</strong> pour trancher.",

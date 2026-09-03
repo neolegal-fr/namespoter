@@ -26,6 +26,26 @@ export interface SocialAvailability {
 
 export type TrademarkMatch = 'none' | 'exact' | 'similar' | 'unknown';
 
+/**
+ * À quelle distance du nom cherché se trouve un dépôt.
+ *
+ * Trois niveaux, parce que « proche » recouvre deux choses très différentes.
+ * « Neo Legal » face à « neolegal » n'est pas un voisin : c'est le même nom,
+ * un espace près — et l'INPI le traiterait comme tel. Alors qu'un dépôt
+ * remonté parce qu'il partage un mot avec le nom cherché n'engage rien.
+ *
+ * Sans cette distinction, l'écran a le choix entre deux mensonges : tout
+ * afficher à plat (la marque qui compte se noie), ou ne rien afficher hors
+ * identité stricte (le faux négatif du 03/09/2026).
+ */
+export type TrademarkProximity =
+  /** Même nom, à la casse et aux espaces de bordure près. */
+  | 'exact'
+  /** Même nom une fois accents, espaces et tirets retirés — « Neo Legal » vs « neolegal ». */
+  | 'normalized'
+  /** Remonté par la recherche, sans correspondance de nom. */
+  | 'other';
+
 /** Résultat de pré-vérification marque pour un registre (INPI/EUIPO/WO). */
 export interface TrademarkResult {
   office: 'INPI'; // périmètre phase 1 : API INPI (couvre FR+EU+WO)
@@ -39,6 +59,11 @@ export interface TrademarkResult {
 
 export interface TrademarkHit {
   name: string;
+  /**
+   * Distance au nom cherché. Absent sur les rapports produits avant le
+   * 03/09/2026 : l'affichage retombe alors sur « other », qui n'affirme rien.
+   */
+  proximity?: TrademarkProximity;
   classes: number[]; // classes de Nice (issues de la notice, pour les dépôts pertinents)
   status?: string;
   collection?: 'FR' | 'EU' | 'WO';

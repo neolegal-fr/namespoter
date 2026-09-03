@@ -70,19 +70,33 @@ function socialsRows(socials: SocialAvailability[]): string {
 function trademarkBlock(report: BrandReport): string {
   const tm = report.trademark;
   const head: Record<string, string> = {
-    none: `<span style="color:#16a34a;font-weight:600">Aucun dépôt identique trouvé</span> dans les bases INPI / EUIPO / OMPI.`,
+    none: `<span style="color:#16a34a;font-weight:600">Aucun dépôt à ce nom</span> dans les bases INPI / EUIPO / OMPI — ni à l'identique, ni aux espaces et accents près.`,
     exact: `<span style="color:#dc2626;font-weight:600">Une marque identique existe déjà.</span>`,
     similar: `<span style="color:#d97706;font-weight:600">Des marques proches existent.</span>`,
     unknown: `<span style="color:#9ca3af;font-weight:600">Vérification marque indisponible.</span> ${esc(tm.note ?? '')}`,
   };
-  const hits = tm.hits
+  /*
+   * Rangés par distance au nom, comme à l'écran. Le courriel est le document
+   * qu'on archive et qu'on transmet à un associé : à plat, la seule marque qui
+   * engage se lisait au milieu de dépôts remontés parce qu'ils partagent un
+   * mot avec le nom.
+   */
+  const RANK: Record<string, number> = { exact: 0, normalized: 1, other: 2 };
+  const MARQUEUR: Record<string, string> = {
+    exact: '<strong>même nom</strong> · ',
+    normalized: '<strong>même nom à un espace près</strong> · ',
+    other: '',
+  };
+  const hits = [...tm.hits]
+    .sort((a, b) => (RANK[a.proximity ?? 'other'] ?? 2) - (RANK[b.proximity ?? 'other'] ?? 2))
     .slice(0, 8)
     .map((h) => {
       const coll = h.collection ? COLLECTION_LABEL[h.collection] ?? h.collection : '—';
       const classes = h.classes.length ? ` · classes ${h.classes.join(', ')}` : '';
       const status = h.status ? ` · ${esc(h.status)}` : '';
       const link = h.noticeUrl ? `<a href="${esc(h.noticeUrl)}" style="color:#0d7a4e">notice</a>` : '';
-      return `<li style="margin:4px 0">${esc(h.name)} <span style="color:#6b7280">(${coll}${classes}${status})</span> ${link}</li>`;
+      const marqueur = MARQUEUR[h.proximity ?? 'other'] ?? '';
+      return `<li style="margin:4px 0">${esc(h.name)} <span style="color:#6b7280">(${marqueur}${coll}${classes}${status})</span> ${link}</li>`;
     })
     .join('');
   return `<p style="margin:0 0 8px">${head[tm.match]}</p>${hits ? `<ul style="margin:8px 0;padding-left:18px">${hits}</ul>` : ''}

@@ -129,7 +129,7 @@
   },
   "TRADEMARK": {
     "SCOPE": "Trademark prior-art — INPI and EUIPO",
-    "SCOPE_NOTE": "Identical-mark search on the classes retained. This is not a full prior-art search."
+    "SCOPE_NOTE": "We compare trademark names, with spaces and accents neutralised. The official database also searches the applicant, the representative and the goods and services wording, so it will show filings that have nothing to do with your name. Neither is a full prior-art search."
   },
   "WIZARD": {
     "STEPS": {
@@ -290,11 +290,15 @@
       "STATUS_TAKEN": "taken",
       "STATUS_UNKNOWN": "unverifiable",
       "SOCIAL_SOON": "soon",
-      "TM_NONE_HEAD": "No identical trademark found (INPI / EUIPO)",
+      "TM_NONE_HEAD": "No filing under this name (INPI / EUIPO)",
+      "TM_HITS_EXACT": "Same name",
+      "TM_HITS_NORMALIZED": "Same name, give or take a space or an accent",
+      "TM_HITS_OTHER": "Other filings returned",
+      "TM_HITS_OTHER_NOTE": "These filings do not carry your name: they share a word with it. Worth a look, not a worry.",
       "TM_EXACT_HEAD": "Identical trademark already registered",
       "TM_SIMILAR_HEAD": "Similar trademarks exist",
       "TM_UNKNOWN_HEAD": "Automatic check unavailable",
-      "TM_NONE_EXPLAIN": "No <strong>identical</strong> trademark appears in the official INPI (France) and EUIPO (Europe) databases. Good sign — but this does not cover <em>similar</em> marks (close in sound or look). Next step: secure the name by <strong>registering your trademark</strong> before going public.",
+      "TM_NONE_EXPLAIN": "No filing carries this name in the official INPI (France) and EUIPO (Europe) databases — neither identically, nor once spaces, hyphens and accents are set aside. Good sign, but it does not cover <em>similar</em> marks (close to the ear or the eye), which only a trademark attorney can assess. Next step: secure the name by <strong>filing your trademark</strong> before you go public.",
       "TM_EXACT_EXPLAIN": "An <strong>identical</strong> trademark is already registered. Using this name in the same classes of goods/services exposes you to an <strong>opposition</strong> or an <strong>infringement</strong> action. Check the classes below: if they don't overlap your activity, use may still be possible — have it validated by an IP attorney.",
       "TM_SIMILAR_EXPLAIN": "<strong>Similar</strong> trademarks exist. The risk depends on the degree of similarity and class overlap. Before any filing, a thorough prior-art search and the advice of an <strong>IP attorney</strong> are recommended.",
       "TM_UNKNOWN_EXPLAIN": "The automatic check could not complete for this name (source unavailable). Run the <strong>official INPI search</strong> to decide.",

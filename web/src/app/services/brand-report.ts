@@ -20,8 +20,15 @@ export interface SocialAvailability {
   planned?: boolean;
 }
 
+/**
+ * Distance d'un dépôt au nom cherché. Absent sur les rapports produits avant
+ * le 03/09/2026 : l'affichage retombe alors sur « other », qui n'affirme rien.
+ */
+export type TrademarkProximity = 'exact' | 'normalized' | 'other';
+
 export interface TrademarkHit {
   name: string;
+  proximity?: TrademarkProximity;
   classes: number[];
   status?: string;
   collection?: 'FR' | 'EU' | 'WO';
