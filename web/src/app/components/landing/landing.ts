@@ -583,6 +583,11 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Liens de guides — en français seulement : ces pages n'existent que dans cette langue. */
   readonly guides = [
+    { path: '/generateur-nom-de-marque',               label: 'Générateur de nom de marque' },
+    { path: '/generateur-nom-entreprise',              label: "Nom d'entreprise et de société" },
+    { path: '/generateur-nom-de-domaine',              label: 'Générateur de nom de domaine' },
+    { path: '/recherche-anteriorite-marque-inpi',      label: "Recherche d'antériorité (INPI)" },
+    { path: '/generateur-nom-marque-vetement',         label: 'Nom de marque de vêtements' },
     { path: '/generateur-nom-saas',                    label: 'Nom de startup SaaS' },
     { path: '/generateur-nom-marque-cosmetique',       label: 'Nom de marque cosmétique' },
     { path: '/generateur-nom-ecommerce',               label: 'Nom de boutique en ligne' },

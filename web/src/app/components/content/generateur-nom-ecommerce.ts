@@ -123,6 +123,7 @@ import { applyContentSeo } from './content-seo';
 
       <h2 id="suite">Guides liés</h2>
       <ul>
+        <li><a routerLink="/generateur-nom-marque-vetement">Générateur de nom pour marque de vêtements</a></li>
         <li><a routerLink="/generateur-nom-marque-cosmetique">Générateur de nom pour marque cosmétique / beauté</a></li>
         <li><a routerLink="/guides/trouver-nom-de-produit">Trouver un nom de produit</a></li>
         <li><a routerLink="/guides/trouver-nom-de-marque">Trouver un nom de marque disponible</a></li>

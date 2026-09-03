@@ -107,6 +107,42 @@ import { applyContentSeo } from './content-seo';
         récupérer un pseudo pris est presque impossible.
       </p>
 
+      <h2 id="qui-nexiste-pas">«&nbsp;Trouver un nom qui n'existe pas&nbsp;»&nbsp;: ce que ça veut dire vraiment</h2>
+      <p>
+        C'est la façon la plus courante de formuler la recherche, et elle mérite d'être corrigée&nbsp;: un nom
+        prononçable «&nbsp;qui n'existe pas&nbsp;» n'existe pas. Tout assemblage de syllabes tenable a déjà été
+        déposé quelque part, par quelqu'un, dans une extension ou une classe. Viser l'inexistence absolue,
+        c'est se condamner à des noms illisibles — et à chercher indéfiniment.
+      </p>
+      <p>
+        La question utile est&nbsp;: <strong>libre pour mon usage à moi</strong>. Elle se décompose en trois
+        vérifications qui ne se recouvrent pas, et qu'on peut mener dans l'ordre du coût croissant.
+      </p>
+      <ul>
+        <li>
+          <strong>Le domaine est-il enregistrable&nbsp;?</strong> Binaire, immédiat, et le moins grave&nbsp;: un
+          nom perdu ici vous coûte une heure. C'est la seule des trois qui se règle dans la minute, pour une
+          dizaine d'euros. Astuce de méthode&nbsp;: avant de renoncer, allongez d'un caractère — environ
+          83&nbsp;% des <code>.com</code> prononçables de 5&nbsp;lettres sont pris, contre moins de 3&nbsp;% à
+          7&nbsp;lettres.
+        </li>
+        <li>
+          <strong>Une société l'utilise-t-elle déjà&nbsp;?</strong> Un homonyme dans un autre secteur n'a
+          souvent aucune conséquence&nbsp;; un homonyme sur votre marché vous expose à la concurrence
+          déloyale, même sans marque déposée.
+        </li>
+        <li>
+          <strong>Est-il déposé comme marque dans vos classes&nbsp;?</strong> La seule des trois qui vous
+          oblige à changer de nom, et la seule qu'on ne voit pas venir. C'est l'objet de la
+          <a routerLink="/recherche-anteriorite-marque-inpi">recherche d'antériorité</a>.
+        </li>
+      </ul>
+      <p>
+        Un nom «&nbsp;non utilisé&nbsp;» au sens strict n'est donc ni nécessaire ni suffisant. Ce qu'il vous
+        faut, c'est un nom que <em>personne ne peut vous reprendre</em> — ce n'est pas la même chose, et cela
+        se vérifie beaucoup plus vite.
+      </p>
+
       <h2 id="erreurs">Cinq erreurs qui coûtent cher</h2>
       <ol>
         <li>
@@ -195,6 +231,20 @@ import { applyContentSeo } from './content-seo';
         l'INPI dans votre classe : dans ce cas, l'utiliser vous expose à une action en contrefaçon.
         Vérifiez systématiquement, et faites appel à un conseil en propriété industrielle avant un dépôt.
       </p>
+      <h3>Comment trouver un nom de marque qui n'existe pas encore ?</h3>
+      <p>
+        En cherchant «&nbsp;libre pour votre usage&nbsp;» plutôt qu'«&nbsp;inexistant&nbsp;». Générez large,
+        écartez d'abord ce dont le domaine est pris, puis vérifiez l'antériorité de marque dans vos classes
+        sur les deux ou trois survivants. Les noms inventés et les mots rares donnent les meilleurs taux de
+        disponibilité&nbsp;; les mots courants de votre secteur, les pires — ce sont les premiers épuisés.
+      </p>
+      <h3>Existe-t-il un moyen gratuit de vérifier qu'un nom n'est pas pris ?</h3>
+      <p>
+        Oui, pour l'essentiel. La disponibilité d'un nom de domaine se vérifie gratuitement auprès du registre,
+        et la recherche à l'identique dans la base des marques de l'INPI l'est aussi. Ce qui est payant, c'est
+        la recherche de <em>similarités</em> — celle qui repère les noms proches, et donc le vrai risque de
+        confusion.
+      </p>
       <h3>Faut-il déposer la marque immédiatement ?</h3>
       <p>
         Réservez le domaine tout de suite — c'est peu coûteux et cela part vite. Le dépôt de marque,
@@ -202,6 +252,14 @@ import { applyContentSeo } from './content-seo';
         n'a de sens qu'une fois le nom stabilisé. Vérifiez en revanche l'antériorité dès le départ,
         pour ne pas construire sur un nom qui vous sera contesté.
       </p>
+
+      <h2 id="suite">À lire aussi</h2>
+      <ul>
+        <li><a routerLink="/generateur-nom-de-marque">Générateur de nom de marque</a></li>
+        <li><a routerLink="/generateur-nom-entreprise">Générateur de nom d'entreprise et de société</a></li>
+        <li><a routerLink="/recherche-anteriorite-marque-inpi">Recherche d'antériorité de marque (INPI)</a></li>
+        <li><a routerLink="/verifier-disponibilite-nom-de-marque">Vérifier la disponibilité d'un nom</a></li>
+      </ul>
 
       <app-article-cta></app-article-cta>
     </article>
@@ -212,7 +270,7 @@ export class GuideNomDeMarqueComponent {
     applyContentSeo({
       title: 'Comment trouver un nom de marque disponible',
       description:
-        "La méthode en 5 étapes pour trouver un nom de marque mémorable dont le domaine est libre, vérifié en temps réel par une requête Whois réelle.",
+        "La méthode en 5 étapes pour trouver un nom de marque mémorable qui n'est pas déjà pris : domaine vérifié en direct, homonymes et antériorité de marque.",
       path: '/guides/trouver-nom-de-marque',
     });
   }

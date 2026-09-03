@@ -115,7 +115,9 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
         manifestement pris. Elle ne remplace pas une <strong>recherche d'antériorité</strong> complète (qui couvre aussi
         les similarités phonétiques et visuelles) ni l'avis d'un <strong>conseil en propriété industrielle</strong>. Pour
         un dépôt, appuyez-vous sur la recherche officielle de l'INPI et, au besoin, un professionnel — nous vous y
-        renvoyons systématiquement.
+        renvoyons systématiquement. Le détail de la démarche, des classes de Nice et de ce que la recherche
+        gratuite ne couvre pas est expliqué dans notre guide de la
+        <a routerLink="/recherche-anteriorite-marque-inpi">recherche d'antériorité à l'INPI</a>.
       </p>
 
       <h2 id="comment">Comment ça marche</h2>
@@ -133,9 +135,35 @@ import { BrandReportService, BrandReport, Availability, BRAND_REPORT_COST } from
         subheading="Domaine, réseaux sociaux et marque déposée (INPI + EUIPO) en un seul rapport."
         label="Lancer une vérification"></app-article-cta>
 
+      <h2 id="faq">Questions fréquentes</h2>
+      <h3>Comment savoir si un nom de marque est disponible à l'INPI&nbsp;?</h3>
+      <p>
+        La base des marques de l'INPI est publique et gratuite&nbsp;: une recherche à l'identique y écarte les
+        noms manifestement pris. Deux réserves, et elles comptent&nbsp;: elle ne couvre pas les
+        <strong>similarités</strong> (un nom proche suffit à créer un risque de confusion), ni les
+        <strong>marques de l'Union européenne</strong> déposées à l'EUIPO, qui produisent pourtant leurs effets
+        en France. Notre rapport interroge les deux bases d'un coup.
+      </p>
+      <h3>Vérifier un nom de société, est-ce la même chose&nbsp;?</h3>
+      <p>
+        Non, et c'est une confusion coûteuse. Une dénomination sociale s'apprécie au registre du commerce et ne
+        vous protège que faiblement, sur votre secteur et votre zone. Créer la société ne réserve pas le
+        nom&nbsp;: seul le dépôt de marque donne un monopole. Un nom peut donc être libre au greffe et
+        totalement bloqué par une marque antérieure.
+      </p>
+      <h3>Que faire si un dépôt proche apparaît&nbsp;?</h3>
+      <p>
+        Regardez d'abord les <strong>classes</strong> et la date&nbsp;: un nom identique dans un secteur
+        éloigné du vôtre coexiste souvent sans difficulté, et une marque non renouvelée au bout de dix ans a pu
+        tomber. Si le dépôt vise vos produits ou services, considérez le nom comme perdu et passez au suivant —
+        ou faites trancher par un conseil en propriété industrielle avant d'investir quoi que ce soit.
+      </p>
+
       <h2 id="aussi">À lire aussi</h2>
       <ul>
         <li><a routerLink="/guides/trouver-nom-de-marque">Guide&nbsp;: trouver un nom de marque disponible</a></li>
+        <li><a routerLink="/recherche-anteriorite-marque-inpi">Recherche d'antériorité de marque (INPI)</a></li>
+        <li><a routerLink="/generateur-nom-de-marque">Générateur de nom de marque</a></li>
         <li><a routerLink="/generateur-nom-de-produit">Générateur de nom de produit</a></li>
         <li><a routerLink="/nom-de-startup-court-invente">Noms courts et inventés, façon Qonto ou Stripe</a></li>
         <li><a routerLink="/comparatif-generateurs-de-noms">Comparatif des générateurs de noms</a></li>
