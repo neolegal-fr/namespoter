@@ -39,6 +39,49 @@ describe('TrademarkService', () => {
     });
   });
 
+  describe('buildQuery (la requête envoyée à la passerelle)', () => {
+    /*
+     * Le cas qui a motivé le correctif : sans guillemets, `[Mark_Exp=neo legal]`
+     * renvoyait 3818 dépôts sans rapport et PAS la marque « Neo Legal »
+     * réellement homonyme — mesuré en production le 03/09/2026. Avec :
+     * 1 résultat, le bon.
+     */
+    it('met le nom entre guillemets — un nom en plusieurs mots est une phrase, pas un OU', () => {
+      expect(svc.buildQuery('neo legal')).toBe('[Mark_Exp="neo legal"]');
+    });
+
+    it('un nom en un seul mot passe par le même chemin', () => {
+      expect(svc.buildQuery('Qonto')).toBe('[Mark_Exp="Qonto"]');
+    });
+
+    /*
+     * Un guillemet laissé passer refermerait la phrase au milieu du nom : le
+     * reste repartirait en OU, c'est-à-dire exactement le défaut corrigé ici.
+     */
+    it('neutralise ce qui refermerait la phrase ou casserait le DSL', () => {
+      expect(svc.buildQuery('neo"legal')).toBe('[Mark_Exp="neo legal"]');
+      expect(svc.buildQuery('[Mark=x]')).toBe('[Mark_Exp="Mark x"]');
+      expect(svc.buildQuery('  neo   legal  ')).toBe('[Mark_Exp="neo legal"]');
+    });
+  });
+
+  describe('check avec un nom inexploitable', () => {
+    /*
+     * `[Mark_Exp=""]` interroge le vide : sa réponse ne veut rien dire, et on
+     * en tirerait un « aucun dépôt identique » rassurant sur du néant.
+     */
+    it("ne pose pas la question quand il ne reste rien du nom", async () => {
+      // Identifiants présents : sans eux, le repli « non configurée » répondrait
+      // en premier et ce garde-fou ne serait jamais atteint. Aucune I/O pour
+      // autant — il rend la main avant l'authentification.
+      const configured = { get: (k: string) => (k === 'INPI_USERNAME' ? 'u' : 'p') } as any;
+      const r = await (new TrademarkService(configured, noEvents) as any).check('[]=""');
+      expect(r.match).toBe('unknown');
+      expect(r.hits).toEqual([]);
+      expect(r.note).toContain('inexploitable');
+    });
+  });
+
   describe('classify', () => {
     it('none quand aucun dépôt', () => expect(svc.classify('Qonto', [])).toBe('none'));
     it('exact quand un nom correspond (insensible à la casse/espaces)', () =>
