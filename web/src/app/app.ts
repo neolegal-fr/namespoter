@@ -59,7 +59,7 @@ const THEME_ICONS: Record<'system' | 'light' | 'dark', string> = {
                c'est le même SVG que le favicon et que le thème Keycloak — une
                seule marque partout. Deux variantes selon le fond du menubar. -->
           <div class="flex align-items-center gap-2 cursor-pointer" (click)="goToHome()">
-            <img [src]="isLanding() ? 'assets/brand/icon-dark.svg' : 'assets/brand/icon.svg'"
+            <img [src]="isLanding() ? '/assets/brand/icon-dark.svg' : '/assets/brand/icon.svg'"
                  alt="" width="24" height="24" aria-hidden="true" style="display:block">
             <span class="brand-wordmark text-xl font-bold text-900">Namorama</span>
           </div>

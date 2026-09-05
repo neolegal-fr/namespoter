@@ -63,10 +63,18 @@
        landing.ts), pas ici. Écrites dans ce fichier, elles partaient dans les
        dix-neuf pages prérendues, dont des guides sans FAQ visible. -->
 
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <!--
+    Chemins ABSOLUS, et pas seulement relatifs à `<base href="/">`.
+
+    Les pages prérendues vivent à des profondeurs différentes (`/guides/xxx`),
+    et tous les agents ne lisent pas `<base>` : GPTBot résout « favicon.svg »
+    contre le répertoire de la page et demande donc
+    `/guides/favicon.svg` — 404. Une barre oblique tranche pour tout le monde.
+  -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <!-- Google tag (gtag.js) + Consent Mode v2 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-0PRN6V9ZL7"></script>
   <script>

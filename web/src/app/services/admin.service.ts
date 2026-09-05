@@ -49,6 +49,10 @@ export interface FunnelMetrics {
   accountsCreated: number;
   /** Demandes de rapport, refus faute de crédits compris : c'est l'intention qu'on compte. */
   reportsRequested: number;
+  /** Visites rattachées à un compte encore existant — dénominateur de la fidélité. */
+  visitsIdentified: number;
+  /** Parmi elles, celles dont le compte existait déjà au début de la fenêtre. */
+  visitsReturning: number;
 }
 
 /** Ce qu'on mesure sur une fenêtre. Voir `PeriodMetrics` côté API. */

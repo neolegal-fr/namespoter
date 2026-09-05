@@ -457,11 +457,62 @@ export class AdminDashboardComponent implements OnInit {
           : undefined,
         indispo: 'aucune inscription sur la période',
       },
+      {
+        label: 'Visiteurs déjà inscrits',
+        value: this.partRevenants(p),
+        previous: this.partRevenants(q),
+        unit: 'pct',
+        detail: this.detailRevenants(p),
+        indispo: this.indisponibiliteRevenants(p),
+      },
       { label: 'Recherches', value: p.newProjects, previous: q.newProjects },
       { label: 'Suggestions générées', value: p.suggestions, previous: q.suggestions },
       { label: 'Rapports de marque', value: p.brandReports, previous: q.brandReports },
       { label: 'Crédits consommés', value: p.creditsConsumed, previous: q.creditsConsumed },
     ];
+  }
+
+  // ─── Fidélité : la part des identifiés qui n'étaient pas nouveaux ─────────
+
+  /**
+   * Parmi les visites rattachées à un compte, celles d'un compte ANTÉRIEUR à la
+   * fenêtre. En clair : est-ce que ceux qui reviennent reviennent vraiment, ou
+   * l'usage n'est-il que le premier jour des nouveaux inscrits ?
+   *
+   * Le dénominateur n'est ni les visites, ni les comptes : ce sont les visites
+   * qu'un appel authentifié a permis de rattacher à un compte encore existant.
+   * Les visites anonymes — la grande majorité — n'ont pas d'âge de compte, et
+   * les compter ferait dire au taux qu'il y a peu de revenants alors qu'il n'y
+   * a surtout aucune information.
+   *
+   * `null` dans trois cas, et aucun n'est zéro :
+   *
+   * 1. l'entonnoir n'a pas de réponse (la jointure a échoué) ;
+   * 2. aucune visite de la fenêtre n'a été rattachée à un compte ;
+   * 3. il y en a moins de {@link SOCLE_POURCENTAGE}. À trois visites
+   *    identifiées, 2 sur 3 s'afficherait « 67 % » et une seule visite de plus
+   *    ferait bouger le taux de 17 points — le badge d'écart, lui, l'annoncerait
+   *    en points comme s'il s'agissait d'une tendance.
+   */
+  private partRevenants(p: PeriodMetrics): number | null {
+    const f = p.funnel;
+    if (!f || f.visitsIdentified < SOCLE_POURCENTAGE) return null;
+    return Math.round((f.visitsReturning / f.visitsIdentified) * 1000) / 10;
+  }
+
+  private detailRevenants(p: PeriodMetrics): string | undefined {
+    const f = p.funnel;
+    if (!f || f.visitsIdentified < SOCLE_POURCENTAGE) return undefined;
+    return `${this.formate(f.visitsReturning)} sur ${this.formate(f.visitsIdentified)}`
+      + ' visites rattachées à un compte créé avant la période';
+  }
+
+  private indisponibiliteRevenants(p: PeriodMetrics): string {
+    const f = p.funnel;
+    if (!f) return 'entonnoir indisponible';
+    if (f.visitsIdentified === 0) return 'aucune visite rattachée à un compte';
+    return `${f.visitsIdentified} visite${f.visitsIdentified > 1 ? 's' : ''} identifiée${f.visitsIdentified > 1 ? 's' : ''}`
+      + ' — trop peu pour un taux';
   }
 
   // ─── Entonnoir ────────────────────────────────────────────────────────────
