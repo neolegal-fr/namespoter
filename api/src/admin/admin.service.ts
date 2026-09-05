@@ -50,6 +50,25 @@ export interface FunnelMetrics {
   accountsCreated: number;
   /** Demandes de rapport, y compris refusées faute de crédits : c'est l'intention qu'on compte. */
   reportsRequested: number;
+  /**
+   * Visites rattachées à un compte qui existe encore — dénominateur de la
+   * fidélité, et lui seul.
+   *
+   * Une visite n'est rattachée qu'au premier appel authentifié : la grande
+   * majorité des visites restent anonymes, et les rapporter à ce taux
+   * répondrait à une autre question. Les visites dont le compte a été supprimé
+   * depuis en sont exclues aussi : on ne sait plus quand il a été créé, et le
+   * ranger d'office parmi les nouveaux inventerait une inscription.
+   */
+  visitsIdentified: number;
+  /**
+   * Parmi elles, celles dont le compte existait DÉJÀ au début de la fenêtre.
+   *
+   * C'est la part de revenants : le complément (`visitsIdentified -
+   * visitsReturning`) est le fait de comptes nés pendant la période, qui
+   * gonflent l'usage sans rien dire de la rétention.
+   */
+  visitsReturning: number;
 }
 
 /**
@@ -442,12 +461,14 @@ export class AdminService {
               COALESCE(SUM(v.loggedInAtStart = 0), 0) AS anonymes,
               COALESCE(SUM(v.searched), 0)            AS recherches,
               COALESCE(SUM(v.accountCreated), 0)      AS comptes,
-              COALESCE(SUM(v.reportRequested), 0)     AS rapports
+              COALESCE(SUM(v.reportRequested), 0)     AS rapports,
+              COALESCE(SUM(u.keycloakId IS NOT NULL), 0)                     AS identifiees,
+              COALESCE(SUM(u.keycloakId IS NOT NULL AND u.createdAt < ?), 0) AS revenants
          FROM visitor_session v
          LEFT JOIN user u ON u.keycloakId = v.keycloakId
         WHERE ${AdminService.VISITES_MESUREES}
           AND v.firstSeenAt >= ? AND v.firstSeenAt <= ?`,
-      [debut, fin],
+      [debut, debut, fin],
     );
     const r = rows[0] ?? {};
     return {
@@ -456,6 +477,8 @@ export class AdminService {
       searched: Number(r.recherches ?? 0),
       accountsCreated: Number(r.comptes ?? 0),
       reportsRequested: Number(r.rapports ?? 0),
+      visitsIdentified: Number(r.identifiees ?? 0),
+      visitsReturning: Number(r.revenants ?? 0),
     };
   }
 

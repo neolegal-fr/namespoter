@@ -20,6 +20,7 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime, timedelta
 from glob import glob
 
 LOG_GLOB = "/var/snap/docker/common/namorama/logs/api/app-*.ndjson"
@@ -258,6 +259,28 @@ def http(rows):
         print(f"  {sum(statuses.values()):6}  {route:42} {detail}")
 
 
+# Les notices d'un rapport partent EN PARALLÈLE : leurs en-têtes reviennent
+# dans un ordre qui n'est pas celui du compteur, et le journal les enregistre
+# dans la même seconde. Observé le 01/09/2026 : « 94 » puis « 95 », lu comme
+# une remise à zéro alors que rien n'avait repris. Deux observations aussi
+# rapprochées ne peuvent pas encadrer une période de quota — qui se compte en
+# heures, sinon en jours.
+FENETRE_SIMULTANEE = timedelta(seconds=5)
+
+
+def _instant(ts):
+    """L'horodatage ISO en `datetime`, ou `None` s'il est illisible."""
+    try:
+        return datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+
+
+def _simultanes(a, b):
+    """Deux observations trop rapprochées pour encadrer une remise à zéro."""
+    return a is not None and b is not None and abs(b - a) <= FENETRE_SIMULTANEE
+
+
 def quota(rows):
     """Évolution du quota INPI dans le temps — et donc, à l'usage, sa période.
 
@@ -281,13 +304,15 @@ def quota(rows):
         rem = r.get("remaining")
         by = r.get("bytesRemaining")
         mo = f"{by / 1_000_000:.1f}" if isinstance(by, (int, float)) else "-"
+        instant = _instant(r.get("ts"))
         flag = ""
-        if prev is not None and isinstance(rem, int) and rem > prev[1]:
+        monte = prev is not None and isinstance(rem, int) and rem > prev[1]
+        if monte and not _simultanes(prev[2], instant):
             flag = f"  ← REMISE À ZÉRO (dernier appel : {prev[0]})"
             resets.append((prev[0], str(r.get("ts"))[:19]))
         print(f"{str(r.get('ts'))[:19]:<22} {str(r.get('endpoint')):<8} {str(rem):>8}  {mo:>12}{flag}")
         if isinstance(rem, int):
-            prev = (str(r.get("ts"))[:19], rem)
+            prev = (str(r.get("ts"))[:19], rem, instant)
 
     print()
     if resets:

@@ -284,6 +284,28 @@ passe, il ne passe pas en SSH non interactif).
 > Rotation à 14 jours : ce journal reste une source d'appoint. Le compte durable des
 > visites vit en base (`visitor_session`), pas ici.
 
+### Pages prérendues : les URL d'actifs sont ABSOLUES
+
+Angular émet `<script src="main-XXXX.js">` en relatif et compte sur
+`<base href="/">`. C'est juste, et les navigateurs le suivent. Les robots, non :
+relevé le 05/09/2026, **GPTBot** résolvait le chemin contre le répertoire de la
+page et demandait `/guides/main-CRXNHNPF.js`, `/guides/styles-FCJEBA4K.css`,
+`/guides/media/primeicons-*.woff` — tous en 404. Sur les pages sans slash, la
+résolution était une pure concaténation :
+`/verifier-disponibilite-nom-de-marquefavicon.svg`. Une page de contenu SEO
+servie sans style ni script à un robot d'indexation, c'est exactement ce que le
+prérendu devait éviter.
+
+- Ce que **nous** écrivons est absolu à la source : favicons dans `index.html`,
+  logo dans `app.ts`.
+- Ce que **le build** génère est repris après coup par
+  `web/scripts/absolutiser-les-assets.mjs`, branché sur `npm run build`. Il ne
+  réécrit une référence que si le fichier visé existe réellement à la racine de
+  la sortie — une URL qu'on ne sait pas résoudre est laissée telle quelle plutôt
+  que transformée en lien mort.
+- Les `url(...)` des feuilles de style n'ont rien à corriger : une fois la CSS
+  chargée depuis `/styles-XXXX.css`, ses chemins relatifs repartent de la racine.
+
 ## Fonctionnalités
 
 - Wizard : Description → Reformulation IA → Mots-clés → Recherche domaines
@@ -300,7 +322,7 @@ Chaque indicateur de période s'affiche avec son **écart à la période précé
 même durée, immédiatement avant — et six **historiques hebdomadaires** sur six mois.
 Un **entonnoir de conversion** rapporte le tout au trafic (voir plus bas).
 
-Trois règles, chacune posée contre une façon précise de faire mentir un chiffre :
+Quatre règles, chacune posée contre une façon précise de faire mentir un chiffre :
 
 - **`user.lastLogin` ne fait pas d'historique.** C'est un scalaire écrasé à chaque
   passage : un compte actif deux semaines de suite n'apparaît que dans la seconde.
@@ -315,6 +337,16 @@ Trois règles, chacune posée contre une façon précise de faire mentir un chif
   indicateur déjà en pourcentage (taux d'activation), l'écart se compte en **points**.
 - **La semaine en cours est incomplète.** Affichée pleine, elle simule une chute
   hebdomadaire : elle est estompée, annoncée comme telle, et exclue des moyennes.
+- **« Visiteurs déjà inscrits » se rapporte aux visites IDENTIFIÉES, pas aux
+  visites.** Parmi les visites qu'un appel authentifié a rattachées à un compte
+  encore existant, la part de celles dont le compte est **antérieur au début de
+  la fenêtre**. Le reste — l'écrasante majorité des visites — est anonyme et n'a
+  pas d'âge de compte : le mettre au dénominateur ferait lire « peu de
+  revenants » là où il n'y a surtout aucune information. Une visite dont le
+  compte a été supprimé depuis est écartée du numérateur ET du dénominateur : on
+  ne sait plus quand il a été créé. Sous 5 visites identifiées, pas de taux du
+  tout (`null`, affiché « — ») : à 2 sur 3, une visite de plus déplace le
+  chiffre de 17 points, que le badge d'écart annoncerait comme une tendance.
 
 Les **crédits consommés** sont reconstitués, faute de journal de débits :
 suggestions × 1 + `costCredits` réel des rapports. Deux angles morts assumés et
